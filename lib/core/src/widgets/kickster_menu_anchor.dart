@@ -150,6 +150,9 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
         focusNode: _triggerFocusNode,
         onTap: _toggleMenu,
         borderRadius: BorderRadius.circular(8),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         child: widget.trigger,
       ),
     );
@@ -285,6 +288,7 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
               onKeyEvent: _handleKeyEvent,
               child: Material(
                 color: Colors.transparent,
+                elevation: 0,
                 child: _withMaxHeight(
                   Container(
                     decoration: BoxDecoration(
@@ -359,6 +363,9 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
           if (hasFocus) _activeIndex = nodeIndex;
         },
         onTap: () => widget.onSelect(item),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         child: content,
       );
     }
