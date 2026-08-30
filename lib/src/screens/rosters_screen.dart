@@ -85,26 +85,29 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                     AppLayout.form(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: KicksterDropdown<String>(
-                          key: ValueKey('comp-$effectiveComp'),
-                          label: 'Campeonato',
-                          value: effectiveComp,
-                          items: compItems
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: appDropdownItem(
-                                    Icons.emoji_events_outlined,
-                                    c.name,
+                        child: SizedBox(
+                          width: 260,
+                          child: KicksterDropdown<String>(
+                            key: ValueKey('comp-$effectiveComp'),
+                            label: 'Campeonato',
+                            value: effectiveComp,
+                            items: compItems
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: appDropdownItem(
+                                      Icons.emoji_events_outlined,
+                                      c.name,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            ref.read(selectedCompetitionProvider.notifier).state =
-                                value;
-                            ref.read(selectedTeamProvider.notifier).state = null;
-                          },
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              ref.read(selectedCompetitionProvider.notifier).state =
+                                  value;
+                              ref.read(selectedTeamProvider.notifier).state = null;
+                            },
+                          ),
                         ),
                       ),
                     ),

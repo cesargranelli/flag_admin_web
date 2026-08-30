@@ -106,25 +106,28 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        KicksterDropdown<String>(
-                          key: ValueKey('comp-$effectiveComp'),
-                          label: 'Campeonato',
-                          value: effectiveComp,
-                          items: compItems
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(c.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            ref
-                                .read(selectedCompetitionProvider.notifier)
-                                .state = value;
-                            ref.read(selectedRoundProvider.notifier).state =
-                                null;
-                          },
+                        SizedBox(
+                          width: 260,
+                          child: KicksterDropdown<String>(
+                            key: ValueKey('comp-$effectiveComp'),
+                            label: 'Campeonato',
+                            value: effectiveComp,
+                            items: compItems
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: Text(c.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              ref
+                                  .read(selectedCompetitionProvider.notifier)
+                                  .state = value;
+                              ref.read(selectedRoundProvider.notifier).state =
+                                  null;
+                            },
+                          ),
                         ),
                         if (!canManage)
                           EditRestrictionNote(

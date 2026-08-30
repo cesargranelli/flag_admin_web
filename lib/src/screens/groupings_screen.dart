@@ -270,31 +270,28 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
               ],
             ),
             const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: KicksterDropdown<String>(
-                  label: 'Campeonato',
-                  value: competition.id,
-                  items: widget.competitions
-                      .map(
-                        (c) => DropdownMenuItem(
-                          value: c.id,
-                          child: appDropdownItem(
-                            Icons.emoji_events_outlined,
-                            c.name,
-                          ),
+            SizedBox(
+              width: 260,
+              child: KicksterDropdown<String>(
+                label: 'Campeonato',
+                value: competition.id,
+                items: widget.competitions
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: appDropdownItem(
+                          Icons.emoji_events_outlined,
+                          c.name,
                         ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref.read(selectedCompetitionProvider.notifier).state =
-                          value;
-                    }
-                  },
-                ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(selectedCompetitionProvider.notifier).state =
+                        value;
+                  }
+                },
               ),
             ),
           ],

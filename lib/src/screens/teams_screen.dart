@@ -108,30 +108,33 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        KicksterDropdown<String>(
-                          label: locked
-                              ? 'Campeonato (travado)'
-                              : 'Campeonato',
-                          value: effectiveComp,
-                          items: compItems
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: appDropdownItem(
-                                    Icons.emoji_events_outlined,
-                                    c.name,
+                        SizedBox(
+                          width: 260,
+                          child: KicksterDropdown<String>(
+                            label: locked
+                                ? 'Campeonato (travado)'
+                                : 'Campeonato',
+                            value: effectiveComp,
+                            items: compItems
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: appDropdownItem(
+                                      Icons.emoji_events_outlined,
+                                      c.name,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: locked
-                              ? null
-                              : (value) {
-                                  ref
-                                      .read(selectedCompetitionProvider
-                                          .notifier)
-                                      .state = value;
-                                },
+                                )
+                                .toList(),
+                            onChanged: locked
+                                ? null
+                                : (value) {
+                                    ref
+                                        .read(selectedCompetitionProvider
+                                            .notifier)
+                                        .state = value;
+                                  },
+                          ),
                         ),
                         if (!canEdit)
                           const EditRestrictionNote(

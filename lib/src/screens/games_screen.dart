@@ -132,28 +132,31 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        KicksterDropdown<String>(
-                          key: ValueKey('comp-$effectiveComp'),
-                          label: 'Campeonato',
-                          value: effectiveComp,
-                          items: compItems
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: appDropdownItem(
-                                    Icons.emoji_events_outlined,
-                                    c.name,
+                        SizedBox(
+                          width: 260,
+                          child: KicksterDropdown<String>(
+                            key: ValueKey('comp-$effectiveComp'),
+                            label: 'Campeonato',
+                            value: effectiveComp,
+                            items: compItems
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: appDropdownItem(
+                                      Icons.emoji_events_outlined,
+                                      c.name,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            ref
-                                .read(selectedCompetitionProvider.notifier)
-                                .state = value;
-                            ref.read(selectedRoundProvider.notifier).state =
-                                null;
-                          },
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              ref
+                                  .read(selectedCompetitionProvider.notifier)
+                                  .state = value;
+                              ref.read(selectedRoundProvider.notifier).state =
+                                  null;
+                            },
+                          ),
                         ),
                         const SizedBox(height: 12),
                         (effectiveComp != null)
@@ -167,26 +170,28 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                     roundsProvider(effectiveComp),
                                   ),
                                 ),
-                                data: (roundItems) =>
-                                    KicksterDropdown<String>(
-                                      key: ValueKey('round-$effectiveComp'),
-                                      label: 'Rodada',
-                                      value: effectiveRound,
-                                      items: roundItems
-                                          .map(
-                                            (r) => DropdownMenuItem(
-                                              value: r.id,
-                                              child: Text(
-                                                'Rodada ${r.number} - ${r.name}',
+                                data: (roundItems) => SizedBox(
+                                      width: 260,
+                                      child: KicksterDropdown<String>(
+                                        key: ValueKey('round-$effectiveComp'),
+                                        label: 'Rodada',
+                                        value: effectiveRound,
+                                        items: roundItems
+                                            .map(
+                                              (r) => DropdownMenuItem(
+                                                value: r.id,
+                                                child: Text(
+                                                  'Rodada ${r.number} - ${r.name}',
+                                                ),
                                               ),
-                                            ),
-                                          )
-                                          .toList(),
-                                      onChanged: (value) => ref
-                                          .read(
-                                            selectedRoundProvider.notifier,
-                                          )
-                                          .state = value,
+                                            )
+                                            .toList(),
+                                        onChanged: (value) => ref
+                                            .read(
+                                              selectedRoundProvider.notifier,
+                                            )
+                                            .state = value,
+                                      ),
                                     ),
                               )
                             : const LinearProgressIndicator(),
