@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/core/flag_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

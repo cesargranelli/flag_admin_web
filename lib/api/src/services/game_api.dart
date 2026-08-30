@@ -1,4 +1,4 @@
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/domain/flag_domain.dart';
 
 import '../api_client.dart';
 import '../models/live_game_response.dart';

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/core/flag_core.dart';
 
 import 'repository_exception.dart';
 

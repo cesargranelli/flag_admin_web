@@ -1,6 +1,6 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/api/flag_api.dart';
+import 'package:flag_admin_web/core/flag_core.dart';
+import 'package:flag_admin_web/domain/flag_domain.dart';
 import 'package:flutter/foundation.dart';
 
 /// Estado de autenticação do Admin Web.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/domain/flag_domain.dart';
 
 import '../theme/app_colors.dart';
 

@@ -1,4 +1,4 @@
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/domain/flag_domain.dart';
 
 /// Regras de permissão de edição sobre um campeonato (issue #261).
 ///

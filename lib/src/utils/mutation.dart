@@ -1,4 +1,4 @@
-import 'package:flag_api/flag_api.dart';
+import 'package:flag_admin_web/api/flag_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
