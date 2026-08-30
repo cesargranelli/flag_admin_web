@@ -96,6 +96,9 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
   /// `true` enquanto o menu está aberto (borda `primary` no pill).
   bool _menuOpen = false;
 
+  /// `true` quando o mouse está sobre o pill.
+  bool _triggerHovered = false;
+
   KicksterDropdown<T> get _widget => widget as KicksterDropdown<T>;
 
   /// Normaliza as opções para [_KicksterMenuEntry], seja pela forma
@@ -191,30 +194,36 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
           onOpenChanged: (open) {
             if (mounted) setState(() => _menuOpen = open);
           },
-          trigger: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(24),
-              border: _menuOpen
-                  ? Border.all(color: AppColors.primary, width: 2)
-                  : hasError
-                      ? Border.all(color: AppColors.danger, width: 1)
-                      : null,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(child: _buildValue()),
-                  const SizedBox(width: 8),
-                  // Kit: arrow-ios-downward 24×24 `#9CA4AB` à direita.
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 24,
-                    color: AppColors.disabled,
-                  ),
-                ],
+          trigger: MouseRegion(
+            onEnter: (_) => setState(() => _triggerHovered = true),
+            onExit: (_) => setState(() => _triggerHovered = false),
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: _triggerHovered
+                    ? AppColors.line
+                    : AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(24),
+                border: _menuOpen
+                    ? Border.all(color: AppColors.primary, width: 2)
+                    : hasError
+                        ? Border.all(color: AppColors.danger, width: 1)
+                        : null,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(child: _buildValue()),
+                    const SizedBox(width: 8),
+                    // Kit: arrow-ios-downward 24×24 `#9CA4AB` à direita.
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 24,
+                      color: AppColors.disabled,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

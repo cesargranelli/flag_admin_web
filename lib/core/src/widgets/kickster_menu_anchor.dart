@@ -209,6 +209,9 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
   /// Item interativo atualmente focado (índice em [_itemNodes]).
   int _activeIndex = 0;
 
+  /// Estado de hover dos itens do menu.
+  final Set<int> _hoveredItems = {};
+
   @override
   void initState() {
     super.initState();
@@ -352,41 +355,52 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
   Widget _buildItem(int index, KicksterMenuItem item) {
     final interactive = item.enabled && item.onTap != null;
 
-    final content = Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: DefaultTextStyle(
-        style: const TextStyle(
-          fontSize: 12,
-          height: 20 / 12,
-          fontWeight: FontWeight.w400,
-          color: AppColors.black,
+    Widget buildItemContent(bool hovered) {
+      return Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        color: hovered ? AppColors.grayFill : Colors.transparent,
+        child: DefaultTextStyle(
+          style: const TextStyle(
+            fontSize: 12,
+            height: 20 / 12,
+            fontWeight: FontWeight.w400,
+            color: AppColors.black,
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: item.child,
+          ),
         ),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: item.child,
-        ),
-      ),
-    );
+      );
+    }
 
-    Widget result = content;
+    Widget result = buildItemContent(false);
     if (interactive) {
       final nodeIndex = _nodeIndexForItem[index]!;
-      result = Focus(
-        focusNode: _itemNodes[nodeIndex],
-        onKeyEvent: (node, event) {
-          if (event is KeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.enter) {
-            widget.onSelect(item);
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
+      result = StatefulBuilder(
+        builder: (context, setState) {
+          return MouseRegion(
+            onEnter: (_) => setState(() => _hoveredItems.add(index)),
+            onExit: (_) => setState(() => _hoveredItems.remove(index)),
+            child: Focus(
+              focusNode: _itemNodes[nodeIndex],
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.enter) {
+                  widget.onSelect(item);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: GestureDetector(
+                onTap: () => widget.onSelect(item),
+                behavior: HitTestBehavior.opaque,
+                child: buildItemContent(_hoveredItems.contains(index)),
+              ),
+            ),
+          );
         },
-        child: GestureDetector(
-          onTap: () => widget.onSelect(item),
-          behavior: HitTestBehavior.opaque,
-          child: content,
-        ),
       );
     }
 
