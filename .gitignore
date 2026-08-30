@@ -1,0 +1,70 @@
+# ===== Backend (Java/Maven) =====
+target/
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/*.class
+backend/*.jar
+backend/*.war
+
+# Perfis locais com credenciais reais (NUNCA commitar — ex.: application-dev/staging.yml)
+backend/src/main/resources/application-*.local.yml
+backend/src/main/resources/application-dev.yml
+backend/src/main/resources/application-staging.yml
+backend/src/main/resources/application-prod.yml
+
+# IDE
+.idea/
+out/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===== Frontend (Flutter) =====
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/.pub-cache/
+frontend/.pub/
+frontend/build/
+frontend/ios/Pods/
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/key.properties
+frontend/*.g.dart
+frontend/*.freezed.dart
+
+# ===== Environment =====
+.env
+.env.local
+.env.*.local
+*.env
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== Docker volumes =====
+infrastructure/volumes/
+
+# ===== E2E (Playwright — issue #202) =====
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+e2e/playwright/.cache/
+
+# lixo gerado por tarefa de agente com encoding corrompido
+docs/fixes/
