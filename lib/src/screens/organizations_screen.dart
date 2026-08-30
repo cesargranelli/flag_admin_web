@@ -54,18 +54,6 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Actions
-          Row(
-            children: [
-              const Spacer(),
-              KicksterButton(
-                label: 'Novo',
-                icon: Icons.add,
-                onPressed: () => context.go('/organizations/new'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
           // Conteúdo (Expanded para dar altura finita ao grid)
           Expanded(
             child: organizations.when(
@@ -101,7 +89,6 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
                   toolbarLeading: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(width: 8),
                       if (isAdmin) ...[
                         Tooltip(
                           message: 'Exibir organizações desativadas',
@@ -119,7 +106,7 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
                       SizedBox(
                         width: 260,
                         child: KicksterDropdown<OrganizationType?>(
-                          label: 'Filtrar por tipo',
+                          label: '',
                           value: _typeFilter,
                           values: [null, ...OrganizationType.values],
                           labels: [
@@ -134,6 +121,12 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
                           onChanged: (value) =>
                               setState(() => _typeFilter = value),
                         ),
+                      ),
+                      const Spacer(),
+                      KicksterButton(
+                        label: 'Novo',
+                        icon: Icons.add,
+                        onPressed: () => context.go('/organizations/new'),
                       ),
                     ],
                   ),
