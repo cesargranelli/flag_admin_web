@@ -145,15 +145,23 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
     return Semantics(
       button: true,
       label: widget.triggerLabel,
-      child: InkWell(
-        key: _triggerKey,
+      child: Focus(
         focusNode: _triggerFocusNode,
-        onTap: _toggleMenu,
-        borderRadius: BorderRadius.circular(8),
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        child: widget.trigger,
+        onKeyEvent: (node, event) {
+          if (event is KeyDownEvent &&
+              (event.logicalKey == LogicalKeyboardKey.enter ||
+               event.logicalKey == LogicalKeyboardKey.space)) {
+            _toggleMenu();
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: GestureDetector(
+          key: _triggerKey,
+          onTap: _toggleMenu,
+          behavior: HitTestBehavior.opaque,
+          child: widget.trigger,
+        ),
       ),
     );
   }
@@ -207,8 +215,15 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
     for (var i = 0; i < widget.items.length; i++) {
       final item = widget.items[i];
       if (item.enabled && item.onTap != null) {
-        _nodeIndexForItem[i] = _itemNodes.length;
-        _itemNodes.add(FocusNode(debugLabel: 'KicksterMenuItem $i'));
+        final nodeIndex = _itemNodes.length;
+        _nodeIndexForItem[i] = nodeIndex;
+        final node = FocusNode(debugLabel: 'KicksterMenuItem $i');
+        node.addListener(() {
+          if (node.hasFocus && mounted) {
+            _activeIndex = nodeIndex;
+          }
+        });
+        _itemNodes.add(node);
       }
     }
     // Foco inicial: primeiro item habilitado (ou o próprio scope, para que
@@ -337,7 +352,7 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
   Widget _buildItem(int index, KicksterMenuItem item) {
     final interactive = item.enabled && item.onTap != null;
 
-    final content = Ink(
+    final content = Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DefaultTextStyle(
@@ -357,16 +372,21 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
     Widget result = content;
     if (interactive) {
       final nodeIndex = _nodeIndexForItem[index]!;
-      result = InkWell(
+      result = Focus(
         focusNode: _itemNodes[nodeIndex],
-        onFocusChange: (hasFocus) {
-          if (hasFocus) _activeIndex = nodeIndex;
+        onKeyEvent: (node, event) {
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.enter) {
+            widget.onSelect(item);
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
         },
-        onTap: () => widget.onSelect(item),
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        child: content,
+        child: GestureDetector(
+          onTap: () => widget.onSelect(item),
+          behavior: HitTestBehavior.opaque,
+          child: content,
+        ),
       );
     }
 
