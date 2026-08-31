@@ -42,6 +42,10 @@ class Competition {
   /// restrita ao criador ou ADMIN). Nulo em registros legados.
   final String? createdBy;
 
+  /// Temporada/ano do campeonato (ex.: "2026", "2026-Q1").
+  /// Campo obrigatório na criação (#12).
+  final String? season;
+
   const Competition({
     required this.id,
     required this.name,
@@ -56,6 +60,7 @@ class Competition {
     this.ageGroup,
     this.groupingType,
     this.createdBy,
+    this.season,
   });
 
   factory Competition.fromJson(Map<String, dynamic> json) => Competition(
@@ -75,6 +80,7 @@ class Competition {
         groupingType: GroupingType.tryFromJson(
             json['groupingType'] as String?),
         createdBy: json['createdBy'] as String?,
+        season: json['season'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -91,6 +97,7 @@ class Competition {
         if (ageGroup != null) 'ageGroup': ageGroup,
         if (groupingType != null) 'groupingType': groupingType!.toJson(),
         if (createdBy != null) 'createdBy': createdBy,
+        if (season != null) 'season': season,
       };
 }
 

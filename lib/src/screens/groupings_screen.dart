@@ -750,7 +750,6 @@ Widget _divisionRow(
             icon: const Icon(Icons.group_add_outlined, size: 20),
             onPressed: () => showClubAssignmentModal(
               context,
-              competitionId: competitionId,
               division: division,
             ),
           ),
