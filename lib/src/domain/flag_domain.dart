@@ -1,5 +1,6 @@
 export 'models/organization.dart';
 export 'models/competition.dart';
+export 'models/competition_team.dart';
 export 'models/category.dart';
 export 'models/conference.dart';
 export 'models/division.dart';
@@ -11,6 +12,7 @@ export 'models/game_batch.dart';
 export 'models/standing.dart';
 export 'models/athlete.dart';
 export 'models/athlete_batch.dart';
+export 'models/roster.dart';
 export 'models/roster_entry.dart';
 export 'models/roster_batch.dart';
 export 'models/check_in.dart';

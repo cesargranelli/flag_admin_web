@@ -567,6 +567,13 @@ class CompetitionSeasonSection extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        _groupLabel('Temporada (obrigatório)'),
+        const SizedBox(height: 8),
+        KicksterInput(
+          label: 'Ex.: 2026, 2026-Q1',
+          controller: c.season,
+        ),
         if (showSummary) ...[
           const SizedBox(height: 20),
           _groupLabel('Resumo'),

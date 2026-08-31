@@ -8,73 +8,68 @@ class TeamApi {
 
   TeamApi(this._client);
 
-  /// Lista os times de um campeonato (endpoint público).
-  Future<List<Team>> listByCompetition(String competitionId) => _client.getList(
-    '/api/v1/competitions/$competitionId/teams',
-    Team.fromJson,
-  );
+  /// Lista os times de uma organização.
+  Future<List<Team>> listByOrganization(String organizationId) =>
+      _client.getList(
+        '/api/v1/organizations/$organizationId/teams',
+        Team.fromJson,
+      );
+
+  /// Lista os times inscritos em um campeonato.
+  Future<List<Team>> listByCompetition(String competitionId) =>
+      _client.getList(
+        '/api/v1/competitions/$competitionId/teams',
+        Team.fromJson,
+      );
 
   Future<Team> getById(String id) =>
       _client.getOne('/api/v1/teams/$id', Team.fromJson);
 
-  /// Cria um time.
-  ///
-  /// O backend espera `POST /api/v1/teams` com corpo completo
-  /// (`organizationId` e `competitionId` obrigatórios).
-  Future<Team> create({
-    required String organizationId,
-    required String competitionId,
-    String? divisionId,
+  /// Cria um time dentro de uma organização.
+  Future<Team> create(
+    String organizationId, {
     required String name,
     String? shortName,
-    String? document,
-    DocumentType? documentType,
     String? logoUrl,
-  }) => _client.post('/api/v1/teams', {
-    'organizationId': organizationId,
-    'competitionId': competitionId,
-    'divisionId': ?divisionId,
-    'name': name,
-    'shortName': ?shortName,
-    'document': ?document,
-    'documentType': documentType?.toJson(),
-    'logoUrl': ?logoUrl,
-  }, Team.fromJson);
+  }) =>
+      _client.post('/api/v1/organizations/$organizationId/teams', {
+        'name': name,
+        'shortName': ?shortName,
+        'logoUrl': ?logoUrl,
+      }, Team.fromJson);
 
-  /// Associa um clube (organização) a um campeonato, criando o time
-  /// automaticamente com o nome do clube (rota própria de associação, #377).
-  Future<Team> associateClub({
-    required String competitionId,
-    required String organizationId,
-  }) => _client.post(
-        '/api/v1/competitions/$competitionId/clubs',
-        {'organizationId': organizationId},
-        Team.fromJson,
+  /// Atualiza um time.
+  Future<Team> update(
+    String teamId, {
+    required String name,
+    String? shortName,
+    String? logoUrl,
+  }) =>
+      _client.put('/api/v1/teams/$teamId', {
+        'name': name,
+        'shortName': ?shortName,
+        'logoUrl': ?logoUrl,
+      }, Team.fromJson);
+
+  /// Remove um time.
+  Future<void> delete(String teamId) =>
+      _client.delete('/api/v1/teams/$teamId');
+
+  /// Inscreve um time em uma competição (opcionalmente em uma divisão).
+  Future<void> enroll(
+    String competitionId,
+    String teamId, {
+    String? divisionId,
+  }) =>
+      _client.post(
+        '/api/v1/competitions/$competitionId/teams/$teamId',
+        {'divisionId': ?divisionId},
+        (json) => json,
       );
 
-  /// Atualiza um time enviando o MESMO corpo completo da criação
-  /// (o backend exige `organizationId` com `@NotNull`).
-  Future<Team> update(
-    String id, {
-    required String organizationId,
-    required String competitionId,
-    String? divisionId,
-    required String name,
-    String? shortName,
-    String? document,
-    DocumentType? documentType,
-    String? logoUrl,
-  }) => _client.put('/api/v1/teams/$id', {
-    'organizationId': organizationId,
-    'competitionId': competitionId,
-    'divisionId': ?divisionId,
-    'name': name,
-    'shortName': ?shortName,
-    'document': ?document,
-    'documentType': documentType?.toJson(),
-    'logoUrl': ?logoUrl,
-  }, Team.fromJson);
-
-  /// Remove a inscrição do clube no campeonato (desassociar).
-  Future<void> delete(String id) => _client.delete('/api/v1/teams/$id');
+  /// Remove a inscrição do time na competição.
+  Future<void> disenroll(String competitionId, String teamId) =>
+      _client.delete(
+        '/api/v1/competitions/$competitionId/teams/$teamId',
+      );
 }

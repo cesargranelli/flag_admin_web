@@ -382,7 +382,7 @@ class _CompetitionDetailScreenState
         final orgs = organizations.valueOrNull ?? const <Organization>[];
         final orgById = {for (final o in orgs) o.id: o};
         final clubs = items
-            .map((t) => orgById[t.organizationId ?? ''])
+            .map((t) => orgById[t.organizationId])
             .whereType<Organization>()
             .toList();
 

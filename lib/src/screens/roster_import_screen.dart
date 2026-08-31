@@ -17,9 +17,14 @@ import '../widgets/app_screen.dart';
 /// a resolução nome -> id acontece aqui, tratando homônimos sem resolução
 /// silenciosa.
 class RosterImportScreen extends ConsumerStatefulWidget {
-  const RosterImportScreen({super.key, this.teamId});
+  const RosterImportScreen({
+    super.key,
+    this.teamId,
+    this.rosterId,
+  });
 
   final String? teamId;
+  final String? rosterId;
 
   @override
   ConsumerState<RosterImportScreen> createState() => _RosterImportScreenState();
@@ -147,8 +152,8 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   }
 
   Future<void> _import() async {
-    final teamId = widget.teamId;
-    if (teamId == null || teamId.isEmpty) return;
+    final rosterId = widget.rosterId;
+    if (rosterId == null || rosterId.isEmpty) return;
 
     final resolved = _resolved;
     final names = _atletaNames;
@@ -166,8 +171,8 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     try {
       final result = await ref
           .read(rosterApiProvider)
-          .createBatch(teamId, items);
-      ref.invalidate(rosterProvider(teamId));
+          .createBatch(rosterId, items);
+      ref.invalidate(rosterEntriesProvider(rosterId));
       if (mounted) setState(() => _result = result);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);

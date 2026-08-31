@@ -226,7 +226,6 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
   Widget _teamCard(BuildContext context, Team team) {
     final subtitle = [
       if (team.sportName?.isNotEmpty ?? false) team.sportName!,
-      '${team.athleteCount ?? 0} atletas',
     ].join(' · ');
 
     return KicksterCard(
