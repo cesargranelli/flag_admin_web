@@ -81,18 +81,7 @@ class _CompetitionEditScreenState
     // Hidratação do formulário no ciclo do provider (B4 #457): em vez de
     // mutar controllers dentro do `build` (side-effect que re-hidrataria a
     // cada refetch), escuta o provider e aplica UMA vez (guard `_appliedRemote`).
-    final competitionId = widget.competitionId;
-    if (competitionId != null) {
-      ref.listen<AsyncValue<Competition>>(
-        competitionProvider(competitionId),
-        (prev, next) {
-          final value = next.valueOrNull;
-          if (value != null && !_appliedRemote) {
-            _applyCompetition(value);
-          }
-        },
-      );
-    }
+    // NOTA: ref.listen movido para build() — Riverpod exige dentro de build.
   }
 
   /// Hidrata o formulário a partir da competição carregada (uma única vez).
@@ -224,6 +213,21 @@ class _CompetitionEditScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Hidratação do formulário via ref.listen dentro de build (B4 #457).
+    if (!_appliedRemote) {
+      final competitionId = widget.competitionId;
+      if (competitionId != null) {
+        ref.listen<AsyncValue<Competition>>(
+          competitionProvider(competitionId),
+          (prev, next) {
+            final value = next.valueOrNull;
+            if (value != null && !_appliedRemote) {
+              _applyCompetition(value);
+            }
+          },
+        );
+      }
+    }
     final asyncComp = ref.watch(competitionProvider(widget.competitionId!));
     return asyncComp.when(
       loading: () => AppScreen(
