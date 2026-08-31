@@ -30,6 +30,14 @@ Widget competitionSection({
       KicksterSectionTitle(title: title, icon: icon),
       const SizedBox(height: 12),
       Card(
+        elevation: 1,
+        shadowColor: AppColors.black.withValues(alpha: 0.08),
+        color: AppColors.surface,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.line, width: 1),
+        ),
         margin: EdgeInsets.zero,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -598,7 +606,7 @@ class CompetitionSeasonSection extends ConsumerWidget {
 ///
 /// [competitionId] `null` (create antes do rascunho) mostra a dica "Crie o
 /// campeonato acima..." e desabilita o input/botão — no edit nunca é null.
-class CompetitionConferencesSection extends ConsumerWidget {
+class CompetitionConferencesSection extends ConsumerStatefulWidget {
   const CompetitionConferencesSection({
     super.key,
     required this.controller,
@@ -611,11 +619,19 @@ class CompetitionConferencesSection extends ConsumerWidget {
   final String? competitionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final c = controller;
+  ConsumerState<CompetitionConferencesSection> createState() =>
+      _CompetitionConferencesSectionState();
+}
+
+class _CompetitionConferencesSectionState
+    extends ConsumerState<CompetitionConferencesSection> {
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.controller;
+    final competitionId = widget.competitionId;
     final conferences = competitionId == null
         ? const AsyncValue<List<Conference>>.data([])
-        : ref.watch(conferencesProvider(competitionId!));
+        : ref.watch(conferencesProvider(competitionId));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -722,7 +738,7 @@ class CompetitionConferencesSection extends ConsumerWidget {
 ///
 /// [competitionId] `null` (create antes do rascunho) mostra a dica e
 /// desabilita input/botão — no edit nunca é null.
-class CompetitionStructureSection extends ConsumerWidget {
+class CompetitionStructureSection extends ConsumerStatefulWidget {
   const CompetitionStructureSection({
     super.key,
     required this.controller,
@@ -735,14 +751,22 @@ class CompetitionStructureSection extends ConsumerWidget {
   final String? competitionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final c = controller;
+  ConsumerState<CompetitionStructureSection> createState() =>
+      _CompetitionStructureSectionState();
+}
+
+class _CompetitionStructureSectionState
+    extends ConsumerState<CompetitionStructureSection> {
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.controller;
+    final competitionId = widget.competitionId;
     final divisions = competitionId == null
         ? const AsyncValue<List<Division>>.data([])
-        : ref.watch(divisionsProvider(competitionId!));
+        : ref.watch(divisionsProvider(competitionId));
     final conferences = competitionId == null
         ? const AsyncValue<List<Conference>>.data([])
-        : ref.watch(conferencesProvider(competitionId!));
+        : ref.watch(conferencesProvider(competitionId));
     final conferenceItems = conferences.valueOrNull ?? const <Conference>[];
     final hasAddedItems =
         (divisions.valueOrNull ?? const <Division>[]).isNotEmpty;

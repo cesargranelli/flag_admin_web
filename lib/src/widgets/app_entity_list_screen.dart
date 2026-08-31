@@ -111,7 +111,8 @@ class _AppEntityListScreenState<T> extends State<AppEntityListScreen<T>> {
             _countText(filtered.length, query.isNotEmpty),
             if (widget.toolbarLeading != null) widget.toolbarLeading!,
             const Spacer(),
-            if (widget.toolbarTrailing != null) widget.toolbarTrailing!,
+            if (widget.toolbarTrailing != null)
+              Flexible(child: widget.toolbarTrailing!),
             SizedBox(
               width: widget.searchWidth,
               child: KicksterSearchField(
