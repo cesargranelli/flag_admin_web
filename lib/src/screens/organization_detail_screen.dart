@@ -111,11 +111,21 @@ class OrganizationDetailScreen extends ConsumerWidget {
   }
 
   /// Seção 1 — Identificação (#323): card hero consolidado + dados.
+  /// Estilo KicksterCard: elevation 1, shadow, border line, borderRadius 12.
   Widget _identificacaoCard(BuildContext context, Organization org) {
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
       child: Container(
         constraints: const BoxConstraints(minHeight: 160),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,12 +139,12 @@ class OrganizationDetailScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
-                      organizationTypeIcon(org.organizationType),
-                      color: AppColors.primary,
-                      size: 36,
-                    ),
+                    organizationTypeIcon(org.organizationType),
+                    color: AppColors.primary,
+                    size: 36,
+                  ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +153,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
                         org.tradeName,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         org.legalName,
                         style: AppTextStyles.paragraph.copyWith(

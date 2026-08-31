@@ -145,9 +145,18 @@ class _CompetitionDetailScreenState
     bool isDraft,
   ) {
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
       child: Container(
         constraints: const BoxConstraints(minHeight: 160),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -166,26 +175,22 @@ class _CompetitionDetailScreenState
                     size: 36,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         comp.name,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         comp.organizationName ??
                             (comp.organizationId != null
                                 ? 'Organização #${comp.organizationId}'
                                 : ''),
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: AppTextStyles.paragraph.copyWith(
                           color: AppColors.textSecondary,
                         ),
                       ),

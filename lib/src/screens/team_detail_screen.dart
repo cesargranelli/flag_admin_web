@@ -72,33 +72,38 @@ class TeamDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         _avatar(team, size: 64, radius: 16),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 team.name,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: Theme.of(context).textTheme.titleLarge,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 2),
                               if (team.shortName != null &&
                                   team.shortName!.isNotEmpty)
                                 Text(
                                   team.shortName!,
-                                  style: const TextStyle(
-                                    fontSize: 14,
+                                  style: AppTextStyles.paragraph.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
