@@ -37,6 +37,7 @@ import '../screens/athlete_import_screen.dart';
 import '../screens/athlete_detail_screen.dart';
 import '../screens/athletes_screen.dart';
 import '../screens/rosters_screen.dart';
+import '../screens/roster_associate_club_screen.dart';
 import '../screens/team_roster_screen.dart';
 import '../screens/roster_add_athlete_screen.dart';
 import '../screens/roster_import_screen.dart';
@@ -541,6 +542,15 @@ class AppRouter {
                   name: 'rosters',
                   builder: (context, state) => const RostersScreen(),
                   routes: [
+                    GoRoute(
+                      path: 'associate',
+                      name: 'rosterAssociateClub',
+                      builder: (context, state) => RosterAssociateClubScreen(
+                        competitionId: state.extra is String
+                            ? state.extra as String
+                            : null,
+                      ),
+                    ),
                     GoRoute(
                       path: 'import',
                       name: 'rosterImport',
