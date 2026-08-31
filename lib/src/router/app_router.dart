@@ -38,6 +38,7 @@ import '../screens/athlete_detail_screen.dart';
 import '../screens/athletes_screen.dart';
 import '../screens/rosters_screen.dart';
 import '../screens/team_roster_screen.dart';
+import '../screens/roster_add_athlete_screen.dart';
 import '../screens/roster_import_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/user_form_screen.dart';
@@ -456,6 +457,25 @@ class AppRouter {
                               teamId: state.pathParameters['id'],
                             );
                           },
+                          routes: [
+                            GoRoute(
+                              path: 'add',
+                              name: 'rosterAddAthlete',
+                              builder: (context, state) {
+                                final extra = state.extra;
+                                final teamId = extra is ({String teamId, String teamName})
+                                    ? extra.teamId
+                                    : state.pathParameters['id'] ?? '';
+                                final teamName = extra is ({String teamId, String teamName})
+                                    ? extra.teamName
+                                    : 'Elenco';
+                                return RosterAddAthleteScreen(
+                                  teamId: teamId,
+                                  teamName: teamName,
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
