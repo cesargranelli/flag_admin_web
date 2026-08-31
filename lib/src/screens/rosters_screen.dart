@@ -176,6 +176,13 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                         ),
                       ),
                     const Spacer(),
+                    KicksterButton(
+                      label: 'Associar clube',
+                      icon: Icons.add,
+                      onPressed: () => context.go('/rosters/associate',
+                          extra: competitionId),
+                    ),
+                    const SizedBox(width: 12),
                     SizedBox(
                       width: 280,
                       child: KicksterSearchField(
