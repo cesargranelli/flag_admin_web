@@ -89,15 +89,30 @@ class OrganizationDetailScreen extends ConsumerWidget {
             icon: Icons.palette_outlined,
             child: _identidadeCard(org),
           ),
-          _section(
-            title: 'Times',
-            icon: Icons.groups_outlined,
-            child: _timesCard(context, ref, org),
-          ),
+          // A seção de entidades depende do tipo da organização:
+          // - Clube/Universidade → Times (listar/criar times do clube)
+          // - Federação/Liga/Associação → Clubes (associar organizações filhas)
+          if (_isClubLike(org))
+            _section(
+              title: 'Times',
+              icon: Icons.groups_outlined,
+              child: _timesCard(context, ref, org),
+            )
+          else
+            _section(
+              title: 'Clubes',
+              icon: Icons.groups_outlined,
+              child: _clubesCard(context, ref, org),
+            ),
         ],
       ),
     );
   }
+
+  /// Organização do tipo Clube/Universidade (tem Times).
+  bool _isClubLike(Organization org) =>
+      org.organizationType == OrganizationType.club ||
+      org.organizationType == OrganizationType.university;
 
   /// Título de seção (titleMedium) + card, separados por espaçamento padrão.
   Widget _section({
@@ -250,6 +265,151 @@ class OrganizationDetailScreen extends ConsumerWidget {
         if (org.logoUrl != null && org.logoUrl!.isNotEmpty)
           AppInfoRow(label: 'Logo', value: org.logoUrl!),
       ],
+    );
+  }
+
+  /// Seção 6 — Clubes (#12, Opção A): lista as organizações do tipo
+  /// clube/universidade que pertencem à federação/liga/associação.
+  ///
+  /// O backend ainda não expõe hierarquia de organizações (sem endpoint de
+  /// associação), então a lista é a de clubes/universidades cadastrados no
+  /// sistema — sem persistir a associação.
+  Widget _clubesCard(BuildContext context, WidgetRef ref, Organization org) {
+    final orgsAsync = ref.watch(organizationsProvider);
+
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: orgsAsync.when(
+          loading: () => const Text(
+            'Carregando clubes...',
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          error: (e, s) => const Text(
+            'Não foi possível carregar os clubes.',
+            style: TextStyle(fontSize: 13, color: AppColors.danger),
+          ),
+          data: (orgs) {
+            final clubs = orgs
+                .where(
+                  (o) =>
+                      o.id != org.id &&
+                      (o.organizationType == OrganizationType.club ||
+                          o.organizationType == OrganizationType.university),
+                )
+                .toList();
+            if (clubs.isEmpty) {
+              return const Text(
+                'Nenhum clube cadastrado. Crie clubes ou universidades '
+                'para associar a esta organização.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Clubes e universidades do sistema (associação será '
+                  'persistida quando o backend suportar hierarquia):',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                for (var i = 0; i < clubs.length; i++) ...[
+                  _clubCard(context, clubs[i]),
+                  if (i != clubs.length - 1) const SizedBox(height: 8),
+                ],
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Card de clube/universidade no padrão Kickster (#12): ícone do tipo,
+  /// nome fantasia + cidade.
+  Widget _clubCard(BuildContext context, Organization club) {
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => context.go(
+          '/organizations/${club.id}',
+          extra: club,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  organizationTypeIcon(club.organizationType),
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      club.tradeName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (club.city?.isNotEmpty ?? false)
+                      Text(
+                        club.city!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
