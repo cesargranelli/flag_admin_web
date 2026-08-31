@@ -113,11 +113,13 @@ class _AppEntityListScreenState<T> extends State<AppEntityListScreen<T>> {
             const Spacer(),
             if (widget.toolbarTrailing != null)
               Flexible(child: widget.toolbarTrailing!),
-            SizedBox(
-              width: widget.searchWidth,
-              child: KicksterSearchField(
-                controller: widget.searchField,
-                onChanged: (value) => setState(() => _query = value),
+            Flexible(
+              child: SizedBox(
+                width: widget.searchWidth,
+                child: KicksterSearchField(
+                  controller: widget.searchField,
+                  onChanged: (value) => setState(() => _query = value),
+                ),
               ),
             ),
           ],

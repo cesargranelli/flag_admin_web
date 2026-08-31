@@ -632,17 +632,12 @@ class _CompetitionConferencesSectionState
     final conferences = competitionId == null
         ? const AsyncValue<List<Conference>>.data([])
         : ref.watch(conferencesProvider(competitionId));
+    final hasPending = c.pendingConferences.isNotEmpty;
+    final hasPersisted = conferences.valueOrNull?.isNotEmpty ?? false;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (competitionId == null) ...[
-          _hint(
-            'Crie o campeonato acima para habilitar a configuração '
-            'da estrutura.',
-          ),
-          const SizedBox(height: 12),
-        ],
         _groupLabel('Conferências'),
         const SizedBox(height: 4),
         _hint(
@@ -679,7 +674,6 @@ class _CompetitionConferencesSectionState
                 child: KicksterInput(
                   label: 'Nome da conferência',
                   controller: c.conferenceName,
-                  enabled: competitionId != null,
                   onFieldSubmitted: (_) => c.addConference(),
                 ),
               ),
@@ -687,25 +681,36 @@ class _CompetitionConferencesSectionState
               KicksterButton(
                 label: 'Adicionar',
                 icon: Icons.add,
-                onPressed: competitionId == null || c.submitting
-                    ? null
-                    : c.addConference,
+                onPressed: c.submitting ? null : c.addConference,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          conferences.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            error: (e, s) => const Text(
-              'Não foi possível carregar as conferências.',
-              style: TextStyle(color: AppColors.danger),
-            ),
-            data: (items) => items.isEmpty
-                ? _hint('Nenhuma conferência adicionada ainda.')
-                : Wrap(
+          if (!hasPending && !hasPersisted)
+            _hint('Nenhuma conferência adicionada ainda.')
+          else ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // Pendentes (criação, antes do rascunho)
+                for (final name in c.pendingConferences)
+                  _removableChip(
+                    label: name,
+                    icon: Icons.account_tree_outlined,
+                    onDelete: () => c.removePendingConference(name),
+                  ),
+                // Persistidos (API)
+                conferences.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (e, s) => const Text(
+                    'Não foi possível carregar as conferências.',
+                    style: TextStyle(color: AppColors.danger),
+                  ),
+                  data: (items) => Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
@@ -717,7 +722,10 @@ class _CompetitionConferencesSectionState
                         ),
                     ],
                   ),
-          ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           KicksterButton(
             label: 'Este campeonato não usa conferências',
@@ -769,18 +777,12 @@ class _CompetitionStructureSectionState
         : ref.watch(conferencesProvider(competitionId));
     final conferenceItems = conferences.valueOrNull ?? const <Conference>[];
     final hasAddedItems =
-        (divisions.valueOrNull ?? const <Division>[]).isNotEmpty;
+        (divisions.valueOrNull ?? const <Division>[]).isNotEmpty ||
+            c.pendingDivisions.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (competitionId == null) ...[
-          _hint(
-            'Crie o campeonato acima para habilitar a configuração '
-            'da estrutura.',
-          ),
-          const SizedBox(height: 12),
-        ],
         _groupLabel('Como os clubes serão agrupados?'),
         const SizedBox(height: 4),
         _hint(
@@ -860,7 +862,6 @@ class _CompetitionStructureSectionState
                 child: KicksterInput(
                   label: 'Nome (${c.groupingChoice})',
                   controller: c.divisionName,
-                  enabled: competitionId != null,
                   onFieldSubmitted: (_) => c.addDivision(),
                 ),
               ),
@@ -868,24 +869,37 @@ class _CompetitionStructureSectionState
               KicksterButton(
                 label: 'Adicionar',
                 icon: Icons.add,
-                onPressed:
-                    competitionId == null || c.submitting ? null : c.addDivision,
+                onPressed: c.submitting ? null : c.addDivision,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          divisions.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            error: (e, s) => Text(
-              'Não foi possível carregar as ${c.itemLabelLower}.',
-              style: const TextStyle(color: AppColors.danger),
-            ),
-            data: (items) => items.isEmpty
-                ? _hint('Nenhum item adicionado ainda.')
-                : Wrap(
+          if (c.pendingDivisions.isEmpty &&
+              (divisions.valueOrNull?.isEmpty ?? true))
+            _hint('Nenhum item adicionado ainda.')
+          else ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // Pendentes (criação, antes do rascunho)
+                for (final name in c.pendingDivisions)
+                  _removableChip(
+                    label: name,
+                    icon: Icons.folder_outlined,
+                    onDelete: () => c.removePendingDivision(name),
+                  ),
+                // Persistidos (API)
+                divisions.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (e, s) => Text(
+                    'Não foi possível carregar as ${c.itemLabelLower}.',
+                    style: const TextStyle(color: AppColors.danger),
+                  ),
+                  data: (items) => Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
@@ -897,7 +911,10 @@ class _CompetitionStructureSectionState
                         ),
                     ],
                   ),
-          ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           KicksterButton(
             label: 'Não usar divisões nem grupos',

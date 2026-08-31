@@ -113,6 +113,11 @@ class _CompetitionCreateScreenState
       ref.invalidate(competitionProvider(created.id));
 
       if (!mounted) return;
+
+      // Persiste conferências/divisões adicionadas antes do rascunho.
+      await c.flushPending(created.id);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Rascunho criado — agora configure a estrutura.'),
