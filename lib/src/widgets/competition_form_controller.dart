@@ -86,6 +86,14 @@ class CompetitionFormController {
   bool declinedConferences = false;
   bool declinedStructure = false;
 
+  // ── Itens pendentes (criação: antes do rascunho existir) ────────────────
+
+  /// Conferências adicionadas antes do campeonato ser criado.
+  final List<String> pendingConferences = [];
+
+  /// Divisões/grupos adicionados antes do campeonato ser criado.
+  final List<String> pendingDivisions = [];
+
   // ── Flags de UI ─────────────────────────────────────────────────────────
 
   bool submitting = false;
@@ -239,9 +247,17 @@ class CompetitionFormController {
   // ── Estrutura: conferências/divisões (chamadas de API injetadas) ────────
 
   Future<void> addConference() async {
-    final id = competitionId();
     final cname = conferenceName.text.trim();
-    if (cname.isEmpty || id == null) return;
+    if (cname.isEmpty) return;
+    final id = competitionId();
+    if (id == null) {
+      // Sem competitionId — adiciona à lista pendente (criação).
+      pendingConferences.add(cname);
+      conferenceName.clear();
+      markDirty();
+      onChanged();
+      return;
+    }
     submitting = true;
     onChanged();
     try {
@@ -262,9 +278,17 @@ class CompetitionFormController {
   }
 
   Future<void> addDivision() async {
-    final id = competitionId();
     final dname = divisionName.text.trim();
-    if (dname.isEmpty || id == null || groupingChoice == null) return;
+    if (dname.isEmpty || groupingChoice == null) return;
+    final id = competitionId();
+    if (id == null) {
+      // Sem competitionId — adiciona à lista pendente (criação).
+      pendingDivisions.add(dname);
+      divisionName.clear();
+      markDirty();
+      onChanged();
+      return;
+    }
     submitting = true;
     onChanged();
     try {
@@ -327,6 +351,50 @@ class CompetitionFormController {
       submitting = false;
       onChanged();
     }
+  }
+
+  // ── Itens pendentes: remover e flush (criação) ──────────────────────────
+
+  void removePendingConference(String name) {
+    pendingConferences.remove(name);
+    markDirty();
+    onChanged();
+  }
+
+  void removePendingDivision(String name) {
+    pendingDivisions.remove(name);
+    markDirty();
+    onChanged();
+  }
+
+  /// Cria as conferências e divisões pendentes via API após o rascunho.
+  /// Chamado pela tela de criação após `_created` ser setado.
+  Future<void> flushPending(String competitionId) async {
+    // Conferências pendentes
+    for (final name in List<String>.from(pendingConferences)) {
+      try {
+        await createConference(competitionId, name);
+        pendingConferences.remove(name);
+        invalidateConferences(competitionId);
+      } on RepositoryException catch (e) {
+        errorMessage = e.message;
+      } catch (_) {
+        errorMessage = 'Não foi possível criar conferência pendente.';
+      }
+    }
+    // Divisões pendentes
+    for (final name in List<String>.from(pendingDivisions)) {
+      try {
+        await createDivision(competitionId, name, null);
+        pendingDivisions.remove(name);
+        invalidateDivisions(competitionId);
+      } on RepositoryException catch (e) {
+        errorMessage = e.message;
+      } catch (_) {
+        errorMessage = 'Não foi possível criar divisão pendente.';
+      }
+    }
+    onChanged();
   }
 
   // ── Navegação com proteção de descarte (M3) ─────────────────────────────

@@ -106,20 +106,25 @@ class _AppEntityListScreenState<T> extends State<AppEntityListScreen<T>> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Toolbar (contagem + leading + trailing + busca) fica fixa no topo.
-        Row(
-          children: [
-            _countText(filtered.length, query.isNotEmpty),
-            if (widget.toolbarLeading != null) widget.toolbarLeading!,
-            const Spacer(),
-            if (widget.toolbarTrailing != null) widget.toolbarTrailing!,
-            SizedBox(
-              width: widget.searchWidth,
-              child: KicksterSearchField(
-                controller: widget.searchField,
-                onChanged: (value) => setState(() => _query = value),
+        // SingleChildScrollView evita overflow em telas estreitas.
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _countText(filtered.length, query.isNotEmpty),
+              if (widget.toolbarLeading != null) widget.toolbarLeading!,
+              const SizedBox(width: 16),
+              if (widget.toolbarTrailing != null) widget.toolbarTrailing!,
+              SizedBox(
+                width: widget.searchWidth,
+                child: KicksterSearchField(
+                  controller: widget.searchField,
+                  onChanged: (value) => setState(() => _query = value),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         // Grid em altura finita (Expanded) → virtualização REAL. O widget é
