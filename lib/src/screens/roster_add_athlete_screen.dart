@@ -11,15 +11,19 @@ import '../widgets/app_screen.dart';
 ///
 /// Lista todos os atletas da plataforma que ainda não estão no elenco,
 /// permitindo incluí-los com apelido e número da camisa.
+///
+/// Requer [rosterId] para adicionar entradas ao elenco correto.
 class RosterAddAthleteScreen extends ConsumerStatefulWidget {
   const RosterAddAthleteScreen({
     super.key,
     required this.teamId,
     required this.teamName,
+    required this.rosterId,
   });
 
   final String teamId;
   final String teamName;
+  final String rosterId;
 
   @override
   ConsumerState<RosterAddAthleteScreen> createState() =>
@@ -49,7 +53,7 @@ class _RosterAddAthleteScreenState
       ref: ref,
       scope: _addScope,
       action: () => ref.read(rosterApiProvider).add(
-            teamId: widget.teamId,
+            widget.rosterId,
             athleteId: athlete.id,
             nickname: details.nickname,
             number: details.number,
@@ -57,7 +61,7 @@ class _RosterAddAthleteScreenState
       successMessage: '${athlete.name} adicionado ao elenco.',
       errorMessage: 'Não foi possível adicionar o atleta.',
       progressId: athlete.id,
-      onSuccess: () => ref.invalidate(rosterProvider(widget.teamId)),
+      onSuccess: () => ref.invalidate(rosterEntriesProvider(widget.rosterId)),
     );
   }
 
@@ -109,7 +113,7 @@ class _RosterAddAthleteScreenState
 
   Widget _buildAthleteList() {
     final athletesAsync = ref.watch(athletesProvider);
-    final rosterAsync = ref.watch(rosterProvider(widget.teamId));
+    final rosterAsync = ref.watch(rosterEntriesProvider(widget.rosterId));
 
     if (athletesAsync.isLoading || rosterAsync.isLoading) {
       return const AppLoading(message: 'Carregando atletas...');
@@ -123,7 +127,7 @@ class _RosterAddAthleteScreenState
     if (rosterAsync.hasError) {
       return AppErrorState(
         message: 'Não foi possível carregar o elenco',
-        onRetry: () => ref.invalidate(rosterProvider(widget.teamId)),
+        onRetry: () => ref.invalidate(rosterEntriesProvider(widget.rosterId)),
       );
     }
 

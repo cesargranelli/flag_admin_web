@@ -8,20 +8,30 @@ import '../providers/providers.dart';
 import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
-/// Elenco de um clube (time) num campeonato (issue #360/#363/#8).
+/// Elenco de um time (clube) num campeonato (issue #360/#363/#8).
 ///
 /// A tela mostra **apenas os atletas que já estão no elenco** (roster).
 /// Para adicionar mais atletas, há um botão que leva para a tela de seleção
 /// ([RosterAddAthleteScreen]). A remoção de atletas é feita diretamente
 /// nesta tela.
+///
+/// Requer [rosterId] para acessar as entradas do elenco.
 class TeamRosterScreen extends ConsumerStatefulWidget {
-  const TeamRosterScreen({super.key, this.team, this.teamId});
+  const TeamRosterScreen({
+    super.key,
+    this.team,
+    this.teamId,
+    required this.rosterId,
+  });
 
   /// Time (clube + competição) quando navegamos com `state.extra`.
   final Team? team;
 
   /// Id do time, derivado da rota `/teams/:id/roster`.
   final String? teamId;
+
+  /// ID do elenco (roster) para buscar as entradas.
+  final String rosterId;
 
   @override
   ConsumerState<TeamRosterScreen> createState() => _TeamRosterScreenState();
@@ -42,8 +52,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
   }
 
   Future<void> _removeAthlete(RosterEntry entry) async {
-    final teamId = _teamId;
-    if (teamId == null) return;
+    final rosterId = widget.rosterId;
 
     await runMutation(
       context,
@@ -51,11 +60,11 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
       scope: _removeScope,
       action: () => ref
           .read(rosterApiProvider)
-          .remove(teamId: teamId, athleteId: entry.athleteId),
+          .remove(rosterId, entry.athleteId),
       successMessage: '${entry.athleteName} removido do elenco.',
       errorMessage: 'Não foi possível remover o atleta.',
       progressId: entry.athleteId,
-      onSuccess: () => ref.invalidate(rosterProvider(teamId)),
+      onSuccess: () => ref.invalidate(rosterEntriesProvider(rosterId)),
     );
   }
 
@@ -63,7 +72,10 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     final teamId = _teamId;
     final teamName = widget.team?.name ?? 'Elenco';
     if (teamId == null) return;
-    context.push('/teams/$teamId/roster/add', extra: (teamId: teamId, teamName: teamName));
+    context.push(
+      '/teams/$teamId/roster/add',
+      extra: (teamId: teamId, teamName: teamName, rosterId: widget.rosterId),
+    );
   }
 
   @override
@@ -116,8 +128,10 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
                     IconButton(
                       tooltip: 'Importar CSV',
                       icon: const Icon(Icons.upload_file),
-                      onPressed: () =>
-                          context.push('/rosters/import', extra: teamId),
+                      onPressed: () => context.push(
+                        '/rosters/import',
+                        extra: (teamId: teamId, rosterId: widget.rosterId),
+                      ),
                     ),
                 ],
               ),
@@ -130,15 +144,15 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
                     message: 'Time não identificado',
                     icon: Icons.groups_outlined,
                   )
-                : _buildRoster(context, teamId),
+                : _buildRoster(context, widget.rosterId),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRoster(BuildContext context, String teamId) {
-    final rosterAsync = ref.watch(rosterProvider(teamId));
+  Widget _buildRoster(BuildContext context, String rosterId) {
+    final rosterAsync = ref.watch(rosterEntriesProvider(rosterId));
     final athletesAsync = ref.watch(athletesProvider);
 
     if (rosterAsync.isLoading || athletesAsync.isLoading) {
@@ -147,7 +161,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     if (rosterAsync.hasError) {
       return AppErrorState(
         message: 'Não foi possível carregar o elenco',
-        onRetry: () => ref.invalidate(rosterProvider(teamId)),
+        onRetry: () => ref.invalidate(rosterEntriesProvider(rosterId)),
       );
     }
     if (athletesAsync.hasError) {

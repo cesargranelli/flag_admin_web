@@ -45,6 +45,7 @@ class CompetitionApi {
     String? gender,
     String? ageGroup,
     GroupingType? groupingType,
+    String? season,
   }) => _client.post(
     '/api/v1/competitions',
     _body(
@@ -58,6 +59,7 @@ class CompetitionApi {
       gender: gender,
       ageGroup: ageGroup,
       groupingType: groupingType,
+      season: season,
     ),
     Competition.fromJson,
   );
@@ -74,6 +76,7 @@ class CompetitionApi {
     String? gender,
     String? ageGroup,
     GroupingType? groupingType,
+    String? season,
   }) => _client.put(
     '/api/v1/competitions/$id',
     _body(
@@ -87,6 +90,7 @@ class CompetitionApi {
       gender: gender,
       ageGroup: ageGroup,
       groupingType: groupingType,
+      season: season,
     ),
     Competition.fromJson,
   );
@@ -102,6 +106,7 @@ class CompetitionApi {
     String? gender,
     String? ageGroup,
     GroupingType? groupingType,
+    String? season,
   }) => {
     'organizationId': organizationId,
     'name': name,
@@ -114,5 +119,6 @@ class CompetitionApi {
     'gender': ?gender,
     'ageGroup': ?ageGroup,
     'groupingType': ?(groupingType?.toJson()),
+    'season': ?season,
   };
 }

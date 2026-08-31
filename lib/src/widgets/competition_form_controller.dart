@@ -29,7 +29,7 @@ class CompetitionFormController {
     required this.invalidateConferences,
     required this.invalidateDivisions,
   }) {
-    for (final c in [name, description, organizationId, startDate, endDate]) {
+    for (final c in [name, description, organizationId, startDate, endDate, season]) {
       c.addListener(markDirty);
     }
   }
@@ -73,6 +73,7 @@ class CompetitionFormController {
   final organizationId = TextEditingController();
   final startDate = TextEditingController();
   final endDate = TextEditingController();
+  final season = TextEditingController();
   final conferenceName = TextEditingController();
   final divisionName = TextEditingController();
 
@@ -175,6 +176,7 @@ class CompetitionFormController {
     organizationId.text = competition.organizationId ?? '';
     startDate.text = formatIsoDate(competition.startDate);
     endDate.text = formatIsoDate(competition.endDate);
+    season.text = competition.season ?? '';
     modality = competition.modality;
     gender =
         competition.gender == null ? null : Gender.fromJson(competition.gender!);
@@ -441,6 +443,7 @@ class CompetitionFormController {
       organizationId,
       startDate,
       endDate,
+      season,
       conferenceName,
       divisionName,
     ]) {

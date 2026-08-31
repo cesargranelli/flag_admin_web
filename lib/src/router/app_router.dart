@@ -414,11 +414,14 @@ class AppRouter {
                     GoRoute(
                       path: 'new',
                       name: 'teamNew',
-                      builder: (context, state) => TeamCreateScreen(
-                        competitionId: state.extra is String
+                      builder: (context, state) {
+                        final organizationId = state.extra is String
                             ? state.extra as String
-                            : null,
-                      ),
+                            : state.pathParameters['orgId'] ?? '';
+                        return TeamCreateScreen(
+                          organizationId: organizationId,
+                        );
+                      },
                     ),
                     GoRoute(
                       path: ':id',
@@ -456,6 +459,9 @@ class AppRouter {
                             return TeamRosterScreen(
                               team: team,
                               teamId: state.pathParameters['id'],
+                              rosterId: state.extra is String
+                                  ? state.extra as String
+                                  : '',
                             );
                           },
                           routes: [
@@ -464,15 +470,19 @@ class AppRouter {
                               name: 'rosterAddAthlete',
                               builder: (context, state) {
                                 final extra = state.extra;
-                                final teamId = extra is ({String teamId, String teamName})
+                                final teamId = extra is ({String teamId, String teamName, String rosterId})
                                     ? extra.teamId
                                     : state.pathParameters['id'] ?? '';
-                                final teamName = extra is ({String teamId, String teamName})
+                                final teamName = extra is ({String teamId, String teamName, String rosterId})
                                     ? extra.teamName
                                     : 'Elenco';
+                                final rosterId = extra is ({String teamId, String teamName, String rosterId})
+                                    ? extra.rosterId
+                                    : '';
                                 return RosterAddAthleteScreen(
                                   teamId: teamId,
                                   teamName: teamName,
+                                  rosterId: rosterId,
                                 );
                               },
                             ),
@@ -554,11 +564,15 @@ class AppRouter {
                     GoRoute(
                       path: 'import',
                       name: 'rosterImport',
-                      builder: (context, state) => RosterImportScreen(
-                        teamId: state.extra is String
-                            ? state.extra as String
-                            : null,
-                      ),
+                      builder: (context, state) {
+                        final extra = state.extra;
+                        return RosterImportScreen(
+                          teamId: extra is String ? extra : null,
+                          rosterId: extra is ({String teamId, String rosterId})
+                              ? extra.rosterId
+                              : null,
+                        );
+                      },
                     ),
                   ],
                 ),

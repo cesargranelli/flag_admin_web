@@ -124,10 +124,16 @@ final divisionsProvider = FutureProvider.autoDispose.family<List<Division>, Stri
       ref.watch(divisionApiProvider).listByCompetition(competitionId),
 );
 
-/// Times de um campeonato.
+/// Times de um campeonato (via competition_team).
 final teamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
   (ref, competitionId) =>
       ref.watch(teamApiProvider).listByCompetition(competitionId),
+);
+
+/// Times de um clube/universidade.
+final clubTeamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
+  (ref, organizationId) =>
+      ref.watch(teamApiProvider).listByOrganization(organizationId),
 );
 
 /// Detalhe de um time por id.
@@ -192,9 +198,9 @@ final rosterApiProvider = Provider<RosterApi>(
 /// Time selecionado na tela de elencos.
 final selectedTeamProvider = StateProvider<String?>((ref) => null);
 
-/// Elenco de um time.
-final rosterProvider = FutureProvider.autoDispose.family<List<RosterEntry>, String>(
-  (ref, teamId) => ref.watch(rosterApiProvider).listByTeam(teamId),
+/// Elenco de um time (por rosterId).
+final rosterEntriesProvider = FutureProvider.autoDispose.family<List<RosterEntry>, String>(
+  (ref, rosterId) => ref.watch(rosterApiProvider).listEntries(rosterId),
 );
 
 /// Lista de usuários (somente ADMIN).

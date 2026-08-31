@@ -8,19 +8,21 @@ class RosterApi {
 
   RosterApi(this._client);
 
-  Future<List<RosterEntry>> listByTeam(String teamId) => _client.getList(
-        '/api/v1/teams/$teamId/roster',
+  /// Lista as entradas de um elenco.
+  Future<List<RosterEntry>> listEntries(String rosterId) => _client.getList(
+        '/api/v1/rosters/$rosterId/entries',
         RosterEntry.fromJson,
       );
 
-  Future<void> add({
-    required String teamId,
+  /// Adiciona um atleta ao elenco.
+  Future<void> add(
+    String rosterId, {
     required String athleteId,
     String? nickname,
     int? number,
   }) =>
       _client.post(
-        '/api/v1/teams/$teamId/roster',
+        '/api/v1/rosters/$rosterId/entries',
         {
           'athleteId': athleteId,
           'nickname': ?nickname,
@@ -29,19 +31,17 @@ class RosterApi {
         (json) => json,
       );
 
-  Future<void> remove({
-    required String teamId,
-    required String athleteId,
-  }) =>
-      _client.delete('/api/v1/teams/$teamId/roster/$athleteId');
+  /// Remove um atleta do elenco.
+  Future<void> remove(String rosterId, String athleteId) =>
+      _client.delete('/api/v1/rosters/$rosterId/entries/$athleteId');
 
-  /// Importa uma carga em lote de atletas no time (idempotente).
+  /// Importa uma carga em lote de atletas no elenco (idempotente).
   Future<RosterBatchResult> createBatch(
-    String teamId,
+    String rosterId,
     List<Map<String, dynamic>> athletes,
   ) =>
       _client.post(
-        '/api/v1/teams/$teamId/roster/batch',
+        '/api/v1/rosters/$rosterId/entries/batch',
         {'athletes': athletes},
         RosterBatchResult.fromJson,
       );
