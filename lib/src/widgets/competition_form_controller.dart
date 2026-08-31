@@ -68,11 +68,11 @@ class CompetitionFormController {
 
   // ── Controllers ─────────────────────────────────────────────────────────
 
-  late final TextEditingController name;
-  late final TextEditingController description;
-  late final TextEditingController organizationId;
-  late final TextEditingController startDate;
-  late final TextEditingController endDate;
+  final name = TextEditingController();
+  final description = TextEditingController();
+  final organizationId = TextEditingController();
+  final startDate = TextEditingController();
+  final endDate = TextEditingController();
   final conferenceName = TextEditingController();
   final divisionName = TextEditingController();
 
