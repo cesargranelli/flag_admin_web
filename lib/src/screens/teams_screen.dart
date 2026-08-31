@@ -72,10 +72,10 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
               const Spacer(),
               if (effectiveComp != null && canEdit)
                 KicksterButton(
-                  label: 'Novo',
+                  label: 'Inscrever time',
                   icon: Icons.add,
-                  onPressed: () =>
-                      context.go('/teams/new', extra: effectiveComp),
+                  onPressed: () => context.go('/teams/associate',
+                      extra: effectiveComp),
                 ),
             ],
           ),
@@ -162,14 +162,14 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                                     if (items.isEmpty) {
                                       return KicksterEmptyState(
                                         icon: Icons.groups_outlined,
-                                        message: 'Nenhum time cadastrado',
+                                        message: 'Nenhum time inscrito',
                                         description:
                                             'Inscreva o primeiro time no campeonato.',
                                         action: KicksterButton(
-                                          label: 'Criar time',
+                                          label: 'Inscrever time',
                                           icon: Icons.add,
                                           onPressed: () => context.go(
-                                            '/teams/new',
+                                            '/teams/associate',
                                             extra: effectiveComp,
                                           ),
                                         ),

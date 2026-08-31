@@ -11,9 +11,8 @@ import '../widgets/app_screen.dart';
 /// Inscrição de times em um campeonato (#12) — substitui a antiga
 /// "associação de clubes".
 ///
-/// Não existe endpoint global de "todos os times": a tela itera as
-/// organizações do tipo clube/universidade e lista os times de cada uma
-/// (`clubTeamsProvider`), agrupados por seção, excluindo os já inscritos
+/// A tela inscreve TIMES: um dropdown de clube/universidade filtra os times
+/// do clube selecionado (`clubTeamsProvider`), excluindo os já inscritos
 /// (`teamsProvider`). O campeonato fica travado quando [lockedCompetitionId]
 /// é informado (ex.: vindo do detalhe do campeonato ou dos elencos).
 class AssociateClubsScreen extends ConsumerStatefulWidget {
@@ -30,6 +29,9 @@ class AssociateClubsScreen extends ConsumerStatefulWidget {
 
 class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   static const _enrollScope = 'team-enroll';
+
+  /// Clube/universidade selecionado no filtro (nulo = primeiro da lista).
+  String? _selectedOrgId;
 
   @override
   Widget build(BuildContext context) {
@@ -125,10 +127,12 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     );
   }
 
-  /// Lista os times disponíveis por clube/universidade, excluindo os que já
-  /// estão inscritos no campeonato.
+  /// Lista os times disponíveis do clube selecionado, excluindo os que já
+  /// estão inscritos no campeonato. O dropdown de clube é um filtro auxiliar:
+  /// a unidade de inscrição é o TIME.
   Widget _buildEnrollList(BuildContext context, String competitionId) {
     final enrolledAsync = ref.watch(teamsProvider(competitionId));
+    final orgsAsync = ref.watch(organizationsProvider);
 
     return enrolledAsync.when(
       loading: () =>
@@ -140,10 +144,15 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       data: (enrolledTeams) {
         final enrolledIds = enrolledTeams.map((t) => t.id).toSet();
 
-        final orgsAsync = ref.watch(organizationsProvider);
         final allOrgs = orgsAsync.valueOrNull ?? const <Organization>[];
         if (orgsAsync.isLoading && allOrgs.isEmpty) {
           return const AppLoading(message: 'Carregando clubes...');
+        }
+        if (orgsAsync.hasError && allOrgs.isEmpty) {
+          return AppErrorState(
+            message: 'Não foi possível carregar os clubes',
+            onRetry: () => ref.invalidate(organizationsProvider),
+          );
         }
 
         final clubs = allOrgs
@@ -157,91 +166,107 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
         if (clubs.isEmpty) {
           return KicksterEmptyState(
             icon: Icons.groups_outlined,
-            message: 'Nenhum time disponível',
+            message: 'Nenhum clube cadastrado',
             description:
                 'Crie um clube ou universidade com times antes de '
                 'inscrevê-los no campeonato.',
             action: KicksterButton(
-              label: 'Voltar',
-              icon: Icons.arrow_back,
-              variant: KicksterButtonVariant.outline,
-              onPressed: () => context.go('/teams'),
+              label: 'Criar clube',
+              icon: Icons.add,
+              onPressed: () => context.go('/organizations/new'),
             ),
           );
         }
 
-        return ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        // Clube efetivo: selecionado ?? primeiro da lista.
+        final effectiveOrgId = _selectedOrgId ?? clubs.first.id;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final org in clubs)
-              _clubSection(context, org, competitionId, enrolledIds),
+            AppLayout.form(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: KicksterDropdown<String>(
+                  key: ValueKey('associate-org-$effectiveOrgId'),
+                  label: 'Clube / Universidade',
+                  value: effectiveOrgId,
+                  items: clubs
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c.id,
+                          child: appDropdownItem(
+                            organizationTypeIcon(c.organizationType),
+                            c.tradeName,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedOrgId = value),
+                  helperText:
+                      'Filtre os times disponíveis por clube ou universidade.',
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: _clubTeamsList(
+                context,
+                effectiveOrgId,
+                competitionId,
+                enrolledIds,
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  /// Seção de um clube/universidade: título + times ainda não inscritos.
-  Widget _clubSection(
+  /// Lista os times do clube selecionado que ainda não estão inscritos.
+  Widget _clubTeamsList(
     BuildContext context,
-    Organization org,
+    String organizationId,
     String competitionId,
     Set<String> enrolledIds,
   ) {
-    final teamsAsync = ref.watch(clubTeamsProvider(org.id));
+    final teamsAsync = ref.watch(clubTeamsProvider(organizationId));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        KicksterSectionTitle(
-          title: org.tradeName,
-          icon: organizationTypeIcon(org.organizationType),
-        ),
-        const SizedBox(height: 12),
-        teamsAsync.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.only(bottom: 20),
-            child: Text(
-              'Carregando times...',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-          ),
-          error: (error, stackTrace) => const Padding(
-            padding: EdgeInsets.only(bottom: 20),
-            child: Text(
-              'Não foi possível carregar os times deste clube.',
-              style: TextStyle(fontSize: 13, color: AppColors.danger),
-            ),
-          ),
-          data: (teams) {
-            final available =
-                teams.where((t) => !enrolledIds.contains(t.id)).toList();
-            if (available.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.only(bottom: 20),
-                child: Text(
-                  'Todos os times deste clube já estão inscritos.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
+    return teamsAsync.when(
+      loading: () => const AppLoading(message: 'Carregando times...'),
+      error: (error, stackTrace) => AppErrorState(
+        message: 'Não foi possível carregar os times do clube.',
+        onRetry: () => ref.invalidate(clubTeamsProvider(organizationId)),
+      ),
+      data: (teams) {
+        final available =
+            teams.where((t) => !enrolledIds.contains(t.id)).toList();
+        if (available.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'Nenhum time disponível neste clube.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
                 ),
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < available.length; i++) ...[
-                  _teamEnrollCard(context, available[i], competitionId),
-                  if (i != available.length - 1) const SizedBox(height: 8),
-                ],
-                const SizedBox(height: 20),
-              ],
-            );
-          },
-        ),
-      ],
+              ),
+            ),
+          );
+        }
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: [
+            for (var i = 0; i < available.length; i++) ...[
+              _teamEnrollCard(context, available[i], competitionId),
+              if (i != available.length - 1) const SizedBox(height: 8),
+            ],
+          ],
+        );
+      },
     );
   }
 

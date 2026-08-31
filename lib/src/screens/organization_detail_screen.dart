@@ -2,6 +2,7 @@ import 'package:flag_admin_web/src/core/flag_core.dart';
 import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
 import '../utils/date_formats.dart';
@@ -41,7 +42,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
       title: org?.tradeName ?? 'Organização',
       breadcrumb: breadcrumb,
       body: orgFuture == null
-          ? _buildDetail(context, org!)
+          ? _buildDetail(context, ref, org!)
           : orgFuture.when(
               loading: () => const AppLoading(
                 message: 'Carregando organização...',
@@ -52,13 +53,13 @@ class OrganizationDetailScreen extends ConsumerWidget {
                   organizationProvider(organizationId!),
                 ),
               ),
-              data: (org) => _buildDetail(context, org),
+              data: (org) => _buildDetail(context, ref, org),
             ),
     );
   }
 
   /// Página única: seções empilhadas, scroll do body (#455).
-  Widget _buildDetail(BuildContext context, Organization org) {
+  Widget _buildDetail(BuildContext context, WidgetRef ref, Organization org) {
     return AppLayout.detail(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,6 +88,11 @@ class OrganizationDetailScreen extends ConsumerWidget {
             title: 'Identidade',
             icon: Icons.palette_outlined,
             child: _identidadeCard(org),
+          ),
+          _section(
+            title: 'Times',
+            icon: Icons.groups_outlined,
+            child: _timesCard(context, ref, org),
           ),
         ],
       ),
@@ -244,6 +250,142 @@ class OrganizationDetailScreen extends ConsumerWidget {
         if (org.logoUrl != null && org.logoUrl!.isNotEmpty)
           AppInfoRow(label: 'Logo', value: org.logoUrl!),
       ],
+    );
+  }
+
+  /// Seção 6 — Times (#12): criação e listagem dos times do clube.
+  ///
+  /// O time pertence à organização, então o "Novo time" navega para
+  /// `/teams/new` com o `organizationId` no extra (rota corrigida — antes
+  /// o botão vivia na tela de times por competição e enviava o id errado).
+  Widget _timesCard(BuildContext context, WidgetRef ref, Organization org) {
+    final teamsAsync = ref.watch(clubTeamsProvider(org.id));
+
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: KicksterButton(
+                label: 'Novo time',
+                icon: Icons.add,
+                onPressed: () => context.go('/teams/new', extra: org.id),
+              ),
+            ),
+            const SizedBox(height: 16),
+            teamsAsync.when(
+              loading: () => const Text(
+                'Carregando times...',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              error: (e, s) => const Text(
+                'Não foi possível carregar os times.',
+                style: TextStyle(fontSize: 13, color: AppColors.danger),
+              ),
+              data: (teams) {
+                if (teams.isEmpty) {
+                  return const Text(
+                    'Nenhum time cadastrado. Crie o primeiro time do clube.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < teams.length; i++) ...[
+                      _teamCard(context, teams[i]),
+                      if (i != teams.length - 1) const SizedBox(height: 8),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Card de time no padrão Kickster (#12): ícone de grupo, nome e sigla.
+  Widget _teamCard(BuildContext context, Team team) {
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => context.go('/teams/${team.id}', extra: team),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.groups_outlined,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      team.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (team.shortName?.isNotEmpty ?? false)
+                      Text(
+                        team.shortName!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
