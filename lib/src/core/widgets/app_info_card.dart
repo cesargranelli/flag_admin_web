@@ -39,6 +39,14 @@ class AppInfoCard extends StatelessWidget {
             const TextStyle(fontSize: 14, fontWeight: FontWeight.w700);
     return Card(
       margin: EdgeInsets.zero,
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
       child: Container(
         constraints: BoxConstraints(
           minHeight: hasTitle ? (minHeight ?? 0) : 0,

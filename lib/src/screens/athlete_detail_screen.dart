@@ -58,8 +58,17 @@ class AthleteDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -70,24 +79,23 @@ class AthleteDetailScreen extends ConsumerWidget {
                           imageUrl: athlete.photoUrl,
                           size: 64,
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 athlete.name,
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w700),
+                                style: Theme.of(context).textTheme.titleLarge,
                               ),
                               if (athlete.nickname != null &&
                                   athlete.nickname!.isNotEmpty) ...[
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 2),
                                 Text(
                                   athlete.nickname!,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary),
+                                  style: AppTextStyles.paragraph.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ],
                             ],
