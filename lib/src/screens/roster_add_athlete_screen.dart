@@ -260,7 +260,7 @@ class _RosterAddAthleteScreenState
               ),
             ),
             const SizedBox(width: 8),
-            // Botão adicionar
+            // Ícone adicionar
             if (adding)
               const Padding(
                 padding: EdgeInsets.all(12),
@@ -271,9 +271,12 @@ class _RosterAddAthleteScreenState
                 ),
               )
             else
-              KicksterButton(
-                label: 'Adicionar',
-                variant: KicksterButtonVariant.outline,
+              IconButton(
+                tooltip: 'Adicionar ao elenco',
+                icon: const Icon(
+                  Icons.person_add_outlined,
+                  color: AppColors.primary,
+                ),
                 onPressed: () => _addAthlete(athlete),
               ),
           ],
