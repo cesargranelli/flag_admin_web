@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
 import 'package:flutter/material.dart';
 
 /// Boilerplate de listagem em grid das telas do Admin Web (issue #459).
