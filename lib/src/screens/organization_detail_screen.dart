@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,7 +66,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
           _section(
             title: 'Identificação',
             icon: Icons.business_outlined,
-            child: _identificacaoCard(org),
+            child: _identificacaoCard(context, org),
           ),
           _section(
             title: 'Presidente',
@@ -111,7 +111,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
   }
 
   /// Seção 1 — Identificação (#323): card hero consolidado + dados.
-  Widget _identificacaoCard(Organization org) {
+  Widget _identificacaoCard(BuildContext context, Organization org) {
     return Card(
       child: Container(
         constraints: const BoxConstraints(minHeight: 160),
@@ -141,14 +141,14 @@ class OrganizationDetailScreen extends ConsumerWidget {
                     children: [
                       Text(
                         org.tradeName,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         org.legalName,
-                        style: const TextStyle(
-                            fontSize: 14, color: AppColors.textSecondary),
+                        style: AppTextStyles.paragraph.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -166,8 +166,9 @@ class OrganizationDetailScreen extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 'Criada em ${formatBrDate(org.createdAt!)}',
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
+                style: AppTextStyles.fieldLabel.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ],
