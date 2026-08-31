@@ -6,7 +6,12 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
 import '../utils/date_formats.dart';
+import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
+import '../widgets/associate_club_modal.dart';
+
+/// Escopo de mutação das desassociações de clube na tela de detalhe.
+const _disassociateScope = 'org-club-disassociate';
 
 /// Detalhe de uma organização em página única (#455): todas as seções
 /// (identificação, presidente, contato, localização, identidade) empilhadas
@@ -268,14 +273,15 @@ class OrganizationDetailScreen extends ConsumerWidget {
     );
   }
 
-  /// Seção 6 — Clubes (#12, Opção A): lista as organizações do tipo
-  /// clube/universidade que pertencem à federação/liga/associação.
+  /// Seção 6 — Clubes (#12/#497): lista apenas os clubes/universidades
+  /// ASSOCIADOS à federação/liga/associação + botão para associar novos.
   ///
-  /// O backend ainda não expõe hierarquia de organizações (sem endpoint de
-  /// associação), então a lista é a de clubes/universidades cadastrados no
-  /// sistema — sem persistir a associação.
+  /// Consome `GET /api/v1/organizations/{id}/clubs` (hierarquia ADR-006).
   Widget _clubesCard(BuildContext context, WidgetRef ref, Organization org) {
-    final orgsAsync = ref.watch(organizationsProvider);
+    final associatedAsync = ref.watch(associatedClubsProvider(org.id));
+    final canEdit = ref
+            .watch(authControllerProvider.select((a) => a.state.user?.role)) ==
+        UserRole.admin;
 
     return Card(
       elevation: 1,
@@ -289,61 +295,72 @@ class OrganizationDetailScreen extends ConsumerWidget {
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: orgsAsync.when(
-          loading: () => const Text(
-            'Carregando clubes...',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-          error: (e, s) => const Text(
-            'Não foi possível carregar os clubes.',
-            style: TextStyle(fontSize: 13, color: AppColors.danger),
-          ),
-          data: (orgs) {
-            final clubs = orgs
-                .where(
-                  (o) =>
-                      o.id != org.id &&
-                      (o.organizationType == OrganizationType.club ||
-                          o.organizationType == OrganizationType.university),
-                )
-                .toList();
-            if (clubs.isEmpty) {
-              return const Text(
-                'Nenhum clube cadastrado. Crie clubes ou universidades '
-                'para associar a esta organização.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Clubes e universidades do sistema (associação será '
-                  'persistida quando o backend suportar hierarquia):',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                for (var i = 0; i < clubs.length; i++) ...[
-                  _clubCard(context, clubs[i]),
-                  if (i != clubs.length - 1) const SizedBox(height: 8),
-                ],
-              ],
-            );
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: KicksterButton(
+                label: 'Associar clube',
+                icon: Icons.add,
+                onPressed: canEdit
+                    ? () => showAssociateClubModal(
+                          context,
+                          organizationId: org.id,
+                        )
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 16),
+            associatedAsync.when(
+              loading: () => const Text(
+                'Carregando clubes...',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              error: (e, s) => const Text(
+                'Não foi possível carregar os clubes.',
+                style: TextStyle(fontSize: 13, color: AppColors.danger),
+              ),
+              data: (clubs) {
+                if (clubs.isEmpty) {
+                  return const Text(
+                    'Nenhum clube associado. Associe clubes ou '
+                    'universidades a esta organização.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < clubs.length; i++) ...[
+                      _clubCard(context, ref, clubs[i], org.id),
+                      if (i != clubs.length - 1) const SizedBox(height: 8),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Card de clube/universidade no padrão Kickster (#12): ícone do tipo,
-  /// nome fantasia + cidade.
-  Widget _clubCard(BuildContext context, Organization club) {
+  /// Card de clube/universidade associado no padrão Kickster (#12): ícone do
+  /// tipo, nome fantasia + cidade, clique → detalhe do clube, e ícone de
+  /// desassociação (quando ADMIN).
+  Widget _clubCard(
+    BuildContext context,
+    WidgetRef ref,
+    Organization club,
+    String orgId,
+  ) {
+    final disassociating =
+        ref.watch(mutationProgressProvider(_disassociateScope)).contains(club.id);
+
     return Card(
       elevation: 1,
       shadowColor: AppColors.black.withValues(alpha: 0.08),
@@ -402,6 +419,25 @@ class OrganizationDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (disassociating)
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              else
+                IconButton(
+                  tooltip: 'Desassociar',
+                  icon: const Icon(
+                    Icons.link_off,
+                    color: AppColors.danger,
+                    size: 20,
+                  ),
+                  onPressed: () => _disassociateClub(context, ref, club, orgId),
+                ),
               const Icon(
                 Icons.chevron_right,
                 color: AppColors.textSecondary,
@@ -410,6 +446,29 @@ class OrganizationDetailScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// Remove a associação do clube à organização (zera o parentId).
+  Future<void> _disassociateClub(
+    BuildContext context,
+    WidgetRef ref,
+    Organization club,
+    String orgId,
+  ) async {
+    await runMutation(
+      context,
+      ref: ref,
+      scope: _disassociateScope,
+      action: () =>
+          ref.read(organizationApiProvider).disassociateClub(orgId, club.id),
+      successMessage: '${club.tradeName} desassociado da organização.',
+      errorMessage: 'Não foi possível desassociar o clube.',
+      progressId: club.id,
+      onSuccess: () {
+        ref.invalidate(associatedClubsProvider(orgId));
+        ref.invalidate(organizationsProvider);
+      },
     );
   }
 

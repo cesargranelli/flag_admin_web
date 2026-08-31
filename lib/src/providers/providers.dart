@@ -61,6 +61,13 @@ final organizationProvider = FutureProvider.autoDispose.family<Organization, Str
   (ref, id) => ref.watch(organizationApiProvider).getById(id),
 );
 
+/// Clubes/universidades associados a uma federação/liga/associação (#497).
+final associatedClubsProvider =
+    FutureProvider.autoDispose.family<List<Organization>, String>(
+  (ref, organizationId) =>
+      ref.watch(organizationApiProvider).listClubs(organizationId),
+);
+
 /// Serviço de campeonatos.
 final competitionApiProvider = Provider<CompetitionApi>(
   (ref) => CompetitionApi(ref.watch(apiClientProvider)),
