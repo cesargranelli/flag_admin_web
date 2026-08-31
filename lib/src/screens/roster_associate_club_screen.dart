@@ -263,7 +263,7 @@ class _RosterAssociateClubScreenState
               IconButton(
                 tooltip: 'Associar ao campeonato',
                 icon: const Icon(
-                  Icons.group_add_outlined,
+                  Icons.link,
                   color: AppColors.primary,
                 ),
                 onPressed: () => _associate(org, competitionId),

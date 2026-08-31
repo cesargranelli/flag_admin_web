@@ -135,7 +135,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
             description: 'Associe clubes ao campeonato para criar elencos.',
             action: KicksterButton(
               label: 'Associar clube',
-              icon: Icons.add,
+              icon: Icons.link,
               onPressed: () => context.go('/rosters/associate',
                   extra: competitionId),
             ),
@@ -178,7 +178,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                     const Spacer(),
                     KicksterButton(
                       label: 'Associar clube',
-                      icon: Icons.add,
+                      icon: Icons.link,
                       onPressed: () => context.go('/rosters/associate',
                           extra: competitionId),
                     ),
