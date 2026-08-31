@@ -158,13 +158,27 @@ class _RosterAddAthleteScreenState
     }
 
     return AppLayout.content(
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: filtered.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final athlete = filtered[index];
-          return _athleteCard(context, athlete);
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = constraints.maxWidth >= 960
+              ? 3
+              : constraints.maxWidth >= 600
+                  ? 2
+                  : 1;
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              mainAxisExtent: 80,
+            ),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final athlete = filtered[index];
+              return _athleteCard(context, athlete);
+            },
+          );
         },
       ),
     );
