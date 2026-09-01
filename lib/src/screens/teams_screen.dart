@@ -33,6 +33,9 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
   @override
   Widget build(BuildContext context) {
     final teamsAsync = ref.watch(allTeamsProvider);
+    // Nome do clube por id (via organizações) para enriquecer o subtítulo.
+    final orgs = ref.watch(organizationsProvider).valueOrNull ?? const [];
+    final orgNames = {for (final o in orgs) o.id: o.tradeName};
 
     return AppScreen(
       title: 'Times',
@@ -63,12 +66,13 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                 }
                 return AppEntityListScreen<Team>(
                   items: items,
-                  cardBuilder: (team) => _teamCard(context, team),
+                  cardBuilder: (team) => _teamCard(context, team, orgNames),
                   searchField: _searchController,
                   countLabel: 'times',
                   countLabelSingular: 'time',
                   emptyMessage: 'Nenhum time encontrado',
                   gridPadding: const EdgeInsets.all(16),
+                  mainAxisExtent: 104,
                   filter: (all, query) => query.isEmpty
                       ? all
                       : all
@@ -88,19 +92,124 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
     );
   }
 
-  /// Card de time no padrão Kickster: ícone de grupo, nome e subtítulo com
-  /// esporte/sigla. Tocar navega para o detalhe do time.
-  Widget _teamCard(BuildContext context, Team team) {
-    final subtitle = [
+  /// Card de time no padrão Kickster: logo/avatar, nome (16 w600), subtítulo
+  /// com sigla · esporte + clube quando resolvido, e chevron. Tocar navega
+  /// para o detalhe do time.
+  Widget _teamCard(
+    BuildContext context,
+    Team team,
+    Map<String, String> orgNames,
+  ) {
+    final subtitleParts = [
       if (team.shortName?.isNotEmpty ?? false) team.shortName!,
       if (team.sportName?.isNotEmpty ?? false) team.sportName!,
     ].join(' · ');
+    final orgName = orgNames[team.organizationId];
 
-    return KicksterCard(
-      icon: Icons.groups_outlined,
-      title: team.name,
-      subtitle: subtitle.isEmpty ? null : subtitle,
-      onTap: () => context.push('/teams/${team.id}', extra: team),
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: InkWell(
+        onTap: () => context.push('/teams/${team.id}', extra: team),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              _teamLogo(context, team),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      team.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (subtitleParts.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitleParts,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                    if (orgName != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Clube: $orgName',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right,
+                size: 22,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Logo do time em quadrado arredondado (raio 12) com fundo `primary` @10%;
+  /// fallback para o ícone de grupos quando não há logo.
+  Widget _teamLogo(BuildContext context, Team team) {
+    final placeholder = Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(
+        Icons.groups_outlined,
+        color: AppColors.primary,
+        size: 24,
+      ),
+    );
+
+    final logo = team.logoUrl;
+    if (logo == null || logo.isEmpty) return placeholder;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.network(
+        logo,
+        width: 48,
+        height: 48,
+        fit: BoxFit.cover,
+        cacheWidth: (48 * MediaQuery.devicePixelRatioOf(context)).round(),
+        cacheHeight: (48 * MediaQuery.devicePixelRatioOf(context)).round(),
+        errorBuilder: (_, _, _) => placeholder,
+      ),
     );
   }
 }

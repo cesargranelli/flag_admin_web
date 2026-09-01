@@ -16,10 +16,13 @@ class TeamApi {
       );
 
   /// Lista os times inscritos em um campeonato.
-  Future<List<Team>> listByCompetition(String competitionId) =>
+  ///
+  /// O backend retorna `CompetitionTeamResponse` (inscrição + dados derivados
+  /// do time), não `Team` completo.
+  Future<List<CompetitionTeam>> listByCompetition(String competitionId) =>
       _client.getList(
         '/api/v1/competitions/$competitionId/teams',
-        Team.fromJson,
+        CompetitionTeam.fromJson,
       );
 
   /// Lista todos os times cadastrados na plataforma (endpoint público).
