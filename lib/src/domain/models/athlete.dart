@@ -12,6 +12,12 @@ class Athlete {
   final int? number;
   final String? photoUrl;
 
+  /// Data de nascimento (ISO no JSON, ex.: `2026-09-01`).
+  final DateTime? birthDate;
+
+  /// Gênero: `MALE` | `FEMALE` | `MIXED`.
+  final String? gender;
+
   /// Status do atleta: `ACTIVE` | `INACTIVE`.
   final String? status;
   final DateTime? createdAt;
@@ -25,6 +31,8 @@ class Athlete {
     this.positions = const [],
     this.number,
     this.photoUrl,
+    this.birthDate,
+    this.gender,
     this.status,
     this.createdAt,
     this.updatedAt,
@@ -50,6 +58,10 @@ class Athlete {
       positions: positions,
       number: json['number'] as int?,
       photoUrl: json['photoUrl'] as String?,
+      birthDate: json['birthDate'] is String
+          ? DateTime.tryParse(json['birthDate'] as String)
+          : null,
+      gender: json['gender'] as String?,
       status: json['status'] as String?,
       createdAt: json['createdAt'] is String
           ? DateTime.tryParse(json['createdAt'] as String)
@@ -75,5 +87,7 @@ class Athlete {
         'positions': positions.map((p) => p.toJson()).toList(),
         if (number != null) 'number': number,
         if (photoUrl != null) 'photoUrl': photoUrl,
+        if (birthDate != null) 'birthDate': birthDate!.toIso8601String(),
+        if (gender != null) 'gender': gender,
       };
 }

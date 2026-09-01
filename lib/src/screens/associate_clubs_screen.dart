@@ -143,33 +143,42 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   /// Dropdown de seleção do campeonato (usado somente quando a rota não
   /// trava o alvo). Após a escolha, a tela passa a exibir o card fixo e o
   /// restante do fluxo usa sempre esse campeonato.
+  ///
+  /// Largura limitada (não ocupa toda a largura da tela) e alinhado à
+  /// esquerda, como os demais pickers da tela.
   Widget _buildCompetitionPicker(List<Competition> compItems) {
-    return KicksterDropdown<String>(
-      key: const ValueKey('associate-comp-picker'),
-      label: 'Campeonato',
-      value: null,
-      hint: 'Selecione um campeonato',
-      items: compItems
-          .map(
-            (c) => DropdownMenuItem(
-              value: c.id,
-              child: appDropdownItem(
-                Icons.emoji_events_outlined,
-                c.name,
-              ),
-            ),
-          )
-          .toList(),
-      onChanged: (value) {
-        if (value == null) return;
-        setState(() {
-          _selectedCompetitionId = value;
-          _selectedRosterByTeam.clear();
-          _expandedTeams.clear();
-        });
-      },
-      helperText:
-          'O campeonato recebe a inscrição do time com o elenco escolhido.',
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        width: 360,
+        child: KicksterDropdown<String>(
+          key: const ValueKey('associate-comp-picker'),
+          label: 'Campeonato',
+          value: null,
+          hint: 'Selecione um campeonato',
+          items: compItems
+              .map(
+                (c) => DropdownMenuItem(
+                  value: c.id,
+                  child: appDropdownItem(
+                    Icons.emoji_events_outlined,
+                    c.name,
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              _selectedCompetitionId = value;
+              _selectedRosterByTeam.clear();
+              _expandedTeams.clear();
+            });
+          },
+          helperText:
+              'O campeonato recebe a inscrição do time com o elenco escolhido.',
+        ),
+      ),
     );
   }
 
@@ -310,25 +319,31 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
             AppLayout.form(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: KicksterDropdown<String>(
-                  key: ValueKey('associate-org-$effectiveOrgId'),
-                  label: 'Clube / Universidade',
-                  value: effectiveOrgId,
-                  items: clubs
-                      .map(
-                        (c) => DropdownMenuItem(
-                          value: c.id,
-                          child: appDropdownItem(
-                            organizationTypeIcon(c.organizationType),
-                            c.tradeName,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) =>
-                      setState(() => _selectedOrgId = value),
-                  helperText:
-                      'Filtre os times disponíveis por clube ou universidade.',
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: 360,
+                    child: KicksterDropdown<String>(
+                      key: ValueKey('associate-org-$effectiveOrgId'),
+                      label: 'Clube / Universidade',
+                      value: effectiveOrgId,
+                      items: clubs
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: appDropdownItem(
+                                organizationTypeIcon(c.organizationType),
+                                c.tradeName,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedOrgId = value),
+                      helperText:
+                          'Filtre os times disponíveis por clube ou universidade.',
+                    ),
+                  ),
                 ),
               ),
             ),
