@@ -402,11 +402,27 @@ class AppRouter {
                     GoRoute(
                       path: 'associate',
                       name: 'teamAssociate',
-                      builder: (context, state) => AssociateClubsScreen(
-                        lockedCompetitionId: state.extra is String
-                            ? state.extra as String
-                            : null,
-                      ),
+                      builder: (context, state) {
+                        // Extra pode ser: String (competitionId, fluxo
+                        // antigo) ou record ({competitionId, organizationId}).
+                        final extra = state.extra;
+                        final String? competitionId;
+                        final String? organizationId;
+                        if (extra is ({String? competitionId, String? organizationId})) {
+                          competitionId = extra.competitionId;
+                          organizationId = extra.organizationId;
+                        } else if (extra is String) {
+                          competitionId = extra;
+                          organizationId = null;
+                        } else {
+                          competitionId = null;
+                          organizationId = null;
+                        }
+                        return AssociateClubsScreen(
+                          lockedCompetitionId: competitionId,
+                          lockedOrganizationId: organizationId,
+                        );
+                      },
                     ),
                     GoRoute(
                       path: 'new',
