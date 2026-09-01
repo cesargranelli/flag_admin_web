@@ -46,7 +46,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
               KicksterButton(
                 label: 'Novo',
                 icon: Icons.add,
-                onPressed: () => context.go('/venues/new'),
+                onPressed: () => context.push('/venues/new'),
               ),
             ],
           ),
@@ -70,7 +70,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     action: KicksterButton(
                       label: 'Criar campo',
                       icon: Icons.add,
-                      onPressed: () => context.go('/venues/new'),
+                      onPressed: () => context.push('/venues/new'),
                     ),
                   );
                 }

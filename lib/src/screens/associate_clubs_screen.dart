@@ -119,7 +119,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                     action: KicksterButton(
                       label: 'Criar campeonato',
                       icon: Icons.add,
-                      onPressed: () => context.go('/competitions/new'),
+                      onPressed: () => context.push('/competitions/new'),
                     ),
                   );
                 }
@@ -430,7 +430,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
             action: KicksterButton(
               label: 'Criar clube',
               icon: Icons.add,
-              onPressed: () => context.go('/organizations/new'),
+              onPressed: () => context.push('/organizations/new'),
             ),
           );
         }
