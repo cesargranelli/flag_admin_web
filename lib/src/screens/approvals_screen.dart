@@ -158,34 +158,26 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
             Row(
               children: [
                 Expanded(
-                  // TODO(#457): variante danger/semantic no KicksterButton
-                  // quando o core evoluir.
-                  child: FilledButton.icon(
-                    onPressed:
-                        ref.watch(mutationProgressProvider(_scope)).contains(user.id)
-                            ? null
-                            : () => _reject(context, ref, user),
-                    icon: const Icon(Icons.close),
-                    label: const Text('Rejeitar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger,
-                    ),
+                  child: KicksterButton(
+                    label: 'Rejeitar',
+                    icon: Icons.close,
+                    variant: KicksterButtonVariant.danger,
+                    loading: ref
+                        .watch(mutationProgressProvider(_scope))
+                        .contains(user.id),
+                    onPressed: () => _reject(context, ref, user),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  // TODO(#457): variante danger/semantic no KicksterButton
-                  // quando o core evoluir.
-                  child: FilledButton.icon(
-                    onPressed:
-                        ref.watch(mutationProgressProvider(_scope)).contains(user.id)
-                            ? null
-                            : () => _approve(context, ref, user),
-                    icon: const Icon(Icons.check),
-                    label: const Text('Aprovar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                    ),
+                  child: KicksterButton(
+                    label: 'Aprovar',
+                    icon: Icons.check,
+                    variant: KicksterButtonVariant.success,
+                    loading: ref
+                        .watch(mutationProgressProvider(_scope))
+                        .contains(user.id),
+                    onPressed: () => _approve(context, ref, user),
                   ),
                 ),
               ],

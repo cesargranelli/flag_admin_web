@@ -13,16 +13,28 @@ enum KicksterButtonVariant {
 
   /// Sem fundo/borda — ação terciária (link).
   text,
+
+  /// Fundo `danger`, texto branco — ação destrutiva (ex.: rejeitar).
+  danger,
+
+  /// Fundo `success`, texto branco — ação de confirmação/sucesso
+  /// (ex.: aprovar).
+  success,
+
+  /// Borda `danger`, texto `danger` — ação destrutiva secundária
+  /// (ex.: desativar).
+  dangerOutline,
 }
 
 /// Botão no estilo do kit Kickster (issue #436/#445).
 ///
 /// Medidas EXATAS do Figma (node `Element` 23:169) para o tamanho padrão
 /// (large): altura **56px** e raio **24** (pill). Variantes:
-/// [KicksterButtonVariant]. O estado desabilitado usa fundo `grayFill`
-/// (`#ecf1f6`) + texto `textPrimary` (variante "Disable" do kit). Tudo via
-/// tokens `AppColors` — sem hex hardcoded. Quando [loading] é `true`, o
-/// botão é desabilitado e exibe um spinner no lugar do ícone.
+/// [KicksterButtonVariant] — incluindo as semânticas `danger`/`success`
+/// (preenchidas) e `dangerOutline` (borda). O estado desabilitado usa fundo
+/// `grayFill` (`#ecf1f6`) + texto `textPrimary` (variante "Disable" do kit).
+/// Tudo via tokens `AppColors` — sem hex hardcoded. Quando [loading] é
+/// `true`, o botão é desabilitado e exibe um spinner no lugar do ícone.
 class KicksterButton extends StatelessWidget {
   const KicksterButton({
     super.key,
@@ -43,7 +55,10 @@ class KicksterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !loading;
     final foreground = switch (variant) {
-      KicksterButtonVariant.primary => Colors.white,
+      KicksterButtonVariant.primary ||
+      KicksterButtonVariant.danger ||
+      KicksterButtonVariant.success => Colors.white,
+      KicksterButtonVariant.dangerOutline => AppColors.danger,
       KicksterButtonVariant.outline || KicksterButtonVariant.text =>
         AppColors.primary,
     };
@@ -70,23 +85,51 @@ class KicksterButton extends StatelessWidget {
     final style = _kicksterStyle(
       background: switch (variant) {
         KicksterButtonVariant.primary => AppColors.primary,
+        KicksterButtonVariant.danger => AppColors.danger,
+        KicksterButtonVariant.success => AppColors.success,
         _ => null,
       },
       foreground: foreground,
       side: switch (variant) {
         KicksterButtonVariant.outline =>
           const BorderSide(color: AppColors.primary),
+        KicksterButtonVariant.dangerOutline =>
+          const BorderSide(color: AppColors.danger),
+        _ => null,
+      },
+      // Hover/pressed mais escuros nas variantes preenchidas semânticas
+      // (overlay preto) e overlay na cor da borda no outline danger.
+      overlay: switch (variant) {
+        KicksterButtonVariant.danger || KicksterButtonVariant.success =>
+          WidgetStateProperty.resolveWith<Color?>(
+            (states) => states.contains(WidgetState.disabled)
+                ? null
+                : Colors.black.withValues(
+                    alpha: states.contains(WidgetState.pressed) ? 0.20 : 0.12,
+                  ),
+          ),
+        KicksterButtonVariant.dangerOutline =>
+          WidgetStateProperty.resolveWith<Color?>(
+            (states) => states.contains(WidgetState.disabled)
+                ? null
+                : AppColors.danger.withValues(
+                    alpha: states.contains(WidgetState.pressed) ? 0.20 : 0.12,
+                  ),
+          ),
         _ => null,
       },
     );
 
     return switch (variant) {
-      KicksterButtonVariant.primary => FilledButton(
+      KicksterButtonVariant.primary ||
+      KicksterButtonVariant.danger ||
+      KicksterButtonVariant.success => FilledButton(
           onPressed: enabled ? onPressed : null,
           style: style,
           child: child,
         ),
-      KicksterButtonVariant.outline => OutlinedButton(
+      KicksterButtonVariant.outline || KicksterButtonVariant.dangerOutline =>
+        OutlinedButton(
           onPressed: enabled ? onPressed : null,
           style: style,
           child: child,
@@ -104,6 +147,7 @@ class KicksterButton extends StatelessWidget {
     Color? background,
     required Color foreground,
     BorderSide? side,
+    WidgetStateProperty<Color?>? overlay,
   }) {
     return ButtonStyle(
       backgroundColor: WidgetStateProperty.resolveWith<Color?>(
@@ -116,6 +160,7 @@ class KicksterButton extends StatelessWidget {
             ? AppColors.textPrimary
             : foreground,
       ),
+      overlayColor: overlay,
       side: WidgetStateProperty.resolveWith<BorderSide?>(
         (states) => states.contains(WidgetState.disabled)
             ? const BorderSide(color: Colors.transparent)

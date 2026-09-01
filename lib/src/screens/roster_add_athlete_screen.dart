@@ -363,11 +363,16 @@ class _RosterDetailsDialogState extends State<_RosterDetailsDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        KicksterButton(
+          label: 'Cancelar',
+          variant: KicksterButtonVariant.text,
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Confirmar')),
+        KicksterButton(
+          label: 'Confirmar',
+          icon: Icons.check,
+          onPressed: _submit,
+        ),
       ],
     );
   }
