@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navegação — Flag Admin Web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5; --primary-soft: #EEF2FF; --text: #111111;
+      --text-secondary: #66707A; --line: #E3E7EC; --surface: #FFFFFF;
+      --gray-fill: #ECF1F6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); background: #F8FAFC; line-height: 1.6; }
+    .nav { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; padding: 0 24px; overflow-x: auto; }
+    .nav a { padding: 14px 14px; font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .nav a:hover { color: var(--primary); }
+    .nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .container { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    h2 { font-size: 22px; font-weight: 700; margin: 40px 0 12px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+    p { color: var(--text-secondary); font-size: 15px; margin-bottom: 12px; }
+    code { background: var(--gray-fill); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 13px; }
+    pre { background: #0F172A; color: #E2E8F0; padding: 16px; border-radius: 12px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0; }
+    pre code { background: transparent; padding: 0; color: inherit; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; font-size: 14px; }
+    th { text-align: left; padding: 12px 14px; background: var(--gray-fill); font-weight: 600; font-size: 13px; }
+    td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--text-secondary); font-size: 13px; text-align: center; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">Visão geral</a>
+    <a href="fluxo-de-telas.html">Fluxo de telas</a>
+    <a href="telas.html">Catálogo de telas</a>
+    <a href="navegacao.html" class="active">Navegação</a>
+  </nav>
+  <div class="container">
+    <h1>Padrões de navegação</h1>
+    <p>Como a navegação funciona no admin_web: <code>StatefulShellRoute</code>, <code>push</code>/<code>go</code>, botão voltar e modais.</p>
+
+    <h2>Estrutura da navegação</h2>
+    <div class="card">
+      <p>
+        O app usa um <code>StatefulShellRoute.indexedStack</code> (definido em
+        <code>lib/src/router/app_router.dart</code>) com uma <strong>branch por módulo</strong>.
+        O <code>AdminShell</code> é apenas o Scaffold ancestral (para SnackBars/Material);
+        cada branch preserva seu estado (filtros/seletores).
+      </p>
+      <p>
+        O router usa <code>refreshListenable</code> com o <code>AuthController</code>:
+        qualquer mudança de autenticação reavalia o redirect (login/logout/proteção).
+        Existe também <code>pendingDestination</code> — após autenticar, o usuário volta
+        ao destino que tentava acessar.
+      </p>
+    </div>
+
+    <h2>context.go vs context.push</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3><code>context.go</code> — substitui a rota (não empilha)</h3>
+        <ul>
+          <li>Navegação entre módulos (cards da home, ícone home)</li>
+          <li>Atalhos que trocam de contexto: detalhe do campeonato → Rodadas, detalhe da rodada → Confrontos</li>
+          <li>Ações de salvamento que levam ao detalhe substituindo o form</li>
+          <li>Telas públicas (login, signup, esqueci senha)</li>
+          <li>Back sem pilha nos forms: <code>canPop ? pop : go(rota do módulo)</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><code>context.push</code> — empilha (mantém volta)</h3>
+        <ul>
+          <li>Entrada em detalhes a partir de listagens (tap no card)</li>
+          <li>Formulários de criação que devem permitir voltar à listagem</li>
+          <li>Fluxos com contexto de volta: clube → novo time, campeonato → inscrever times, time → elenco</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Botão voltar</h2>
+    <div class="card">
+      <p>
+        Toda tela (exceto a home) exibe um <strong>botão voltar</strong> no topo
+        (implementado em <code>lib/src/widgets/app_screen.dart</code>):
+      </p>
+      <pre><code>// Com histórico (canPop): volta pelo histórico real
+if (canPop) → context.pop()
+
+// Sem histórico (listagem vinda da home via go): volta para a home
+else → context.go('/')  // "Voltar para Início"</code></pre>
+      <p>
+        O rótulo do botão indica a <strong>página para onde se vai</strong> (a anterior):
+        "Voltar para {nome}" — resolvido por <code>backLabel</code> da tela ou pelo nome
+        da rota anterior na pilha. O título da página atual fica centralizado na barra.
+      </p>
+    </div>
+
+    <h2>Forms com alterações pendentes</h2>
+    <div class="card">
+      <p>
+        Formulários usam <code>PopScope</code> + confirmação <strong>"Descartar alterações?"</strong>
+        ao sair com mudanças não salvas:
+      </p>
+      <ul>
+        <li><code>OrganizationFormScreen</code></li>
+        <li><code>CompetitionCreateScreen</code> / <code>CompetitionEditScreen</code> (via <code>CompetitionFormController.handleBack</code>)</li>
+      </ul>
+    </div>
+
+    <h2>Modais de navegação</h2>
+    <table>
+      <thead><tr><th>Modal</th><th>Arquivo</th><th>Disparado por</th><th>Comportamento</th></tr></thead>
+      <tbody>
+        <tr><td><code>AssociateClubModal</code></td><td><code>widgets/associate_club_modal.dart</code></td><td><code>OrganizationDetailScreen</code> (seção "Clubes")</td><td>Associa clube/universidade a federação/liga — sem rota, fecha com pop.</td></tr>
+        <tr><td><code>ConferenceFormModal</code></td><td><code>widgets/conference_form_modal.dart</code></td><td><code>GroupingsScreen</code></td><td>Cria/edita conferência.</td></tr>
+        <tr><td><code>DivisionFormModal</code></td><td><code>widgets/division_form_modal.dart</code></td><td><code>GroupingsScreen</code></td><td>Cria/edita divisão.</td></tr>
+        <tr><td><code>ClubAssignmentModal</code></td><td><code>widgets/club_assignment_modal.dart</code></td><td><code>GroupingsScreen</code></td><td>Placeholder (aguardando #12).</td></tr>
+        <tr><td>Dialog de competição</td><td>inline em <code>team_detail_screen.dart</code></td><td>Botão "Configurar elenco"</td><td>Escolhe competição e navega (push) para o elenco.</td></tr>
+        <tr><td>Dialog "Incluir {atleta}"</td><td>inline em <code>roster_add_athlete_screen.dart</code></td><td>Adicionar atleta ao elenco</td><td>Coleta apelido/número, mutação in-place.</td></tr>
+        <tr><td>Dialog "Modelo CSV"</td><td>inline em imports</td><td>Atletas/Jogos/Elencos (import)</td><td>Apenas exibe o modelo, sem navegação.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Extras de rota (state.extra)</h2>
+    <div class="card">
+      <p>O <code>state.extra</code> do GoRouter transporta dados entre telas:</p>
+      <ul>
+        <li>Detalhes recebem o objeto via extra (fallback ao provider pelo <code>:id</code>)</li>
+        <li><code>teamAssociate</code>: aceita <code>String</code> (competitionId, antigo) ou record <code>{competitionId, organizationId}</code></li>
+        <li><code>gameNew</code>/<code>gameEdit</code>/<code>gameDetail</code>: record <code>GameFormArgs</code> / <code>GameImportArgs</code></li>
+        <li><code>teamRoster</code>: <code>competitionId</code> via extra String</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">Flag Admin Web — documentação gerada a partir do código-fonte.</div>
+</body>
+</html>
