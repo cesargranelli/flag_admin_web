@@ -244,11 +244,6 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
     if (roundId == null || roundId.isEmpty) {
       return AppScreen(
         title: 'Importar jogos',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.games, route: '/games'),
-          BreadcrumbItem('Importar'),
-        ],
         body: AppLayout.form(
           child: KicksterEmptyState(
             icon: Icons.sports,
@@ -267,11 +262,6 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
 
     return AppScreen(
       title: 'Importar jogos',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.games, route: '/games'),
-        BreadcrumbItem('Importar'),
-      ],
       body: AppLayout.form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

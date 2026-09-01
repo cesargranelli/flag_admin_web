@@ -68,47 +68,6 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   String? get _competitionId =>
       widget.lockedCompetitionId ?? _selectedCompetitionId;
 
-  /// Breadcrumb dinâmico (C3): reflete o caminho real de navegação.
-  ///
-  /// - Vindo do detalhe do clube ([lockedOrganizationId]): `Início ›
-  ///   Organizações › {Clube} › Inscrever time`;
-  /// - vindo do detalhe/campeonato ([lockedCompetitionId]): `Início ›
-  ///   Campeonatos › {Campeonato} › Inscrever time`;
-  /// - fluxo geral (tela Times): `Início › Times › Inscrever time`.
-  List<BreadcrumbItem> _buildBreadcrumb() {
-    final orgId = widget.lockedOrganizationId;
-    if (orgId != null) {
-      final orgs =
-          ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
-      final org = orgs.where((o) => o.id == orgId).firstOrNull;
-      return [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-        if (org != null)
-          BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
-        const BreadcrumbItem('Inscrever time'),
-      ];
-    }
-    final compId = widget.lockedCompetitionId;
-    if (compId != null) {
-      final comps =
-          ref.watch(competitionsProvider).valueOrNull ?? const <Competition>[];
-      final comp = comps.where((c) => c.id == compId).firstOrNull;
-      return [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        if (comp != null)
-          BreadcrumbItem(comp.name, route: '/competitions/${comp.id}'),
-        const BreadcrumbItem('Inscrever time'),
-      ];
-    }
-    return const [
-      BreadcrumbItem('Início', route: '/'),
-      BreadcrumbItem(AppStrings.teams, route: '/teams'),
-      BreadcrumbItem('Inscrever time'),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     final competitions = ref.watch(competitionsProvider);
@@ -120,7 +79,6 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     return AppScreen(
       title: 'Inscrever time',
       scrollable: false,
-      breadcrumb: _buildBreadcrumb(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -149,47 +149,13 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
   Widget _buildScaffold({required Widget body}) {
     return AppScreen(
       title: 'Editar time',
-      breadcrumb: _buildBreadcrumb(),
       body: body,
     );
-  }
-
-  /// Breadcrumb dinâmico (C3): quando o time pertence a um clube conhecido,
-  /// reflete o caminho real `Início › Organizações › {Clube} › Editar time`;
-  /// caso contrário, usa o padrão `Início › Times › {Time} / Editar`.
-  List<BreadcrumbItem> _buildBreadcrumb() {
-    final orgId = _team?.organizationId;
-    if (orgId != null && orgId.isNotEmpty) {
-      final orgs = ref
-          .watch(organizationsProvider)
-          .valueOrNull ??
-          const <Organization>[];
-      final org = orgs.where((o) => o.id == orgId).firstOrNull;
-      if (org != null) {
-        return [
-          const BreadcrumbItem('Início', route: '/'),
-          const BreadcrumbItem(
-            AppStrings.organizations,
-            route: '/organizations',
-          ),
-          BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
-          const BreadcrumbItem('Editar time'),
-        ];
-      }
-    }
-    return [
-      const BreadcrumbItem('Início', route: '/'),
-      const BreadcrumbItem(AppStrings.teams, route: '/teams'),
-      if (_team?.name.isNotEmpty ?? false)
-        BreadcrumbItem(_team!.name, route: '/teams/${_team!.id}'),
-      const BreadcrumbItem('Editar time'),
-    ];
   }
 
   Widget _buildForm(BuildContext context) {
     return AppScreen(
       title: 'Editar time',
-      breadcrumb: _buildBreadcrumb(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

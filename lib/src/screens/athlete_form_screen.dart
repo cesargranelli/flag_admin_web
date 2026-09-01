@@ -216,11 +216,6 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
   Widget build(BuildContext context) {
     return AppScreen(
       title: _isEditing ? 'Editar atleta' : 'Novo atleta',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.athletes, route: '/athletes'),
-        BreadcrumbItem('Formulário'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

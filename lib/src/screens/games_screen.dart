@@ -62,10 +62,6 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
     return AppScreen(
       title: 'Jogos',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Jogos'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

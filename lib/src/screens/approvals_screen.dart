@@ -35,10 +35,6 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
     return AppScreen(
       title: 'Aprovações',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Aprovações'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

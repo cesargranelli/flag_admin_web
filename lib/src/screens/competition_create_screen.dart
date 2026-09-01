@@ -207,11 +207,6 @@ class _CompetitionCreateScreenState
       },
       child: AppScreen(
         title: 'Novo campeonato',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-          BreadcrumbItem('Novo'),
-        ],
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

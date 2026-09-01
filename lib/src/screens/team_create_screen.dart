@@ -1,6 +1,5 @@
 import 'package:flag_admin_web/src/api/flag_api.dart';
 import 'package:flag_admin_web/src/core/flag_core.dart';
-import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -82,32 +81,6 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
     }
   }
 
-  /// Breadcrumb dinâmico (C3): quando o "Novo time" é lançado do detalhe do
-  /// clube ([organizationId] via rota), reflete o caminho real `Início ›
-  /// Organizações › {Clube} › Novo time`; caso contrário, usa o padrão
-  /// `Início › Times › Novo`.
-  List<BreadcrumbItem> _buildBreadcrumb() {
-    final orgs = ref
-        .watch(organizationsProvider)
-        .valueOrNull ??
-        const <Organization>[];
-    final org =
-        orgs.where((o) => o.id == widget.organizationId).firstOrNull;
-    if (org != null) {
-      return [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-        BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
-        const BreadcrumbItem('Novo time'),
-      ];
-    }
-    return const [
-      BreadcrumbItem('Início', route: '/'),
-      BreadcrumbItem(AppStrings.teams, route: '/teams'),
-      BreadcrumbItem('Novo'),
-    ];
-  }
-
   String? _validateLogoUrl(String? value) {
     if (value == null || value.trim().isEmpty) return null;
     final uri = Uri.tryParse(value.trim());
@@ -122,7 +95,6 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
   Widget build(BuildContext context) {
     return AppScreen(
       title: 'Novo time',
-      breadcrumb: _buildBreadcrumb(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

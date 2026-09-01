@@ -31,11 +31,6 @@ class GroupingsScreen extends ConsumerWidget {
 
     return AppScreen(
       title: 'Conferências e divisões',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        BreadcrumbItem('Conferências e divisões'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

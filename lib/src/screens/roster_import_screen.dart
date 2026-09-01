@@ -201,11 +201,6 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     if (teamId == null || teamId.isEmpty) {
       return AppScreen(
         title: 'Importar elenco',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
-          BreadcrumbItem('Importar'),
-        ],
         body: AppLayout.form(
           child: KicksterEmptyState(
             icon: Icons.groups_outlined,
@@ -224,11 +219,6 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
 
     return AppScreen(
       title: 'Importar elenco',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
-        BreadcrumbItem('Importar'),
-      ],
       body: AppLayout.form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

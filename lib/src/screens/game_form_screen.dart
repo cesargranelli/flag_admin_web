@@ -154,11 +154,6 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
 
     return AppScreen(
       title: _isEditing ? 'Editar jogo' : 'Novo jogo',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.games, route: '/games'),
-        BreadcrumbItem('Formulário'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
