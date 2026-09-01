@@ -498,13 +498,14 @@ class _RosterBody extends ConsumerWidget {
               'Não foi possível carregar o elenco',
               style: TextStyle(fontSize: 13, color: AppColors.danger),
             ),
-            TextButton(
+            KicksterButton(
+              label: 'Tentar novamente',
+              variant: KicksterButtonVariant.text,
               onPressed: () => ref.invalidate(
                 teamRosterProvider(
                   (teamId: teamId, competitionId: competitionId),
                 ),
               ),
-              child: const Text('Tentar novamente'),
             ),
           ],
         ),

@@ -153,7 +153,7 @@ class TeamDetailScreen extends ConsumerWidget {
                         KicksterButton(
                           label: 'Desativar',
                           icon: Icons.pause_circle_outline,
-                          variant: KicksterButtonVariant.outline,
+                          variant: KicksterButtonVariant.dangerOutline,
                           onPressed: () => _deactivate(context, ref, team),
                         ),
                     ],
