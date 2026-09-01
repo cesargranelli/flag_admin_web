@@ -164,7 +164,9 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 (rounds?.when(
-                      loading: () => const LinearProgressIndicator(),
+                      loading: () => const AppLoading(
+                        message: 'Carregando rodadas...',
+                      ),
                       error: (e, s) => const Text('Erro ao carregar rodadas'),
                       data: (items) => KicksterDropdown<String>(
                         label: 'Rodada',
@@ -183,10 +185,12 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
                             : null,
                       ),
                     ) ??
-                    const LinearProgressIndicator()),
+                    const AppLoading()),
                 const SizedBox(height: 12),
                 (teams?.when(
-                      loading: () => const LinearProgressIndicator(),
+                      loading: () => const AppLoading(
+                        message: 'Carregando times...',
+                      ),
                       error: (e, s) => const Text('Erro ao carregar times'),
                       data: (items) => KicksterDropdown<String>(
                         label: 'Time da casa',
@@ -206,10 +210,12 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
                             : null,
                       ),
                     ) ??
-                    const LinearProgressIndicator()),
+                    const AppLoading()),
                 const SizedBox(height: 12),
                 (teams?.when(
-                      loading: () => const LinearProgressIndicator(),
+                      loading: () => const AppLoading(
+                        message: 'Carregando times...',
+                      ),
                       error: (e, s) => const Text('Erro ao carregar times'),
                       data: (items) => KicksterDropdown<String>(
                         label: 'Time visitante',
@@ -235,10 +241,12 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
                         },
                       ),
                     ) ??
-                    const LinearProgressIndicator()),
+                    const AppLoading()),
                 const SizedBox(height: 12),
                 venues.when(
-                  loading: () => const LinearProgressIndicator(),
+                  loading: () => const AppLoading(
+                    message: 'Carregando campos...',
+                  ),
                   error: (e, s) => const Text('Erro ao carregar campos'),
                   data: (items) => KicksterDropdown<String?>(
                     label: 'Campo (opcional)',
@@ -273,6 +281,7 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
                     _errorMessage!,
                     style: TextStyle(
                       color: AppColors.danger,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

@@ -42,7 +42,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
               KicksterButton(
                 label: 'Novo',
                 icon: Icons.add,
-                onPressed: () => context.go('/users/new'),
+                onPressed: () => context.push('/users/new'),
               ),
             ],
           ),
@@ -66,7 +66,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                     action: KicksterButton(
                       label: 'Criar usuário',
                       icon: Icons.add,
-                      onPressed: () => context.go('/users/new'),
+                      onPressed: () => context.push('/users/new'),
                     ),
                   );
                 }

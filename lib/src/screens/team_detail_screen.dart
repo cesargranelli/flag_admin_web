@@ -114,7 +114,7 @@ class TeamDetailScreen extends ConsumerWidget {
                               ),
                             const SizedBox(height: 4),
                             Text(
-                              'Clube: ${orgName ?? team.organizationId}',
+                              'Clube: ${orgName ?? 'Clube não encontrado'}',
                               style: AppTextStyles.paragraph.copyWith(
                                 color: AppColors.textSecondary,
                               ),
@@ -259,41 +259,21 @@ class TeamDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 rostersAsync.when(
-                  loading: () => const Text(
-                    'Carregando elencos...',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
+                  loading: () => const AppLoading(
+                    message: 'Carregando elencos...',
                   ),
-                  error: (error, stackTrace) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Não foi possível carregar os elencos.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.danger,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      KicksterButton(
-                        label: 'Tentar novamente',
-                        variant: KicksterButtonVariant.text,
-                        onPressed: () =>
-                            ref.invalidate(teamRostersProvider(team.id)),
-                      ),
-                    ],
+                  error: (error, stackTrace) => AppErrorState(
+                    message: 'Não foi possível carregar os elencos.',
+                    onRetry: () =>
+                        ref.invalidate(teamRostersProvider(team.id)),
                   ),
                   data: (rosters) {
                     if (rosters.isEmpty) {
-                      return const Text(
-                        'Nenhum elenco criado. Crie o primeiro elenco do '
-                        'time em uma competição.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
+                      return KicksterEmptyState(
+                        icon: Icons.groups_outlined,
+                        message: 'Nenhum elenco criado',
+                        description:
+                            'Crie o primeiro elenco do time em uma competição.',
                       );
                     }
                     return Column(

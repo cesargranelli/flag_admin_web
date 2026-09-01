@@ -69,7 +69,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               padding: const EdgeInsets.all(32),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: _sent ? _buildSent() : _buildForm(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => context.go('/login'),
+                        icon: const Icon(Icons.arrow_back, size: 20),
+                        label: const Text('Voltar ao login'),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _sent ? _buildSent() : _buildForm(),
+                  ],
+                ),
               ),
             ),
           ),

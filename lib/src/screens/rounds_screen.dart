@@ -160,7 +160,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                                         action: KicksterButton(
                                           label: 'Criar rodada',
                                           icon: Icons.add,
-                                          onPressed: () => context.go(
+                                          onPressed: () => context.push(
                                             '/rounds/new',
                                             extra: effectiveComp,
                                           ),

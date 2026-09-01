@@ -39,4 +39,5 @@ export 'widgets/kickster_toggle.dart';
 export 'widgets/kickster_status_chip.dart';
 export 'widgets/kickster_social_auth.dart';
 export 'widgets/search_field.dart';
+export 'widgets/roster_athlete_card.dart';
 export 'session/session_manager.dart';

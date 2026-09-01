@@ -139,6 +139,15 @@ class _CompetitionDetailScreenState
     bool canEdit,
     bool isDraft,
   ) {
+    // Resolve o nome da organização a partir do provider.
+    final orgs = ref.watch(organizationsProvider).valueOrNull ??
+        const <Organization>[];
+    final orgName = comp.organizationId != null
+        ? orgs
+            .where((o) => o.id == comp.organizationId)
+            .map((o) => o.tradeName)
+            .firstOrNull
+        : null;
     return Card(
       elevation: 1,
       shadowColor: AppColors.black.withValues(alpha: 0.08),
@@ -182,9 +191,7 @@ class _CompetitionDetailScreenState
                       const SizedBox(height: 2),
                       Text(
                         comp.organizationName ??
-                            (comp.organizationId != null
-                                ? 'Organização #${comp.organizationId}'
-                                : ''),
+                            (orgName ?? 'Organização'),
                         style: AppTextStyles.paragraph.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -313,21 +320,12 @@ class _CompetitionDetailScreenState
         ref.watch(conferencesProvider(comp.id)).valueOrNull ??
         const <Conference>[];
     return divisions.when(
-      loading: () => AppInfoCard(
-        children: const [
-          Text(
-            'Carregando agrupamento...',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-          ),
-        ],
+      loading: () => const AppLoading(
+        message: 'Carregando agrupamento...',
       ),
-      error: (e, s) => AppInfoCard(
-        children: const [
-          Text(
-            'Não foi possível carregar as divisões.',
-            style: TextStyle(color: AppColors.danger, fontSize: 13),
-          ),
-        ],
+      error: (e, s) => AppErrorState(
+        message: 'Não foi possível carregar as divisões.',
+        onRetry: () => ref.invalidate(divisionsProvider(comp.id)),
       ),
       data: (items) => AppInfoCard(
         children: items.isEmpty
@@ -374,21 +372,12 @@ class _CompetitionDetailScreenState
     final teams = ref.watch(teamsProvider(comp.id));
 
     return teams.when(
-      loading: () => AppInfoCard(
-        children: const [
-          Text(
-            'Carregando times...',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-          ),
-        ],
+      loading: () => const AppLoading(
+        message: 'Carregando times...',
       ),
-      error: (e, s) => AppInfoCard(
-        children: const [
-          Text(
-            'Não foi possível carregar os times.',
-            style: TextStyle(color: AppColors.danger, fontSize: 13),
-          ),
-        ],
+      error: (e, s) => AppErrorState(
+        message: 'Não foi possível carregar os times.',
+        onRetry: () => ref.invalidate(teamsProvider(comp.id)),
       ),
       data: (items) => AppInfoCard(
         children: [
@@ -471,21 +460,12 @@ class _CompetitionDetailScreenState
   Widget _conferencesCard(Competition comp) {
     final conferences = ref.watch(conferencesProvider(comp.id));
     return conferences.when(
-      loading: () => AppInfoCard(
-        children: const [
-          Text(
-            'Carregando conferências...',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-          ),
-        ],
+      loading: () => const AppLoading(
+        message: 'Carregando conferências...',
       ),
-      error: (e, s) => AppInfoCard(
-        children: const [
-          Text(
-            'Não foi possível carregar as conferências.',
-            style: TextStyle(color: AppColors.danger, fontSize: 13),
-          ),
-        ],
+      error: (e, s) => AppErrorState(
+        message: 'Não foi possível carregar as conferências.',
+        onRetry: () => ref.invalidate(conferencesProvider(comp.id)),
       ),
       data: (items) => AppInfoCard(
         children: items.isEmpty

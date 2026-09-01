@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
+import '../widgets/app_screen.dart';
 
 /// Passo 3 do fluxo: define a nova senha usando o token do link do e-mail.
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -59,15 +60,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(leading: BackButton(onPressed: () => context.go('/login'))),
+    return AppScreen(
+      title: 'Redefinir senha',
+      showUserHeader: false,
       body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: _done ? _buildDone() : _buildForm(),
-          ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: _done ? _buildDone() : _buildForm(),
         ),
       ),
     );

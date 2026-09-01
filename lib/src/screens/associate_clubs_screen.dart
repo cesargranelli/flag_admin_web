@@ -140,9 +140,9 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                     Expanded(
                       child: competitionId != null
                           ? _buildEnrollList(context, competitionId)
-                          : const AppEmptyState(
-                              message: 'Selecione um campeonato',
+                          : const KicksterEmptyState(
                               icon: Icons.emoji_events_outlined,
+                              message: 'Selecione um campeonato',
                             ),
                     ),
                   ],
@@ -359,9 +359,9 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                       competitionId,
                       enrolledIds,
                     )
-                  : const AppEmptyState(
-                      message: 'Selecione um clube',
+                  : const KicksterEmptyState(
                       icon: Icons.groups_outlined,
+                      message: 'Selecione um clube',
                     ),
             ),
           ],

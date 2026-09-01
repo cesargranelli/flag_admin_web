@@ -253,9 +253,9 @@ class _CompetitionEditScreenState
           return AppScreen(
             title: 'Editar campeonato',
             backLabel: widget.competition?.name,
-            body: const AppEmptyState(
-              message: 'Você não tem permissão para editar este campeonato.',
+            body: const KicksterEmptyState(
               icon: Icons.lock_outline,
+              message: 'Você não tem permissão para editar este campeonato.',
             ),
           );
         }
@@ -264,13 +264,13 @@ class _CompetitionEditScreenState
           return AppScreen(
             title: 'Editar campeonato',
             backLabel: widget.competition?.name,
-            body: AppEmptyState(
+            body: KicksterEmptyState(
+              icon: Icons.lock,
               message: competition.status == CompetitionStatus.published
                   ? 'Campeonato publicado — não é mais editável.'
                   : 'Campeonato '
                          '${_statusLabel(competition.status).toLowerCase()} — '
                          'não é mais editável.',
-              icon: Icons.lock,
             ),
           );
         }

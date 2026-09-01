@@ -57,7 +57,7 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
               KicksterButton(
                 label: 'Novo',
                 icon: Icons.add,
-                onPressed: () => context.go('/organizations/new'),
+                onPressed: () => context.push('/organizations/new'),
               ),
             ],
           ),
@@ -83,7 +83,7 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
                     action: KicksterButton(
                       label: 'Criar organização',
                       icon: Icons.add,
-                      onPressed: () => context.go('/organizations/new'),
+                      onPressed: () => context.push('/organizations/new'),
                     ),
                   );
                 }
