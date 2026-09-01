@@ -205,70 +205,20 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
         .where((c) => c.id == competitionId)
         .firstOrNull;
 
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.emoji_events_outlined,
-                color: AppColors.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Campeonato',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    competition?.name ?? 'Campeonato não encontrado',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Tooltip(
-              message: 'Campeonato alvo desta inscrição (não editável)',
-              child: Icon(
-                Icons.lock_outline,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+    return KicksterCard(
+      icon: Icons.emoji_events_outlined,
+      title: competition?.name ?? 'Campeonato não encontrado',
+      subtitle: 'Campeonato',
+      trailing: const Tooltip(
+        message: 'Campeonato alvo desta inscrição (não editável)',
+        child: Icon(
+          Icons.lock_outline,
+          size: 18,
+          color: AppColors.textSecondary,
         ),
       ),
+      // Card fixo do alvo (não editável): sem ação ao toque.
+      onTap: () {},
     );
   }
 
@@ -316,70 +266,20 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   Widget _buildOrganizationCard(List<Organization> clubs, String orgId) {
     final org = clubs.where((o) => o.id == orgId).firstOrNull;
 
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                organizationTypeIcon(org?.organizationType),
-                color: AppColors.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Clube / Universidade',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    org?.tradeName ?? 'Clube não encontrado',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Tooltip(
-              message: 'Clube alvo desta inscrição (não editável)',
-              child: Icon(
-                Icons.lock_outline,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+    return KicksterCard(
+      icon: organizationTypeIcon(org?.organizationType),
+      title: org?.tradeName ?? 'Clube não encontrado',
+      subtitle: 'Clube / Universidade',
+      trailing: const Tooltip(
+        message: 'Clube alvo desta inscrição (não editável)',
+        child: Icon(
+          Icons.lock_outline,
+          size: 18,
+          color: AppColors.textSecondary,
         ),
       ),
+      // Card fixo do alvo (não editável): sem ação ao toque.
+      onTap: () {},
     );
   }
 
@@ -554,68 +454,20 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     final enrolling =
         ref.watch(mutationProgressProvider(_enrollScope)).contains(team.id);
 
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
+    return KicksterCard(
+      icon: Icons.groups_outlined,
+      title: team.name,
+      subtitle: (team.shortName?.isNotEmpty ?? false) ? team.shortName : null,
+      trailing: KicksterButton(
+        label: 'Inscrever',
+        icon: Icons.add,
+        loading: enrolling,
+        onPressed: enrolling
+            ? null
+            : () => _enroll(context, team, competitionId),
       ),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: KicksterAvatar(
-                name: team.name,
-                imageUrl: team.logoUrl,
-                icon: Icons.groups_outlined,
-                size: 48,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    team.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (team.shortName?.isNotEmpty ?? false)
-                    Text(
-                      team.shortName!,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            KicksterButton(
-              label: 'Inscrever',
-              icon: Icons.add,
-              loading: enrolling,
-              onPressed: enrolling
-                  ? null
-                  : () => _enroll(context, team, competitionId),
-            ),
-          ],
-        ),
-      ),
+      // Card sem expansão nesta tela (inscrição direta pelo botão).
+      onTap: () {},
     );
   }
 

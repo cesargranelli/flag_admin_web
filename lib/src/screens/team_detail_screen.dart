@@ -596,89 +596,38 @@ class _RosterCard extends ConsumerWidget {
         .watch(mutationProgressProvider(_rosterDeactivateScope))
         .contains(roster.id);
 
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.emoji_events_outlined,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
+    return KicksterCard(
+      icon: Icons.emoji_events_outlined,
+      title: title,
+      subtitle: subtitle,
+      onTap: onTap,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isInactive) ...[
+            KicksterBadge(label: 'Inativo', color: AppColors.danger),
+            const SizedBox(width: 8),
+          ],
+          if (deactivating)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                    if (isInactive) ...[
-                      const SizedBox(height: 6),
-                      KicksterBadge(label: 'Inativo', color: AppColors.danger),
-                    ],
-                  ],
-                ),
+            )
+          else
+            IconButton(
+              tooltip: 'Desativar elenco',
+              icon: const Icon(
+                Icons.pause_circle_outline,
+                color: AppColors.danger,
+                size: 20,
               ),
-              if (deactivating)
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              else
-                IconButton(
-                  tooltip: 'Desativar elenco',
-                  icon: const Icon(
-                    Icons.pause_circle_outline,
-                    color: AppColors.danger,
-                    size: 20,
-                  ),
-                  onPressed: onDeactivate,
-                ),
-            ],
-          ),
-        ),
+              onPressed: onDeactivate,
+            ),
+        ],
       ),
     );
   }

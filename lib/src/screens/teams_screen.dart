@@ -73,8 +73,6 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                   countLabel: 'times',
                   countLabelSingular: 'time',
                   emptyMessage: 'Nenhum time encontrado',
-                  gridPadding: const EdgeInsets.all(16),
-                  mainAxisExtent: 104,
                   filter: (all, query) => query.isEmpty
                       ? all
                       : all
@@ -94,10 +92,10 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
     );
   }
 
-  /// Card de time no padrão Kickster: logo/avatar, nome (16 w600), subtítulo
-  /// com sigla · esporte + clube quando resolvido, e chevron. Tocar navega
-  /// para o detalhe do time. Para ADMIN, mostra badge de inativo e menu de
-  /// desativar/reativar (status lifecycle).
+  /// Card de time no padrão Kickster: ícone de grupos, nome (16 w600),
+  /// subtítulo com sigla · esporte + clube quando resolvido. Para ADMIN,
+  /// mostra badge de inativo e menu de desativar/reativar (status
+  /// lifecycle). Tocar navega para o detalhe do time.
   Widget _teamCard(
     BuildContext context,
     Team team,
@@ -111,108 +109,56 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
     final orgName = orgNames[team.organizationId];
     final isInactive = team.status == 'INACTIVE';
 
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      child: InkWell(
-        onTap: () => context.push('/teams/${team.id}', extra: team),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              _teamLogo(context, team),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      team.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (subtitleParts.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitleParts,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                    if (orgName != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Clube: $orgName',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              if (isInactive)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: KicksterBadge(
-                    label: 'Inativo',
-                    color: AppColors.danger,
+    // Subtítulo em linha única (limite do KicksterCard): sigla · esporte
+    // combinados com o nome do clube quando resolvido.
+    final subtitle = [
+      if (subtitleParts.isNotEmpty) subtitleParts,
+      ?orgName,
+    ].join(' · ');
+
+    return KicksterCard(
+      icon: Icons.groups_outlined,
+      title: team.name,
+      subtitle: subtitle.isEmpty ? null : subtitle,
+      onTap: () => context.push('/teams/${team.id}', extra: team),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isInactive) ...[
+            KicksterBadge(label: 'Inativo', color: AppColors.danger),
+            const SizedBox(width: 8),
+          ],
+          if (isAdmin)
+            PopupMenuButton<String>(
+              tooltip: 'Ações',
+              onSelected: (value) async {
+                if (value == 'deactivate') {
+                  final ok = await _confirmDeactivate(context, team);
+                  if (ok == true) await _deactivate(team);
+                } else if (value == 'reactivate') {
+                  await _reactivate(team);
+                }
+              },
+              itemBuilder: (_) => [
+                if (!isInactive)
+                  const PopupMenuItem(
+                    value: 'deactivate',
+                    child: Text('Desativar'),
                   ),
-                ),
-              if (isAdmin)
-                PopupMenuButton<String>(
-                  tooltip: 'Ações',
-                  onSelected: (value) async {
-                    if (value == 'deactivate') {
-                      final ok = await _confirmDeactivate(context, team);
-                      if (ok == true) await _deactivate(team);
-                    } else if (value == 'reactivate') {
-                      await _reactivate(team);
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    if (!isInactive)
-                      const PopupMenuItem(
-                        value: 'deactivate',
-                        child: Text('Desativar'),
-                      ),
-                    if (isInactive)
-                      const PopupMenuItem(
-                        value: 'reactivate',
-                        child: Text('Reativar'),
-                      ),
-                  ],
-                ),
-              const SizedBox(width: 4),
-              const Icon(
-                Icons.chevron_right,
-                size: 22,
-                color: AppColors.textSecondary,
-              ),
-            ],
+                if (isInactive)
+                  const PopupMenuItem(
+                    value: 'reactivate',
+                    child: Text('Reativar'),
+                  ),
+              ],
+            ),
+          const SizedBox(width: 4),
+          const Icon(
+            Icons.chevron_right,
+            size: 22,
+            color: AppColors.textSecondary,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -258,40 +204,6 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
       errorMessage: errorMessage,
       progressId: team.id,
       onSuccess: () => ref.invalidate(allTeamsProvider),
-    );
-  }
-
-  /// Logo do time em quadrado arredondado (raio 12) com fundo `primary` @10%;
-  /// fallback para o ícone de grupos quando não há logo.
-  Widget _teamLogo(BuildContext context, Team team) {
-    final placeholder = Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Icon(
-        Icons.groups_outlined,
-        color: AppColors.primary,
-        size: 24,
-      ),
-    );
-
-    final logo = team.logoUrl;
-    if (logo == null || logo.isEmpty) return placeholder;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Image.network(
-        logo,
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-        cacheWidth: (48 * MediaQuery.devicePixelRatioOf(context)).round(),
-        cacheHeight: (48 * MediaQuery.devicePixelRatioOf(context)).round(),
-        errorBuilder: (_, _, _) => placeholder,
-      ),
     );
   }
 }

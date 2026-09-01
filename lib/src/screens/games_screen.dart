@@ -252,8 +252,6 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                       countLabelSingular: 'jogo',
                                       emptyMessage: 'Nenhum jogo encontrado',
                                       mainAxisExtent: 120,
-                                      gridPadding:
-                                          const EdgeInsets.all(16),
                                       filter: (all, query) => query.isEmpty
                                           ? all
                                           : all
