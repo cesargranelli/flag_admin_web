@@ -52,6 +52,14 @@ class AthleteDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// Rótulo amigável do gênero (MALE/FEMALE/MIXED → pt-BR).
+  String _genderLabel(String gender) => switch (gender) {
+        'MALE' => 'Masculino',
+        'FEMALE' => 'Feminino',
+        'MIXED' => 'Misto',
+        _ => gender,
+      };
+
   Widget _buildDetail(BuildContext context, Athlete athlete) {
     return AppLayout.detail(
         child: Column(
@@ -123,6 +131,24 @@ class AthleteDetailScreen extends ConsumerWidget {
                 label: 'Apelido',
                 value: athlete.nickname?.isNotEmpty == true
                     ? athlete.nickname!
+                    : '—',
+              ),
+              AppInfoRow(
+                label: 'Gênero',
+                value: athlete.gender != null
+                    ? _genderLabel(athlete.gender!)
+                    : '—',
+              ),
+              AppInfoRow(
+                label: 'Data de nascimento',
+                value: athlete.birthDate != null
+                    ? formatBrDate(athlete.birthDate)
+                    : '—',
+              ),
+              AppInfoRow(
+                label: 'Idade',
+                value: athlete.birthDate != null
+                    ? '${ageFromBirthDate(athlete.birthDate)} anos'
                     : '—',
               ),
               AppInfoRow(

@@ -81,6 +81,10 @@ Future<DateTime?> showAppCalendarDialog(
 ///   fora do intervalo permitido com opacity 0.3 e não interativos;
 /// - Dia selecionado: círculo preenchido `AppColors.primary` com texto
 ///   branco; hoje (não selecionado): contorno sutil.
+///
+/// Navegação rápida (#12): tocar no título ("Mês de Ano") alterna para um
+/// seletor de **mês + ano** (grade 3x4 de meses + botões ‹ › de ano), para
+/// acelerar a escolha sem avançar mês a mês.
 class AppCalendar extends StatefulWidget {
   const AppCalendar({
     super.key,
@@ -102,9 +106,23 @@ class AppCalendar extends StatefulWidget {
   State<AppCalendar> createState() => _AppCalendarState();
 }
 
+/// Modo de exibição do calendário.
+enum _CalendarMode {
+  /// Grade de dias do mês (padrão).
+  days,
+
+  /// Seletor de mês + ano (navegação rápida).
+  monthYear,
+}
+
 class _AppCalendarState extends State<AppCalendar> {
   late DateTime _selected;
   late DateTime _displayedMonth;
+
+  /// Ano em exibição no seletor de mês/ano (janeiro desse ano).
+  late DateTime _displayedYear;
+
+  _CalendarMode _mode = _CalendarMode.days;
 
   static DateTime _midnight(DateTime date) =>
       DateTime(date.year, date.month, date.day);
@@ -120,6 +138,7 @@ class _AppCalendarState extends State<AppCalendar> {
     }
     _selected = selected;
     _displayedMonth = DateTime(selected.year, selected.month);
+    _displayedYear = DateTime(selected.year);
   }
 
   bool get _canGoToPreviousMonth => _displayedMonth.isAfter(
@@ -130,6 +149,12 @@ class _AppCalendarState extends State<AppCalendar> {
     DateTime(widget.lastDate.year, widget.lastDate.month),
   );
 
+  bool get _canGoToPreviousYear =>
+      _displayedYear.isAfter(DateTime(widget.firstDate.year));
+
+  bool get _canGoToNextYear =>
+      _displayedYear.isBefore(DateTime(widget.lastDate.year));
+
   void _goToPreviousMonth() {
     setState(() {
       _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month - 1);
@@ -139,6 +164,37 @@ class _AppCalendarState extends State<AppCalendar> {
   void _goToNextMonth() {
     setState(() {
       _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+    });
+  }
+
+  void _goToPreviousYear() {
+    setState(() {
+      _displayedYear = DateTime(_displayedYear.year - 1);
+    });
+  }
+
+  void _goToNextYear() {
+    setState(() {
+      _displayedYear = DateTime(_displayedYear.year + 1);
+    });
+  }
+
+  /// Alterna para o seletor de mês/ano (a partir do mês em exibição).
+  void _openMonthYearPicker() {
+    setState(() {
+      _displayedYear = DateTime(_displayedMonth.year);
+      _mode = _CalendarMode.monthYear;
+    });
+  }
+
+  /// Escolhe um mês no seletor e volta para a grade de dias.
+  void _selectMonth(int month) {
+    final year = _displayedYear.year;
+    // Clamp do dia para dentro do mês escolhido (ex.: 31 → fev).
+    final day = math.min(_selected.day, DateTime(year, month + 1, 0).day);
+    setState(() {
+      _displayedMonth = DateTime(year, month, day);
+      _mode = _CalendarMode.days;
     });
   }
 
@@ -172,11 +228,16 @@ class _AppCalendarState extends State<AppCalendar> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(),
+            _mode == _CalendarMode.days
+                ? _buildHeader()
+                : _buildMonthYearHeader(),
             const SizedBox(height: 12),
-            _buildWeekdayRow(),
-            const SizedBox(height: 4),
-            ..._buildWeekRows(),
+            if (_mode == _CalendarMode.days) ...[
+              _buildWeekdayRow(),
+              const SizedBox(height: 4),
+              ..._buildWeekRows(),
+            ] else
+              _buildMonthGrid(),
           ],
         ),
       ),
@@ -195,10 +256,72 @@ class _AppCalendarState extends State<AppCalendar> {
         ),
         Expanded(
           child: Center(
+            child: InkWell(
+              onTap: _openMonthYearPicker,
+              customBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            height: 1.2,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -1.6,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.arrow_drop_down,
+                      size: 24,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        _NavButton(
+          icon: Icons.chevron_right,
+          tooltip: 'Próximo mês',
+          onPressed: _canGoToNextMonth ? _goToNextMonth : null,
+        ),
+      ],
+    );
+  }
+
+  /// Header do seletor de mês/ano: "Ano" navegável por ‹ › e botão de voltar
+  /// para a grade de dias.
+  Widget _buildMonthYearHeader() {
+    return Row(
+      children: [
+        _NavButton(
+          icon: Icons.chevron_left,
+          tooltip: 'Ano anterior',
+          onPressed: _canGoToPreviousYear ? _goToPreviousYear : null,
+        ),
+        Expanded(
+          child: Center(
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                title,
+                '${_displayedYear.year}',
                 maxLines: 1,
                 style: const TextStyle(
                   fontSize: 32,
@@ -213,10 +336,81 @@ class _AppCalendarState extends State<AppCalendar> {
         ),
         _NavButton(
           icon: Icons.chevron_right,
-          tooltip: 'Próximo mês',
-          onPressed: _canGoToNextMonth ? _goToNextMonth : null,
+          tooltip: 'Próximo ano',
+          onPressed: _canGoToNextYear ? _goToNextYear : null,
         ),
       ],
+    );
+  }
+
+  /// Grade 3x4 de meses (janeiro..dezembro) para seleção rápida.
+  Widget _buildMonthGrid() {
+    return Column(
+      children: [
+        for (var row = 0; row < 4; row++) ...[
+          Row(
+            children: [
+              for (var col = 0; col < 3; col++)
+                Expanded(child: _buildMonthCell(row * 3 + col + 1)),
+            ],
+          ),
+          if (row < 3) const SizedBox(height: 8),
+        ],
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.center,
+          child: TextButton.icon(
+            onPressed: () => setState(() => _mode = _CalendarMode.days),
+            icon: const Icon(Icons.calendar_today, size: 16),
+            label: const Text('Voltar para dias'),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthCell(int month) {
+    final year = _displayedYear.year;
+    final enabled = !DateTime(year, month).isBefore(
+      DateTime(widget.firstDate.year, widget.firstDate.month),
+    ) && !DateTime(year, month).isAfter(
+      DateTime(widget.lastDate.year, widget.lastDate.month),
+    );
+    final isCurrent =
+        month == _displayedMonth.month && year == _displayedMonth.year;
+
+    return SizedBox(
+      height: 52,
+      child: InkWell(
+        onTap: enabled ? () => _selectMonth(month) : null,
+        customBorder: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isCurrent
+                ? AppColors.primary.withValues(alpha: 0.12)
+                : null,
+          ),
+          child: Text(
+            _kMonthNames[month - 1],
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+              color: !enabled
+                  ? AppColors.textSecondary.withValues(alpha: 0.4)
+                  : isCurrent
+                      ? AppColors.primary
+                      : AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

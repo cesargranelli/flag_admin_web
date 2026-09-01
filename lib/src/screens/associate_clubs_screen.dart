@@ -18,18 +18,29 @@ import '../widgets/app_screen.dart';
 /// - fixa o campeonato alvo num card não-editável quando [lockedCompetitionId]
 ///   é informado; sem o travamento, mostra um dropdown para a escolha e, após
 ///   selecionar, passa a exibir o card fixo (alvo não muda no resto do fluxo);
-/// - para cada time disponível (filtro de clube/universidade), exibe um card
+/// - faz o mesmo com o clube/universidade alvo: card fixo quando
+///   [lockedOrganizationId] é informado, dropdown que vira card fixo após a
+///   escolha;
+/// - para cada time disponível do clube efetivo, exibe um card
 ///   expansível com a lista de elencos do time (`teamRostersProvider`) para
 ///   escolher **exatamente um** elenco antes de inscrever;
 /// - oferece "Criar novo elenco" (navega para `/teams/:id/roster` com o
 ///   `competitionId` no `extra`) — o backend cria o elenco implicitamente
 ///   (`getOrCreateRoster`) quando o primeiro atleta é adicionado.
 class AssociateClubsScreen extends ConsumerStatefulWidget {
-  const AssociateClubsScreen({super.key, this.lockedCompetitionId});
+  const AssociateClubsScreen({
+    super.key,
+    this.lockedCompetitionId,
+    this.lockedOrganizationId,
+  });
 
   /// Quando informado, o campeonato alvo é exibido como card fixo
   /// (sem dropdown para trocar).
   final String? lockedCompetitionId;
+
+  /// Quando informado, o clube/universidade alvo é exibido como card fixo
+  /// (sem dropdown para trocar).
+  final String? lockedOrganizationId;
 
   @override
   ConsumerState<AssociateClubsScreen> createState() =>
@@ -59,6 +70,10 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     if (oldWidget.lockedCompetitionId != widget.lockedCompetitionId) {
       _selectedCompetitionId = null;
       _selectedRosterByTeam.clear();
+      _expandedTeams.clear();
+    }
+    if (oldWidget.lockedOrganizationId != widget.lockedOrganizationId) {
+      _selectedOrgId = null;
       _expandedTeams.clear();
     }
   }
@@ -259,9 +274,122 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     );
   }
 
+  /// Dropdown de seleção do clube/universidade (usado somente quando a rota
+  /// não trava o alvo). Após a escolha, a tela passa a exibir o card fixo e
+  /// o restante do fluxo usa sempre esse clube.
+  ///
+  /// Largura limitada e alinhado à esquerda, como o picker de campeonato.
+  Widget _buildOrganizationPicker(List<Organization> clubs) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        width: 360,
+        child: KicksterDropdown<String>(
+          key: const ValueKey('associate-org-picker'),
+          label: 'Clube / Universidade',
+          value: null,
+          hint: 'Selecione um clube',
+          items: clubs
+              .map(
+                (c) => DropdownMenuItem(
+                  value: c.id,
+                  child: appDropdownItem(
+                    organizationTypeIcon(c.organizationType),
+                    c.tradeName,
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              _selectedOrgId = value;
+              _expandedTeams.clear();
+            });
+          },
+          helperText:
+              'Filtre os times disponíveis por clube ou universidade.',
+        ),
+      ),
+    );
+  }
+
+  /// Card fixo do clube/universidade alvo (mesmo padrão do campeonato):
+  /// o alvo não é editável aqui, apenas direciona a lista de times abaixo.
+  Widget _buildOrganizationCard(List<Organization> clubs, String orgId) {
+    final org = clubs.where((o) => o.id == orgId).firstOrNull;
+
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                organizationTypeIcon(org?.organizationType),
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Clube / Universidade',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    org?.tradeName ?? 'Clube não encontrado',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Tooltip(
+              message: 'Clube alvo desta inscrição (não editável)',
+              child: Icon(
+                Icons.lock_outline,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Lista os times disponíveis do clube selecionado, excluindo os que já
-  /// estão inscritos no campeonato. O dropdown de clube é um filtro auxiliar:
-  /// a unidade de inscrição é o TIME (com um elenco escolhido).
+  /// estão inscritos no campeonato. O clube/universidade é apresentado como
+  /// picker (dropdown) ou card fixo, igual ao campeonato: a unidade de
+  /// inscrição é o TIME (com um elenco escolhido).
   Widget _buildEnrollList(BuildContext context, String competitionId) {
     final enrolledAsync = ref.watch(teamsProvider(competitionId));
     final orgsAsync = ref.watch(organizationsProvider);
@@ -310,8 +438,9 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
           );
         }
 
-        // Clube efetivo: selecionado ?? primeiro da lista.
-        final effectiveOrgId = _selectedOrgId ?? clubs.first.id;
+        // Clube efetivo: travado pela rota ?? escolhido no dropdown.
+        // (Sem o travamento e sem escolha, o picker fica aberto.)
+        final effectiveOrgId = widget.lockedOrganizationId ?? _selectedOrgId;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,42 +448,24 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
             AppLayout.form(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: 360,
-                    child: KicksterDropdown<String>(
-                      key: ValueKey('associate-org-$effectiveOrgId'),
-                      label: 'Clube / Universidade',
-                      value: effectiveOrgId,
-                      items: clubs
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: appDropdownItem(
-                                organizationTypeIcon(c.organizationType),
-                                c.tradeName,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) =>
-                          setState(() => _selectedOrgId = value),
-                      helperText:
-                          'Filtre os times disponíveis por clube ou universidade.',
-                    ),
-                  ),
-                ),
+                child: effectiveOrgId != null
+                    ? _buildOrganizationCard(clubs, effectiveOrgId)
+                    : _buildOrganizationPicker(clubs),
               ),
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: _clubTeamsList(
-                context,
-                effectiveOrgId,
-                competitionId,
-                enrolledIds,
-              ),
+              child: effectiveOrgId != null
+                  ? _clubTeamsList(
+                      context,
+                      effectiveOrgId,
+                      competitionId,
+                      enrolledIds,
+                    )
+                  : const AppEmptyState(
+                      message: 'Selecione um clube',
+                      icon: Icons.groups_outlined,
+                    ),
             ),
           ],
         );
@@ -394,15 +505,42 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
             ),
           );
         }
-        return ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          children: [
-            for (var i = 0; i < available.length; i++) ...[
-              _teamEnrollCard(context, available[i], competitionId),
-              if (i != available.length - 1) const SizedBox(height: 8),
-            ],
-          ],
+        // Layout responsivo dos cards expansíveis: 2 por linha em telas
+        // largas (>=900), coluna única abaixo disso. O Wrap permite alturas
+        // variáveis (cards expandidos mudam de tamanho).
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 900;
+            final halfWidth = (constraints.maxWidth - 12) / 2;
+            final Widget list = isWide
+                ? Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      for (final team in available)
+                        SizedBox(
+                          width: halfWidth,
+                          child: _teamEnrollCard(context, team, competitionId),
+                        ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < available.length; i++) ...[
+                        _teamEnrollCard(context, available[i], competitionId),
+                        if (i != available.length - 1)
+                          const SizedBox(height: 8),
+                      ],
+                    ],
+                  );
+
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: list,
+            );
+          },
         );
       },
     );
