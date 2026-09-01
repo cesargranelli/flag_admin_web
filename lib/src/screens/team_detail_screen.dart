@@ -9,6 +9,9 @@ import '../utils/date_formats.dart';
 import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
+/// Escopo de mutação da desativação de elenco na tela de detalhe do time.
+const _rosterDeactivateScope = 'roster-deactivate';
+
 /// Detalhe de um time (#12): apresenta os dados da entidade e oferece a
 /// edição.
 ///
@@ -245,7 +248,9 @@ class TeamDetailScreen extends ConsumerWidget {
   // ---------------------------------------------------------------------------
 
   /// Seção "Elencos": lista os elencos do time por competição
-  /// ([teamRostersProvider]) e oferece a ação de criar um novo elenco.
+  /// ([teamRostersProvider]) no mesmo modelo da seção "Clubes" do detalhe
+  /// da organização — um único card com o botão de ação no topo e a lista
+  /// de cards de elenco (configurar/desativar).
   Widget _buildRostersSection(BuildContext context, WidgetRef ref, Team team) {
     final rostersAsync = ref.watch(teamRostersProvider(team.id));
     final competitions =
@@ -260,53 +265,101 @@ class TeamDetailScreen extends ConsumerWidget {
         KicksterSectionTitle(
           title: 'Elencos',
           icon: Icons.groups_outlined,
-          action: KicksterButton(
-            label: 'Criar elenco',
-            icon: Icons.add,
-            variant: KicksterButtonVariant.outline,
-            onPressed: () => _pickCompetitionAndCreateRoster(context, ref, team),
-          ),
         ),
         const SizedBox(height: 12),
-        rostersAsync.when(
-          loading: () => const AppLoading(message: 'Carregando elencos...'),
-          error: (error, stackTrace) => AppErrorState(
-            message: 'Não foi possível carregar os elencos',
-            onRetry: () => ref.invalidate(teamRostersProvider(team.id)),
+        Card(
+          elevation: 1,
+          shadowColor: AppColors.black.withValues(alpha: 0.08),
+          color: AppColors.surface,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.line, width: 1),
           ),
-          data: (rosters) {
-            if (rosters.isEmpty) {
-              return KicksterEmptyState(
-                icon: Icons.groups_outlined,
-                message: 'Nenhum elenco criado',
-                description:
-                    'Crie o primeiro elenco do time em uma competição.',
-                action: KicksterButton(
-                  label: 'Criar elenco',
-                  icon: Icons.add,
-                  onPressed: () =>
-                      _pickCompetitionAndCreateRoster(context, ref, team),
-                ),
-              );
-            }
-            // Cards compactos (mesmo padrão visual dos times inscritos no
-            // detalhe do campeonato): fluem em Wrap, sem expansão.
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final roster in rosters)
-                  _RosterChip(
-                    roster: roster,
-                    competitionName: competitionNameById[roster.competitionId],
-                    onTap: () => context.push(
-                      '/teams/${team.id}/roster',
-                      extra: roster.competitionId,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: KicksterButton(
+                    label: 'Configurar elenco',
+                    icon: Icons.add,
+                    variant: KicksterButtonVariant.outline,
+                    onPressed: () =>
+                        _pickCompetitionAndCreateRoster(context, ref, team),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                rostersAsync.when(
+                  loading: () => const Text(
+                    'Carregando elencos...',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
                     ),
                   ),
+                  error: (error, stackTrace) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Não foi possível carregar os elencos.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.danger,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      KicksterButton(
+                        label: 'Tentar novamente',
+                        variant: KicksterButtonVariant.text,
+                        onPressed: () =>
+                            ref.invalidate(teamRostersProvider(team.id)),
+                      ),
+                    ],
+                  ),
+                  data: (rosters) {
+                    if (rosters.isEmpty) {
+                      return const Text(
+                        'Nenhum elenco criado. Crie o primeiro elenco do '
+                        'time em uma competição.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < rosters.length; i++) ...[
+                          _RosterCard(
+                            roster: rosters[i],
+                            competitionName:
+                                competitionNameById[rosters[i].competitionId],
+                            onTap: () => context.push(
+                              '/teams/${team.id}/roster',
+                              extra: rosters[i].competitionId,
+                            ),
+                            onDeactivate: () => _deactivateRoster(
+                              context,
+                              ref,
+                              team,
+                              rosters[i],
+                            ),
+                          ),
+                          if (i != rosters.length - 1)
+                            const SizedBox(height: 8),
+                        ],
+                      ],
+                    );
+                  },
+                ),
               ],
-            );
-          },
+            ),
+          ),
         ),
       ],
     );
@@ -480,6 +533,40 @@ class TeamDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// Desativa o elenco do time na competição (status INACTIVE): exibe
+  /// confirmação antes de executar a mutação e, após o sucesso, invalida a
+  /// listagem de elencos do time.
+  Future<void> _deactivateRoster(
+    BuildContext context,
+    WidgetRef ref,
+    Team team,
+    Roster roster,
+  ) async {
+    final ok = await showKicksterConfirm(
+      context: context,
+      title: 'Desativar elenco',
+      content: 'O elenco deste time ficará inativo até ser reativado.',
+      confirmLabel: 'Desativar',
+      danger: true,
+    );
+    if (ok != true || !context.mounted) return;
+
+    await runMutation(
+      context,
+      ref: ref,
+      scope: _rosterDeactivateScope,
+      action: () => ref
+          .read(rosterApiProvider)
+          .deactivate(team.id, roster.competitionId),
+      successMessage: 'Elenco desativado.',
+      errorMessage: 'Não foi possível desativar o elenco.',
+      progressId: roster.id,
+      onSuccess: () {
+        ref.invalidate(teamRostersProvider(team.id));
+      },
+    );
+  }
+
   /// Avatar do time: logo (Image.network) quando a URL é válida, ou o ícone
   /// de grupos como fallback.
   Widget _avatar(Team team, {required double size}) {
@@ -515,16 +602,17 @@ class TeamDetailScreen extends ConsumerWidget {
   }
 }
 
-/// Chip compacto de um elenco do time numa competição (mesmo padrão visual
-/// dos times inscritos no detalhe do campeonato, um pouco mais rico):
-/// card cinza `grayFill` com raio 12, ícone pequeno de grupos, rótulo
-/// "nome · temporada" e badge "Inativo" quando o status é `INACTIVE`.
-/// O toque navega para a tela do elenco (`/teams/:id/roster`).
-class _RosterChip extends StatelessWidget {
-  const _RosterChip({
+/// Card de elenco do time numa competição (mesmo padrão visual dos clubes
+/// associados no detalhe da organização): ícone de troféu, nome da
+/// competição + temporada, badge "Inativo" quando o status é `INACTIVE` e
+/// ação de desativação. O toque navega para a tela do elenco
+/// (`/teams/:id/roster`).
+class _RosterCard extends ConsumerWidget {
+  const _RosterCard({
     required this.roster,
     required this.competitionName,
     required this.onTap,
+    required this.onDeactivate,
   });
 
   final Roster roster;
@@ -534,9 +622,10 @@ class _RosterChip extends StatelessWidget {
   final String? competitionName;
 
   final VoidCallback onTap;
+  final VoidCallback onDeactivate;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Título: nome da competição; fallback para o nome do elenco e, por
     // último, o id bruto da competição.
     final title = competitionName ?? roster.name ?? roster.competitionId;
@@ -546,49 +635,90 @@ class _RosterChip extends StatelessWidget {
         ? 'Temporada ${roster.season}'
         : (roster.name?.isNotEmpty == true ? roster.name : null);
     final isInactive = roster.status == 'INACTIVE';
+    final deactivating = ref
+        .watch(mutationProgressProvider(_rosterDeactivateScope))
+        .contains(roster.id);
 
     return Card(
-      elevation: 0,
-      color: AppColors.grayFill,
-      margin: EdgeInsets.zero,
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
       ),
+      margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.all(12),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.groups,
-                size: 14,
-                color: AppColors.textSecondary,
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_outlined,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
               ),
-              const SizedBox(width: 6),
-              Flexible(
+              const SizedBox(width: 12),
+              Expanded(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      subtitle == null ? title : '$title · $subtitle',
+                      title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                     if (isInactive) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       KicksterBadge(label: 'Inativo', color: AppColors.danger),
                     ],
                   ],
                 ),
               ),
+              if (deactivating)
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              else
+                IconButton(
+                  tooltip: 'Desativar elenco',
+                  icon: const Icon(
+                    Icons.pause_circle_outline,
+                    color: AppColors.danger,
+                    size: 20,
+                  ),
+                  onPressed: onDeactivate,
+                ),
             ],
           ),
         ),
