@@ -85,6 +85,7 @@ class _RosterAddAthleteScreenState
   Widget build(BuildContext context) {
     return AppScreen(
       title: 'Adicionar atleta',
+      backLabel: 'Elenco',
       scrollable: false,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
