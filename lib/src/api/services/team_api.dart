@@ -22,6 +22,10 @@ class TeamApi {
         Team.fromJson,
       );
 
+  /// Lista todos os times cadastrados na plataforma (endpoint público).
+  Future<List<Team>> listAll() =>
+      _client.getList('/api/v1/teams', Team.fromJson);
+
   Future<Team> getById(String id) =>
       _client.getOne('/api/v1/teams/$id', Team.fromJson);
 

@@ -143,6 +143,11 @@ final clubTeamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
       ref.watch(teamApiProvider).listByOrganization(organizationId),
 );
 
+/// Todos os times cadastrados na plataforma (home → módulo Times).
+final allTeamsProvider = FutureProvider<List<Team>>(
+  (ref) => ref.watch(teamApiProvider).listAll(),
+);
+
 /// Detalhe de um time por id.
 final teamProvider = FutureProvider.autoDispose.family<Team, String>(
   (ref, id) => ref.watch(teamApiProvider).getById(id),
