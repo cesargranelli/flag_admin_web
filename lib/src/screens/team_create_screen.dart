@@ -97,7 +97,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
       return [
         const BreadcrumbItem('Início', route: '/'),
         const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-        BreadcrumbItem(org.tradeName),
+        BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
         const BreadcrumbItem('Novo time'),
       ];
     }

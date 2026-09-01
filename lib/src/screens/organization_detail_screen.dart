@@ -35,16 +35,28 @@ class OrganizationDetailScreen extends ConsumerWidget {
     final orgFuture =
         org != null ? null : ref.watch(organizationProvider(organizationId!));
 
-    // Breadcrumb dinâmico com nome da organização
-    final orgName = org?.tradeName;
+    // Organização resolvida (extra da rota ou provider já carregado).
+    final resolvedOrg = org ?? orgFuture?.valueOrNull;
+
+    // Breadcrumb hierárquico (ADR-006): quando a organização é um
+    // clube/universidade com [parentId] (federação/liga/associação pai),
+    // exibe o pai como link clicável antes do nome da organização atual.
+    final orgs =
+        ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
+    final parentId = resolvedOrg?.parentId;
+    final parent = parentId == null
+        ? null
+        : orgs.where((o) => o.id == parentId).firstOrNull;
     final breadcrumb = [
       const BreadcrumbItem('Início', route: '/'),
       const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-      if (orgName != null) BreadcrumbItem(orgName),
+      if (parent != null)
+        BreadcrumbItem(parent.tradeName, route: '/organizations/${parent.id}'),
+      if (resolvedOrg != null) BreadcrumbItem(resolvedOrg.tradeName),
     ];
 
     return AppScreen(
-      title: org?.tradeName ?? 'Organização',
+      title: resolvedOrg?.tradeName ?? 'Organização',
       breadcrumb: breadcrumb,
       body: orgFuture == null
           ? _buildDetail(context, ref, org!)
