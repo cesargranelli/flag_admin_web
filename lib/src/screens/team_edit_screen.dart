@@ -149,6 +149,7 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
   Widget _buildScaffold({required Widget body}) {
     return AppScreen(
       title: 'Editar time',
+      backLabel: _team?.name ?? 'Time',
       body: body,
     );
   }
@@ -156,6 +157,7 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
   Widget _buildForm(BuildContext context) {
     return AppScreen(
       title: 'Editar time',
+      backLabel: _team?.name ?? 'Time',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -68,6 +68,24 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   String? get _competitionId =>
       widget.lockedCompetitionId ?? _selectedCompetitionId;
 
+  /// Rótulo da página para a qual voltamos: o clube alvo (se travado) ou o
+  /// campeonato alvo (se travado). Fallback: 'Times'.
+  String _previousLabel() {
+    final lockedOrgId = widget.lockedOrganizationId;
+    if (lockedOrgId != null) {
+      final orgs = ref.watch(organizationsProvider).valueOrNull ?? const [];
+      final org = orgs.where((o) => o.id == lockedOrgId).firstOrNull;
+      if (org != null) return org.tradeName;
+    }
+    final lockedCompId = widget.lockedCompetitionId;
+    if (lockedCompId != null) {
+      final comps = ref.watch(competitionsProvider).valueOrNull ?? const [];
+      final comp = comps.where((c) => c.id == lockedCompId).firstOrNull;
+      if (comp != null) return comp.name;
+    }
+    return 'Times';
+  }
+
   @override
   Widget build(BuildContext context) {
     final competitions = ref.watch(competitionsProvider);
@@ -78,6 +96,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
 
     return AppScreen(
       title: 'Inscrever time',
+      backLabel: _previousLabel(),
       scrollable: false,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

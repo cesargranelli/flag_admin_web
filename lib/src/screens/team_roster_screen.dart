@@ -99,6 +99,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
 
     return AppScreen(
       title: title,
+      backLabel: teamName ?? 'Time',
       scrollable: false,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

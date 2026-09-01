@@ -8,56 +8,99 @@ import '../providers/providers.dart';
 /// Scaffold padrão das telas autenticadas do Admin Web.
 ///
 /// - **Header pessoal**: avatar + nome + greeting + home icon (sticky)
-/// - **Botão voltar + título** (sticky, abaixo do header pessoal, apenas
-///   quando há tela anterior na pilha — `canPop`)
+/// - **Barra superior** (sticky, abaixo do header pessoal, apenas quando há
+///   tela anterior na pilha — `canPop`): link "Voltar para {label}" à
+///   esquerda (ícone + rótulo num único [InkWell]) e o **título da página
+///   centralizado** no meio da barra.
 /// - **Page Body** (scrollável, padding 24px): conteúdo da tela
 class AppScreen extends StatelessWidget {
   const AppScreen({
     super.key,
     required this.title,
     required this.body,
+    this.backLabel,
     this.showUserHeader = true,
     this.scrollable = true,
   });
 
   final String title;
   final Widget body;
+
+  /// Rótulo da página para a qual vamos voltar (a tela anterior na pilha).
+  ///
+  /// Telas que conhecem o nome real da página anterior o informam aqui.
+  /// Quando `null`, [AppScreen] resolve o rótulo a partir do nome da rota
+  /// anterior (fallback por módulo) ou usa 'Voltar'.
+  final String? backLabel;
+
   final bool showUserHeader;
   final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
     final canPop = GoRouter.of(context).canPop();
+    final backLabel = _resolveBackLabel(context, this.backLabel);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Header pessoal (sticky)
         if (showUserHeader) const _UserHeader(),
-        // Botão voltar + título (sticky — fixos acima do conteúdo scrollável)
+        // Barra superior (sticky — fixa acima do conteúdo scrollável):
+        // link "Voltar para {label}" + título centralizado.
         if (canPop)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             child: Row(
               children: [
-                IconButton(
-                  onPressed: () => context.pop(),
-                  tooltip: 'Voltar',
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    size: 22,
-                    color: AppColors.textPrimary,
+                Semantics(
+                  button: true,
+                  label: 'Voltar para $backLabel',
+                  child: InkWell(
+                    onTap: () => context.pop(),
+                    borderRadius: BorderRadius.circular(8),
+                    hoverColor: AppColors.primary.withValues(alpha: 0.08),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.arrow_back,
+                            size: 20,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Voltar para $backLabel',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                // Título centralizado na barra.
                 Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  child: Center(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
                 ),
+                // Balanceia o link esquerdo (~48px) para o título ficar
+                // visualmente centralizado.
+                const SizedBox(width: 48),
               ],
             ),
           ),
@@ -81,6 +124,52 @@ class AppScreen extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  /// Resolve o rótulo da página anterior da barra superior.
+  ///
+  /// Prioridade:
+  /// 1. [backLabel] informado pela tela (nome real conhecido).
+  /// 2. Nome da rota anterior na pilha (fallback por módulo).
+  /// 3. 'Voltar' (fallback genérico).
+  static String _resolveBackLabel(BuildContext context, String? backLabel) {
+    if (backLabel != null && backLabel.trim().isNotEmpty) return backLabel;
+
+    final matches = GoRouter.of(context)
+        .routerDelegate
+        .currentConfiguration
+        .matches;
+    final prev = matches.length >= 2 ? matches[matches.length - 2] : null;
+    return _previousRouteLabel(prev);
+  }
+
+  /// Mapeia o nome da rota anterior para um rótulo de módulo (fallback).
+  static String _previousRouteLabel(RouteMatchBase? prev) {
+    final name =
+        prev?.route is GoRoute ? (prev!.route as GoRoute).name : null;
+    if (name == null) return 'Voltar';
+    return switch (name) {
+      'teams' => 'Times',
+      'teamDetail' => 'Time',
+      'organizations' => 'Organizações',
+      'organizationDetail' => 'Organização',
+      'competitions' => 'Campeonatos',
+      'competitionDetail' => 'Campeonato',
+      'athletes' => 'Atletas',
+      'athleteDetail' => 'Atleta',
+      'venues' => 'Campos',
+      'venueDetail' => 'Campo',
+      'rounds' => 'Rodadas',
+      'roundDetail' => 'Rodada',
+      'games' => 'Jogos',
+      'gameDetail' => 'Jogo',
+      'rosters' => 'Elencos',
+      'teamRoster' => 'Elenco',
+      'users' => 'Usuários',
+      'approvals' => 'Aprovações',
+      'home' => 'Início',
+      _ => 'Voltar',
+    };
   }
 }
 
