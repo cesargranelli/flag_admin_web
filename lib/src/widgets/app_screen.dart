@@ -40,6 +40,9 @@ class AppScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final canPop = GoRouter.of(context).canPop();
     final backLabel = _resolveBackLabel(context, this.backLabel);
+    // Sem rótulo conhecido: o botão mostra apenas "Voltar" (evita o feio
+    // "Voltar para Voltar").
+    final backText = backLabel == null ? 'Voltar' : 'Voltar para $backLabel';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,7 +58,7 @@ class AppScreen extends StatelessWidget {
               children: [
                 Semantics(
                   button: true,
-                  label: 'Voltar para $backLabel',
+                  label: backText,
                   child: InkWell(
                     onTap: () => context.pop(),
                     borderRadius: BorderRadius.circular(8),
@@ -75,7 +78,7 @@ class AppScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'Voltar para $backLabel',
+                            backText,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -131,8 +134,8 @@ class AppScreen extends StatelessWidget {
   /// Prioridade:
   /// 1. [backLabel] informado pela tela (nome real conhecido).
   /// 2. Nome da rota anterior na pilha (fallback por módulo).
-  /// 3. 'Voltar' (fallback genérico).
-  static String _resolveBackLabel(BuildContext context, String? backLabel) {
+  /// 3. `null` — sem rótulo conhecido (o botão mostra apenas "Voltar").
+  static String? _resolveBackLabel(BuildContext context, String? backLabel) {
     if (backLabel != null && backLabel.trim().isNotEmpty) return backLabel;
 
     final matches = GoRouter.of(context)
@@ -144,10 +147,11 @@ class AppScreen extends StatelessWidget {
   }
 
   /// Mapeia o nome da rota anterior para um rótulo de módulo (fallback).
-  static String _previousRouteLabel(RouteMatchBase? prev) {
+  /// Retorna `null` quando não há rótulo conhecido (ex.: rota desconhecida).
+  static String? _previousRouteLabel(RouteMatchBase? prev) {
     final name =
         prev?.route is GoRoute ? (prev!.route as GoRoute).name : null;
-    if (name == null) return 'Voltar';
+    if (name == null) return null;
     return switch (name) {
       'teams' => 'Times',
       'teamDetail' => 'Time',
@@ -168,7 +172,7 @@ class AppScreen extends StatelessWidget {
       'users' => 'Usuários',
       'approvals' => 'Aprovações',
       'home' => 'Início',
-      _ => 'Voltar',
+      _ => null,
     };
   }
 }
