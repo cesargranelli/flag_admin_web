@@ -355,90 +355,41 @@ class OrganizationDetailScreen extends ConsumerWidget {
     final disassociating =
         ref.watch(mutationProgressProvider(_disassociateScope)).contains(club.id);
 
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
+    return KicksterCard(
+      icon: organizationTypeIcon(club.organizationType),
+      title: club.tradeName,
+      subtitle: (club.city?.isNotEmpty ?? false) ? club.city : null,
+      onTap: () => context.push(
+        '/organizations/${club.id}',
+        extra: club,
       ),
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () => context.push(
-          '/organizations/${club.id}',
-          extra: club,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  organizationTypeIcon(club.organizationType),
-                  color: AppColors.primary,
-                  size: 24,
-                ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (disassociating)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      club.tradeName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (club.city?.isNotEmpty ?? false)
-                      Text(
-                        club.city!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                  ],
-                ),
+            )
+          else
+            IconButton(
+              tooltip: 'Desassociar',
+              icon: const Icon(
+                Icons.link_off,
+                color: AppColors.danger,
+                size: 20,
               ),
-              if (disassociating)
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              else
-                IconButton(
-                  tooltip: 'Desassociar',
-                  icon: const Icon(
-                    Icons.link_off,
-                    color: AppColors.danger,
-                    size: 20,
-                  ),
-                  onPressed: () => _disassociateClub(context, ref, club, orgId),
-                ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-              ),
-            ],
+              onPressed: () => _disassociateClub(context, ref, club, orgId),
+            ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.textSecondary,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -536,69 +487,15 @@ class OrganizationDetailScreen extends ConsumerWidget {
 
   /// Card de time no padrão Kickster (#12): ícone de grupo, nome e sigla.
   Widget _teamCard(BuildContext context, Team team) {
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
+    return KicksterCard(
+      icon: Icons.groups_outlined,
+      title: team.name,
+      subtitle: (team.shortName?.isNotEmpty ?? false) ? team.shortName : null,
+      trailing: const Icon(
+        Icons.chevron_right,
+        color: AppColors.textSecondary,
       ),
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () => context.push('/teams/${team.id}', extra: team),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.groups_outlined,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      team.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (team.shortName?.isNotEmpty ?? false)
-                      Text(
-                        team.shortName!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
-      ),
+      onTap: () => context.push('/teams/${team.id}', extra: team),
     );
   }
 }

@@ -40,7 +40,7 @@ class AppEntityListScreen<T> extends StatefulWidget {
     this.toolbarLeading,
     this.toolbarTrailing,
     this.searchWidth = 280,
-    this.gridPadding = EdgeInsets.zero,
+    this.gridPadding = const EdgeInsets.all(16),
   });
 
   /// Lista já resolvida (data do provider).
@@ -86,7 +86,8 @@ class AppEntityListScreen<T> extends StatefulWidget {
   /// Largura do campo de busca.
   final double searchWidth;
 
-  /// Padding interno do grid.
+  /// Padding interno do grid (padrão `all(16)` — telas não precisam mais
+  /// sobrescrever para consistência).
   final EdgeInsetsGeometry gridPadding;
 
   @override
