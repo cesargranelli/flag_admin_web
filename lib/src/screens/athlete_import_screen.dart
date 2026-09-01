@@ -36,7 +36,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     // Mostra o formato num dialog para o usuário copiar.
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => kicksterModalDialog(
         title: const Text('Modelo CSV'),
         content: const Text(
           'Use o formato abaixo (ponto-e-vírgula, UTF-8):\n\n'

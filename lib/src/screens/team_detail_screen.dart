@@ -349,11 +349,7 @@ class TeamDetailScreen extends ConsumerWidget {
     if (competitions.isEmpty) {
       await showDialog<void>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        builder: (dialogContext) => kicksterModalDialog(
           title: const Text('Criar elenco'),
           content: const Text(
             'Nenhum campeonato disponível. Crie um campeonato antes de '
@@ -384,11 +380,7 @@ class TeamDetailScreen extends ConsumerWidget {
     final competitionId = await showDialog<String>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (innerContext, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        builder: (innerContext, setDialogState) => kicksterModalDialog(
           title: const Text('Criar elenco'),
           content: SizedBox(
             width: 360,

@@ -21,6 +21,7 @@ export 'widgets/kickster_chip.dart';
 export 'widgets/kickster_button.dart';
 export 'widgets/kickster_input.dart';
 export 'widgets/kickster_menu_anchor.dart';
+export 'widgets/kickster_modal.dart';
 export 'widgets/kickster_dropdown.dart';
 export 'widgets/kickster_field.dart';
 export 'widgets/kickster_dialog.dart';

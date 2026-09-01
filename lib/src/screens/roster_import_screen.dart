@@ -42,7 +42,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   void _showTemplate() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => kicksterModalDialog(
         title: const Text('Modelo CSV'),
         content: const Text(
           'Use o formato abaixo (ponto-e-vírgula, UTF-8):\n\n'

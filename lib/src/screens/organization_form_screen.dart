@@ -880,7 +880,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final preview = _parseHex('#${_hex.text}') ?? Colors.transparent;
-    return AlertDialog(
+    return kicksterModalDialog(
       title: const Text('Escolher cor'),
       content: SizedBox(
         width: 320,
