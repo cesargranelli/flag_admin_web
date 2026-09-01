@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxo de telas — Flag Admin Web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5; --primary-soft: #EEF2FF; --text: #111111;
+      --text-secondary: #66707A; --line: #E3E7EC; --surface: #FFFFFF;
+      --gray-fill: #ECF1F6; --danger: #DC2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); background: #F8FAFC; line-height: 1.6; }
+    .nav { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; padding: 0 24px; overflow-x: auto; }
+    .nav a { padding: 14px 14px; font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .nav a:hover { color: var(--primary); }
+    .nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .container { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    h2 { font-size: 22px; font-weight: 700; margin: 40px 0 8px; letter-spacing: -0.3px; }
+    p { color: var(--text-secondary); font-size: 15px; margin-bottom: 8px; }
+    code { background: var(--gray-fill); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 13px; }
+    .legend { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: var(--text-secondary); margin: 12px 0 20px; }
+    .legend b { color: var(--text); }
+    .mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin: 16px 0; overflow-x: auto; }
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--text-secondary); font-size: 13px; text-align: center; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+    });
+  </script>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">Visão geral</a>
+    <a href="fluxo-de-telas.html" class="active">Fluxo de telas</a>
+    <a href="telas.html">Catálogo de telas</a>
+    <a href="navegacao.html">Navegação</a>
+  </nav>
+  <div class="container">
+    <h1>Fluxo de telas</h1>
+    <p>
+      Diagramas da navegação entre telas, com os nomes das classes Flutter.
+      As setas indicam a direção da navegação (a ação que dispara o movimento).
+    </p>
+
+    <div class="legend">
+      <b>Legenda:</b> cada nó é uma tela (classe Flutter). As setas mostram a navegação
+      (<code>→ push</code>: empilha e permite voltar; <code>⇒ go</code>: substitui a rota atual).
+    </div>
+
+    <h2>Visão geral (home → módulos)</h2>
+    <div class="mermaid">
+flowchart TD
+  AdminHomeScreen["AdminHomeScreen (/)"] -->|"card Organizações"| OrganizationsScreen["OrganizationsScreen (/organizations)"]
+  AdminHomeScreen -->|"card Campeonatos"| CompetitionsScreen["CompetitionsScreen (/competitions)"]
+  AdminHomeScreen -->|"card Campos"| VenuesScreen["VenuesScreen (/venues)"]
+  AdminHomeScreen -->|"card Atletas"| AthletesScreen["AthletesScreen (/athletes)"]
+  AdminHomeScreen -->|"card Times"| TeamsScreen["TeamsScreen (/teams)"]
+  AdminHomeScreen -->|"card Elencos"| RostersScreen["RostersScreen (/rosters)"]
+  AdminHomeScreen -->|"card Aprovações (ADMIN)"| ApprovalsScreen["ApprovalsScreen (/approvals)"]
+  AdminHomeScreen -->|"card Usuários (ADMIN)"| UsersScreen["UsersScreen (/users)"]
+  LoginScreen["LoginScreen (/login)"] -->|"autenticar → redirect"| AdminHomeScreen
+  style AdminHomeScreen fill:#EEF2FF,stroke:#4F46E5
+    </div>
+
+    <h2>Autenticação</h2>
+    <div class="mermaid">
+flowchart LR
+  LoginScreen["LoginScreen"] -->|"Esqueci a senha"| ForgotPassword["ForgotPasswordScreen"]
+  LoginScreen -->|"Criar conta"| Signup["SignupScreen"]
+  Signup -->|"Voltar ao login"| LoginScreen
+  ForgotPassword -->|"Voltar ao login"| LoginScreen
+  ResetPassword["ResetPasswordScreen (?token=)"] -->|"redefinir"| LoginScreen
+  AdminHomeScreen -->|"logout"| LoginScreen
+    </div>
+
+    <h2>Organizações</h2>
+    <div class="mermaid">
+flowchart TD
+  OrganizationsScreen -->|"Novo (push)"| OrganizationForm["OrganizationFormScreen (/organizations/new)"]
+  OrganizationsScreen -->|"tap card (push)"| OrganizationDetail["OrganizationDetailScreen (/organizations/:id)"]
+  OrganizationForm -->|"após salvar (go)"| OrganizationDetail
+  OrganizationDetail -->|"tap clube associado (push)"| OrganizationDetail
+  OrganizationDetail -->|"Novo time (push)"| TeamCreate["TeamCreateScreen (/teams/new)"]
+  OrganizationDetail -->|"tap time (push)"| TeamDetail["TeamDetailScreen (/teams/:id)"]
+  OrganizationDetail -.->|"Associar clube (modal)"| AssociateClubModal["AssociateClubModal"]
+    </div>
+
+    <h2>Campeonatos</h2>
+    <div class="mermaid">
+flowchart TD
+  CompetitionsScreen -->|"Novo (push)"| CompetitionCreate["CompetitionCreateScreen (/competitions/new)"]
+  CompetitionsScreen -->|"tap card (push)"| CompetitionDetail["CompetitionDetailScreen (/competitions/:id)"]
+  CompetitionCreate -->|"Concluir (go)"| CompetitionDetail
+  CompetitionDetail -->|"Editar (go)"| CompetitionEdit["CompetitionEditScreen (/competitions/:id/edit)"]
+  CompetitionEdit -->|"Salvar/Publicar (go)"| CompetitionDetail
+  CompetitionDetail -->|"Rodadas (go)"| Rounds["RoundsScreen (/rounds)"]
+  CompetitionDetail -->|"Inscrever times (push)"| Associate["AssociateClubsScreen (/teams/associate)"]
+  CompetitionDetail -->|"Conferências/Divisões (go)"| Groupings["GroupingsScreen (/groupings)"]
+  Groupings -.->|"modais conferência/divisão"| Modals["ConferenceFormModal / DivisionFormModal"]
+    </div>
+
+    <h2>Rodadas</h2>
+    <div class="mermaid">
+flowchart TD
+  Rounds["RoundsScreen (/rounds)"] -->|"Novo (push)"| RoundForm["RoundFormScreen (/rounds/new)"]
+  Rounds -->|"tap card (push)"| RoundDetail["RoundDetailScreen (/rounds/:id)"]
+  RoundDetail -->|"Editar (go)"| RoundForm
+  RoundDetail -->|"Confrontos (go)"| Games["GamesScreen (/games)"]
+  RoundForm -->|"criar (pop) / editar (go)"| Rounds
+    </div>
+
+    <h2>Jogos</h2>
+    <div class="mermaid">
+flowchart TD
+  Games["GamesScreen (/games)"] -->|"Novo (go)"| GameForm["GameFormScreen (/games/new)"]
+  Games -->|"Importar (push)"| GameImport["GameImportScreen (/games/import)"]
+  Games -->|"tap card (push)"| GameDetail["GameDetailScreen (/games/:id)"]
+  GameDetail -->|"Editar (go)"| GameForm
+  GameForm -->|"criar (pop) / editar (go)"| Games
+  GameImport -->|"Concluir (go)"| Games
+    </div>
+
+    <h2>Campos</h2>
+    <div class="mermaid">
+flowchart TD
+  Venues["VenuesScreen (/venues)"] -->|"Novo (push)"| VenueForm["VenueFormScreen (/venues/new)"]
+  Venues -->|"tap card (push)"| VenueDetail["VenueDetailScreen (/venues/:id)"]
+  VenueDetail -->|"Editar (go)"| VenueForm
+  VenueForm -->|"criar (pop) / editar (go)"| Venues
+    </div>
+
+    <h2>Times</h2>
+    <div class="mermaid">
+flowchart TD
+  Teams["TeamsScreen (/teams)"] -->|"tap card (push)"| TeamDetail["TeamDetailScreen (/teams/:id)"]
+  TeamDetail -->|"Editar (push)"| TeamEdit["TeamEditScreen (/teams/:id/edit)"]
+  TeamEdit -->|"Salvar (go)"| TeamDetail
+  TeamDetail -->|"Configurar elenco / tap elenco (push)"| TeamRoster["TeamRosterScreen (/teams/:id/roster)"]
+  TeamRoster -->|"Adicionar atleta (push)"| RosterAdd["RosterAddAthleteScreen (/teams/:id/roster/add)"]
+  TeamRoster -->|"Importar CSV (push)"| RosterImport["RosterImportScreen (/rosters/import)"]
+  TeamDetail -->|"volta ao clube (go)"| OrgDetail["OrganizationDetailScreen"]
+    </div>
+
+    <h2>Inscrição de times</h2>
+    <div class="mermaid">
+flowchart TD
+  Associate["AssociateClubsScreen (/teams/associate)"] -->|"Inscrever (API enroll)"| Teams["TeamsScreen"]
+  CompetitionDetail["CompetitionDetailScreen"] -->|"Inscrever times (push)"| Associate
+  RostersScreen["RostersScreen (/rosters)"] -->|"Inscrever time (push)"| Associate
+  Associate -->|"sem campeonato (push)"| CompetitionCreate["CompetitionCreateScreen"]
+  Associate -->|"sem clube (push)"| OrgForm["OrganizationFormScreen"]
+    </div>
+
+    <h2>Atletas</h2>
+    <div class="mermaid">
+flowchart TD
+  Athletes["AthletesScreen (/athletes)"] -->|"Novo (push)"| AthleteForm["AthleteFormScreen (/athletes/new)"]
+  Athletes -->|"Importar (push)"| AthleteImport["AthleteImportScreen (/athletes/import)"]
+  Athletes -->|"tap card (push)"| AthleteDetail["AthleteDetailScreen (/athletes/:id)"]
+  AthleteDetail -->|"Editar (go)"| AthleteForm
+  AthleteForm -->|"criar (pop) / editar (go)"| Athletes
+  AthleteImport -->|"Concluir (go)"| Athletes
+    </div>
+
+    <h2>Elencos</h2>
+    <div class="mermaid">
+flowchart TD
+  RostersScreen["RostersScreen (/rosters)"] -->|"Inscrever time (push)"| Associate["AssociateClubsScreen"]
+  RostersScreen -->|"Adicionar atleta (push)"| RosterAdd["RosterAddAthleteScreen (/teams/:id/roster/add)"]
+  RostersScreen -->|"Importar (push)"| RosterImport["RosterImportScreen (/rosters/import)"]
+  RosterAssociate["RosterAssociateClubScreen (/rosters/associate — placeholder)"] -->|"Voltar (go)"| RostersScreen
+  RosterImport -->|"Concluir (go)"| RostersScreen
+    </div>
+
+    <h2>Usuários</h2>
+    <div class="mermaid">
+flowchart TD
+  Users["UsersScreen (/users)"] -->|"Novo (go)"| UserForm["UserFormScreen (/users/new)"]
+  UserForm -->|"criar (pop)"| Users
+  Approvals["ApprovalsScreen (/approvals)"] -.->|"Aprovar/Rejeitar (mutação local)"| Approvals
+    </div>
+  </div>
+  <div class="footer">Flag Admin Web — documentação gerada a partir do código-fonte.</div>
+</body>
+</html>

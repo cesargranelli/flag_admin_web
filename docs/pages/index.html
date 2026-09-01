@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flag Admin Web — Documentação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-soft: #EEF2FF;
+      --text: #111111;
+      --text-secondary: #66707A;
+      --line: #E3E7EC;
+      --surface: #FFFFFF;
+      --gray-fill: #ECF1F6;
+      --danger: #DC2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: #F8FAFC;
+      line-height: 1.6;
+    }
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex; gap: 4px; padding: 0 24px; overflow-x: auto;
+    }
+    .nav a {
+      padding: 14px 14px; font-size: 14px; font-weight: 500;
+      color: var(--text-secondary); text-decoration: none;
+      border-bottom: 2px solid transparent; white-space: nowrap;
+    }
+    .nav a:hover { color: var(--primary); }
+    .nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .container { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    h2 { font-size: 22px; font-weight: 700; margin: 40px 0 12px; letter-spacing: -0.3px; }
+    h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+    p { color: var(--text-secondary); font-size: 15px; margin-bottom: 12px; }
+    .lead { font-size: 16px; color: var(--text-secondary); max-width: 720px; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      background: var(--primary-soft); color: var(--primary);
+      font-size: 12px; font-weight: 600; margin-right: 6px;
+    }
+    .badge.gray { background: var(--gray-fill); color: var(--text-secondary); }
+    .card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    code {
+      background: var(--gray-fill); padding: 2px 6px; border-radius: 6px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px;
+    }
+    pre {
+      background: #0F172A; color: #E2E8F0; padding: 16px; border-radius: 12px;
+      overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0;
+    }
+    pre code { background: transparent; padding: 0; color: inherit; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; font-size: 14px; }
+    th { text-align: left; padding: 12px 14px; background: var(--gray-fill); font-weight: 600; font-size: 13px; }
+    td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+    tr:hover td { background: #F8FAFC; }
+    .mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--text-secondary); font-size: 13px; text-align: center; }
+    .note { background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 16px; font-size: 14px; margin: 16px 0; }
+    .btn {
+      display: inline-block; padding: 10px 18px; border-radius: 24px;
+      background: var(--primary); color: #fff; font-weight: 600; font-size: 14px;
+      text-decoration: none; margin-top: 8px;
+    }
+    .btn:hover { opacity: 0.9; }
+    ul { margin: 8px 0 16px 22px; color: var(--text-secondary); font-size: 15px; }
+    li { margin-bottom: 6px; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="active">Visão geral</a>
+    <a href="fluxo-de-telas.html">Fluxo de telas</a>
+    <a href="telas.html">Catálogo de telas</a>
+    <a href="navegacao.html">Navegação</a>
+  </nav>
+  <div class="container">
+    <h1>Flag Admin Web</h1>
+    <p class="lead">
+      Aplicação web de gestão da <strong>Flag Platform</strong> — cadastro de organizações,
+      campeonatos, times, elencos, atletas, rodadas, jogos e campos. Flutter Web com
+      Riverpod (estado) e GoRouter (navegação).
+    </p>
+
+    <h2>Stack</h2>
+    <div class="card">
+      <span class="badge">Flutter Web</span>
+      <span class="badge">Dart</span>
+      <span class="badge">Riverpod</span>
+      <span class="badge">GoRouter</span>
+      <span class="badge gray">StatefulShellRoute</span>
+      <span class="badge gray">GitHub Pages</span>
+    </div>
+
+    <h2>Módulos</h2>
+    <div class="grid3">
+      <div class="card"><strong>Início</strong><br><span class="mono">AdminHomeScreen</span><p>Grid de cards para navegar aos módulos.</p></div>
+      <div class="card"><strong>Organizações</strong><br><span class="mono">OrganizationsScreen</span><p>Clubes, universidades, federações e ligas.</p></div>
+      <div class="card"><strong>Campeonatos</strong><br><span class="mono">CompetitionsScreen</span><p>Competições, conferências, divisões, rodadas e jogos.</p></div>
+      <div class="card"><strong>Campos</strong><br><span class="mono">VenuesScreen</span><p>Campos de jogo.</p></div>
+      <div class="card"><strong>Times</strong><br><span class="mono">TeamsScreen</span><p>Times e inscrição em campeonatos.</p></div>
+      <div class="card"><strong>Atletas</strong><br><span class="mono">AthletesScreen</span><p>Atletas da plataforma.</p></div>
+      <div class="card"><strong>Elencos</strong><br><span class="mono">RostersScreen</span><p>Elencos por campeonato.</p></div>
+      <div class="card"><strong>Aprovações</strong><br><span class="mono">ApprovalsScreen</span><p>Contas pendentes (ADMIN).</p></div>
+      <div class="card"><strong>Usuários</strong><br><span class="mono">UsersScreen</span><p>Gestão de usuários (ADMIN).</p></div>
+    </div>
+
+    <h2>Estrutura de pastas</h2>
+    <pre><code>lib/src/
+├── api/          # Cliente HTTP (ApiClient) + services por recurso
+├── core/         # Tema, tokens, widgets compartilhados (Kickster)
+├── domain/       # Modelos e enums de domínio
+├── providers/    # Providers Riverpod (API, listas, seleções)
+├── router/       # GoRouter (app_router.dart) + AdminShell
+├── screens/      # Telas (uma classe por tela)
+├── widgets/      # Widgets reutilizáveis (modais, cards, formulários)
+└── utils/        # Helpers (datas, máscaras, mutações)</code></pre>
+
+    <h2>Navegação em resumo</h2>
+    <p>
+      O app usa um <code>StatefulShellRoute.indexedStack</code> com uma branch por módulo
+      (preserva estado por branch). A navegação entre módulos é feita pelos cards da home
+      com <code>context.go</code>. Telas de detalhe/formulário usam <code>push</code> /
+      <code>pop</code> para manter o histórico. Todas as telas (exceto a home) exibem um
+      botão voltar no topo.
+    </p>
+    <a class="btn" href="fluxo-de-telas.html">Ver fluxo de telas →</a>
+  </div>
+  <div class="footer">
+    Flag Admin Web — documentação gerada a partir do código-fonte (router + screens).<br>
+    Repositório: <code>cesargranelli/flag_admin_web</code>
+  </div>
+</body>
+</html>
