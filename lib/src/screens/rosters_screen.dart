@@ -22,6 +22,7 @@ class RostersScreen extends ConsumerStatefulWidget {
 
 class _RostersScreenState extends ConsumerState<RostersScreen> {
   static const _disenrollScope = 'roster-disenroll';
+  static const _rosterToggleScope = 'roster-toggle';
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -259,6 +260,9 @@ class _TeamRosterCard extends ConsumerWidget {
     final disassociating = ref
         .watch(mutationProgressProvider(_RostersScreenState._disenrollScope))
         .contains(team.id);
+    final togglingRoster = ref
+        .watch(mutationProgressProvider(_RostersScreenState._rosterToggleScope))
+        .contains(team.id);
 
     // Dados completos do time (shortName) — o mapping de `teamsProvider` só
     // carrega name/logo; o detalhe resolve o restante quando disponível.
@@ -323,6 +327,13 @@ class _TeamRosterCard extends ConsumerWidget {
                             ),
                           ),
                         ],
+                        if (team.status == 'INACTIVE') ...[
+                          const SizedBox(height: 2),
+                          KicksterBadge(
+                            label: 'Inativo',
+                            color: AppColors.danger,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -331,6 +342,25 @@ class _TeamRosterCard extends ConsumerWidget {
                     expanded ? Icons.expand_less : Icons.expand_more,
                     color: AppColors.textSecondary,
                   ),
+                  const SizedBox(width: 4),
+                  if (togglingRoster)
+                    const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  else
+                    IconButton(
+                      tooltip: 'Desativar elenco',
+                      icon: const Icon(
+                        Icons.visibility_off_outlined,
+                        color: AppColors.textSecondary,
+                      ),
+                      onPressed: () => _deactivateRoster(context, ref),
+                    ),
                   const SizedBox(width: 4),
                   if (disassociating)
                     const Padding(
@@ -385,6 +415,36 @@ class _TeamRosterCard extends ConsumerWidget {
       errorMessage: 'Não foi possível remover a inscrição do time.',
       progressId: team.id,
       onSuccess: () => ref.invalidate(teamsProvider(competitionId)),
+    );
+  }
+
+  /// Desativa o elenco do time na competição (status INACTIVE).
+  ///
+  /// Decisão pragmática: a tela de elencos não expõe o status do roster
+  /// (o provider carrega apenas as entradas), então o botão executa a
+  /// desativação sem espelhar estado — a reativação fica por conta do
+  /// backend/futura tela dedicada.
+  Future<void> _deactivateRoster(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    await runMutation(
+      context,
+      ref: ref,
+      scope: _RostersScreenState._rosterToggleScope,
+      action: () =>
+          ref.read(rosterApiProvider).deactivate(team.id, competitionId),
+      successMessage: 'Elenco de ${team.name} desativado.',
+      errorMessage: 'Não foi possível desativar o elenco.',
+      progressId: team.id,
+      onSuccess: () {
+        ref.invalidate(
+          teamRosterProvider(
+            (teamId: team.id, competitionId: competitionId),
+          ),
+        );
+        ref.invalidate(teamsProvider(competitionId));
+      },
     );
   }
 }

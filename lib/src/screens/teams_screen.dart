@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
+import '../utils/mutation.dart';
 import '../widgets/app_entity_list_screen.dart';
 import '../widgets/app_screen.dart';
 
@@ -22,6 +23,7 @@ class TeamsScreen extends ConsumerStatefulWidget {
 }
 
 class _TeamsScreenState extends ConsumerState<TeamsScreen> {
+  static const _scope = 'teams';
   final _searchController = TextEditingController();
 
   @override
@@ -32,6 +34,9 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin =
+        ref.watch(authControllerProvider.select((a) => a.state.user?.role)) ==
+        UserRole.admin;
     final teamsAsync = ref.watch(allTeamsProvider);
     // Nome do clube por id (via organizações) para enriquecer o subtítulo.
     final orgs = ref.watch(organizationsProvider).valueOrNull ?? const [];
@@ -66,7 +71,8 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                 }
                 return AppEntityListScreen<Team>(
                   items: items,
-                  cardBuilder: (team) => _teamCard(context, team, orgNames),
+                  cardBuilder: (team) =>
+                      _teamCard(context, team, orgNames, isAdmin),
                   searchField: _searchController,
                   countLabel: 'times',
                   countLabelSingular: 'time',
@@ -94,17 +100,20 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
 
   /// Card de time no padrão Kickster: logo/avatar, nome (16 w600), subtítulo
   /// com sigla · esporte + clube quando resolvido, e chevron. Tocar navega
-  /// para o detalhe do time.
+  /// para o detalhe do time. Para ADMIN, mostra badge de inativo e menu de
+  /// desativar/reativar (status lifecycle).
   Widget _teamCard(
     BuildContext context,
     Team team,
     Map<String, String> orgNames,
+    bool isAdmin,
   ) {
     final subtitleParts = [
       if (team.shortName?.isNotEmpty ?? false) team.shortName!,
       if (team.sportName?.isNotEmpty ?? false) team.sportName!,
     ].join(' · ');
     final orgName = orgNames[team.organizationId];
+    final isInactive = team.status == 'INACTIVE';
 
     return Card(
       elevation: 1,
@@ -167,6 +176,39 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                 ),
               ),
               const SizedBox(width: 8),
+              if (isInactive)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: KicksterBadge(
+                    label: 'Inativo',
+                    color: AppColors.danger,
+                  ),
+                ),
+              if (isAdmin)
+                PopupMenuButton<String>(
+                  tooltip: 'Ações',
+                  onSelected: (value) async {
+                    if (value == 'deactivate') {
+                      final ok = await _confirmDeactivate(context, team);
+                      if (ok == true) await _deactivate(team);
+                    } else if (value == 'reactivate') {
+                      await _reactivate(team);
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    if (!isInactive)
+                      const PopupMenuItem(
+                        value: 'deactivate',
+                        child: Text('Desativar'),
+                      ),
+                    if (isInactive)
+                      const PopupMenuItem(
+                        value: 'reactivate',
+                        child: Text('Reativar'),
+                      ),
+                  ],
+                ),
+              const SizedBox(width: 4),
               const Icon(
                 Icons.chevron_right,
                 size: 22,
@@ -176,6 +218,50 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<bool?> _confirmDeactivate(BuildContext context, Team team) {
+    return showKicksterConfirm(
+      context: context,
+      title: 'Desativar time',
+      content: '"${team.name}" ficará inativo até ser reativado.',
+      confirmLabel: 'Desativar',
+      danger: true,
+    );
+  }
+
+  Future<void> _deactivate(Team team) => _toggleActive(
+        team,
+        activate: false,
+        successMessage: '${team.name} desativado.',
+        errorMessage: 'Não foi possível desativar o time.',
+      );
+
+  Future<void> _reactivate(Team team) => _toggleActive(
+        team,
+        activate: true,
+        successMessage: '${team.name} reativado.',
+        errorMessage: 'Não foi possível reativar o time.',
+      );
+
+  Future<void> _toggleActive(
+    Team team, {
+    required bool activate,
+    required String successMessage,
+    required String errorMessage,
+  }) async {
+    await runMutation(
+      context,
+      ref: ref,
+      scope: _scope,
+      action: () => activate
+          ? ref.read(teamApiProvider).reactivate(team.id)
+          : ref.read(teamApiProvider).deactivate(team.id),
+      successMessage: successMessage,
+      errorMessage: errorMessage,
+      progressId: team.id,
+      onSuccess: () => ref.invalidate(allTeamsProvider),
     );
   }
 

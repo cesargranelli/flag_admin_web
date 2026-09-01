@@ -11,6 +11,9 @@ class Athlete {
   final List<AthletePosition> positions;
   final int? number;
   final String? photoUrl;
+
+  /// Status do atleta: `ACTIVE` | `INACTIVE`.
+  final String? status;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -22,6 +25,7 @@ class Athlete {
     this.positions = const [],
     this.number,
     this.photoUrl,
+    this.status,
     this.createdAt,
     this.updatedAt,
   });
@@ -46,6 +50,7 @@ class Athlete {
       positions: positions,
       number: json['number'] as int?,
       photoUrl: json['photoUrl'] as String?,
+      status: json['status'] as String?,
       createdAt: json['createdAt'] is String
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,

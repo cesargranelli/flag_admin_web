@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../auth/competition_permissions.dart';
 import '../providers/providers.dart';
 import '../utils/date_formats.dart';
+import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
 /// Detalhe de um campeonato em página única (#455): todas as seções
@@ -204,6 +205,8 @@ class _CompetitionDetailScreenState
             const SizedBox(height: 16),
             // V250: edição permitida apenas enquanto rascunho.
             // Issue #261: e apenas pelo criador ou ADMIN.
+            // Status lifecycle: publicado pode ser encerrado (PUBLISHED →
+            // FINISHED) por quem pode editar.
             if (isDraft && canEdit)
               Wrap(
                 spacing: 8,
@@ -231,11 +234,26 @@ class _CompetitionDetailScreenState
                   ),
                 ],
               )
+            else if (canEdit && comp.status == CompetitionStatus.published)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  KicksterButton(
+                    label: 'Encerrar campeonato',
+                    icon: Icons.flag,
+                    variant: KicksterButtonVariant.outline,
+                    onPressed: () => _finishCompetition(context, comp),
+                  ),
+                ],
+              )
             else
               Text(
                 isDraft
                     ? 'Apenas o criador do campeonato pode editá-lo.'
-                    : 'Campeonato publicado — não é mais editável.',
+                    : comp.status == CompetitionStatus.finished
+                        ? 'Campeonato encerrado — não é mais editável.'
+                        : 'Campeonato publicado — não é mais editável.',
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -563,6 +581,37 @@ class _CompetitionDetailScreenState
       CompetitionStatus.disabled => AppColors.textSecondary,
     };
     return KicksterBadge(label: _statusLabel(status), color: color);
+  }
+
+  /// Encerra um campeonato publicado (PUBLISHED → FINISHED).
+  ///
+  /// Ação irreversível: pede confirmação em modo danger e, após a mutação,
+  /// invalida a listagem e o detalhe para refletir o novo status.
+  Future<void> _finishCompetition(
+    BuildContext context,
+    Competition comp,
+  ) async {
+    final ok = await showKicksterConfirm(
+      context: context,
+      title: 'Encerrar campeonato',
+      content: 'O campeonato não poderá mais ser editado após encerrado.',
+      confirmLabel: 'Encerrar',
+      danger: true,
+    );
+    if (ok != true || !context.mounted) return;
+    await runMutation(
+      context,
+      ref: ref,
+      scope: 'competition-finish',
+      action: () => ref.read(competitionApiProvider).finish(comp.id),
+      successMessage: 'Campeonato encerrado.',
+      errorMessage: 'Não foi possível encerrar o campeonato.',
+      progressId: comp.id,
+      onSuccess: () {
+        ref.invalidate(competitionsProvider);
+        ref.invalidate(competitionProvider(comp.id));
+      },
+    );
   }
 
   String _statusLabel(CompetitionStatus status) => switch (status) {

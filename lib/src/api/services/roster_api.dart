@@ -67,4 +67,20 @@ class RosterApi {
         {'athletes': athletes},
         RosterBatchResult.fromJson,
       );
+
+  /// Desativa o elenco de um time numa competição (INACTIVE).
+  Future<void> deactivate(String teamId, String competitionId) =>
+      _client.post(
+        '/api/v1/teams/$teamId/competitions/$competitionId/roster/deactivate',
+        <String, dynamic>{},
+        (json) => json,
+      );
+
+  /// Reativa o elenco de um time numa competição (ACTIVE).
+  Future<void> reactivate(String teamId, String competitionId) =>
+      _client.post(
+        '/api/v1/teams/$teamId/competitions/$competitionId/roster/reactivate',
+        <String, dynamic>{},
+        (json) => json,
+      );
 }

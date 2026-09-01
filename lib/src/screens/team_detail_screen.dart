@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
 import '../utils/date_formats.dart';
+import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
 /// Detalhe de um time (#12): apresenta os dados da entidade e oferece a
@@ -21,10 +22,14 @@ class TeamDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final teamFuture = team != null ? null : ref.watch(teamProvider(teamId!));
+    final resolvedId = team?.id ?? teamId!;
+    // Sempre observa o provider para refletir mutações (ex.: desativar/
+    // reativar). Quando o time foi passado via `extra`, ele serve de
+    // fallback imediato enquanto o provider carrega.
+    final teamAsync = ref.watch(teamProvider(resolvedId));
 
     return AppScreen(
-      title: team?.name ?? 'Time',
+      title: team?.name ?? teamAsync.valueOrNull?.name ?? 'Time',
       breadcrumb: [
         const BreadcrumbItem('Início', route: '/'),
         const BreadcrumbItem(AppStrings.teams, route: '/teams'),
@@ -34,17 +39,19 @@ class TeamDetailScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Conteúdo
-          teamFuture == null
-              ? _buildDetail(context, ref, team!)
-              : teamFuture.when(
-                  loading: () =>
-                      const AppLoading(message: 'Carregando time...'),
-                  error: (error, stackTrace) => AppErrorState(
+          teamAsync.when(
+            loading: () => team != null
+                ? _buildDetail(context, ref, team!)
+                : const AppLoading(message: 'Carregando time...'),
+            error: (error, stackTrace) => team != null
+                ? _buildDetail(context, ref, team!)
+                : AppErrorState(
                     message: 'Não foi possível carregar o time',
-                    onRetry: () => ref.invalidate(teamProvider(teamId!)),
+                    onRetry: () =>
+                        ref.invalidate(teamProvider(resolvedId)),
                   ),
-                  data: (team) => _buildDetail(context, ref, team),
-                ),
+            data: (freshTeam) => _buildDetail(context, ref, freshTeam),
+          ),
         ],
       ),
     );
@@ -59,6 +66,10 @@ class TeamDetailScreen extends ConsumerWidget {
         .where((o) => o.id == team.organizationId)
         .map((o) => o.tradeName)
         .firstOrNull;
+    final isAdmin =
+        ref.watch(authControllerProvider.select((a) => a.state.user?.role)) ==
+        UserRole.admin;
+    final isInactive = team.status == 'INACTIVE';
 
     return AppLayout.detail(
       child: Column(
@@ -108,17 +119,44 @@ class TeamDetailScreen extends ConsumerWidget {
                                 color: AppColors.textSecondary,
                               ),
                             ),
+                            if (isInactive) ...[
+                              const SizedBox(height: 8),
+                              KicksterBadge(
+                                label: 'Inativo',
+                                color: AppColors.danger,
+                              ),
+                            ],
                           ],
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  KicksterButton(
-                    label: 'Editar dados',
-                    icon: Icons.edit_outlined,
-                    onPressed: () =>
-                        context.go('/teams/${team.id}/edit', extra: team),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      KicksterButton(
+                        label: 'Editar dados',
+                        icon: Icons.edit_outlined,
+                        onPressed: () =>
+                            context.go('/teams/${team.id}/edit', extra: team),
+                      ),
+                      if (isAdmin && isInactive)
+                        KicksterButton(
+                          label: 'Reativar',
+                          icon: Icons.play_circle_outline,
+                          variant: KicksterButtonVariant.outline,
+                          onPressed: () => _reactivate(context, ref, team),
+                        ),
+                      if (isAdmin && !isInactive)
+                        KicksterButton(
+                          label: 'Desativar',
+                          icon: Icons.pause_circle_outline,
+                          variant: KicksterButtonVariant.outline,
+                          onPressed: () => _deactivate(context, ref, team),
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -145,7 +183,7 @@ class TeamDetailScreen extends ConsumerWidget {
               ),
               AppInfoRow(
                 label: 'Status',
-                value: team.status?.isNotEmpty == true ? team.status! : '—',
+                value: _statusLabel(team.status),
               ),
               AppInfoRow(label: 'Criado em', value: formatBrDate(team.createdAt)),
               AppInfoRow(
@@ -175,6 +213,62 @@ class TeamDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Rótulo amigável do status do time para o card de informações.
+  String _statusLabel(String? status) => switch (status) {
+        'ACTIVE' => 'Ativo',
+        'INACTIVE' => 'Inativo',
+        _ => '—',
+      };
+
+  Future<void> _deactivate(
+    BuildContext context,
+    WidgetRef ref,
+    Team team,
+  ) async {
+    final ok = await showKicksterConfirm(
+      context: context,
+      title: 'Desativar time',
+      content: '"${team.name}" ficará inativo até ser reativado.',
+      confirmLabel: 'Desativar',
+      danger: true,
+    );
+    if (ok != true || !context.mounted) return;
+    await _toggleActive(context, ref, team, activate: false);
+  }
+
+  Future<void> _reactivate(
+    BuildContext context,
+    WidgetRef ref,
+    Team team,
+  ) =>
+      _toggleActive(context, ref, team, activate: true);
+
+  Future<void> _toggleActive(
+    BuildContext context,
+    WidgetRef ref,
+    Team team, {
+    required bool activate,
+  }) async {
+    await runMutation(
+      context,
+      ref: ref,
+      scope: 'team-detail',
+      action: () => activate
+          ? ref.read(teamApiProvider).reactivate(team.id)
+          : ref.read(teamApiProvider).deactivate(team.id),
+      successMessage:
+          activate ? '${team.name} reativado.' : '${team.name} desativado.',
+      errorMessage: activate
+          ? 'Não foi possível reativar o time.'
+          : 'Não foi possível desativar o time.',
+      progressId: team.id,
+      onSuccess: () {
+        ref.invalidate(teamProvider(team.id));
+        ref.invalidate(allTeamsProvider);
+      },
     );
   }
 

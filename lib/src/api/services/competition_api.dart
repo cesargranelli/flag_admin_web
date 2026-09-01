@@ -34,6 +34,13 @@ class CompetitionApi {
       _client.post('/api/v1/competitions/$id/reactivate', <String, dynamic>{},
           (json) => json);
 
+  /// Encerra um campeonato publicado (PUBLISHED → FINISHED).
+  ///
+  /// Retorna 400 quando o campeonato não está publicado.
+  Future<void> finish(String id) =>
+      _client.post('/api/v1/competitions/$id/finish', <String, dynamic>{},
+          (json) => json);
+
   Future<Competition> create({
     required String organizationId,
     required String name,

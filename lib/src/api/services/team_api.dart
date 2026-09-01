@@ -62,6 +62,16 @@ class TeamApi {
   Future<void> delete(String teamId) =>
       _client.delete('/api/v1/teams/$teamId');
 
+  /// Desativa um time (status INACTIVE).
+  Future<void> deactivate(String teamId) =>
+      _client.post('/api/v1/teams/$teamId/deactivate', <String, dynamic>{},
+          (json) => json);
+
+  /// Reativa um time (status ACTIVE).
+  Future<void> reactivate(String teamId) =>
+      _client.post('/api/v1/teams/$teamId/reactivate', <String, dynamic>{},
+          (json) => json);
+
   /// Inscreve um time em uma competição (opcionalmente em uma divisão).
   Future<void> enroll(
     String competitionId,
