@@ -313,9 +313,9 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
         Row(
           children: [
             Expanded(
-              child: Text(
-                'Conferências',
-                style: Theme.of(context).textTheme.titleMedium,
+              child: KicksterSectionTitle(
+                title: 'Conferências',
+                icon: Icons.account_tree_outlined,
               ),
             ),
             if (canEdit)
@@ -344,17 +344,17 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
                       .where((c) => c.name.toLowerCase().contains(query))
                       .toList(growable: false);
             if (filteredConf.isEmpty && query.isNotEmpty) {
-              return const AppEmptyState(
-                message: 'Nenhuma conferência encontrada',
+              return const KicksterEmptyState(
                 icon: Icons.search_off,
+                message: 'Nenhuma conferência encontrada',
               );
             }
             if (filteredConf.isEmpty) {
-              return const AppEmptyState(
-                message:
-                    'Nenhuma conferência criada. '
-                    'Crie a primeira para organizar seu campeonato.',
+              return const KicksterEmptyState(
                 icon: Icons.account_tree_outlined,
+                message: 'Nenhuma conferência criada',
+                description:
+                    'Crie a primeira para organizar seu campeonato.',
               );
             }
             final divItems = divisions.valueOrNull ?? const <Division>[];
@@ -402,9 +402,9 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
         Row(
           children: [
             Expanded(
-              child: Text(
-                'Divisões sem conferência',
-                style: Theme.of(context).textTheme.titleMedium,
+              child: KicksterSectionTitle(
+                title: 'Divisões sem conferência',
+                icon: Icons.hub_outlined,
               ),
             ),
             if (canEdit)
@@ -450,16 +450,16 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
                     .toList();
                 if (standalone.isEmpty) {
                   if (query.isNotEmpty) {
-                    return const AppEmptyState(
-                      message: 'Nenhuma divisão encontrada',
+                    return const KicksterEmptyState(
                       icon: Icons.search_off,
+                      message: 'Nenhuma divisão encontrada',
                     );
                   }
-                  return const AppEmptyState(
-                    message:
-                        'Nenhuma divisão sem conferência. '
-                        'Use "Adicionar divisão" para criar uma.',
+                  return const KicksterEmptyState(
                     icon: Icons.subdirectory_arrow_right,
+                    message: 'Nenhuma divisão sem conferência',
+                    description:
+                        'Use "Adicionar divisão" para criar uma.',
                   );
                 }
                 return Column(

@@ -122,16 +122,19 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 organizations.when(
-                  loading: () => const LinearProgressIndicator(),
+                  loading: () => const AppLoading(
+                    message: 'Carregando organizações...',
+                  ),
                   error: (e, s) => AppErrorState(
                     message: 'Erro ao carregar organizações',
                     onRetry: () => ref.invalidate(organizationsProvider),
                   ),
                   data: (orgs) {
                     if (orgs.isEmpty) {
-                      return const AppEmptyState(
-                        message: 'Cadastre uma organização antes de criar campos',
+                      return const KicksterEmptyState(
                         icon: Icons.business,
+                        message:
+                            'Cadastre uma organização antes de criar campos',
                       );
                     }
                     return KicksterDropdown<String>(
@@ -177,7 +180,10 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _errorMessage!,
-                    style: TextStyle(color: AppColors.danger),
+                    style: TextStyle(
+                      color: AppColors.danger,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 24),

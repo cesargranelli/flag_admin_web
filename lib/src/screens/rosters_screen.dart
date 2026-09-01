@@ -103,9 +103,9 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                     Expanded(
                       child: effectiveComp != null
                           ? _associatedTeamsList(context, effectiveComp)
-                          : const AppEmptyState(
-                              message: 'Selecione um campeonato',
+                          : const KicksterEmptyState(
                               icon: Icons.emoji_events_outlined,
+                              message: 'Selecione um campeonato',
                             ),
                     ),
                   ],
@@ -202,9 +202,9 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
               const SizedBox(height: 16),
               Expanded(
                 child: filtered.isEmpty
-                    ? const AppEmptyState(
-                        message: 'Nenhum elenco encontrado',
+                    ? const KicksterEmptyState(
                         icon: Icons.search_off,
+                        message: 'Nenhum elenco encontrado',
                       )
                     : ListView.separated(
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -489,25 +489,12 @@ class _RosterBody extends ConsumerWidget {
           ),
         ),
       ),
-      error: (error, stackTrace) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Não foi possível carregar o elenco',
-              style: TextStyle(fontSize: 13, color: AppColors.danger),
-            ),
-            KicksterButton(
-              label: 'Tentar novamente',
-              variant: KicksterButtonVariant.text,
-              onPressed: () => ref.invalidate(
-                teamRosterProvider(
-                  (teamId: teamId, competitionId: competitionId),
-                ),
-              ),
-            ),
-          ],
+      error: (error, stackTrace) => AppErrorState(
+        message: 'Não foi possível carregar o elenco',
+        onRetry: () => ref.invalidate(
+          teamRosterProvider(
+            (teamId: teamId, competitionId: competitionId),
+          ),
         ),
       ),
       data: (entries) {
@@ -518,7 +505,7 @@ class _RosterBody extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (var i = 0; i < entries.length; i++) ...[
-              _athleteCard(context, entries[i]),
+              _buildAthleteCard(entries[i]),
               if (i < entries.length - 1) const SizedBox(height: 8),
             ],
             const SizedBox(height: 8),
@@ -572,12 +559,8 @@ class _RosterBody extends ConsumerWidget {
     );
   }
 
-  /// Card de atleta no estilo Figma (mesmo padrão do `TeamRosterScreen`):
-  /// - Background: #ECF1F6 (Grayscale 20), raio 12, padding 4px 10px
-  /// - Avatar: 60x60, border radius 16px
-  /// - Nome: 14px Medium #111111
-  /// - Subtítulo: 12px Regular #9CA4AB (#number · nickname · position)
-  Widget _athleteCard(BuildContext context, RosterEntry entry) {
+  /// Card de atleta usando o widget compartilhado [RosterAthleteCard].
+  Widget _buildAthleteCard(RosterEntry entry) {
     final displayNickname = entry.nickname ?? entry.athleteNickname;
     final subtitle = [
       if (entry.number != null) '#${entry.number}',
@@ -586,69 +569,14 @@ class _RosterBody extends ConsumerWidget {
       if (entry.position != null) entry.position!.label,
     ].join(' · ');
 
-    return Card(
-      elevation: 0,
-      color: AppColors.grayFill,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: KicksterAvatar(
-                  name: entry.athleteName,
-                  imageUrl: entry.photoUrl,
-                  size: 60,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.athleteName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Ações de edição do elenco ficam na tela dedicada do time.
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: AppColors.textSecondary,
-            ),
-          ],
-        ),
+    return RosterAthleteCard(
+      name: entry.athleteName,
+      subtitle: subtitle,
+      imageUrl: entry.photoUrl,
+      trailing: const Icon(
+        Icons.chevron_right,
+        size: 20,
+        color: AppColors.textSecondary,
       ),
     );
   }

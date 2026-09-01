@@ -48,7 +48,10 @@ class AdminHomeScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Seção "Módulos"
-          _SectionHeader(title: 'Módulos'),
+          const KicksterSectionTitle(
+            title: 'Módulos',
+            icon: Icons.dashboard_outlined,
+          ),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -73,32 +76,6 @@ class AdminHomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ── Section header ──────────────────────────────────────────────────────────
-
-/// Título de seção Kickster (Figma: "Live Matches" 16px w600 + "See All").
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const Spacer(),
-      ],
     );
   }
 }

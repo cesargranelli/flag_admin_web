@@ -88,7 +88,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                 KicksterButton(
                   label: 'Novo',
                   icon: Icons.add,
-                  onPressed: () => context.go(
+                  onPressed: () => context.push(
                     '/games/new',
                     extra: (
                       competitionId: effectiveComp,
@@ -155,7 +155,9 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                         (effectiveComp != null)
                             ? roundsAsync!.when(
                                 loading: () =>
-                                    const LinearProgressIndicator(),
+                                    const AppLoading(
+                                      message: 'Carregando rodadas...',
+                                    ),
                                 error: (e, s) => AppErrorState(
                                   message:
                                       'Não foi possível carregar as rodadas',
@@ -185,7 +187,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                           .state = value,
                                     ),
                               )
-                            : const LinearProgressIndicator(),
+                            : const AppLoading(),
                         if (!canEdit)
                           const EditRestrictionNote(
                             message:
@@ -222,7 +224,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                         action: KicksterButton(
                                           label: 'Criar jogo',
                                           icon: Icons.add,
-                                          onPressed: () => context.go(
+                                          onPressed: () => context.push(
                                             '/games/new',
                                             extra: (
                                               competitionId: effectiveComp,
@@ -268,9 +270,9 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                     );
                                   },
                                 )
-                          : const AppEmptyState(
-                              message: 'Nenhuma rodada cadastrada',
+                          : const KicksterEmptyState(
                               icon: Icons.format_list_numbered,
+                              message: 'Nenhuma rodada cadastrada',
                             ),
                     ),
                   ],

@@ -307,23 +307,20 @@ class OrganizationDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             associatedAsync.when(
-              loading: () => const Text(
-                'Carregando clubes...',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              loading: () => const AppLoading(
+                message: 'Carregando clubes...',
               ),
-              error: (e, s) => const Text(
-                'Não foi possível carregar os clubes.',
-                style: TextStyle(fontSize: 13, color: AppColors.danger),
+              error: (e, s) => AppErrorState(
+                message: 'Não foi possível carregar os clubes.',
+                onRetry: () => ref.invalidate(associatedClubsProvider(org.id)),
               ),
               data: (clubs) {
                 if (clubs.isEmpty) {
-                  return const Text(
-                    'Nenhum clube associado. Associe clubes ou '
-                    'universidades a esta organização.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
+                  return KicksterEmptyState(
+                    icon: Icons.groups_outlined,
+                    message: 'Nenhum clube associado',
+                    description:
+                        'Associe clubes ou universidades a esta organização.',
                   );
                 }
                 return Column(
@@ -450,22 +447,19 @@ class OrganizationDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             teamsAsync.when(
-              loading: () => const Text(
-                'Carregando times...',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              loading: () => const AppLoading(
+                message: 'Carregando times...',
               ),
-              error: (e, s) => const Text(
-                'Não foi possível carregar os times.',
-                style: TextStyle(fontSize: 13, color: AppColors.danger),
+              error: (e, s) => AppErrorState(
+                message: 'Não foi possível carregar os times.',
+                onRetry: () => ref.invalidate(clubTeamsProvider(org.id)),
               ),
               data: (teams) {
                 if (teams.isEmpty) {
-                  return const Text(
-                    'Nenhum time cadastrado. Crie o primeiro time do clube.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
+                  return KicksterEmptyState(
+                    icon: Icons.groups_outlined,
+                    message: 'Nenhum time cadastrado',
+                    description: 'Crie o primeiro time do clube.',
                   );
                 }
                 return Column(

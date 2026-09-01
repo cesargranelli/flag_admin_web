@@ -143,9 +143,9 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
           // Conteúdo (Expanded para dar altura finita à lista lazy)
           Expanded(
             child: teamId == null
-                ? const AppEmptyState(
-                    message: 'Time não identificado',
+                ? const KicksterEmptyState(
                     icon: Icons.groups_outlined,
+                    message: 'Time não identificado',
                   )
                 : _buildRoster(context),
           ),
@@ -157,9 +157,9 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
   Widget _buildRoster(BuildContext context) {
     final teamId = _teamId;
     if (teamId == null) {
-      return const AppEmptyState(
-        message: 'Time não identificado',
+      return const KicksterEmptyState(
         icon: Icons.groups_outlined,
+        message: 'Time não identificado',
       );
     }
     final rosterAsync = ref.watch(
@@ -226,9 +226,9 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
       );
     }
     if (entries.isEmpty) {
-      return const AppEmptyState(
-        message: 'Nenhum atleta encontrado',
+      return const KicksterEmptyState(
         icon: Icons.search_off,
+        message: 'Nenhum atleta encontrado',
       );
     }
 
@@ -260,14 +260,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     );
   }
 
-  /// Card de atleta no estilo Figma (node 34442:3299):
-  /// - Background: #ECF1F6 (Grayscale 20)
-  /// - Border radius: 12px
-  /// - Padding: 4px 10px
-  /// - Avatar: 60x60, border radius 16px
-  /// - Nome: 14px Medium #111111
-  /// - Subtítulo: 12px Regular #9CA4AB
-  /// - Valor à direita: 14px SemiBold #000000
+  /// Card de atleta usando o widget compartilhado [RosterAthleteCard].
   Widget _athleteCard(
     BuildContext context,
     RosterEntry entry,
@@ -292,85 +285,27 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     final removing =
         ref.watch(mutationProgressProvider(_removeScope)).contains(entry.athleteId);
 
-    return Card(
-      elevation: 0,
-      color: AppColors.grayFill,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        child: Row(
-          children: [
-            // Avatar 60x60 com border radius 16px
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+    return RosterAthleteCard(
+      name: name,
+      subtitle: subtitle,
+      imageUrl: photoUrl,
+      trailing: removing
+          ? const Padding(
+              padding: EdgeInsets.all(12),
               child: SizedBox(
-                width: 60,
-                height: 60,
-                child: KicksterAvatar(
-                  name: name,
-                  imageUrl: photoUrl,
-                  size: 60,
-                ),
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
+            )
+          : IconButton(
+              tooltip: 'Remover do elenco',
+              icon: const Icon(
+                Icons.person_remove_outlined,
+                color: AppColors.danger,
+              ),
+              onPressed: () => _removeAthlete(entry),
             ),
-            const SizedBox(width: 8),
-            // Nome + subtítulo
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Botão remover
-            if (removing)
-              const Padding(
-                padding: EdgeInsets.all(12),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-            else
-              IconButton(
-                tooltip: 'Remover do elenco',
-                icon: const Icon(
-                  Icons.person_remove_outlined,
-                  color: AppColors.danger,
-                ),
-                onPressed: () => _removeAthlete(entry),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -146,7 +146,9 @@ class _DivisionFormModalState extends ConsumerState<DivisionFormModal> {
               ),
               const SizedBox(height: 12),
               conferences.when(
-                loading: () => const LinearProgressIndicator(),
+                loading: () => const AppLoading(
+                  message: 'Carregando conferências...',
+                ),
                 error: (e, s) =>
                     const Text('Erro ao carregar conferências'),
                 data: (_) {
