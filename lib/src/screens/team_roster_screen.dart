@@ -93,12 +93,30 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
         : teamId != null
         ? ref.watch(teamProvider(teamId))
         : null;
-    final teamName = widget.team?.name ?? teamFuture?.valueOrNull?.name;
+    final team = widget.team ?? teamFuture?.valueOrNull;
+    final teamName = team?.name;
     final title = teamName ?? 'Elenco';
+
+    // Breadcrumb hierárquico (ADR-006): quando o clube dono do time é
+    // resolvido, mostra a cadeia Organizações › {PAI?} › {Clube} › {Time} ›
+    // Elenco; senão, mantém o padrão Times › {Time} › Elenco.
+    final orgs =
+        ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
+    final org = orgs.where((o) => o.id == team?.organizationId).firstOrNull;
+    final parentId = org?.parentId;
+    final parent = parentId == null
+        ? null
+        : orgs.where((o) => o.id == parentId).firstOrNull;
 
     final breadcrumb = [
       const BreadcrumbItem('Início', route: '/'),
-      const BreadcrumbItem(AppStrings.teams, route: '/teams'),
+      if (org != null) ...[
+        const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
+        if (parent != null)
+          BreadcrumbItem(parent.tradeName, route: '/organizations/${parent.id}'),
+        BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
+      ] else
+        const BreadcrumbItem(AppStrings.teams, route: '/teams'),
       if (teamName != null && teamId != null)
         BreadcrumbItem(teamName, route: '/teams/$teamId'),
       const BreadcrumbItem('Elenco'),

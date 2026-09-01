@@ -30,12 +30,42 @@ class TeamDetailScreen extends ConsumerWidget {
     // fallback imediato enquanto o provider carrega.
     final teamAsync = ref.watch(teamProvider(resolvedId));
 
+    // Time resolvido (extra da rota ou provider já carregado).
+    final resolvedTeam = team ?? teamAsync.valueOrNull;
+
+    // Breadcrumb hierárquico (ADR-006): quando o clube dono do time é
+    // resolvido, mostra a cadeia Organizações › {PAI?} › {Clube} › {Time};
+    // senão, mantém o padrão Times › {Time}.
+    final orgs =
+        ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
+    final org = orgs
+        .where((o) => o.id == resolvedTeam?.organizationId)
+        .firstOrNull;
+    final parentId = org?.parentId;
+    final parent = parentId == null
+        ? null
+        : orgs.where((o) => o.id == parentId).firstOrNull;
+
     return AppScreen(
       title: team?.name ?? teamAsync.valueOrNull?.name ?? 'Time',
       breadcrumb: [
         const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.teams, route: '/teams'),
-        if (team?.name != null) BreadcrumbItem(team!.name),
+        if (org != null) ...[
+          const BreadcrumbItem(
+            AppStrings.organizations,
+            route: '/organizations',
+          ),
+          if (parent != null)
+            BreadcrumbItem(
+              parent.tradeName,
+              route: '/organizations/${parent.id}',
+            ),
+          BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
+          if (resolvedTeam?.name != null) BreadcrumbItem(resolvedTeam!.name),
+        ] else ...[
+          const BreadcrumbItem(AppStrings.teams, route: '/teams'),
+          if (resolvedTeam?.name != null) BreadcrumbItem(resolvedTeam!.name),
+        ],
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

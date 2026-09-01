@@ -84,7 +84,8 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       return [
         const BreadcrumbItem('Início', route: '/'),
         const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-        if (org != null) BreadcrumbItem(org.tradeName),
+        if (org != null)
+          BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
         const BreadcrumbItem('Inscrever time'),
       ];
     }
@@ -96,7 +97,8 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       return [
         const BreadcrumbItem('Início', route: '/'),
         const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        if (comp != null) BreadcrumbItem(comp.name),
+        if (comp != null)
+          BreadcrumbItem(comp.name, route: '/competitions/${comp.id}'),
         const BreadcrumbItem('Inscrever time'),
       ];
     }

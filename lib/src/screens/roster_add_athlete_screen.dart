@@ -83,9 +83,27 @@ class _RosterAddAthleteScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Breadcrumb hierárquico (ADR-006): quando o clube dono do time é
+    // resolvido, mostra a cadeia Organizações › {PAI?} › {Clube} › {Time} ›
+    // Elenco › Adicionar atleta; senão, mantém o padrão Times.
+    final team = ref.watch(teamProvider(widget.teamId)).valueOrNull;
+    final orgs =
+        ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
+    final org = orgs.where((o) => o.id == team?.organizationId).firstOrNull;
+    final parentId = org?.parentId;
+    final parent = parentId == null
+        ? null
+        : orgs.where((o) => o.id == parentId).firstOrNull;
+
     final breadcrumb = [
       const BreadcrumbItem('Início', route: '/'),
-      const BreadcrumbItem(AppStrings.teams, route: '/teams'),
+      if (org != null) ...[
+        const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
+        if (parent != null)
+          BreadcrumbItem(parent.tradeName, route: '/organizations/${parent.id}'),
+        BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
+      ] else
+        const BreadcrumbItem(AppStrings.teams, route: '/teams'),
       BreadcrumbItem(widget.teamName, route: '/teams/${widget.teamId}'),
       BreadcrumbItem('Elenco', route: '/teams/${widget.teamId}/roster'),
       const BreadcrumbItem('Adicionar atleta'),

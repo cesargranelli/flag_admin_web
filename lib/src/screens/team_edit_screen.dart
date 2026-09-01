@@ -172,7 +172,7 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
             AppStrings.organizations,
             route: '/organizations',
           ),
-          BreadcrumbItem(org.tradeName),
+          BreadcrumbItem(org.tradeName, route: '/organizations/${org.id}'),
           const BreadcrumbItem('Editar time'),
         ];
       }
@@ -180,7 +180,8 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
     return [
       const BreadcrumbItem('Início', route: '/'),
       const BreadcrumbItem(AppStrings.teams, route: '/teams'),
-      if (_team?.name.isNotEmpty ?? false) BreadcrumbItem(_team!.name),
+      if (_team?.name.isNotEmpty ?? false)
+        BreadcrumbItem(_team!.name, route: '/teams/${_team!.id}'),
       const BreadcrumbItem('Editar time'),
     ];
   }
