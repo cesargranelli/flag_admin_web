@@ -39,10 +39,17 @@ class AppScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canPop = GoRouter.of(context).canPop();
+    // Tela atual (path) — a home (/) é a raiz e não mostra botão voltar.
+    final currentPath =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    final isHome = currentPath == '/';
     final backLabel = _resolveBackLabel(context, this.backLabel);
-    // Sem rótulo conhecido: o botão mostra apenas "Voltar" (evita o feio
-    // "Voltar para Voltar").
-    final backText = backLabel == null ? 'Voltar' : 'Voltar para $backLabel';
+    // Sem histórico: volta para a home (ex.: listagens vindas da home via
+    // `go`, sem pilha). Sem rótulo conhecido: mostra apenas "Voltar".
+    final fallbackHome = !canPop && !isHome;
+    final backText = fallbackHome
+        ? 'Voltar para Início'
+        : (backLabel == null ? 'Voltar' : 'Voltar para $backLabel');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,7 +60,7 @@ class AppScreen extends StatelessWidget {
         // link "Voltar para {label}" à esquerda + título centralizado.
         // Três colunas de largura igual (flex 1) — o título fica no centro
         // real da barra independente da largura do botão voltar.
-        if (canPop)
+        if (!isHome)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             child: Row(
@@ -66,7 +73,8 @@ class AppScreen extends StatelessWidget {
                       button: true,
                       label: backText,
                       child: InkWell(
-                        onTap: () => context.pop(),
+                        onTap: () =>
+                            canPop ? context.pop() : context.go('/'),
                         borderRadius: BorderRadius.circular(8),
                         hoverColor:
                             AppColors.primary.withValues(alpha: 0.08),
