@@ -494,7 +494,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
               child: KicksterButton(
                 label: 'Novo time',
                 icon: Icons.add,
-                onPressed: () => context.go('/teams/new', extra: org.id),
+                onPressed: () => context.push('/teams/new', extra: org.id),
               ),
             ),
             const SizedBox(height: 16),

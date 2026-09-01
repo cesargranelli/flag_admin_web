@@ -58,7 +58,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
               KicksterButton(
                 label: 'Novo',
                 icon: Icons.add,
-                onPressed: () => context.go('/competitions/new'),
+                onPressed: () => context.push('/competitions/new'),
               ),
             ],
           ),
@@ -84,7 +84,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
                     action: KicksterButton(
                       label: 'Criar campeonato',
                       icon: Icons.add,
-                      onPressed: () => context.go('/competitions/new'),
+                      onPressed: () => context.push('/competitions/new'),
                     ),
                   );
                 }

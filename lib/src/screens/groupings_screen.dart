@@ -51,7 +51,7 @@ class GroupingsScreen extends ConsumerWidget {
                   action: KicksterButton(
                     label: 'Criar campeonato',
                     icon: Icons.add,
-                    onPressed: () => context.go('/competitions/new'),
+                    onPressed: () => context.push('/competitions/new'),
                   ),
                 );
               }

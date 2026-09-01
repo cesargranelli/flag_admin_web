@@ -118,7 +118,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                     action: KicksterButton(
                       label: 'Criar campeonato',
                       icon: Icons.add,
-                      onPressed: () => context.go('/competitions/new'),
+                      onPressed: () => context.push('/competitions/new'),
                     ),
                   );
                 }

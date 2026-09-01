@@ -50,47 +50,60 @@ class AppScreen extends StatelessWidget {
         // Header pessoal (sticky)
         if (showUserHeader) const _UserHeader(),
         // Barra superior (sticky — fixa acima do conteúdo scrollável):
-        // link "Voltar para {label}" + título centralizado.
+        // link "Voltar para {label}" à esquerda + título centralizado.
+        // Três colunas de largura igual (flex 1) — o título fica no centro
+        // real da barra independente da largura do botão voltar.
         if (canPop)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             child: Row(
               children: [
-                Semantics(
-                  button: true,
-                  label: backText,
-                  child: InkWell(
-                    onTap: () => context.pop(),
-                    borderRadius: BorderRadius.circular(8),
-                    hoverColor: AppColors.primary.withValues(alpha: 0.08),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.arrow_back,
-                            size: 20,
-                            color: AppColors.primary,
+                // Coluna esquerda: botão voltar (conteúdo pode variar).
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Semantics(
+                      button: true,
+                      label: backText,
+                      child: InkWell(
+                        onTap: () => context.pop(),
+                        borderRadius: BorderRadius.circular(8),
+                        hoverColor:
+                            AppColors.primary.withValues(alpha: 0.08),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            backText,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primary,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.arrow_back,
+                                size: 20,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  backText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-                // Título centralizado na barra.
+                // Coluna central: título realmente centralizado.
                 Expanded(
                   child: Center(
                     child: Text(
@@ -101,9 +114,8 @@ class AppScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Balanceia o link esquerdo (~48px) para o título ficar
-                // visualmente centralizado.
-                const SizedBox(width: 48),
+                // Coluna direita: espaçamento de balanceamento (sem botão).
+                const Expanded(child: SizedBox()),
               ],
             ),
           ),

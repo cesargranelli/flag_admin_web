@@ -54,7 +54,7 @@ class _AthletesScreenState extends ConsumerState<AthletesScreen> {
               KicksterButton(
                 label: 'Novo',
                 icon: Icons.add,
-                onPressed: () => context.go('/athletes/new'),
+                onPressed: () => context.push('/athletes/new'),
               ),
             ],
           ),
@@ -76,7 +76,7 @@ class _AthletesScreenState extends ConsumerState<AthletesScreen> {
                     action: KicksterButton(
                       label: 'Criar atleta',
                       icon: Icons.add,
-                      onPressed: () => context.go('/athletes/new'),
+                      onPressed: () => context.push('/athletes/new'),
                     ),
                   );
                 }

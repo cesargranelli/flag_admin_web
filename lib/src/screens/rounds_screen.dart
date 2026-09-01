@@ -69,7 +69,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                   label: 'Novo',
                   icon: Icons.add,
                   onPressed: () =>
-                      context.go('/rounds/new', extra: effectiveComp),
+                      context.push('/rounds/new', extra: effectiveComp),
                 ),
             ],
           ),
@@ -92,7 +92,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                     action: KicksterButton(
                       label: 'Criar campeonato',
                       icon: Icons.add,
-                      onPressed: () => context.go('/competitions/new'),
+                      onPressed: () => context.push('/competitions/new'),
                     ),
                   );
                 }
@@ -199,7 +199,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                                 label: 'Criar campeonato',
                                 icon: Icons.add,
                                 onPressed: () =>
-                                    context.go('/competitions/new'),
+                                    context.push('/competitions/new'),
                               ),
                             ),
                     ),
