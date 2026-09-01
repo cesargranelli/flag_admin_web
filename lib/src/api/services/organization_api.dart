@@ -35,4 +35,31 @@ class OrganizationApi {
     );
     return getById(id);
   }
+
+  /// Clubes/universidades associados a uma federação/liga/associação.
+  Future<List<Organization>> listClubs(String organizationId) =>
+      _client.getList(
+        '/api/v1/organizations/$organizationId/clubs',
+        Organization.fromJson,
+      );
+
+  /// Associa um clube/universidade à organização (federação/liga/associação).
+  Future<Organization> associateClub(
+    String organizationId,
+    String clubId,
+  ) =>
+      _client.post(
+        '/api/v1/organizations/$organizationId/clubs',
+        {'organizationId': clubId},
+        Organization.fromJson,
+      );
+
+  /// Remove a associação do clube/universidade à organização.
+  Future<void> disassociateClub(
+    String organizationId,
+    String clubId,
+  ) =>
+      _client.delete(
+        '/api/v1/organizations/$organizationId/clubs/$clubId',
+      );
 }

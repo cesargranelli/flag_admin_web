@@ -110,9 +110,9 @@ class _CompetitionDetailScreenState
               child: _estruturaCard(context, comp, canEdit, isDraft),
             ),
             _section(
-              title: 'Clubes',
+              title: 'Times',
               icon: Icons.groups,
-              child: _clubsCard(context, comp, canEdit, isDraft),
+              child: _teamsCard(context, comp, canEdit, isDraft),
             ),
           ],
         ),
@@ -350,22 +350,22 @@ class _CompetitionDetailScreenState
     );
   }
 
-  /// Seção 7 — Clubes (#377): lista simples dos clubes (organizações)
-  /// associados ao campeonato + botão para a tela de associação.
-  Widget _clubsCard(
+  /// Seção 7 — Times (#12): lista dos times inscritos no campeonato +
+  /// botão para a tela de inscrição. O time é a unidade inscrita (não a
+  /// organização), então não há mais resolução `Team.organizationId` → `Organization`.
+  Widget _teamsCard(
     BuildContext context,
     Competition comp,
     bool canEdit,
     bool isDraft,
   ) {
     final teams = ref.watch(teamsProvider(comp.id));
-    final organizations = ref.watch(organizationsProvider);
 
     return teams.when(
       loading: () => AppInfoCard(
         children: const [
           Text(
-            'Carregando clubes...',
+            'Carregando times...',
             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
         ],
@@ -373,62 +373,56 @@ class _CompetitionDetailScreenState
       error: (e, s) => AppInfoCard(
         children: const [
           Text(
-            'Não foi possível carregar os clubes.',
+            'Não foi possível carregar os times.',
             style: TextStyle(color: AppColors.danger, fontSize: 13),
           ),
         ],
       ),
-      data: (items) {
-        final orgs = organizations.valueOrNull ?? const <Organization>[];
-        final orgById = {for (final o in orgs) o.id: o};
-        final clubs = items
-            .map((t) => orgById[t.organizationId])
-            .whereType<Organization>()
-            .toList();
-
-        return AppInfoCard(
-          children: [
-            if (clubs.isEmpty)
-              const Text(
-                'Nenhum clube associado.',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              )
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final club in clubs)
-                    _clubChip(
-                      club.tradeName,
-                      subtitle: club.city?.isNotEmpty == true ? club.city : null,
-                    ),
-                ],
-              ),
-            const SizedBox(height: 12),
-            if (canEdit && isDraft)
-              KicksterButton(
-                label: 'Associar clubes',
-                icon: Icons.groups,
-                onPressed: () {
-                  ref.read(selectedCompetitionProvider.notifier).state =
-                      comp.id;
-                  context.go('/teams/associate', extra: comp.id);
-                },
-              )
-            else
-              const Text(
-                'Apenas o criador do campeonato pode associar clubes.',
-                style:
-                    TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              ),
-          ],
-        );
-      },
+      data: (items) => AppInfoCard(
+        children: [
+          if (items.isEmpty)
+            const Text(
+              'Nenhum time inscrito.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final team in items)
+                  _teamChip(
+                    team.name,
+                    subtitle:
+                        team.shortName?.isNotEmpty == true
+                        ? team.shortName
+                        : null,
+                  ),
+              ],
+            ),
+          const SizedBox(height: 12),
+          if (canEdit && isDraft)
+            KicksterButton(
+              label: 'Inscrever times',
+              icon: Icons.add,
+              onPressed: () {
+                ref.read(selectedCompetitionProvider.notifier).state =
+                    comp.id;
+                context.go('/teams/associate', extra: comp.id);
+              },
+            )
+          else
+            const Text(
+              'Apenas o criador do campeonato pode inscrever times.',
+              style:
+                  TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+        ],
+      ),
     );
   }
 
-  Widget _clubChip(String name, {String? subtitle}) {
+  Widget _teamChip(String name, {String? subtitle}) {
     final label = subtitle == null ? name : '$name · $subtitle';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

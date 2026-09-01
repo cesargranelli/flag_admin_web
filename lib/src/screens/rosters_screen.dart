@@ -8,11 +8,11 @@ import '../providers/providers.dart';
 import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
-/// Tela de elencos: lista apenas os clubes/universidades já associados ao
-/// campeonato selecionado.
+/// Tela de elencos: lista apenas os times já inscritos no campeonato
+/// selecionado.
 ///
-/// Para associar novos clubes, navega para `/rosters/associate`. Para
-/// desassociar, o ícone `link_off` no card executa a remoção.
+/// Para inscrever novos times, navega para `/teams/associate`. Para
+/// remover a inscrição, o ícone `link_off` no card executa o disenroll.
 /// Tocar no card navega para `/teams/:id/roster`.
 class RostersScreen extends ConsumerStatefulWidget {
   const RostersScreen({super.key});
@@ -22,7 +22,7 @@ class RostersScreen extends ConsumerStatefulWidget {
 }
 
 class _RostersScreenState extends ConsumerState<RostersScreen> {
-  static const _disassociateScope = 'roster-disassociate';
+  static const _disenrollScope = 'roster-disenroll';
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -122,21 +122,21 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     final teamsAsync = ref.watch(teamsProvider(competitionId));
 
     return teamsAsync.when(
-      loading: () => const AppLoading(message: 'Carregando elencos...'),
+      loading: () => const AppLoading(message: 'Carregando times...'),
       error: (error, stackTrace) => AppErrorState(
-        message: 'Não foi possível carregar os elencos',
+        message: 'Não foi possível carregar os times',
         onRetry: () => ref.invalidate(teamsProvider(competitionId)),
       ),
       data: (teams) {
         if (teams.isEmpty) {
           return KicksterEmptyState(
             icon: Icons.groups_outlined,
-            message: 'Nenhum elenco associado',
-            description: 'Associe clubes ao campeonato para criar elencos.',
+            message: 'Nenhum time inscrito',
+            description: 'Inscreva times no campeonato para criar elencos.',
             action: KicksterButton(
-              label: 'Associar clube',
-              icon: Icons.link,
-              onPressed: () => context.go('/rosters/associate',
+              label: 'Inscrever time',
+              icon: Icons.add,
+              onPressed: () => context.go('/teams/associate',
                   extra: competitionId),
             ),
           );
@@ -169,7 +169,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                       )
                     else
                       Text(
-                        '${teams.length} ${teams.length == 1 ? 'elenco' : 'elencos'}',
+                        '${teams.length} ${teams.length == 1 ? 'time' : 'times'}',
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -177,9 +177,9 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                       ),
                     const Spacer(),
                     KicksterButton(
-                      label: 'Associar clube',
-                      icon: Icons.link,
-                      onPressed: () => context.go('/rosters/associate',
+                      label: 'Inscrever time',
+                      icon: Icons.add,
+                      onPressed: () => context.go('/teams/associate',
                           extra: competitionId),
                     ),
                     const SizedBox(width: 12),
@@ -236,10 +236,10 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     );
   }
 
-  /// Card de elenco (time já associado) no estilo Kickster:
-  /// - Ícone do tipo de organização à esquerda
+  /// Card de elenco (time já inscrito) no estilo Kickster:
+  /// - Ícone de grupo à esquerda
   /// - Nome do time + detalhes
-  /// - Ícone `link_off` para desassociar (direita)
+  /// - Ícone `link_off` para desinscrever (direita)
   /// - Tocar navega para `/teams/:id/roster`
   Widget _teamCard(
     BuildContext context,
@@ -247,13 +247,13 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     required String competitionId,
   }) {
     final disassociating = ref
-        .watch(mutationProgressProvider(_disassociateScope))
+        .watch(mutationProgressProvider(_disenrollScope))
         .contains(team.id);
 
     return KicksterCard(
       icon: Icons.groups_outlined,
       title: team.name,
-      subtitle: 'Elenco do campeonato',
+      subtitle: 'Inscrito no campeonato',
       trailing: disassociating
           ? const Padding(
               padding: EdgeInsets.all(8),
@@ -264,20 +264,20 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
               ),
             )
           : IconButton(
-              tooltip: 'Desassociar elenco',
+              tooltip: 'Desinscrever time',
               icon: const Icon(
                 Icons.link_off,
                 color: AppColors.danger,
               ),
               onPressed: () =>
-                  _disassociate(context, team, competitionId),
+                  _disenroll(context, team, competitionId),
             ),
       onTap: () => context.go('/teams/${team.id}/roster', extra: team),
     );
   }
 
-  /// Desassocia o clube do campeonato (remove o Team).
-  Future<void> _disassociate(
+  /// Remove a inscrição do time no campeonato (disenroll).
+  Future<void> _disenroll(
     BuildContext context,
     Team team,
     String competitionId,
@@ -285,10 +285,11 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     await runMutation(
       context,
       ref: ref,
-      scope: _disassociateScope,
-      action: () => ref.read(teamApiProvider).delete(team.id),
-      successMessage: '${team.name} desassociado do campeonato.',
-      errorMessage: 'Não foi possível desassociar o elenco.',
+      scope: _disenrollScope,
+      action: () =>
+          ref.read(teamApiProvider).disenroll(competitionId, team.id),
+      successMessage: '${team.name} removido do campeonato.',
+      errorMessage: 'Não foi possível remover a inscrição do time.',
       progressId: team.id,
       onSuccess: () => ref.invalidate(teamsProvider(competitionId)),
     );

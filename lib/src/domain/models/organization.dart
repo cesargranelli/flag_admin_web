@@ -31,6 +31,9 @@ class Organization {
   final String locale;
   final OrganizationStatus? status;
 
+  /// Organização pai (federação/liga/associação) — hierarquia ADR-006.
+  final String? parentId;
+
   /// UUID do usuário que criou a organização (exposto pelo backend, #359).
   final String? createdBy;
   final DateTime? createdAt;
@@ -64,6 +67,7 @@ class Organization {
     this.createdBy,
     this.createdAt,
     this.updatedAt,
+    this.parentId,
   });
 
   factory Organization.fromJson(Map<String, dynamic> json) => Organization(
@@ -100,6 +104,7 @@ class Organization {
         createdBy: json['createdBy'] as String?,
         createdAt: _tryParseDate(json['createdAt']),
         updatedAt: _tryParseDate(json['updatedAt']),
+        parentId: json['parentId'] as String?,
       );
 
   /// Corpo de criação/atualização (`POST/PUT /api/v1/organizations`).
