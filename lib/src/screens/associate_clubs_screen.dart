@@ -11,9 +11,8 @@ import '../widgets/app_screen.dart';
 /// Inscrição de times em um campeonato (#12) — substitui a antiga
 /// "associação de clubes".
 ///
-/// O elenco é uma extensão do TIME (não do campeonato): os elencos do time
-/// são criados para o campeonato e o campeonato apenas **recebe a inscrição**
-/// do time com o elenco escolhido. Por isso a tela:
+/// O elenco é criado depois, na tela do time (tela de elencos); aqui a
+/// inscrição é direta. Por isso a tela:
 ///
 /// - fixa o campeonato alvo num card não-editável quando [lockedCompetitionId]
 ///   é informado; sem o travamento, mostra um dropdown para a escolha e, após
@@ -21,12 +20,9 @@ import '../widgets/app_screen.dart';
 /// - faz o mesmo com o clube/universidade alvo: card fixo quando
 ///   [lockedOrganizationId] é informado, dropdown que vira card fixo após a
 ///   escolha;
-/// - para cada time disponível do clube efetivo, exibe um card
-///   expansível com a lista de elencos do time (`teamRostersProvider`) para
-///   escolher **exatamente um** elenco antes de inscrever;
-/// - oferece "Criar novo elenco" (navega para `/teams/:id/roster` com o
-///   `competitionId` no `extra`) — o backend cria o elenco implicitamente
-///   (`getOrCreateRoster`) quando o primeiro atleta é adicionado.
+/// - para cada time disponível do clube efetivo (ainda não inscrito no
+///   campeonato), exibe um card com botão "Inscrever" — sem escolha de elenco
+///   (o elenco é criado posteriormente na tela de elencos do time).
 class AssociateClubsScreen extends ConsumerStatefulWidget {
   const AssociateClubsScreen({
     super.key,
@@ -57,30 +53,59 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   /// Depois da escolha, vira o card fixo da tela.
   String? _selectedCompetitionId;
 
-  /// Elenco escolhido por time (teamId → rosterId) antes da inscrição.
-  /// Limpo quando o campeonato alvo muda.
-  final Map<String, String> _selectedRosterByTeam = {};
-
-  /// Times com o card expandido (lista de elencos visível).
-  final Set<String> _expandedTeams = {};
-
   @override
   void didUpdateWidget(AssociateClubsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.lockedCompetitionId != widget.lockedCompetitionId) {
       _selectedCompetitionId = null;
-      _selectedRosterByTeam.clear();
-      _expandedTeams.clear();
     }
     if (oldWidget.lockedOrganizationId != widget.lockedOrganizationId) {
       _selectedOrgId = null;
-      _expandedTeams.clear();
     }
   }
 
   /// Campeonato alvo da tela: o travado pela rota ?? o escolhido no dropdown.
   String? get _competitionId =>
       widget.lockedCompetitionId ?? _selectedCompetitionId;
+
+  /// Breadcrumb dinâmico (C3): reflete o caminho real de navegação.
+  ///
+  /// - Vindo do detalhe do clube ([lockedOrganizationId]): `Início ›
+  ///   Organizações › {Clube} › Inscrever time`;
+  /// - vindo do detalhe/campeonato ([lockedCompetitionId]): `Início ›
+  ///   Campeonatos › {Campeonato} › Inscrever time`;
+  /// - fluxo geral (tela Times): `Início › Times › Inscrever time`.
+  List<BreadcrumbItem> _buildBreadcrumb() {
+    final orgId = widget.lockedOrganizationId;
+    if (orgId != null) {
+      final orgs =
+          ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
+      final org = orgs.where((o) => o.id == orgId).firstOrNull;
+      return [
+        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
+        if (org != null) BreadcrumbItem(org.tradeName),
+        const BreadcrumbItem('Inscrever time'),
+      ];
+    }
+    final compId = widget.lockedCompetitionId;
+    if (compId != null) {
+      final comps =
+          ref.watch(competitionsProvider).valueOrNull ?? const <Competition>[];
+      final comp = comps.where((c) => c.id == compId).firstOrNull;
+      return [
+        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
+        if (comp != null) BreadcrumbItem(comp.name),
+        const BreadcrumbItem('Inscrever time'),
+      ];
+    }
+    return const [
+      BreadcrumbItem('Início', route: '/'),
+      BreadcrumbItem(AppStrings.teams, route: '/teams'),
+      BreadcrumbItem('Inscrever time'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,11 +118,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     return AppScreen(
       title: 'Inscrever time',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.teams, route: '/teams'),
-        BreadcrumbItem('Inscrever time'),
-      ],
+      breadcrumb: _buildBreadcrumb(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -186,12 +207,10 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
             if (value == null) return;
             setState(() {
               _selectedCompetitionId = value;
-              _selectedRosterByTeam.clear();
-              _expandedTeams.clear();
             });
           },
           helperText:
-              'O campeonato recebe a inscrição do time com o elenco escolhido.',
+              'O campeonato recebe a inscrição dos times disponíveis abaixo.',
         ),
       ),
     );
@@ -304,7 +323,6 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
             if (value == null) return;
             setState(() {
               _selectedOrgId = value;
-              _expandedTeams.clear();
             });
           },
           helperText:
@@ -546,15 +564,16 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     );
   }
 
-  /// Card expansível de um time disponível: header (avatar + nome + chevron)
-  /// e, quando expandido, a lista de elencos do time para escolher
-  /// **exatamente um** antes de inscrever.
+  /// Card simples de um time disponível (sem escolha de elenco): avatar +
+  /// nome + sigla e, à direita, o botão "Inscrever" que faz a inscrição
+  /// direta no campeonato. O elenco é criado depois, na tela do time.
   Widget _teamEnrollCard(
     BuildContext context,
     Team team,
     String competitionId,
   ) {
-    final expanded = _expandedTeams.contains(team.id);
+    final enrolling =
+        ref.watch(mutationProgressProvider(_enrollScope)).contains(team.id);
 
     return Card(
       elevation: 1,
@@ -566,76 +585,57 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
         side: const BorderSide(color: AppColors.line, width: 1),
       ),
       margin: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          InkWell(
-            onTap: () => setState(() {
-              if (!_expandedTeams.remove(team.id)) _expandedTeams.add(team.id);
-            }),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-              child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: KicksterAvatar(
+                name: team.name,
+                imageUrl: team.logoUrl,
+                icon: Icons.groups_outlined,
+                size: 48,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: KicksterAvatar(
-                      name: team.name,
-                      imageUrl: team.logoUrl,
-                      icon: Icons.groups_outlined,
-                      size: 48,
+                  Text(
+                    team.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          team.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        if (team.shortName?.isNotEmpty ?? false)
-                          Text(
-                            team.shortName!,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                      ],
+                  if (team.shortName?.isNotEmpty ?? false)
+                    Text(
+                      team.shortName!,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    expanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppColors.textSecondary,
-                  ),
                 ],
               ),
             ),
-          ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: _TeamRosterPicker(
-                team: team,
-                competitionId: competitionId,
-                selectedRosterId: _selectedRosterByTeam[team.id],
-                onSelectRoster: (rosterId) => setState(() {
-                  _selectedRosterByTeam[team.id] = rosterId;
-                }),
-                onEnroll: () => _enroll(context, team, competitionId),
-              ),
+            const SizedBox(width: 8),
+            KicksterButton(
+              label: 'Inscrever',
+              icon: Icons.add,
+              loading: enrolling,
+              onPressed: enrolling
+                  ? null
+                  : () => _enroll(context, team, competitionId),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -656,205 +656,8 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       progressId: team.id,
       onSuccess: () {
         ref.invalidate(teamsProvider(competitionId));
-        if (mounted) {
-          setState(() {
-            _selectedRosterByTeam.remove(team.id);
-            _expandedTeams.remove(team.id);
-          });
-        }
+        ref.invalidate(clubTeamsProvider(team.organizationId));
       },
-    );
-  }
-}
-
-/// Corpo do card expandido de um time: lista de elencos (radio-style),
-/// botão "Criar novo elenco" (sempre visível) e botão "Inscrever"
-/// (habilitado somente quando um elenco foi escolhido).
-class _TeamRosterPicker extends ConsumerWidget {
-  const _TeamRosterPicker({
-    required this.team,
-    required this.competitionId,
-    required this.selectedRosterId,
-    required this.onSelectRoster,
-    required this.onEnroll,
-  });
-
-  final Team team;
-
-  /// Campeonato alvo (fixo) da inscrição — também passado como `extra`
-  /// para a tela de elenco do time (`/teams/:id/roster`).
-  final String competitionId;
-
-  /// Elenco escolhido para este time (nulo = ainda não escolhido).
-  final String? selectedRosterId;
-
-  final ValueChanged<String> onSelectRoster;
-
-  final VoidCallback onEnroll;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rostersAsync = ref.watch(teamRostersProvider(team.id));
-    final competitions =
-        ref.watch(competitionsProvider).valueOrNull ?? const <Competition>[];
-    final enrolling = ref
-        .watch(mutationProgressProvider(_AssociateClubsScreenState._enrollScope))
-        .contains(team.id);
-
-    // Nome do campeonato do elenco (o elenco é criado para um campeonato).
-    String competitionName(String id) {
-      for (final c in competitions) {
-        if (c.id == id) return c.name;
-      }
-      return '';
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        rostersAsync.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          ),
-          error: (error, stackTrace) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Não foi possível carregar os elencos do time.',
-                  style: TextStyle(fontSize: 13, color: AppColors.danger),
-                ),
-                TextButton(
-                  onPressed: () => ref.invalidate(teamRostersProvider(team.id)),
-                  child: const Text('Tentar novamente'),
-                ),
-              ],
-            ),
-          ),
-          data: (rosters) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (rosters.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    'Nenhum elenco criado',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                )
-              else
-                for (var i = 0; i < rosters.length; i++) ...[
-                  _rosterRow(context, rosters[i], competitionName),
-                  if (i < rosters.length - 1) const SizedBox(height: 4),
-                ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: KicksterButton(
-            label: 'Criar novo elenco',
-            icon: Icons.add,
-            variant: KicksterButtonVariant.outline,
-            onPressed: () async {
-              await context.push(
-                '/teams/${team.id}/roster',
-                extra: competitionId,
-              );
-              // Ao voltar, recarrega os elencos do time (o backend cria o
-              // elenco implicitamente ao adicionar o primeiro atleta).
-              ref.invalidate(teamRostersProvider(team.id));
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        KicksterButton(
-          label: 'Inscrever',
-          icon: Icons.add,
-          loading: enrolling,
-          onPressed:
-              selectedRosterId == null || enrolling ? null : onEnroll,
-        ),
-      ],
-    );
-  }
-
-  /// Linha selecionável de um elenco do time (radio-style): nome do
-  /// campeonato + "Temporada {season}" (ou nome do elenco) + badge
-  /// "Inativo" quando o status é INACTIVE.
-  Widget _rosterRow(
-    BuildContext context,
-    Roster roster,
-    String Function(String) competitionName,
-  ) {
-    final selected = roster.id == selectedRosterId;
-    final compName = competitionName(roster.competitionId);
-    final subtitle = (roster.season?.isNotEmpty ?? false)
-        ? 'Temporada ${roster.season}'
-        : (roster.name?.isNotEmpty ?? false ? roster.name! : 'Elenco');
-
-    return InkWell(
-      onTap: () => onSelectRoster(roster.id),
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        child: Row(
-          children: [
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              size: 20,
-              color: selected ? AppColors.primary : AppColors.textSecondary,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (compName.isNotEmpty)
-                    Text(
-                      compName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  if (compName.isNotEmpty) const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (roster.status == 'INACTIVE') ...[
-              const SizedBox(width: 8),
-              const KicksterBadge(label: 'Inativo', color: AppColors.danger),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }

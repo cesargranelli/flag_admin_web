@@ -497,27 +497,10 @@ class OrganizationDetailScreen extends ConsumerWidget {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  KicksterButton(
-                    label: 'Novo time',
-                    icon: Icons.add,
-                    onPressed: () => context.go('/teams/new', extra: org.id),
-                  ),
-                  KicksterButton(
-                    label: 'Inscrever times',
-                    icon: Icons.playlist_add,
-                    variant: KicksterButtonVariant.outline,
-                    // O clube vem travado da tela anterior (detalhe do
-                    // clube); o campeonato é escolhido na tela de inscrição.
-                    onPressed: () => context.go(
-                      '/teams/associate',
-                      extra: (competitionId: null, organizationId: org.id),
-                    ),
-                  ),
-                ],
+              child: KicksterButton(
+                label: 'Novo time',
+                icon: Icons.add,
+                onPressed: () => context.go('/teams/new', extra: org.id),
               ),
             ),
             const SizedBox(height: 16),
