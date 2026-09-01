@@ -259,21 +259,21 @@ class TeamDetailScreen extends ConsumerWidget {
                 ),
               );
             }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            // Cards compactos (mesmo padrão visual dos times inscritos no
+            // detalhe do campeonato): fluem em Wrap, sem expansão.
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                for (var i = 0; i < rosters.length; i++) ...[
-                  _RosterCard(
-                    roster: rosters[i],
-                    competitionName:
-                        competitionNameById[rosters[i].competitionId],
+                for (final roster in rosters)
+                  _RosterChip(
+                    roster: roster,
+                    competitionName: competitionNameById[roster.competitionId],
                     onTap: () => context.push(
                       '/teams/${team.id}/roster',
-                      extra: rosters[i].competitionId,
+                      extra: roster.competitionId,
                     ),
                   ),
-                  if (i < rosters.length - 1) const SizedBox(height: 12),
-                ],
               ],
             );
           },
@@ -485,12 +485,13 @@ class TeamDetailScreen extends ConsumerWidget {
   }
 }
 
-/// Card de um elenco do time numa competição (estilo Kickster): nome da
-/// competição como título, temporada/nome do elenco como subtítulo, badge
-/// "Inativo" quando o status é `INACTIVE` e chevron à direita. O toque
-/// navega para a tela do elenco (`/teams/:id/roster`).
-class _RosterCard extends StatelessWidget {
-  const _RosterCard({
+/// Chip compacto de um elenco do time numa competição (mesmo padrão visual
+/// dos times inscritos no detalhe do campeonato, um pouco mais rico):
+/// card cinza `grayFill` com raio 12, ícone pequeno de grupos, rótulo
+/// "nome · temporada" e badge "Inativo" quando o status é `INACTIVE`.
+/// O toque navega para a tela do elenco (`/teams/:id/roster`).
+class _RosterChip extends StatelessWidget {
+  const _RosterChip({
     required this.roster,
     required this.competitionName,
     required this.onTap,
@@ -511,82 +512,53 @@ class _RosterCard extends StatelessWidget {
     final title = competitionName ?? roster.name ?? roster.competitionId;
     // Subtítulo: temporada quando presente ("Temporada 2026"); senão o nome
     // do elenco (caso ele não tenha sido usado no título).
-    final subtitle = roster.season != null
+    final subtitle = roster.season?.isNotEmpty == true
         ? 'Temporada ${roster.season}'
-        : (competitionName != null && roster.name != null ? roster.name : null);
+        : (roster.name?.isNotEmpty == true ? roster.name : null);
     final isInactive = roster.status == 'INACTIVE';
 
     return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: AppColors.grayFill,
       margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
       ),
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Ícone do elenco em quadrado 48x48 com tinta primária.
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.groups_outlined,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
+              const Icon(
+                Icons.groups,
+                size: 14,
+                color: AppColors.textSecondary,
               ),
-              const SizedBox(width: 12),
-              Expanded(
+              const SizedBox(width: 6),
+              Flexible(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      subtitle == null ? title : '$title · $subtitle',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
                     if (isInactive) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       KicksterBadge(label: 'Inativo', color: AppColors.danger),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: 8),
             ],
           ),
         ),
