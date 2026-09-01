@@ -83,11 +83,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
   Widget build(BuildContext context) {
     return AppScreen(
       title: 'Novo usuário',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.users, route: '/users'),
-        BreadcrumbItem('Novo'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

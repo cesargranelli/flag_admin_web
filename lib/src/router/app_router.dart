@@ -50,7 +50,7 @@ import '../widgets/admin_shell.dart';
 ///
 /// A navegação autenticada vive dentro de uma
 /// [StatefulShellRoute.indexedStack] com uma branch por módulo (issue #427):
-/// o [AdminShell] exibe header global + breadcrumb, e cada branch preserva
+/// o [AdminShell] exibe header global, e cada branch preserva
 /// seu estado (filtros/seletores). Telas de autenticação ficam FORA da shell.
 class AppRouter {
   /// Cria a configuração do GoRouter da aplicação.

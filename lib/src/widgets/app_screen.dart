@@ -4,71 +4,65 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
-import 'kickster_breadcrumb.dart';
-
-/// Item da trilha de navegação do [AppScreen].
-class BreadcrumbItem {
-  const BreadcrumbItem(this.label, {this.route, this.icon});
-
-  final String label;
-
-  /// Rota da listagem do módulo. Quando nula, o item é texto estático.
-  final String? route;
-
-  /// Ícone opcional antes do texto (ex: home_outlined).
-  final IconData? icon;
-}
 
 /// Scaffold padrão das telas autenticadas do Admin Web.
 ///
 /// - **Header pessoal**: avatar + nome + greeting + home icon (sticky)
-/// - **Breadcrumb** (quando houver): abaixo do header pessoal
+/// - **Botão voltar + título** (sticky, abaixo do header pessoal, apenas
+///   quando há tela anterior na pilha — `canPop`)
 /// - **Page Body** (scrollável, padding 24px): conteúdo da tela
 class AppScreen extends StatelessWidget {
   const AppScreen({
     super.key,
     required this.title,
     required this.body,
-    this.breadcrumb,
     this.showUserHeader = true,
     this.scrollable = true,
   });
 
   final String title;
   final Widget body;
-  final List<BreadcrumbItem>? breadcrumb;
   final bool showUserHeader;
   final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
-    final crumbs = breadcrumb ?? const <BreadcrumbItem>[];
+    final canPop = GoRouter.of(context).canPop();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Header pessoal (sticky)
         if (showUserHeader) const _UserHeader(),
-        // Breadcrumb (sticky — fica fixo acima do conteúdo scrollável)
-        if (crumbs.isNotEmpty)
+        // Botão voltar + título (sticky — fixos acima do conteúdo scrollável)
+        if (canPop)
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-            child: KicksterBreadcrumb(
-              items: [
-                for (var i = 0; i < crumbs.length; i++)
-                  KicksterBreadcrumbItem(
-                    label: crumbs[i].label,
-                    route: crumbs[i].route,
-                    icon: crumbs[i].icon ??
-                        (i == 0 && crumbs[i].route == '/'
-                            ? Icons.home_outlined
-                            : null),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () => context.pop(),
+                  tooltip: 'Voltar',
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 22,
+                    color: AppColors.textPrimary,
                   ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
               ],
             ),
           ),
         if (scrollable)
-          // Page body (somente conteúdo, scrollável — breadcrumb já está fora)
+          // Page body (somente conteúdo, scrollável — nav fixa acima)
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -76,9 +70,9 @@ class AppScreen extends StatelessWidget {
             ),
           )
         else
-          // Page body (breadcrumb + conteúdo) em altura finita (Expanded):
-          // usado pelas telas de listagem para permitir scroll raiz LIGHT
-          // (virtualização real via altura finita nos grids/lists).
+          // Page body em altura finita (Expanded): usado pelas telas de
+          // listagem para permitir scroll raiz LIGHT (virtualização real via
+          // altura finita nos grids/lists).
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),

@@ -39,12 +39,6 @@ class _CompetitionDetailScreenState
 
     return AppScreen(
       title: widget.competition?.name ?? 'Campeonato',
-      breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        if (widget.competition?.name != null)
-          BreadcrumbItem(widget.competition!.name),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -426,7 +420,7 @@ class _CompetitionDetailScreenState
               onPressed: () {
                 ref.read(selectedCompetitionProvider.notifier).state =
                     comp.id;
-                context.go('/teams/associate', extra: comp.id);
+                context.push('/teams/associate', extra: comp.id);
               },
             )
           else

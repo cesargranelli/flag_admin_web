@@ -45,10 +45,6 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     return AppScreen(
       title: 'Elencos',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Elencos'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -142,7 +138,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
             action: KicksterButton(
               label: 'Inscrever time',
               icon: Icons.add,
-              onPressed: () => context.go('/teams/associate',
+              onPressed: () => context.push('/teams/associate',
                   extra: competitionId),
             ),
           );
@@ -189,7 +185,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                     KicksterButton(
                       label: 'Inscrever time',
                       icon: Icons.add,
-                      onPressed: () => context.go('/teams/associate',
+                      onPressed: () => context.push('/teams/associate',
                           extra: competitionId),
                     ),
                     const SizedBox(width: 12),

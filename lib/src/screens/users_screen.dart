@@ -32,10 +32,6 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     return AppScreen(
       title: 'Usuários',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Usuários'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

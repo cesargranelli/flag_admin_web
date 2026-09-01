@@ -38,26 +38,8 @@ class OrganizationDetailScreen extends ConsumerWidget {
     // Organização resolvida (extra da rota ou provider já carregado).
     final resolvedOrg = org ?? orgFuture?.valueOrNull;
 
-    // Breadcrumb hierárquico (ADR-006): quando a organização é um
-    // clube/universidade com [parentId] (federação/liga/associação pai),
-    // exibe o pai como link clicável antes do nome da organização atual.
-    final orgs =
-        ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
-    final parentId = resolvedOrg?.parentId;
-    final parent = parentId == null
-        ? null
-        : orgs.where((o) => o.id == parentId).firstOrNull;
-    final breadcrumb = [
-      const BreadcrumbItem('Início', route: '/'),
-      const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-      if (parent != null)
-        BreadcrumbItem(parent.tradeName, route: '/organizations/${parent.id}'),
-      if (resolvedOrg != null) BreadcrumbItem(resolvedOrg.tradeName),
-    ];
-
     return AppScreen(
       title: resolvedOrg?.tradeName ?? 'Organização',
-      breadcrumb: breadcrumb,
       body: orgFuture == null
           ? _buildDetail(context, ref, org!)
           : orgFuture.when(
@@ -384,7 +366,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
       ),
       margin: EdgeInsets.zero,
       child: InkWell(
-        onTap: () => context.go(
+        onTap: () => context.push(
           '/organizations/${club.id}',
           extra: club,
         ),
@@ -565,7 +547,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
       ),
       margin: EdgeInsets.zero,
       child: InkWell(
-        onTap: () => context.go('/teams/${team.id}', extra: team),
+        onTap: () => context.push('/teams/${team.id}', extra: team),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(

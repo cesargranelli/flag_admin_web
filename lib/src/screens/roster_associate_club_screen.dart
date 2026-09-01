@@ -19,11 +19,6 @@ class RosterAssociateClubScreen extends StatelessWidget {
     return AppScreen(
       title: 'Associar clube',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Elencos', route: '/rosters'),
-        BreadcrumbItem('Associar clube'),
-      ],
       body: KicksterEmptyState(
         icon: Icons.construction,
         message: 'Tela em reformulação',

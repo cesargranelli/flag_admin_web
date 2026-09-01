@@ -210,11 +210,6 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
       },
       child: AppScreen(
         title: 'Nova organização',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-          BreadcrumbItem('Nova'),
-        ],
         body: AppLayout.form(
           child: Form(
                 key: _formKey,

@@ -120,11 +120,6 @@ class _RoundFormScreenState extends ConsumerState<RoundFormScreen> {
 
     return AppScreen(
       title: _isEditing ? 'Editar rodada' : 'Nova rodada',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.rounds, route: '/rounds'),
-        BreadcrumbItem('Formulário'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
