@@ -12,7 +12,8 @@ import '../widgets/app_screen.dart';
 /// ao expandir cada card, mostra os atletas dentro do elenco daquele time.
 ///
 /// Para inscrever novos times, navega para `/teams/associate`. Para
-/// remover a inscrição, o ícone `link_off` no card executa o disenroll.
+/// desativar a inscrição, o ícone no card executa a desativação lógica do
+/// time (`teamApi.deactivate`).
 class RostersScreen extends ConsumerStatefulWidget {
   const RostersScreen({super.key});
 
@@ -21,7 +22,7 @@ class RostersScreen extends ConsumerStatefulWidget {
 }
 
 class _RostersScreenState extends ConsumerState<RostersScreen> {
-  static const _disenrollScope = 'roster-disenroll';
+  static const _deactivateScope = 'roster-deactivate';
   static const _rosterToggleScope = 'roster-toggle';
   final _searchController = TextEditingController();
   String _query = '';
@@ -257,8 +258,8 @@ class _TeamRosterCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final disassociating = ref
-        .watch(mutationProgressProvider(_RostersScreenState._disenrollScope))
+    final deactivating = ref
+        .watch(mutationProgressProvider(_RostersScreenState._deactivateScope))
         .contains(team.id);
     final togglingRoster = ref
         .watch(mutationProgressProvider(_RostersScreenState._rosterToggleScope))
@@ -362,7 +363,7 @@ class _TeamRosterCard extends ConsumerWidget {
                       onPressed: () => _deactivateRoster(context, ref),
                     ),
                   const SizedBox(width: 4),
-                  if (disassociating)
+                  if (deactivating)
                     const Padding(
                       padding: EdgeInsets.all(12),
                       child: SizedBox(
@@ -373,13 +374,13 @@ class _TeamRosterCard extends ConsumerWidget {
                     )
                   else
                     IconButton(
-                      tooltip: 'Desinscrever time',
+                      tooltip: 'Desativar time',
                       icon: const Icon(
-                        Icons.link_off,
+                        Icons.pause_circle_outline,
                         color: AppColors.danger,
                       ),
                       onPressed: () =>
-                          _disenroll(context, ref, team, competitionId),
+                          _deactivate(context, ref, team, competitionId),
                     ),
                 ],
               ),
@@ -399,20 +400,33 @@ class _TeamRosterCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _disenroll(
+  /// Desativa o time (status INACTIVE, desativação lógica).
+  ///
+  /// Exibe confirmação antes de executar a mutação e, após o sucesso,
+  /// invalida a listagem de inscritos do campeonato (o time desativado deixa
+  /// de aparecer como ativo).
+  Future<void> _deactivate(
     BuildContext context,
     WidgetRef ref,
     Team team,
     String competitionId,
   ) async {
+    final confirmed = await showKicksterConfirm(
+      context: context,
+      title: 'Desativar time',
+      content: '"${team.name}" ficará inativo até ser reativado.',
+      confirmLabel: 'Desativar',
+      danger: true,
+    );
+    if (confirmed != true || !context.mounted) return;
+
     await runMutation(
       context,
       ref: ref,
-      scope: _RostersScreenState._disenrollScope,
-      action: () =>
-          ref.read(teamApiProvider).disenroll(competitionId, team.id),
-      successMessage: '${team.name} removido do campeonato.',
-      errorMessage: 'Não foi possível remover a inscrição do time.',
+      scope: _RostersScreenState._deactivateScope,
+      action: () => ref.read(teamApiProvider).deactivate(team.id),
+      successMessage: '${team.name} desativado.',
+      errorMessage: 'Não foi possível desativar o time.',
       progressId: team.id,
       onSuccess: () => ref.invalidate(teamsProvider(competitionId)),
     );
