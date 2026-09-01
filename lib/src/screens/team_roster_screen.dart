@@ -15,13 +15,13 @@ import '../widgets/app_screen.dart';
 /// ([RosterAddAthleteScreen]). A remoção de atletas é feita diretamente
 /// nesta tela.
 ///
-/// Requer [rosterId] para acessar as entradas do elenco.
+/// Requer [competitionId] para acessar as entradas do elenco.
 class TeamRosterScreen extends ConsumerStatefulWidget {
   const TeamRosterScreen({
     super.key,
     this.team,
     this.teamId,
-    required this.rosterId,
+    required this.competitionId,
   });
 
   /// Time (clube + competição) quando navegamos com `state.extra`.
@@ -30,8 +30,8 @@ class TeamRosterScreen extends ConsumerStatefulWidget {
   /// Id do time, derivado da rota `/teams/:id/roster`.
   final String? teamId;
 
-  /// ID do elenco (roster) para buscar as entradas.
-  final String rosterId;
+  /// Id da competição para buscar as entradas do elenco.
+  final String competitionId;
 
   @override
   ConsumerState<TeamRosterScreen> createState() => _TeamRosterScreenState();
@@ -52,7 +52,9 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
   }
 
   Future<void> _removeAthlete(RosterEntry entry) async {
-    final rosterId = widget.rosterId;
+    final teamId = _teamId;
+    if (teamId == null) return;
+    final competitionId = widget.competitionId;
 
     await runMutation(
       context,
@@ -60,11 +62,12 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
       scope: _removeScope,
       action: () => ref
           .read(rosterApiProvider)
-          .remove(rosterId, entry.athleteId),
+          .remove(teamId, competitionId, entry.athleteId),
       successMessage: '${entry.athleteName} removido do elenco.',
       errorMessage: 'Não foi possível remover o atleta.',
       progressId: entry.athleteId,
-      onSuccess: () => ref.invalidate(rosterEntriesProvider(rosterId)),
+      onSuccess: () => ref
+          .invalidate(teamRosterProvider((teamId: teamId, competitionId: competitionId))),
     );
   }
 
@@ -74,7 +77,11 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     if (teamId == null) return;
     context.push(
       '/teams/$teamId/roster/add',
-      extra: (teamId: teamId, teamName: teamName, rosterId: widget.rosterId),
+      extra: (
+        teamId: teamId,
+        teamName: teamName,
+        competitionId: widget.competitionId,
+      ),
     );
   }
 
@@ -130,7 +137,10 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
                       icon: const Icon(Icons.upload_file),
                       onPressed: () => context.push(
                         '/rosters/import',
-                        extra: (teamId: teamId, rosterId: widget.rosterId),
+                        extra: (
+                          teamId: teamId,
+                          competitionId: widget.competitionId,
+                        ),
                       ),
                     ),
                 ],
@@ -144,15 +154,24 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
                     message: 'Time não identificado',
                     icon: Icons.groups_outlined,
                   )
-                : _buildRoster(context, widget.rosterId),
+                : _buildRoster(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRoster(BuildContext context, String rosterId) {
-    final rosterAsync = ref.watch(rosterEntriesProvider(rosterId));
+  Widget _buildRoster(BuildContext context) {
+    final teamId = _teamId;
+    if (teamId == null) {
+      return const AppEmptyState(
+        message: 'Time não identificado',
+        icon: Icons.groups_outlined,
+      );
+    }
+    final rosterAsync = ref.watch(
+      teamRosterProvider((teamId: teamId, competitionId: widget.competitionId)),
+    );
     final athletesAsync = ref.watch(athletesProvider);
 
     if (rosterAsync.isLoading || athletesAsync.isLoading) {
@@ -161,7 +180,9 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     if (rosterAsync.hasError) {
       return AppErrorState(
         message: 'Não foi possível carregar o elenco',
-        onRetry: () => ref.invalidate(rosterEntriesProvider(rosterId)),
+        onRetry: () => ref.invalidate(
+          teamRosterProvider((teamId: teamId, competitionId: widget.competitionId)),
+        ),
       );
     }
     if (athletesAsync.hasError) {

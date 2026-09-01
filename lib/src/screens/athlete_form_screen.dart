@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
+import '../utils/date_formats.dart';
 import '../widgets/app_screen.dart';
 import '../widgets/selectable_card.dart';
 
@@ -28,6 +29,9 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
   late final TextEditingController _nickname;
   late final TextEditingController _number;
   late final TextEditingController _photoUrl;
+  late final TextEditingController _birthDateText;
+  DateTime? _birthDate;
+  Gender? _gender;
   List<AthletePosition> _positions = [];
   bool _submitting = false;
   String? _errorMessage;
@@ -44,11 +48,25 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
     _number = TextEditingController(text: athlete?.number?.toString() ?? '');
     _photoUrl = TextEditingController(text: athlete?.photoUrl ?? '');
     _positions = List.of(athlete?.positions ?? []);
+    _birthDate = athlete?.birthDate;
+    _birthDateText = TextEditingController(
+      text: athlete?.birthDate != null ? formatBrDate(athlete!.birthDate) : '',
+    );
+    _gender = athlete?.gender == null
+        ? null
+        : Gender.fromJson(athlete!.gender!);
   }
 
   @override
   void dispose() {
-    for (final controller in [_name, _cpf, _nickname, _number, _photoUrl]) {
+    for (final controller in [
+      _name,
+      _cpf,
+      _nickname,
+      _number,
+      _photoUrl,
+      _birthDateText,
+    ]) {
       controller.dispose();
     }
     super.dispose();
@@ -83,6 +101,8 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
         if (int.tryParse(_number.text.trim()) != null)
           'number': int.parse(_number.text.trim()),
         if (_photoUrl.text.trim().isNotEmpty) 'photoUrl': _photoUrl.text.trim(),
+        if (_birthDate != null) 'birthDate': formatIsoDate(_birthDate!),
+        if (_gender != null) 'gender': _gender!.toJson(),
       };
 
   /// Alterna a seleção de uma posição, respeitando o limite de 3 e evitando
@@ -95,6 +115,24 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
         _positions.add(position);
       }
     });
+  }
+
+  /// Abre o calendário do design system e aplica a data de nascimento
+  /// (mesmo padrão do date picker do form de campeonato).
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final picked = await showAppCalendarDialog(
+      context,
+      initialDate: _birthDate ?? now,
+      firstDate: DateTime(1900),
+      lastDate: now,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _birthDate = picked;
+        _birthDateText.text = formatBrDate(picked);
+      });
+    }
   }
 
   /// Campo de posições: um conjunto de chips de seleção, limitado a 3
@@ -218,6 +256,38 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
                     }
                   },
                   validator: _validateCpf,
+                ),
+                const SizedBox(height: 12),
+                // Campos curtos alinhados à esquerda: data de nascimento e
+                // gênero não precisam ocupar toda a largura do formulário.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: 320,
+                    child: KicksterInput(
+                      label: 'Data de nascimento',
+                      controller: _birthDateText,
+                      readOnly: true,
+                      hintText: 'dd/mm/aaaa',
+                      onTap: _pickBirthDate,
+                      suffixIcon: const Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: 320,
+                    child: KicksterDropdown<Gender>(
+                      label: 'Gênero',
+                      value: _gender,
+                      hint: 'Selecione',
+                      values: Gender.values,
+                      labels: [for (final gender in Gender.values) gender.label],
+                      onChanged: (value) => setState(() => _gender = value),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 KicksterInput(

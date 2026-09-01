@@ -68,7 +68,9 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
       );
       ref.invalidate(clubTeamsProvider(widget.organizationId));
       if (mounted) {
-        context.pop();
+        // Volta para o detalhe do clube (o "Novo time" usa `go`, que
+        // substituiu a rota do clube — `pop()` não retornaria a ele).
+        context.go('/organizations/${widget.organizationId}');
       }
     } on RepositoryException catch (e) {
       setState(() => _errorMessage = e.message);

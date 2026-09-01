@@ -20,11 +20,11 @@ class RosterImportScreen extends ConsumerStatefulWidget {
   const RosterImportScreen({
     super.key,
     this.teamId,
-    this.rosterId,
+    this.competitionId,
   });
 
   final String? teamId;
-  final String? rosterId;
+  final String? competitionId;
 
   @override
   ConsumerState<RosterImportScreen> createState() => _RosterImportScreenState();
@@ -152,8 +152,10 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   }
 
   Future<void> _import() async {
-    final rosterId = widget.rosterId;
-    if (rosterId == null || rosterId.isEmpty) return;
+    final teamId = widget.teamId;
+    final competitionId = widget.competitionId;
+    if (teamId == null || teamId.isEmpty) return;
+    if (competitionId == null || competitionId.isEmpty) return;
 
     final resolved = _resolved;
     final names = _atletaNames;
@@ -171,8 +173,10 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     try {
       final result = await ref
           .read(rosterApiProvider)
-          .createBatch(rosterId, items);
-      ref.invalidate(rosterEntriesProvider(rosterId));
+          .createBatch(teamId, competitionId, items);
+      ref.invalidate(
+        teamRosterProvider((teamId: teamId, competitionId: competitionId)),
+      );
       if (mounted) setState(() => _result = result);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);

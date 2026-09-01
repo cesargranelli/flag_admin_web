@@ -26,6 +26,15 @@ class AthleteApi {
   Future<Athlete> update(String id, Map<String, dynamic> body) =>
       _client.put('/api/v1/athletes/$id', body, Athlete.fromJson);
 
+  /// Exclusão lógica: marca o atleta como desativado (INACTIVE).
+  Future<void> deactivate(String id) =>
+      _client.delete('/api/v1/athletes/$id');
+
+  /// Reativa o atleta (volta para ACTIVE).
+  Future<void> reactivate(String id) =>
+      _client.post('/api/v1/athletes/$id/reactivate', <String, dynamic>{},
+          (json) => json);
+
   /// Valida uma carga em lote de atletas sem gravar (dry-run).
   Future<AthleteBatchResult> validateBatch(List<Map<String, dynamic>> athletes) =>
       _client.post(

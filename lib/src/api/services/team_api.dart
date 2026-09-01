@@ -16,11 +16,18 @@ class TeamApi {
       );
 
   /// Lista os times inscritos em um campeonato.
-  Future<List<Team>> listByCompetition(String competitionId) =>
+  ///
+  /// O backend retorna `CompetitionTeamResponse` (inscrição + dados derivados
+  /// do time), não `Team` completo.
+  Future<List<CompetitionTeam>> listByCompetition(String competitionId) =>
       _client.getList(
         '/api/v1/competitions/$competitionId/teams',
-        Team.fromJson,
+        CompetitionTeam.fromJson,
       );
+
+  /// Lista todos os times cadastrados na plataforma (endpoint público).
+  Future<List<Team>> listAll() =>
+      _client.getList('/api/v1/teams', Team.fromJson);
 
   Future<Team> getById(String id) =>
       _client.getOne('/api/v1/teams/$id', Team.fromJson);
@@ -54,6 +61,16 @@ class TeamApi {
   /// Remove um time.
   Future<void> delete(String teamId) =>
       _client.delete('/api/v1/teams/$teamId');
+
+  /// Desativa um time (status INACTIVE).
+  Future<void> deactivate(String teamId) =>
+      _client.post('/api/v1/teams/$teamId/deactivate', <String, dynamic>{},
+          (json) => json);
+
+  /// Reativa um time (status ACTIVE).
+  Future<void> reactivate(String teamId) =>
+      _client.post('/api/v1/teams/$teamId/reactivate', <String, dynamic>{},
+          (json) => json);
 
   /// Inscreve um time em uma competição (opcionalmente em uma divisão).
   Future<void> enroll(

@@ -12,18 +12,18 @@ import '../widgets/app_screen.dart';
 /// Lista todos os atletas da plataforma que ainda não estão no elenco,
 /// permitindo incluí-los com apelido e número da camisa.
 ///
-/// Requer [rosterId] para adicionar entradas ao elenco correto.
+/// Requer [competitionId] para adicionar entradas ao elenco correto.
 class RosterAddAthleteScreen extends ConsumerStatefulWidget {
   const RosterAddAthleteScreen({
     super.key,
     required this.teamId,
     required this.teamName,
-    required this.rosterId,
+    required this.competitionId,
   });
 
   final String teamId;
   final String teamName;
-  final String rosterId;
+  final String competitionId;
 
   @override
   ConsumerState<RosterAddAthleteScreen> createState() =>
@@ -53,7 +53,8 @@ class _RosterAddAthleteScreenState
       ref: ref,
       scope: _addScope,
       action: () => ref.read(rosterApiProvider).add(
-            widget.rosterId,
+            widget.teamId,
+            widget.competitionId,
             athleteId: athlete.id,
             nickname: details.nickname,
             number: details.number,
@@ -61,7 +62,11 @@ class _RosterAddAthleteScreenState
       successMessage: '${athlete.name} adicionado ao elenco.',
       errorMessage: 'Não foi possível adicionar o atleta.',
       progressId: athlete.id,
-      onSuccess: () => ref.invalidate(rosterEntriesProvider(widget.rosterId)),
+      onSuccess: () => ref.invalidate(
+        teamRosterProvider(
+          (teamId: widget.teamId, competitionId: widget.competitionId),
+        ),
+      ),
     );
   }
 
@@ -113,7 +118,11 @@ class _RosterAddAthleteScreenState
 
   Widget _buildAthleteList() {
     final athletesAsync = ref.watch(athletesProvider);
-    final rosterAsync = ref.watch(rosterEntriesProvider(widget.rosterId));
+    final rosterAsync = ref.watch(
+      teamRosterProvider(
+        (teamId: widget.teamId, competitionId: widget.competitionId),
+      ),
+    );
 
     if (athletesAsync.isLoading || rosterAsync.isLoading) {
       return const AppLoading(message: 'Carregando atletas...');
@@ -127,7 +136,11 @@ class _RosterAddAthleteScreenState
     if (rosterAsync.hasError) {
       return AppErrorState(
         message: 'Não foi possível carregar o elenco',
-        onRetry: () => ref.invalidate(rosterEntriesProvider(widget.rosterId)),
+        onRetry: () => ref.invalidate(
+          teamRosterProvider(
+            (teamId: widget.teamId, competitionId: widget.competitionId),
+          ),
+        ),
       );
     }
 
