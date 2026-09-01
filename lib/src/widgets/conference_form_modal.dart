@@ -96,7 +96,7 @@ class _ConferenceFormModalState extends ConsumerState<ConferenceFormModal> {
   Widget build(BuildContext context) {
     final submitting =
         ref.watch(mutationProgressProvider(_scope)).contains('save');
-    return AlertDialog(
+    return kicksterModalDialog(
       title: Text(_isEditing ? 'Editar conferência' : 'Nova conferência'),
       content: SizedBox(
         width: AppLayout.maxFormWidth,

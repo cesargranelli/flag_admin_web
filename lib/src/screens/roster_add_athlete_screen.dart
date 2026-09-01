@@ -338,7 +338,7 @@ class _RosterDetailsDialogState extends State<_RosterDetailsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return kicksterModalDialog(
       title: Text('Incluir ${widget.athleteName}'),
       content: Form(
         key: _formKey,

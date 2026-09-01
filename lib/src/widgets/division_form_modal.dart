@@ -124,7 +124,7 @@ class _DivisionFormModalState extends ConsumerState<DivisionFormModal> {
     final submitting =
         ref.watch(mutationProgressProvider(_scope)).contains('save');
 
-    return AlertDialog(
+    return kicksterModalDialog(
       title: Text(_isEditing ? 'Editar divisão' : 'Nova divisão'),
       content: SizedBox(
         width: AppLayout.maxFormWidth,

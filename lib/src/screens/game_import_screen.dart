@@ -50,7 +50,7 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
   void _showTemplate() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => kicksterModalDialog(
         title: const Text('Modelo CSV'),
         content: const Text(
           'Use o formato abaixo (ponto-e-vírgula, UTF-8):\n\n'

@@ -39,7 +39,7 @@ class _AssociateClubModalState extends ConsumerState<AssociateClubModal> {
     final orgsAsync = ref.watch(organizationsProvider);
     final associatedAsync = ref.watch(associatedClubsProvider(widget.organizationId));
 
-    return AlertDialog(
+    return kicksterModalDialog(
       title: const Text('Associar clube'),
       content: SizedBox(
         width: AppLayout.maxFormWidth,
