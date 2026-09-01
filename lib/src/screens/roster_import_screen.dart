@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,9 +17,14 @@ import '../widgets/app_screen.dart';
 /// a resolução nome -> id acontece aqui, tratando homônimos sem resolução
 /// silenciosa.
 class RosterImportScreen extends ConsumerStatefulWidget {
-  const RosterImportScreen({super.key, this.teamId});
+  const RosterImportScreen({
+    super.key,
+    this.teamId,
+    this.competitionId,
+  });
 
   final String? teamId;
+  final String? competitionId;
 
   @override
   ConsumerState<RosterImportScreen> createState() => _RosterImportScreenState();
@@ -148,7 +153,9 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
 
   Future<void> _import() async {
     final teamId = widget.teamId;
+    final competitionId = widget.competitionId;
     if (teamId == null || teamId.isEmpty) return;
+    if (competitionId == null || competitionId.isEmpty) return;
 
     final resolved = _resolved;
     final names = _atletaNames;
@@ -166,8 +173,10 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     try {
       final result = await ref
           .read(rosterApiProvider)
-          .createBatch(teamId, items);
-      ref.invalidate(rosterProvider(teamId));
+          .createBatch(teamId, competitionId, items);
+      ref.invalidate(
+        teamRosterProvider((teamId: teamId, competitionId: competitionId)),
+      );
       if (mounted) setState(() => _result = result);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);
@@ -192,11 +201,6 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     if (teamId == null || teamId.isEmpty) {
       return AppScreen(
         title: 'Importar elenco',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
-          BreadcrumbItem('Importar'),
-        ],
         body: AppLayout.form(
           child: KicksterEmptyState(
             icon: Icons.groups_outlined,
@@ -215,11 +219,6 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
 
     return AppScreen(
       title: 'Importar elenco',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
-        BreadcrumbItem('Importar'),
-      ],
       body: AppLayout.form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

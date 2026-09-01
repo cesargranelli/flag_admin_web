@@ -1,6 +1,6 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,18 +81,7 @@ class _CompetitionEditScreenState
     // Hidratação do formulário no ciclo do provider (B4 #457): em vez de
     // mutar controllers dentro do `build` (side-effect que re-hidrataria a
     // cada refetch), escuta o provider e aplica UMA vez (guard `_appliedRemote`).
-    final competitionId = widget.competitionId;
-    if (competitionId != null) {
-      ref.listen<AsyncValue<Competition>>(
-        competitionProvider(competitionId),
-        (prev, next) {
-          final value = next.valueOrNull;
-          if (value != null && !_appliedRemote) {
-            _applyCompetition(value);
-          }
-        },
-      );
-    }
+    // NOTA: ref.listen movido para build() — Riverpod exige dentro de build.
   }
 
   /// Hidrata o formulário a partir da competição carregada (uma única vez).
@@ -138,6 +127,7 @@ class _CompetitionEditScreenState
             : c.description.text.trim(),
         startDate: c.startDate.text.isEmpty ? null : c.startDate.text,
         endDate: c.endDate.text.isEmpty ? null : c.endDate.text,
+        season: c.season.text.isEmpty ? null : c.season.text,
         status: _status,
         modality: c.modality,
         gender: c.gender?.toJson(),
@@ -195,6 +185,7 @@ class _CompetitionEditScreenState
             : c.description.text.trim(),
         startDate: c.startDate.text.isEmpty ? null : c.startDate.text,
         endDate: c.endDate.text.isEmpty ? null : c.endDate.text,
+        season: c.season.text.isEmpty ? null : c.season.text,
         status: CompetitionStatus.published,
         modality: c.modality,
         gender: c.gender?.toJson(),
@@ -224,26 +215,31 @@ class _CompetitionEditScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Hidratação do formulário via ref.listen dentro de build (B4 #457).
+    if (!_appliedRemote) {
+      final competitionId = widget.competitionId;
+      if (competitionId != null) {
+        ref.listen<AsyncValue<Competition>>(
+          competitionProvider(competitionId),
+          (prev, next) {
+            final value = next.valueOrNull;
+            if (value != null && !_appliedRemote) {
+              _applyCompetition(value);
+            }
+          },
+        );
+      }
+    }
     final asyncComp = ref.watch(competitionProvider(widget.competitionId!));
     return asyncComp.when(
       loading: () => AppScreen(
         title: 'Editar campeonato',
-        breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
-          const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-          if (widget.competition?.name != null)
-            BreadcrumbItem(widget.competition!.name),
-        ],
+        backLabel: widget.competition?.name,
         body: const AppLoading(message: 'Carregando campeonato...'),
       ),
       error: (error, stackTrace) => AppScreen(
         title: 'Editar campeonato',
-        breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
-          const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-          if (widget.competition?.name != null)
-            BreadcrumbItem(widget.competition!.name),
-        ],
+        backLabel: widget.competition?.name,
         body: AppErrorState(
           message: 'Não foi possível carregar o campeonato',
           onRetry: () =>
@@ -256,11 +252,7 @@ class _CompetitionEditScreenState
         if (!canEditCompetition(user, competition)) {
           return AppScreen(
             title: 'Editar campeonato',
-            breadcrumb: [
-              const BreadcrumbItem('Início', route: '/'),
-              const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-              BreadcrumbItem(competition.name),
-            ],
+            backLabel: widget.competition?.name,
             body: const AppEmptyState(
               message: 'Você não tem permissão para editar este campeonato.',
               icon: Icons.lock_outline,
@@ -271,11 +263,7 @@ class _CompetitionEditScreenState
         if (competition.status != CompetitionStatus.draft) {
           return AppScreen(
             title: 'Editar campeonato',
-            breadcrumb: [
-              const BreadcrumbItem('Início', route: '/'),
-              const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-              BreadcrumbItem(competition.name),
-            ],
+            backLabel: widget.competition?.name,
             body: AppEmptyState(
               message: competition.status == CompetitionStatus.published
                   ? 'Campeonato publicado — não é mais editável.'
@@ -300,11 +288,7 @@ class _CompetitionEditScreenState
       },
       child: AppScreen(
         title: 'Editar campeonato',
-        breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
-          const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-          if (c.name.text.isNotEmpty) BreadcrumbItem(c.name.text),
-        ],
+        backLabel: widget.competition?.name,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

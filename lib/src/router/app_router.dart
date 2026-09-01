@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,7 +37,9 @@ import '../screens/athlete_import_screen.dart';
 import '../screens/athlete_detail_screen.dart';
 import '../screens/athletes_screen.dart';
 import '../screens/rosters_screen.dart';
+import '../screens/roster_associate_club_screen.dart';
 import '../screens/team_roster_screen.dart';
+import '../screens/roster_add_athlete_screen.dart';
 import '../screens/roster_import_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/user_form_screen.dart';
@@ -48,7 +50,7 @@ import '../widgets/admin_shell.dart';
 ///
 /// A navegação autenticada vive dentro de uma
 /// [StatefulShellRoute.indexedStack] com uma branch por módulo (issue #427):
-/// o [AdminShell] exibe header global + breadcrumb, e cada branch preserva
+/// o [AdminShell] exibe header global, e cada branch preserva
 /// seu estado (filtros/seletores). Telas de autenticação ficam FORA da shell.
 class AppRouter {
   /// Cria a configuração do GoRouter da aplicação.
@@ -395,28 +397,44 @@ class AppRouter {
                 GoRoute(
                   path: '/teams',
                   name: 'teams',
-                  builder: (context, state) => TeamsScreen(
-                      lockedCompetitionId: state.extra is String
-                          ? state.extra as String
-                          : null),
+                  builder: (context, state) => const TeamsScreen(),
                   routes: [
                     GoRoute(
                       path: 'associate',
                       name: 'teamAssociate',
-                      builder: (context, state) => AssociateClubsScreen(
-                        lockedCompetitionId: state.extra is String
-                            ? state.extra as String
-                            : null,
-                      ),
+                      builder: (context, state) {
+                        // Extra pode ser: String (competitionId, fluxo
+                        // antigo) ou record ({competitionId, organizationId}).
+                        final extra = state.extra;
+                        final String? competitionId;
+                        final String? organizationId;
+                        if (extra is ({String? competitionId, String? organizationId})) {
+                          competitionId = extra.competitionId;
+                          organizationId = extra.organizationId;
+                        } else if (extra is String) {
+                          competitionId = extra;
+                          organizationId = null;
+                        } else {
+                          competitionId = null;
+                          organizationId = null;
+                        }
+                        return AssociateClubsScreen(
+                          lockedCompetitionId: competitionId,
+                          lockedOrganizationId: organizationId,
+                        );
+                      },
                     ),
                     GoRoute(
                       path: 'new',
                       name: 'teamNew',
-                      builder: (context, state) => TeamCreateScreen(
-                        competitionId: state.extra is String
+                      builder: (context, state) {
+                        final organizationId = state.extra is String
                             ? state.extra as String
-                            : null,
-                      ),
+                            : state.pathParameters['orgId'] ?? '';
+                        return TeamCreateScreen(
+                          organizationId: organizationId,
+                        );
+                      },
                     ),
                     GoRoute(
                       path: ':id',
@@ -454,8 +472,49 @@ class AppRouter {
                             return TeamRosterScreen(
                               team: team,
                               teamId: state.pathParameters['id'],
+                              competitionId: state.extra is String
+                                  ? state.extra as String
+                                  : '',
                             );
                           },
+                          routes: [
+                            GoRoute(
+                              path: 'add',
+                              name: 'rosterAddAthlete',
+                              builder: (context, state) {
+                                final extra = state.extra;
+                                final teamId = extra
+                                        is ({
+                                          String teamId,
+                                          String teamName,
+                                          String competitionId
+                                        })
+                                    ? extra.teamId
+                                    : state.pathParameters['id'] ?? '';
+                                final teamName = extra
+                                        is ({
+                                          String teamId,
+                                          String teamName,
+                                          String competitionId
+                                        })
+                                    ? extra.teamName
+                                    : 'Elenco';
+                                final competitionId = extra
+                                        is ({
+                                          String teamId,
+                                          String teamName,
+                                          String competitionId
+                                        })
+                                    ? extra.competitionId
+                                    : '';
+                                return RosterAddAthleteScreen(
+                                  teamId: teamId,
+                                  teamName: teamName,
+                                  competitionId: competitionId,
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -522,13 +581,30 @@ class AppRouter {
                   builder: (context, state) => const RostersScreen(),
                   routes: [
                     GoRoute(
-                      path: 'import',
-                      name: 'rosterImport',
-                      builder: (context, state) => RosterImportScreen(
-                        teamId: state.extra is String
+                      path: 'associate',
+                      name: 'rosterAssociateClub',
+                      builder: (context, state) => RosterAssociateClubScreen(
+                        competitionId: state.extra is String
                             ? state.extra as String
                             : null,
                       ),
+                    ),
+                    GoRoute(
+                      path: 'import',
+                      name: 'rosterImport',
+                      builder: (context, state) {
+                        final extra = state.extra;
+                        return RosterImportScreen(
+                          teamId: extra is String ? extra : null,
+                          competitionId: extra
+                                  is ({
+                                    String teamId,
+                                    String competitionId
+                                  })
+                              ? extra.competitionId
+                              : null,
+                        );
+                      },
                     ),
                   ],
                 ),

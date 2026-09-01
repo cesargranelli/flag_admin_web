@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de telas — Flag Admin Web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5; --primary-soft: #EEF2FF; --text: #111111;
+      --text-secondary: #66707A; --line: #E3E7EC; --surface: #FFFFFF;
+      --gray-fill: #ECF1F6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); background: #F8FAFC; line-height: 1.6; }
+    .nav { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; padding: 0 24px; overflow-x: auto; }
+    .nav a { padding: 14px 14px; font-size: 14px; font-weight: 500; color: var(--text-secondary); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .nav a:hover { color: var(--primary); }
+    .nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    h2 { font-size: 22px; font-weight: 700; margin: 32px 0 12px; letter-spacing: -0.3px; }
+    p { color: var(--text-secondary); font-size: 15px; margin-bottom: 12px; }
+    code { background: var(--gray-fill); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 12.5px; }
+    .filter { margin: 16px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; cursor: pointer; user-select: none; }
+    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; font-size: 14px; }
+    th { text-align: left; padding: 12px 14px; background: var(--gray-fill); font-weight: 600; font-size: 13px; }
+    td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+    tr:hover td { background: #F8FAFC; }
+    .module-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: 12px; font-weight: 600; }
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--text-secondary); font-size: 13px; text-align: center; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">Visão geral</a>
+    <a href="fluxo-de-telas.html">Fluxo de telas</a>
+    <a href="telas.html" class="active">Catálogo de telas</a>
+    <a href="navegacao.html">Navegação</a>
+  </nav>
+  <div class="container">
+    <h1>Catálogo de telas</h1>
+    <p>Todas as telas do app, com a <strong>classe Flutter</strong>, arquivo-fonte e rota(s) que atendem.</p>
+
+    <h2>Autenticação</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>LoginScreen</code></td><td><code>screens/login_screen.dart</code></td><td><code>/login</code></td><td>Login (e-mail/senha), manter conectado, links para senha/cadastro.</td></tr>
+        <tr><td><code>SignupScreen</code></td><td><code>screens/signup_screen.dart</code></td><td><code>/signup</code></td><td>Cadastro de organizador com pendência de aprovação.</td></tr>
+        <tr><td><code>ForgotPasswordScreen</code></td><td><code>screens/forgot_password_screen.dart</code></td><td><code>/forgot-password</code></td><td>Passo 1 do "esqueci a senha" (envio de link).</td></tr>
+        <tr><td><code>ResetPasswordScreen</code></td><td><code>screens/reset_password_screen.dart</code></td><td><code>/reset-password?token=</code></td><td>Passo 2: define nova senha com token do e-mail.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Home</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>AdminHomeScreen</code></td><td><code>screens/home_screen.dart</code></td><td><code>/</code></td><td>Grid de cards dos módulos.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Organizações</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>OrganizationsScreen</code></td><td><code>screens/organizations_screen.dart</code></td><td><code>/organizations</code></td><td>Lista organizações em grid, filtro por tipo, desativar/reativar (ADMIN).</td></tr>
+        <tr><td><code>OrganizationFormScreen</code></td><td><code>screens/organization_form_screen.dart</code></td><td><code>/organizations/new</code></td><td>Criação de organização (V250: sem edição).</td></tr>
+        <tr><td><code>OrganizationDetailScreen</code></td><td><code>screens/organization_detail_screen.dart</code></td><td><code>/organizations/:id</code></td><td>Detalhe em página única: identificação, presidente, contato, localização, identidade + "Clubes" (associados) ou "Times".</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Campeonatos</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>CompetitionsScreen</code></td><td><code>screens/competitions_screen.dart</code></td><td><code>/competitions</code></td><td>Lista campeonatos em grid, desativar/reativar (ADMIN).</td></tr>
+        <tr><td><code>CompetitionCreateScreen</code></td><td><code>screens/competition_create_screen.dart</code></td><td><code>/competitions/new</code></td><td>Criação em página única: identidade, modalidade, categoria, temporada, conferências, agrupamento.</td></tr>
+        <tr><td><code>CompetitionDetailScreen</code></td><td><code>screens/competition_detail_screen.dart</code></td><td><code>/competitions/:id</code></td><td>Detalhe com seções e ações por status (editar/encerrar/rodadas/inscrever times).</td></tr>
+        <tr><td><code>CompetitionEditScreen</code></td><td><code>screens/competition_edit_screen.dart</code></td><td><code>/competitions/:id/edit</code></td><td>Edição (só rascunho) + ação "Publicar".</td></tr>
+        <tr><td><code>GroupingsScreen</code></td><td><code>screens/groupings_screen.dart</code></td><td><code>/groupings</code></td><td>Conferências (cards expansíveis) e divisões por campeonato, via modais.</td></tr>
+        <tr><td><code>RoundsScreen</code></td><td><code>screens/rounds_screen.dart</code></td><td><code>/rounds</code></td><td>Rodadas por campeonato (dropdown).</td></tr>
+        <tr><td><code>RoundFormScreen</code></td><td><code>screens/round_form_screen.dart</code></td><td><code>/rounds/new</code>, <code>/rounds/:id/edit</code></td><td>Formulário de criação/edição de rodada.</td></tr>
+        <tr><td><code>RoundDetailScreen</code></td><td><code>screens/round_detail_screen.dart</code></td><td><code>/rounds/:id</code></td><td>Detalhe da rodada + atalho "Confrontos".</td></tr>
+        <tr><td><code>GamesScreen</code></td><td><code>screens/games_screen.dart</code></td><td><code>/games</code></td><td>Jogos por campeonato/rodada (dropdowns), criar/importar.</td></tr>
+        <tr><td><code>GameFormScreen</code></td><td><code>screens/game_form_screen.dart</code></td><td><code>/games/new</code>, <code>/games/:id/edit</code></td><td>Formulário de criação/edição de jogo.</td></tr>
+        <tr><td><code>GameDetailScreen</code></td><td><code>screens/game_detail_screen.dart</code></td><td><code>/games/:id</code></td><td>Detalhe do jogo: confronto, placar, status.</td></tr>
+        <tr><td><code>GameImportScreen</code></td><td><code>screens/game_import_screen.dart</code></td><td><code>/games/import</code></td><td>Importação em lote de jogos (CSV/TXT).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Campos</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>VenuesScreen</code></td><td><code>screens/venues_screen.dart</code></td><td><code>/venues</code></td><td>Lista campos em grid com busca.</td></tr>
+        <tr><td><code>VenueFormScreen</code></td><td><code>screens/venue_form_screen.dart</code></td><td><code>/venues/new</code>, <code>/venues/:id/edit</code></td><td>Formulário de criação/edição de campo.</td></tr>
+        <tr><td><code>VenueDetailScreen</code></td><td><code>screens/venue_detail_screen.dart</code></td><td><code>/venues/:id</code></td><td>Detalhe do campo + "Abrir no mapa".</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Times</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>TeamsScreen</code></td><td><code>screens/teams_screen.dart</code></td><td><code>/teams</code></td><td>Lista todos os times (somente visualização; criação no detalhe do clube).</td></tr>
+        <tr><td><code>TeamCreateScreen</code></td><td><code>screens/team_create_screen.dart</code></td><td><code>/teams/new</code></td><td>Criação de time dentro de um clube.</td></tr>
+        <tr><td><code>TeamDetailScreen</code></td><td><code>screens/team_detail_screen.dart</code></td><td><code>/teams/:id</code></td><td>Detalhe do time + seção "Elencos" (configurar/desativar).</td></tr>
+        <tr><td><code>TeamEditScreen</code></td><td><code>screens/team_edit_screen.dart</code></td><td><code>/teams/:id/edit</code></td><td>Edição de time.</td></tr>
+        <tr><td><code>AssociateClubsScreen</code></td><td><code>screens/associate_clubs_screen.dart</code></td><td><code>/teams/associate</code></td><td>Inscrição de times em campeonato (alvo travado ou dropdowns).</td></tr>
+        <tr><td><code>TeamRosterScreen</code></td><td><code>screens/team_roster_screen.dart</code></td><td><code>/teams/:id/roster</code></td><td>Elenco do time na competição: atletas, remover, adicionar, importar.</td></tr>
+        <tr><td><code>RosterAddAthleteScreen</code></td><td><code>screens/roster_add_athlete_screen.dart</code></td><td><code>/teams/:id/roster/add</code></td><td>Adiciona atletas ao elenco (com apelido/número via dialog).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Atletas</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>AthletesScreen</code></td><td><code>screens/athletes_screen.dart</code></td><td><code>/athletes</code></td><td>Lista atletas em grid, desativar/reativar (ADMIN), importar.</td></tr>
+        <tr><td><code>AthleteFormScreen</code></td><td><code>screens/athlete_form_screen.dart</code></td><td><code>/athletes/new</code>, <code>/athletes/:id/edit</code></td><td>Formulário de criação/edição de atleta (até 3 posições).</td></tr>
+        <tr><td><code>AthleteDetailScreen</code></td><td><code>screens/athlete_detail_screen.dart</code></td><td><code>/athletes/:id</code></td><td>Detalhe do atleta (dados pessoais, posição, camisa, gênero, idade).</td></tr>
+        <tr><td><code>AthleteImportScreen</code></td><td><code>screens/athlete_import_screen.dart</code></td><td><code>/athletes/import</code></td><td>Importação em lote de atletas (CSV) com validação prévia.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Elencos</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>RostersScreen</code></td><td><code>screens/rosters_screen.dart</code></td><td><code>/rosters</code></td><td>Elencos por campeonato: times inscritos em cards expansíveis com atletas.</td></tr>
+        <tr><td><code>RosterAssociateClubScreen</code></td><td><code>screens/roster_associate_club_screen.dart</code></td><td><code>/rosters/associate</code></td><td>Placeholder ("tela em reformulação").</td></tr>
+        <tr><td><code>RosterImportScreen</code></td><td><code>screens/roster_import_screen.dart</code></td><td><code>/rosters/import</code></td><td>Importação em lote de atletas para o elenco (CSV).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Aprovações e Usuários (ADMIN)</h2>
+    <table>
+      <thead><tr><th>Classe</th><th>Arquivo</th><th>Rota</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td><code>ApprovalsScreen</code></td><td><code>screens/approvals_screen.dart</code></td><td><code>/approvals</code></td><td>Aprovar/rejeitar contas pendentes (ADMIN).</td></tr>
+        <tr><td><code>UsersScreen</code></td><td><code>screens/users_screen.dart</code></td><td><code>/users</code></td><td>Lista usuários com papel (ADMIN).</td></tr>
+        <tr><td><code>UserFormScreen</code></td><td><code>screens/user_form_screen.dart</code></td><td><code>/users/new</code></td><td>Criação de usuário (ADMIN).</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="footer">Flag Admin Web — documentação gerada a partir do código-fonte.</div>
+</body>
+</html>

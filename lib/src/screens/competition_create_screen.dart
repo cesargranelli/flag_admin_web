@@ -1,6 +1,6 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -104,6 +104,7 @@ class _CompetitionCreateScreenState
             : c.description.text.trim(),
         startDate: c.startDate.text.isEmpty ? null : c.startDate.text,
         endDate: c.endDate.text.isEmpty ? null : c.endDate.text,
+        season: c.season.text.isEmpty ? null : c.season.text,
         modality: c.modality,
         gender: c.gender?.toJson(),
         ageGroup: c.ageGroup?.toJson(),
@@ -111,6 +112,11 @@ class _CompetitionCreateScreenState
 
       ref.invalidate(competitionsProvider);
       ref.invalidate(competitionProvider(created.id));
+
+      if (!mounted) return;
+
+      // Persiste conferências/divisões adicionadas antes do rascunho.
+      await c.flushPending(created.id);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -154,6 +160,7 @@ class _CompetitionCreateScreenState
           description: created.description,
           startDate: formatIsoDate(created.startDate),
           endDate: formatIsoDate(created.endDate),
+          season: created.season,
           status: created.status,
           modality: created.modality,
           gender: created.gender,
@@ -200,11 +207,6 @@ class _CompetitionCreateScreenState
       },
       child: AppScreen(
         title: 'Novo campeonato',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-          BreadcrumbItem('Novo'),
-        ],
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -47,3 +47,19 @@ String formatBrShortDateTime(DateTime? value) {
 String formatBrTime(DateTime value) =>
     '${value.hour.toString().padLeft(2, '0')}:'
     '${value.minute.toString().padLeft(2, '0')}';
+
+/// Idade completa em anos a partir de uma data de nascimento, considerando o
+/// aniversário do ano corrente (a idade é o ano corrente menos o ano de
+/// nascimento, subtraindo 1 se o aniversário ainda não ocorreu este ano).
+/// `null` → `null`.
+int? ageFromBirthDate(DateTime? birthDate) {
+  if (birthDate == null) return null;
+  final today = DateTime.now();
+  final local = birthDate.toLocal();
+  var age = today.year - local.year;
+  if (today.month < local.month ||
+      (today.month == local.month && today.day < local.day)) {
+    age--;
+  }
+  return age < 0 ? 0 : age;
+}

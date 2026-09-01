@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../auth/competition_permissions.dart';
 import '../providers/providers.dart';
 import '../utils/date_formats.dart';
+import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
 /// Detalhe de um campeonato em página única (#455): todas as seções
@@ -38,12 +39,6 @@ class _CompetitionDetailScreenState
 
     return AppScreen(
       title: widget.competition?.name ?? 'Campeonato',
-      breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        if (widget.competition?.name != null)
-          BreadcrumbItem(widget.competition!.name),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -110,9 +105,9 @@ class _CompetitionDetailScreenState
               child: _estruturaCard(context, comp, canEdit, isDraft),
             ),
             _section(
-              title: 'Clubes',
+              title: 'Times',
               icon: Icons.groups,
-              child: _clubsCard(context, comp, canEdit, isDraft),
+              child: _teamsCard(context, comp, canEdit, isDraft),
             ),
           ],
         ),
@@ -145,9 +140,18 @@ class _CompetitionDetailScreenState
     bool isDraft,
   ) {
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
       child: Container(
         constraints: const BoxConstraints(minHeight: 160),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -166,26 +170,22 @@ class _CompetitionDetailScreenState
                     size: 36,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         comp.name,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         comp.organizationName ??
                             (comp.organizationId != null
                                 ? 'Organização #${comp.organizationId}'
                                 : ''),
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: AppTextStyles.paragraph.copyWith(
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -199,6 +199,8 @@ class _CompetitionDetailScreenState
             const SizedBox(height: 16),
             // V250: edição permitida apenas enquanto rascunho.
             // Issue #261: e apenas pelo criador ou ADMIN.
+            // Status lifecycle: publicado pode ser encerrado (PUBLISHED →
+            // FINISHED) por quem pode editar.
             if (isDraft && canEdit)
               Wrap(
                 spacing: 8,
@@ -226,11 +228,26 @@ class _CompetitionDetailScreenState
                   ),
                 ],
               )
+            else if (canEdit && comp.status == CompetitionStatus.published)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  KicksterButton(
+                    label: 'Encerrar campeonato',
+                    icon: Icons.flag,
+                    variant: KicksterButtonVariant.outline,
+                    onPressed: () => _finishCompetition(context, comp),
+                  ),
+                ],
+              )
             else
               Text(
                 isDraft
                     ? 'Apenas o criador do campeonato pode editá-lo.'
-                    : 'Campeonato publicado — não é mais editável.',
+                    : comp.status == CompetitionStatus.finished
+                        ? 'Campeonato encerrado — não é mais editável.'
+                        : 'Campeonato publicado — não é mais editável.',
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -345,22 +362,22 @@ class _CompetitionDetailScreenState
     );
   }
 
-  /// Seção 7 — Clubes (#377): lista simples dos clubes (organizações)
-  /// associados ao campeonato + botão para a tela de associação.
-  Widget _clubsCard(
+  /// Seção 7 — Times (#12): lista dos times inscritos no campeonato +
+  /// botão para a tela de inscrição. O time é a unidade inscrita (não a
+  /// organização), então não há mais resolução `Team.organizationId` → `Organization`.
+  Widget _teamsCard(
     BuildContext context,
     Competition comp,
     bool canEdit,
     bool isDraft,
   ) {
     final teams = ref.watch(teamsProvider(comp.id));
-    final organizations = ref.watch(organizationsProvider);
 
     return teams.when(
       loading: () => AppInfoCard(
         children: const [
           Text(
-            'Carregando clubes...',
+            'Carregando times...',
             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
         ],
@@ -368,62 +385,56 @@ class _CompetitionDetailScreenState
       error: (e, s) => AppInfoCard(
         children: const [
           Text(
-            'Não foi possível carregar os clubes.',
+            'Não foi possível carregar os times.',
             style: TextStyle(color: AppColors.danger, fontSize: 13),
           ),
         ],
       ),
-      data: (items) {
-        final orgs = organizations.valueOrNull ?? const <Organization>[];
-        final orgById = {for (final o in orgs) o.id: o};
-        final clubs = items
-            .map((t) => orgById[t.organizationId ?? ''])
-            .whereType<Organization>()
-            .toList();
-
-        return AppInfoCard(
-          children: [
-            if (clubs.isEmpty)
-              const Text(
-                'Nenhum clube associado.',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              )
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final club in clubs)
-                    _clubChip(
-                      club.tradeName,
-                      subtitle: club.city?.isNotEmpty == true ? club.city : null,
-                    ),
-                ],
-              ),
-            const SizedBox(height: 12),
-            if (canEdit && isDraft)
-              KicksterButton(
-                label: 'Associar clubes',
-                icon: Icons.groups,
-                onPressed: () {
-                  ref.read(selectedCompetitionProvider.notifier).state =
-                      comp.id;
-                  context.go('/teams/associate', extra: comp.id);
-                },
-              )
-            else
-              const Text(
-                'Apenas o criador do campeonato pode associar clubes.',
-                style:
-                    TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              ),
-          ],
-        );
-      },
+      data: (items) => AppInfoCard(
+        children: [
+          if (items.isEmpty)
+            const Text(
+              'Nenhum time inscrito.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final team in items)
+                  _teamChip(
+                    team.name,
+                    subtitle:
+                        team.shortName?.isNotEmpty == true
+                        ? team.shortName
+                        : null,
+                  ),
+              ],
+            ),
+          const SizedBox(height: 12),
+          if (canEdit && isDraft)
+            KicksterButton(
+              label: 'Inscrever times',
+              icon: Icons.add,
+              onPressed: () {
+                ref.read(selectedCompetitionProvider.notifier).state =
+                    comp.id;
+                context.push('/teams/associate', extra: comp.id);
+              },
+            )
+          else
+            const Text(
+              'Apenas o criador do campeonato pode inscrever times.',
+              style:
+                  TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+        ],
+      ),
     );
   }
 
-  Widget _clubChip(String name, {String? subtitle}) {
+  Widget _teamChip(String name, {String? subtitle}) {
     final label = subtitle == null ? name : '$name · $subtitle';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -564,6 +575,37 @@ class _CompetitionDetailScreenState
       CompetitionStatus.disabled => AppColors.textSecondary,
     };
     return KicksterBadge(label: _statusLabel(status), color: color);
+  }
+
+  /// Encerra um campeonato publicado (PUBLISHED → FINISHED).
+  ///
+  /// Ação irreversível: pede confirmação em modo danger e, após a mutação,
+  /// invalida a listagem e o detalhe para refletir o novo status.
+  Future<void> _finishCompetition(
+    BuildContext context,
+    Competition comp,
+  ) async {
+    final ok = await showKicksterConfirm(
+      context: context,
+      title: 'Encerrar campeonato',
+      content: 'O campeonato não poderá mais ser editado após encerrado.',
+      confirmLabel: 'Encerrar',
+      danger: true,
+    );
+    if (ok != true || !context.mounted) return;
+    await runMutation(
+      context,
+      ref: ref,
+      scope: 'competition-finish',
+      action: () => ref.read(competitionApiProvider).finish(comp.id),
+      successMessage: 'Campeonato encerrado.',
+      errorMessage: 'Não foi possível encerrar o campeonato.',
+      progressId: comp.id,
+      onSuccess: () {
+        ref.invalidate(competitionsProvider);
+        ref.invalidate(competitionProvider(comp.id));
+      },
+    );
   }
 
   String _statusLabel(CompetitionStatus status) => switch (status) {

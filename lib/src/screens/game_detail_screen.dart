@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,11 +23,6 @@ class GameDetailScreen extends ConsumerWidget {
 
     return AppScreen(
       title: game?.homeTeamName ?? 'Jogo',
-      breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.games, route: '/games'),
-        if (game?.homeTeamName != null) BreadcrumbItem(game!.homeTeamName!),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -67,8 +62,17 @@ class GameDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -77,8 +81,7 @@ class GameDetailScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             '${game.homeTeamName ?? 'Casa'} x ${game.awayTeamName ?? 'Fora'}',
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w700),
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ),
                         _statusChip(game.status),

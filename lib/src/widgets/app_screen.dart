@@ -1,107 +1,199 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
-import 'kickster_breadcrumb.dart';
-
-/// Item da trilha de navegação do [AppScreen].
-class BreadcrumbItem {
-  const BreadcrumbItem(this.label, {this.route, this.icon});
-
-  final String label;
-
-  /// Rota da listagem do módulo. Quando nula, o item é texto estático.
-  final String? route;
-
-  /// Ícone opcional antes do texto (ex: home_outlined).
-  final IconData? icon;
-}
 
 /// Scaffold padrão das telas autenticadas do Admin Web.
 ///
 /// - **Header pessoal**: avatar + nome + greeting + home icon (sticky)
-/// - **Breadcrumb** (quando houver): abaixo do header pessoal
+/// - **Barra superior** (sticky, abaixo do header pessoal, apenas quando há
+///   tela anterior na pilha — `canPop`): link "Voltar para {label}" à
+///   esquerda (ícone + rótulo num único [InkWell]) e o **título da página
+///   centralizado** no meio da barra.
 /// - **Page Body** (scrollável, padding 24px): conteúdo da tela
 class AppScreen extends StatelessWidget {
   const AppScreen({
     super.key,
     required this.title,
     required this.body,
-    this.breadcrumb,
+    this.backLabel,
     this.showUserHeader = true,
     this.scrollable = true,
   });
 
   final String title;
   final Widget body;
-  final List<BreadcrumbItem>? breadcrumb;
+
+  /// Rótulo da página para a qual vamos voltar (a tela anterior na pilha).
+  ///
+  /// Telas que conhecem o nome real da página anterior o informam aqui.
+  /// Quando `null`, [AppScreen] resolve o rótulo a partir do nome da rota
+  /// anterior (fallback por módulo) ou usa 'Voltar'.
+  final String? backLabel;
+
   final bool showUserHeader;
   final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
-    final crumbs = breadcrumb ?? const <BreadcrumbItem>[];
+    final canPop = GoRouter.of(context).canPop();
+    // Tela atual (path) — a home (/) é a raiz e não mostra botão voltar.
+    final currentPath =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    final isHome = currentPath == '/';
+    final backLabel = _resolveBackLabel(context, this.backLabel);
+    // Sem histórico: volta para a home (ex.: listagens vindas da home via
+    // `go`, sem pilha). Sem rótulo conhecido: mostra apenas "Voltar".
+    final fallbackHome = !canPop && !isHome;
+    final backText = fallbackHome
+        ? 'Voltar para Início'
+        : (backLabel == null ? 'Voltar' : 'Voltar para $backLabel');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Header pessoal (sticky)
         if (showUserHeader) const _UserHeader(),
+        // Barra superior (sticky — fixa acima do conteúdo scrollável):
+        // link "Voltar para {label}" à esquerda + título centralizado.
+        // Três colunas de largura igual (flex 1) — o título fica no centro
+        // real da barra independente da largura do botão voltar.
+        if (!isHome)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Row(
+              children: [
+                // Coluna esquerda: botão voltar (conteúdo pode variar).
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Semantics(
+                      button: true,
+                      label: backText,
+                      child: InkWell(
+                        onTap: () =>
+                            canPop ? context.pop() : context.go('/'),
+                        borderRadius: BorderRadius.circular(8),
+                        hoverColor:
+                            AppColors.primary.withValues(alpha: 0.08),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.arrow_back,
+                                size: 20,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  backText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Coluna central: título realmente centralizado.
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                ),
+                // Coluna direita: espaçamento de balanceamento (sem botão).
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+          ),
         if (scrollable)
-          // Page body (breadcrumb + conteúdo, scrollável)
+          // Page body (somente conteúdo, scrollável — nav fixa acima)
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: _buildBody(crumbs),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: body,
             ),
           )
         else
-          // Page body (breadcrumb + conteúdo) em altura finita (Expanded):
-          // usado pelas telas de listagem para permitir scroll raiz LIGHT
-          // (virtualização real via altura finita nos grids/lists).
+          // Page body em altura finita (Expanded): usado pelas telas de
+          // listagem para permitir scroll raiz LIGHT (virtualização real via
+          // altura finita nos grids/lists).
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: _buildBody(crumbs),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: body,
             ),
           ),
       ],
     );
   }
 
-  Widget _buildBody(List<BreadcrumbItem> crumbs) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Breadcrumb inline (sem barra separada)
-        if (crumbs.isNotEmpty) ...[
-          KicksterBreadcrumb(
-            items: [
-              for (var i = 0; i < crumbs.length; i++)
-                KicksterBreadcrumbItem(
-                  label: crumbs[i].label,
-                  route: crumbs[i].route,
-                  icon: crumbs[i].icon ??
-                      (i == 0 && crumbs[i].route == '/'
-                          ? Icons.home_outlined
-                          : null),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
-        // Quando scrollable=false, o body precisa receber altura finita via
-        // Expanded para que telas com Expanded interno (grids/lists) não
-        // recebam constraints ilimitadas (fix "RenderFlex children have
-        // non-zero flex but incoming height constraints are unbounded").
-        if (scrollable)
-          body
-        else
-          Expanded(child: body),
-      ],
-    );
+  /// Resolve o rótulo da página anterior da barra superior.
+  ///
+  /// Prioridade:
+  /// 1. [backLabel] informado pela tela (nome real conhecido).
+  /// 2. Nome da rota anterior na pilha (fallback por módulo).
+  /// 3. `null` — sem rótulo conhecido (o botão mostra apenas "Voltar").
+  static String? _resolveBackLabel(BuildContext context, String? backLabel) {
+    if (backLabel != null && backLabel.trim().isNotEmpty) return backLabel;
+
+    final matches = GoRouter.of(context)
+        .routerDelegate
+        .currentConfiguration
+        .matches;
+    final prev = matches.length >= 2 ? matches[matches.length - 2] : null;
+    return _previousRouteLabel(prev);
+  }
+
+  /// Mapeia o nome da rota anterior para um rótulo de módulo (fallback).
+  /// Retorna `null` quando não há rótulo conhecido (ex.: rota desconhecida).
+  static String? _previousRouteLabel(RouteMatchBase? prev) {
+    final name =
+        prev?.route is GoRoute ? (prev!.route as GoRoute).name : null;
+    if (name == null) return null;
+    return switch (name) {
+      'teams' => 'Times',
+      'teamDetail' => 'Time',
+      'organizations' => 'Organizações',
+      'organizationDetail' => 'Organização',
+      'competitions' => 'Campeonatos',
+      'competitionDetail' => 'Campeonato',
+      'athletes' => 'Atletas',
+      'athleteDetail' => 'Atleta',
+      'venues' => 'Campos',
+      'venueDetail' => 'Campo',
+      'rounds' => 'Rodadas',
+      'roundDetail' => 'Rodada',
+      'games' => 'Jogos',
+      'gameDetail' => 'Jogo',
+      'rosters' => 'Elencos',
+      'teamRoster' => 'Elenco',
+      'users' => 'Usuários',
+      'approvals' => 'Aprovações',
+      'home' => 'Início',
+      _ => null,
+    };
   }
 }
 

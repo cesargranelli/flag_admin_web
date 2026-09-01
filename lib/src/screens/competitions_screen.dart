@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,10 +48,6 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
     return AppScreen(
       title: 'Campeonatos',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Campeonatos'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -62,7 +58,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
               KicksterButton(
                 label: 'Novo',
                 icon: Icons.add,
-                onPressed: () => context.go('/competitions/new'),
+                onPressed: () => context.push('/competitions/new'),
               ),
             ],
           ),
@@ -88,7 +84,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
                     action: KicksterButton(
                       label: 'Criar campeonato',
                       icon: Icons.add,
-                      onPressed: () => context.go('/competitions/new'),
+                      onPressed: () => context.push('/competitions/new'),
                     ),
                   );
                 }

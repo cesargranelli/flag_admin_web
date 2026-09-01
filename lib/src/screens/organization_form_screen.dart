@@ -1,6 +1,6 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,11 +210,6 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
       },
       child: AppScreen(
         title: 'Nova organização',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-          BreadcrumbItem('Nova'),
-        ],
         body: AppLayout.form(
           child: Form(
                 key: _formKey,
@@ -346,6 +341,14 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
 
   Widget _card(String? title, List<Widget> children) {
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),

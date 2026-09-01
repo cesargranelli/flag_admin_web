@@ -1,6 +1,6 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -59,6 +59,13 @@ final organizationsAdminProvider =
 /// Detalhe de uma organização por id.
 final organizationProvider = FutureProvider.autoDispose.family<Organization, String>(
   (ref, id) => ref.watch(organizationApiProvider).getById(id),
+);
+
+/// Clubes/universidades associados a uma federação/liga/associação (#497).
+final associatedClubsProvider =
+    FutureProvider.autoDispose.family<List<Organization>, String>(
+  (ref, organizationId) =>
+      ref.watch(organizationApiProvider).listClubs(organizationId),
 );
 
 /// Serviço de campeonatos.
@@ -124,10 +131,40 @@ final divisionsProvider = FutureProvider.autoDispose.family<List<Division>, Stri
       ref.watch(divisionApiProvider).listByCompetition(competitionId),
 );
 
-/// Times de um campeonato.
+/// Times de um campeonato (via competition_team).
+///
+/// O backend retorna `CompetitionTeam`; mapeamos para `Team` para que os
+/// consumidores existentes (games, times, elencos, etc.) continuem funcionando.
 final teamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
-  (ref, competitionId) =>
-      ref.watch(teamApiProvider).listByCompetition(competitionId),
+  (ref, competitionId) async {
+    final items = await ref
+        .watch(teamApiProvider)
+        .listByCompetition(competitionId);
+    return items
+        .map(
+          (ct) => Team(
+            id: ct.teamId,
+            organizationId: ct.organizationId ?? '',
+            name: ct.teamName ?? '',
+            shortName: null,
+            sportName: null,
+            logoUrl: ct.teamLogoUrl,
+            status: 'ACTIVE',
+          ),
+        )
+        .toList(growable: false);
+  },
+);
+
+/// Times de um clube/universidade.
+final clubTeamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
+  (ref, organizationId) =>
+      ref.watch(teamApiProvider).listByOrganization(organizationId),
+);
+
+/// Todos os times cadastrados na plataforma (home → módulo Times).
+final allTeamsProvider = FutureProvider<List<Team>>(
+  (ref) => ref.watch(teamApiProvider).listAll(),
 );
 
 /// Detalhe de um time por id.
@@ -192,9 +229,19 @@ final rosterApiProvider = Provider<RosterApi>(
 /// Time selecionado na tela de elencos.
 final selectedTeamProvider = StateProvider<String?>((ref) => null);
 
-/// Elenco de um time.
-final rosterProvider = FutureProvider.autoDispose.family<List<RosterEntry>, String>(
-  (ref, teamId) => ref.watch(rosterApiProvider).listByTeam(teamId),
+/// Elenco de um time numa competição (por teamId + competitionId).
+final teamRosterProvider =
+    FutureProvider.autoDispose.family<List<RosterEntry>,
+        ({String teamId, String competitionId})>(
+  (ref, args) => ref
+      .watch(rosterApiProvider)
+      .listByTeamAndCompetition(args.teamId, args.competitionId),
+);
+
+/// Elencos (rosters) de um time, independente da competição.
+final teamRostersProvider =
+    FutureProvider.autoDispose.family<List<Roster>, String>(
+  (ref, teamId) => ref.watch(rosterApiProvider).listRostersByTeam(teamId),
 );
 
 /// Lista de usuários (somente ADMIN).

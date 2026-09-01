@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
 import 'package:flutter/material.dart';
 
 /// Card selecionável do design system (issues #287/#290–#300).
@@ -37,8 +37,15 @@ class SelectableCard extends StatelessWidget {
         selected: selected,
         enabled: enabled,
         child: Card(
+          elevation: 1,
+          shadowColor: AppColors.black.withValues(alpha: 0.08),
+          color: AppColors.surface,
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.line, width: 1),
+          ),
           child: InkWell(
             onTap: enabled ? onTap : null,
             child: Container(

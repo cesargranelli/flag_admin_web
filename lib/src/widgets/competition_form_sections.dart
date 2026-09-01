@@ -3,8 +3,8 @@
 /// que preservam as divergências legítimas entre as duas telas.
 library;
 
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,6 +30,14 @@ Widget competitionSection({
       KicksterSectionTitle(title: title, icon: icon),
       const SizedBox(height: 12),
       Card(
+        elevation: 1,
+        shadowColor: AppColors.black.withValues(alpha: 0.08),
+        color: AppColors.surface,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.line, width: 1),
+        ),
         margin: EdgeInsets.zero,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -559,6 +567,13 @@ class CompetitionSeasonSection extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        _groupLabel('Temporada (obrigatório)'),
+        const SizedBox(height: 8),
+        KicksterInput(
+          label: 'Ex.: 2026, 2026-Q1',
+          controller: c.season,
+        ),
         if (showSummary) ...[
           const SizedBox(height: 20),
           _groupLabel('Resumo'),
@@ -598,7 +613,7 @@ class CompetitionSeasonSection extends ConsumerWidget {
 ///
 /// [competitionId] `null` (create antes do rascunho) mostra a dica "Crie o
 /// campeonato acima..." e desabilita o input/botão — no edit nunca é null.
-class CompetitionConferencesSection extends ConsumerWidget {
+class CompetitionConferencesSection extends ConsumerStatefulWidget {
   const CompetitionConferencesSection({
     super.key,
     required this.controller,
@@ -611,22 +626,25 @@ class CompetitionConferencesSection extends ConsumerWidget {
   final String? competitionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final c = controller;
+  ConsumerState<CompetitionConferencesSection> createState() =>
+      _CompetitionConferencesSectionState();
+}
+
+class _CompetitionConferencesSectionState
+    extends ConsumerState<CompetitionConferencesSection> {
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.controller;
+    final competitionId = widget.competitionId;
     final conferences = competitionId == null
         ? const AsyncValue<List<Conference>>.data([])
-        : ref.watch(conferencesProvider(competitionId!));
+        : ref.watch(conferencesProvider(competitionId));
+    final hasPending = c.pendingConferences.isNotEmpty;
+    final hasPersisted = conferences.valueOrNull?.isNotEmpty ?? false;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (competitionId == null) ...[
-          _hint(
-            'Crie o campeonato acima para habilitar a configuração '
-            'da estrutura.',
-          ),
-          const SizedBox(height: 12),
-        ],
         _groupLabel('Conferências'),
         const SizedBox(height: 4),
         _hint(
@@ -663,7 +681,6 @@ class CompetitionConferencesSection extends ConsumerWidget {
                 child: KicksterInput(
                   label: 'Nome da conferência',
                   controller: c.conferenceName,
-                  enabled: competitionId != null,
                   onFieldSubmitted: (_) => c.addConference(),
                 ),
               ),
@@ -671,25 +688,36 @@ class CompetitionConferencesSection extends ConsumerWidget {
               KicksterButton(
                 label: 'Adicionar',
                 icon: Icons.add,
-                onPressed: competitionId == null || c.submitting
-                    ? null
-                    : c.addConference,
+                onPressed: c.submitting ? null : c.addConference,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          conferences.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            error: (e, s) => const Text(
-              'Não foi possível carregar as conferências.',
-              style: TextStyle(color: AppColors.danger),
-            ),
-            data: (items) => items.isEmpty
-                ? _hint('Nenhuma conferência adicionada ainda.')
-                : Wrap(
+          if (!hasPending && !hasPersisted)
+            _hint('Nenhuma conferência adicionada ainda.')
+          else ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // Pendentes (criação, antes do rascunho)
+                for (final name in c.pendingConferences)
+                  _removableChip(
+                    label: name,
+                    icon: Icons.account_tree_outlined,
+                    onDelete: () => c.removePendingConference(name),
+                  ),
+                // Persistidos (API)
+                conferences.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (e, s) => const Text(
+                    'Não foi possível carregar as conferências.',
+                    style: TextStyle(color: AppColors.danger),
+                  ),
+                  data: (items) => Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
@@ -701,7 +729,10 @@ class CompetitionConferencesSection extends ConsumerWidget {
                         ),
                     ],
                   ),
-          ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           KicksterButton(
             label: 'Este campeonato não usa conferências',
@@ -722,7 +753,7 @@ class CompetitionConferencesSection extends ConsumerWidget {
 ///
 /// [competitionId] `null` (create antes do rascunho) mostra a dica e
 /// desabilita input/botão — no edit nunca é null.
-class CompetitionStructureSection extends ConsumerWidget {
+class CompetitionStructureSection extends ConsumerStatefulWidget {
   const CompetitionStructureSection({
     super.key,
     required this.controller,
@@ -735,28 +766,30 @@ class CompetitionStructureSection extends ConsumerWidget {
   final String? competitionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final c = controller;
+  ConsumerState<CompetitionStructureSection> createState() =>
+      _CompetitionStructureSectionState();
+}
+
+class _CompetitionStructureSectionState
+    extends ConsumerState<CompetitionStructureSection> {
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.controller;
+    final competitionId = widget.competitionId;
     final divisions = competitionId == null
         ? const AsyncValue<List<Division>>.data([])
-        : ref.watch(divisionsProvider(competitionId!));
+        : ref.watch(divisionsProvider(competitionId));
     final conferences = competitionId == null
         ? const AsyncValue<List<Conference>>.data([])
-        : ref.watch(conferencesProvider(competitionId!));
+        : ref.watch(conferencesProvider(competitionId));
     final conferenceItems = conferences.valueOrNull ?? const <Conference>[];
     final hasAddedItems =
-        (divisions.valueOrNull ?? const <Division>[]).isNotEmpty;
+        (divisions.valueOrNull ?? const <Division>[]).isNotEmpty ||
+            c.pendingDivisions.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (competitionId == null) ...[
-          _hint(
-            'Crie o campeonato acima para habilitar a configuração '
-            'da estrutura.',
-          ),
-          const SizedBox(height: 12),
-        ],
         _groupLabel('Como os clubes serão agrupados?'),
         const SizedBox(height: 4),
         _hint(
@@ -836,7 +869,6 @@ class CompetitionStructureSection extends ConsumerWidget {
                 child: KicksterInput(
                   label: 'Nome (${c.groupingChoice})',
                   controller: c.divisionName,
-                  enabled: competitionId != null,
                   onFieldSubmitted: (_) => c.addDivision(),
                 ),
               ),
@@ -844,24 +876,37 @@ class CompetitionStructureSection extends ConsumerWidget {
               KicksterButton(
                 label: 'Adicionar',
                 icon: Icons.add,
-                onPressed:
-                    competitionId == null || c.submitting ? null : c.addDivision,
+                onPressed: c.submitting ? null : c.addDivision,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          divisions.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            error: (e, s) => Text(
-              'Não foi possível carregar as ${c.itemLabelLower}.',
-              style: const TextStyle(color: AppColors.danger),
-            ),
-            data: (items) => items.isEmpty
-                ? _hint('Nenhum item adicionado ainda.')
-                : Wrap(
+          if (c.pendingDivisions.isEmpty &&
+              (divisions.valueOrNull?.isEmpty ?? true))
+            _hint('Nenhum item adicionado ainda.')
+          else ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // Pendentes (criação, antes do rascunho)
+                for (final name in c.pendingDivisions)
+                  _removableChip(
+                    label: name,
+                    icon: Icons.folder_outlined,
+                    onDelete: () => c.removePendingDivision(name),
+                  ),
+                // Persistidos (API)
+                divisions.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (e, s) => Text(
+                    'Não foi possível carregar as ${c.itemLabelLower}.',
+                    style: const TextStyle(color: AppColors.danger),
+                  ),
+                  data: (items) => Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
@@ -873,7 +918,10 @@ class CompetitionStructureSection extends ConsumerWidget {
                         ),
                     ],
                   ),
-          ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           KicksterButton(
             label: 'Não usar divisões nem grupos',

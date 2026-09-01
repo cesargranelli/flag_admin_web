@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,10 +57,6 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
     return AppScreen(
       title: 'Rodadas',
       scrollable: false,
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.rounds, route: '/rounds'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -73,7 +69,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                   label: 'Novo',
                   icon: Icons.add,
                   onPressed: () =>
-                      context.go('/rounds/new', extra: effectiveComp),
+                      context.push('/rounds/new', extra: effectiveComp),
                 ),
             ],
           ),
@@ -96,7 +92,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                     action: KicksterButton(
                       label: 'Criar campeonato',
                       icon: Icons.add,
-                      onPressed: () => context.go('/competitions/new'),
+                      onPressed: () => context.push('/competitions/new'),
                     ),
                   );
                 }
@@ -203,7 +199,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                                 label: 'Criar campeonato',
                                 icon: Icons.add,
                                 onPressed: () =>
-                                    context.go('/competitions/new'),
+                                    context.push('/competitions/new'),
                               ),
                             ),
                     ),

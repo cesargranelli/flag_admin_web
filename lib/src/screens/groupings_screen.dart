@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,11 +31,6 @@ class GroupingsScreen extends ConsumerWidget {
 
     return AppScreen(
       title: 'Conferências e divisões',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        BreadcrumbItem('Conferências e divisões'),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -56,7 +51,7 @@ class GroupingsScreen extends ConsumerWidget {
                   action: KicksterButton(
                     label: 'Criar campeonato',
                     icon: Icons.add,
-                    onPressed: () => context.go('/competitions/new'),
+                    onPressed: () => context.push('/competitions/new'),
                   ),
                 );
               }
@@ -750,7 +745,6 @@ Widget _divisionRow(
             icon: const Icon(Icons.group_add_outlined, size: 20),
             onPressed: () => showClubAssignmentModal(
               context,
-              competitionId: competitionId,
               division: division,
             ),
           ),

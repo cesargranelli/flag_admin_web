@@ -1,6 +1,6 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,7 +29,7 @@ class CompetitionFormController {
     required this.invalidateConferences,
     required this.invalidateDivisions,
   }) {
-    for (final c in [name, description, organizationId, startDate, endDate]) {
+    for (final c in [name, description, organizationId, startDate, endDate, season]) {
       c.addListener(markDirty);
     }
   }
@@ -68,11 +68,12 @@ class CompetitionFormController {
 
   // ── Controllers ─────────────────────────────────────────────────────────
 
-  late final TextEditingController name;
-  late final TextEditingController description;
-  late final TextEditingController organizationId;
-  late final TextEditingController startDate;
-  late final TextEditingController endDate;
+  final name = TextEditingController();
+  final description = TextEditingController();
+  final organizationId = TextEditingController();
+  final startDate = TextEditingController();
+  final endDate = TextEditingController();
+  final season = TextEditingController();
   final conferenceName = TextEditingController();
   final divisionName = TextEditingController();
 
@@ -85,6 +86,14 @@ class CompetitionFormController {
   String? conferenceId;
   bool declinedConferences = false;
   bool declinedStructure = false;
+
+  // ── Itens pendentes (criação: antes do rascunho existir) ────────────────
+
+  /// Conferências adicionadas antes do campeonato ser criado.
+  final List<String> pendingConferences = [];
+
+  /// Divisões/grupos adicionados antes do campeonato ser criado.
+  final List<String> pendingDivisions = [];
 
   // ── Flags de UI ─────────────────────────────────────────────────────────
 
@@ -167,6 +176,7 @@ class CompetitionFormController {
     organizationId.text = competition.organizationId ?? '';
     startDate.text = formatIsoDate(competition.startDate);
     endDate.text = formatIsoDate(competition.endDate);
+    season.text = competition.season ?? '';
     modality = competition.modality;
     gender =
         competition.gender == null ? null : Gender.fromJson(competition.gender!);
@@ -239,9 +249,17 @@ class CompetitionFormController {
   // ── Estrutura: conferências/divisões (chamadas de API injetadas) ────────
 
   Future<void> addConference() async {
-    final id = competitionId();
     final cname = conferenceName.text.trim();
-    if (cname.isEmpty || id == null) return;
+    if (cname.isEmpty) return;
+    final id = competitionId();
+    if (id == null) {
+      // Sem competitionId — adiciona à lista pendente (criação).
+      pendingConferences.add(cname);
+      conferenceName.clear();
+      markDirty();
+      onChanged();
+      return;
+    }
     submitting = true;
     onChanged();
     try {
@@ -262,9 +280,17 @@ class CompetitionFormController {
   }
 
   Future<void> addDivision() async {
-    final id = competitionId();
     final dname = divisionName.text.trim();
-    if (dname.isEmpty || id == null || groupingChoice == null) return;
+    if (dname.isEmpty || groupingChoice == null) return;
+    final id = competitionId();
+    if (id == null) {
+      // Sem competitionId — adiciona à lista pendente (criação).
+      pendingDivisions.add(dname);
+      divisionName.clear();
+      markDirty();
+      onChanged();
+      return;
+    }
     submitting = true;
     onChanged();
     try {
@@ -329,6 +355,50 @@ class CompetitionFormController {
     }
   }
 
+  // ── Itens pendentes: remover e flush (criação) ──────────────────────────
+
+  void removePendingConference(String name) {
+    pendingConferences.remove(name);
+    markDirty();
+    onChanged();
+  }
+
+  void removePendingDivision(String name) {
+    pendingDivisions.remove(name);
+    markDirty();
+    onChanged();
+  }
+
+  /// Cria as conferências e divisões pendentes via API após o rascunho.
+  /// Chamado pela tela de criação após `_created` ser setado.
+  Future<void> flushPending(String competitionId) async {
+    // Conferências pendentes
+    for (final name in List<String>.from(pendingConferences)) {
+      try {
+        await createConference(competitionId, name);
+        pendingConferences.remove(name);
+        invalidateConferences(competitionId);
+      } on RepositoryException catch (e) {
+        errorMessage = e.message;
+      } catch (_) {
+        errorMessage = 'Não foi possível criar conferência pendente.';
+      }
+    }
+    // Divisões pendentes
+    for (final name in List<String>.from(pendingDivisions)) {
+      try {
+        await createDivision(competitionId, name, null);
+        pendingDivisions.remove(name);
+        invalidateDivisions(competitionId);
+      } on RepositoryException catch (e) {
+        errorMessage = e.message;
+      } catch (_) {
+        errorMessage = 'Não foi possível criar divisão pendente.';
+      }
+    }
+    onChanged();
+  }
+
   // ── Navegação com proteção de descarte (M3) ─────────────────────────────
 
   /// Sair da rota com confirmação de descarte quando há alterações não
@@ -373,6 +443,7 @@ class CompetitionFormController {
       organizationId,
       startDate,
       endDate,
+      season,
       conferenceName,
       divisionName,
     ]) {

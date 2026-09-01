@@ -1,5 +1,5 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,11 +27,6 @@ class VenueDetailScreen extends ConsumerWidget {
 
     return AppScreen(
       title: venue?.name ?? 'Campo',
-      breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
-        const BreadcrumbItem(AppStrings.venues, route: '/venues'),
-        if (venue?.name != null) BreadcrumbItem(venue!.name),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -63,8 +58,17 @@ class VenueDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -80,23 +84,22 @@ class VenueDetailScreen extends ConsumerWidget {
                           child: const Icon(Icons.sports_soccer,
                               color: AppColors.primary, size: 32),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 venue.name,
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w700),
+                                style: Theme.of(context).textTheme.titleLarge,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 2),
                               if (orgName.isNotEmpty)
                                 Text(
                                   orgName,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary),
+                                  style: AppTextStyles.paragraph.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                             ],
                           ),

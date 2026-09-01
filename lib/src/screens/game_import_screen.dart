@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/flag_api.dart';
+import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -244,11 +244,6 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
     if (roundId == null || roundId.isEmpty) {
       return AppScreen(
         title: 'Importar jogos',
-        breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
-          BreadcrumbItem(AppStrings.games, route: '/games'),
-          BreadcrumbItem('Importar'),
-        ],
         body: AppLayout.form(
           child: KicksterEmptyState(
             icon: Icons.sports,
@@ -267,11 +262,6 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
 
     return AppScreen(
       title: 'Importar jogos',
-      breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem(AppStrings.games, route: '/games'),
-        BreadcrumbItem('Importar'),
-      ],
       body: AppLayout.form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
