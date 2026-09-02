@@ -1,4 +1,6 @@
+import 'package:flag_admin_web/src/api/flag_api.dart';
 import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/core/widgets/image_upload_field.dart';
 import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,7 +68,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
           _section(
             title: 'Identificação',
             icon: Icons.business_outlined,
-            child: _identificacaoCard(context, org),
+            child: _identificacaoCard(context, ref, org),
           ),
           _section(
             title: 'Presidente',
@@ -132,7 +134,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
 
   /// Seção 1 — Identificação (#323): card hero consolidado + dados.
   /// Estilo KicksterCard: elevation 1, shadow, border line, borderRadius 12.
-  Widget _identificacaoCard(BuildContext context, Organization org) {
+  Widget _identificacaoCard(BuildContext context, WidgetRef ref, Organization org) {
     return Card(
       elevation: 1,
       shadowColor: AppColors.black.withValues(alpha: 0.08),
@@ -151,19 +153,8 @@ class OrganizationDetailScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    organizationTypeIcon(org.organizationType),
-                    color: AppColors.primary,
-                    size: 36,
-                  ),
-                ),
+                // Logo com badge de edição (ou placeholder com ícone do tipo).
+                _buildLogoAvatar(context, ref, org),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -338,6 +329,167 @@ class OrganizationDetailScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  // ── Logo editing ──────────────────────────────────────────────────────
+
+  /// Avatar circular do logo da organização com badge de edição sobreposto.
+  /// Se não houver logo, exibe o ícone do tipo como placeholder.
+  Widget _buildLogoAvatar(BuildContext context, WidgetRef ref, Organization org) {
+    final hasLogo = org.logoUrl != null && org.logoUrl!.isNotEmpty;
+
+    return SizedBox(
+      width: 64,
+      height: 64,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Avatar circular: logo ou placeholder.
+          Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(shape: BoxShape.circle),
+            child: ClipOval(
+              child: hasLogo
+                  ? Image.network(
+                      org.logoUrl!,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _typeIconPlaceholder(org),
+                    )
+                  : _typeIconPlaceholder(org),
+            ),
+          ),
+          // Badge de edição.
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () => _showLogoEditDialog(context, ref, org),
+              child: Material(
+                color: AppColors.primary,
+                shape: const CircleBorder(),
+                elevation: 2,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(Icons.edit, size: 12, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _typeIconPlaceholder(Organization org) {
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        organizationTypeIcon(org.organizationType),
+        color: AppColors.primary,
+        size: 32,
+      ),
+    );
+  }
+
+  /// Abre o dialog de edição de logo da organização.
+  void _showLogoEditDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Organization org,
+  ) {
+    var tempLogoUrl = org.logoUrl;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (builderContext, setDialogState) => kicksterModalDialog(
+          title: const Text('Trocar logo'),
+          content: SizedBox(
+            width: 296,
+            child: ImageUploadField(
+              label: 'Logo da organização',
+              apiClient: ref.read(apiClientProvider),
+              imageUrl: tempLogoUrl,
+              onUrlChanged: (url) {
+                setDialogState(() => tempLogoUrl = url);
+              },
+            ),
+          ),
+          actions: [
+            KicksterButton(
+              label: 'Cancelar',
+              variant: KicksterButtonVariant.text,
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+            KicksterButton(
+              label: 'Salvar',
+              onPressed: () =>
+                  _updateLogo(dialogContext, ref, org, tempLogoUrl),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Atualiza apenas o logo da organização (mantém todos os outros campos).
+  Future<void> _updateLogo(
+    BuildContext dialogContext,
+    WidgetRef ref,
+    Organization org,
+    String? newLogoUrl,
+  ) async {
+    try {
+      final api = ref.read(organizationApiProvider);
+      final body = org.toJson();
+      if (newLogoUrl != null && newLogoUrl.isNotEmpty) {
+        body['logoUrl'] = newLogoUrl;
+      } else {
+        body['logoUrl'] = null;
+      }
+      await api.update(org.id, body);
+      ref.invalidate(organizationProvider(org.id));
+      ref.invalidate(organizationsProvider);
+      if (dialogContext.mounted) {
+        Navigator.of(dialogContext).pop();
+      }
+      if (dialogContext.mounted) {
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
+          const SnackBar(content: Text('Logo atualizado com sucesso')),
+        );
+      }
+    } on RepositoryException catch (e) {
+      if (dialogContext.mounted) {
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao atualizar logo: ${e.message}'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    } catch (_) {
+      if (dialogContext.mounted) {
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível atualizar o logo.'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
   }
 
   /// Card de clube/universidade associado no padrão Kickster (#12): ícone do

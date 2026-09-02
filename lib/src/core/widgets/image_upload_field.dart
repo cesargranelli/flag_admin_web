@@ -5,15 +5,21 @@ import 'package:flutter/material.dart';
 import '../../api/api_client.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'kickster_modal.dart';
 
-/// Campo de upload de imagem com preview e botão de seleção.
+/// Campo de upload de imagem com avatar circular e popup de opções.
 ///
-/// Exibe um placeholder com borda tracejada quando não há imagem e um preview
-/// quando uma URL é fornecida. O upload é feito via [ApiClient.uploadBytes]
-/// (multipart) e a URL retornada pelo backend é repassada ao formulário
-/// através de [onUrlChanged].
+/// Exibe um avatar circular 100×100 com imagem ou placeholder, e um ícone de
+/// edição sobreposto (32×32, fundo azul primary, borda branca). Ao tocar no
+/// ícone ou na área vazia, abre um popup com opções:
+///   • Escolher do arquivo (FilePicker)
+///   • Tirar foto (FilePicker no Web)
+///   • Excluir foto (quando há imagem)
 ///
-/// Segue o design system Kickster (raio 24, fundo surface, borda fieldBorder).
+/// O upload é feito via [ApiClient.uploadBytes] (multipart) e a URL retornada
+/// pelo backend é repassada ao formulário através de [onUrlChanged].
+///
+/// Segue o design system Kickster (Figma avatar + modal com cards).
 class ImageUploadField extends StatefulWidget {
   const ImageUploadField({
     super.key,
@@ -24,7 +30,7 @@ class ImageUploadField extends StatefulWidget {
     this.enabled = true,
   });
 
-  /// Rótulo exibido acima do campo.
+  /// Rótulo exibido acima do avatar (para acessibilidade / screen readers).
   final String label;
 
   /// Cliente HTTP para realizar o upload multipart.
@@ -55,6 +61,11 @@ class ImageUploadField extends StatefulWidget {
 
 class _ImageUploadFieldState extends State<ImageUploadField> {
   bool _uploading = false;
+
+  bool get _hasImage =>
+      widget.imageUrl != null && widget.imageUrl!.isNotEmpty;
+
+  // ── File picking + upload ──────────────────────────────────────────────
 
   Future<void> _pickAndUpload() async {
     if (!widget.enabled || _uploading) return;
@@ -101,21 +112,62 @@ class _ImageUploadFieldState extends State<ImageUploadField> {
     widget.onUrlChanged(null);
   }
 
+  // ── Popup de opções ────────────────────────────────────────────────────
+
+  void _openOptionsDialog() {
+    if (!widget.enabled) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (_) => _ImageOptionsDialog(
+        hasImage: _hasImage,
+        onPickFile: () {
+          Navigator.of(context).pop();
+          _pickAndUpload();
+        },
+        onTakePhoto: () {
+          Navigator.of(context).pop();
+          if (kIsWeb) {
+            // No Web, câmera nativa não disponível — abre FilePicker como
+            // alternativa (o usuário pode tirar foto pela câmera do browser
+            // ao selecionar arquivo).
+            _pickAndUpload();
+          } else {
+            _pickAndUpload();
+          }
+        },
+        onDelete: () {
+          Navigator.of(context).pop();
+          _removeImage();
+        },
+      ),
+    );
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    return InputDecorator(
-      decoration: _fieldDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
-            _buildPreview()
-          else
-            _buildPlaceholder(),
-          if (_uploading) ...[
-            const SizedBox(height: 8),
-            Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Rótulo para acessibilidade.
+        Text(
+          widget.label,
+          style: AppTextStyles.fieldLabel.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Avatar com overlay de edição.
+        Center(child: _buildAvatar()),
+        if (_uploading) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(
                   width: 16,
@@ -131,222 +183,237 @@ class _ImageUploadFieldState extends State<ImageUploadField> {
                 ),
               ],
             ),
-          ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildAvatar() {
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Avatar circular (imagem ou placeholder).
+          GestureDetector(
+            onTap: widget.enabled && !_hasImage ? _openOptionsDialog : null,
+            child: _hasImage ? _buildImageAvatar() : _buildPlaceholder(),
+          ),
+          // Ícone de edição sobreposto (bottom-right).
+          if (widget.enabled)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: _EditBadge(onTap: _openOptionsDialog),
+            ),
+          // Indicador de upload sobre o avatar.
+          if (_uploading)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withValues(alpha: 0.4),
+                ),
+                child: const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildPreview() {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            widget.imageUrl!,
-            width: 160,
-            height: 160,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                color: AppColors.grayFill,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.broken_image_outlined,
-                color: AppColors.disabled,
-                size: 40,
-              ),
+  Widget _buildImageAvatar() {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+      ),
+      child: ClipOval(
+        child: Image.network(
+          widget.imageUrl!,
+          width: 100,
+          height: 100,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => Container(
+            width: 100,
+            height: 100,
+            decoration: const BoxDecoration(
+              color: AppColors.grayFill,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.broken_image_outlined,
+              color: AppColors.disabled,
+              size: 40,
             ),
           ),
         ),
-        if (widget.enabled)
-          Positioned(
-            top: 4,
-            right: 4,
-            child: _ActionBadge(
-              icon: Icons.close,
-              onTap: _removeImage,
-              tooltip: 'Remover imagem',
-            ),
-          ),
-        if (widget.enabled)
-          Positioned(
-            bottom: 4,
-            right: 4,
-            child: _ActionBadge(
-              icon: Icons.edit,
-              onTap: _pickAndUpload,
-              tooltip: 'Trocar imagem',
-            ),
-          ),
-      ],
+      ),
     );
   }
 
   Widget _buildPlaceholder() {
-    return InkWell(
-      onTap: widget.enabled ? _pickAndUpload : null,
-      borderRadius: BorderRadius.circular(12),
-      child: DashedBorder(
-        radius: 12,
-        color: AppColors.disabled,
-        child: Container(
-          width: 160,
-          height: 160,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.add_a_photo_outlined,
-                  size: 32,
-                  color: AppColors.disabled,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Selecionar\nimagem',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.fieldLabel.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: const BoxDecoration(
+        color: AppColors.grayFill,
+        shape: BoxShape.circle,
       ),
-    );
-  }
-
-  InputDecoration _fieldDecoration() {
-    return InputDecoration(
-      labelText: widget.label,
-      filled: true,
-      fillColor: AppColors.surface,
-      contentPadding: const EdgeInsets.all(12),
-      labelStyle: AppTextStyles.paragraph.copyWith(
-        fontWeight: FontWeight.w600,
-        color: AppColors.grayLabel,
+      child: const Icon(
+        Icons.person_outline,
+        color: AppColors.textSecondary,
+        size: 40,
       ),
-      floatingLabelStyle: AppTextStyles.fieldLabel.copyWith(
-        fontWeight: FontWeight.w600,
-        color: AppColors.primary,
-      ),
-      border: _border(AppColors.fieldBorder),
-      enabledBorder: _border(AppColors.fieldBorder),
-      focusedBorder: _border(AppColors.primary, width: 2),
-      disabledBorder: _border(AppColors.disabled),
-      errorBorder: _border(AppColors.danger),
-      focusedErrorBorder: _border(AppColors.danger, width: 2),
-    );
-  }
-
-  OutlineInputBorder _border(Color color, {double width = 1}) {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(24),
-      borderSide: BorderSide(color: color, width: width),
     );
   }
 }
 
-/// Botão circular de ação sobreposto ao preview da imagem.
-class _ActionBadge extends StatelessWidget {
-  const _ActionBadge({
+// ── Ícone de edição circular (azul + borda branca) ──────────────────────
+
+/// Badge circular de edição no canto inferior direito do avatar.
+/// Segue o Figma: 32×32, fundo `AppColors.primary`, borda branca 3px,
+/// ícone `Icons.edit` branco tamanho 18.
+class _EditBadge extends StatelessWidget {
+  const _EditBadge({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary,
+      shape: const CircleBorder(),
+      elevation: 2,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 3),
+          ),
+          child: const Icon(Icons.edit, size: 18, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Dialog de opções (Figma "Change picture popup") ─────────────────────
+
+/// Modal com as opções de troca de imagem, seguindo o estilo do Figma:
+/// cards 296×60, bg #F5F5F5, border-radius 8, ícone + texto.
+class _ImageOptionsDialog extends StatelessWidget {
+  const _ImageOptionsDialog({
+    required this.hasImage,
+    required this.onPickFile,
+    required this.onTakePhoto,
+    required this.onDelete,
+  });
+
+  final bool hasImage;
+  final VoidCallback onPickFile;
+  final VoidCallback onTakePhoto;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return kicksterModalDialog(
+      title: const Text('Alterar foto'),
+      content: SizedBox(
+        width: 296,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _OptionCard(
+              icon: Icons.upload_file,
+              label: 'Escolher do arquivo',
+              onTap: onPickFile,
+            ),
+            const SizedBox(height: 8),
+            _OptionCard(
+              icon: Icons.photo_camera,
+              label: 'Tirar foto',
+              onTap: onTakePhoto,
+            ),
+            if (hasImage) ...[
+              const SizedBox(height: 8),
+              _OptionCard(
+                icon: Icons.delete_outline,
+                label: 'Excluir foto',
+                onTap: onDelete,
+                danger: true,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Card de opção no popup: fundo #F5F5F5, border-radius 8, ícone + texto.
+/// Segue o estilo do Figma (296×60, Body text style/Medium/Bold 14px).
+class _OptionCard extends StatelessWidget {
+  const _OptionCard({
     required this.icon,
+    required this.label,
     required this.onTap,
-    required this.tooltip,
+    this.danger = false,
   });
 
   final IconData icon;
+  final String label;
   final VoidCallback onTap;
-  final String tooltip;
+  final bool danger;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.black.withValues(alpha: 0.55),
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Icon(icon, size: 16, color: Colors.white),
+    final textColor = danger ? AppColors.danger : AppColors.textPrimary;
+    final iconColor = danger ? AppColors.danger : AppColors.textPrimary;
+
+    return Material(
+      color: const Color(0xFFF5F5F5),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Icon(icon, size: 21, color: iconColor),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-/// Widget auxiliar que desenha uma borda tracejada (dashed) ao redor do filho.
-class DashedBorder extends StatelessWidget {
-  const DashedBorder({
-    super.key,
-    required this.child,
-    this.radius = 12,
-    this.color = AppColors.disabled,
-  });
-
-  final Widget child;
-  final double radius;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _DashedBorderPainter(color: color, radius: radius),
-      child: child,
-    );
-  }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  _DashedBorderPainter({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-
-    final path = Path()..addRRect(rrect);
-
-    // Simula borda tracejada: 6px linha, 4px espaço.
-    final metrics = path.computeMetrics().first;
-    final totalLength = metrics.length;
-    const dashLen = 6.0;
-    const gapLen = 4.0;
-    double distance = 0;
-
-    while (distance < totalLength) {
-      final start = metrics.getTangentForOffset(distance)!.position;
-      final endDist = (distance + dashLen).clamp(0.0, totalLength);
-      final end = metrics.getTangentForOffset(endDist)!.position;
-      canvas.drawLine(start, end, paint);
-      distance += dashLen + gapLen;
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedBorderPainter oldDelegate) =>
-      color != oldDelegate.color || radius != oldDelegate.radius;
 }

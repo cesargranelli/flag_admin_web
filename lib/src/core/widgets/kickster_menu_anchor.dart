@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
@@ -82,11 +83,16 @@ class KicksterMenuAnchor extends StatefulWidget {
   State<KicksterMenuAnchor> createState() => _KicksterMenuAnchorState();
 }
 
-class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
+class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> with TickerProviderStateMixin {
   final GlobalKey _triggerKey = GlobalKey();
   final FocusNode _triggerFocusNode = FocusNode(debugLabel: 'KicksterMenuAnchor');
   OverlayEntry? _overlayEntry;
   bool _menuOpen = false;
+
+  /// Ticker para monitorar a posição do trigger; quando a posição muda
+  /// (scroll da página), fecha o menu automaticamente.
+  Ticker? _positionTicker;
+  Offset _lastTriggerOffset = Offset.zero;
 
   void _toggleMenu() {
     if (_menuOpen) {
@@ -120,11 +126,14 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
       ),
     );
     Overlay.of(context).insert(_overlayEntry!);
+    _lastTriggerOffset = offset;
+    _startPositionMonitor();
     setState(() => _menuOpen = true);
     widget.onOpenChanged?.call(true);
   }
 
   void _closeMenu() {
+    _stopPositionMonitor();
     _overlayEntry?.remove();
     _overlayEntry = null;
     // Devolve o foco ao trigger (UX de teclado após Esc/seleção).
@@ -133,8 +142,41 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
     widget.onOpenChanged?.call(false);
   }
 
+  /// Inicia o monitoramento de posição: a cada frame, verifica se o trigger
+  /// mudou de posição (scroll da página). Se mudou, fecha o menu.
+  void _startPositionMonitor() {
+    _positionTicker?.dispose();
+    _positionTicker = createTicker((_) {
+      if (!_menuOpen) return;
+      final triggerContext = _triggerKey.currentContext;
+      if (triggerContext == null) {
+        _closeMenu();
+        return;
+      }
+      final renderBox = triggerContext.findRenderObject() as RenderBox?;
+      if (renderBox == null || !renderBox.hasSize) {
+        _closeMenu();
+        return;
+      }
+      final currentOffset = renderBox.localToGlobal(Offset.zero);
+      // Se a posição vertical mudou mais de 5px, a página rolou — fecha.
+      if ((currentOffset.dy - _lastTriggerOffset.dy).abs() > 5) {
+        _closeMenu();
+      } else {
+        _lastTriggerOffset = currentOffset;
+      }
+    });
+    _positionTicker!.start();
+  }
+
+  void _stopPositionMonitor() {
+    _positionTicker?.stop();
+  }
+
   @override
   void dispose() {
+    _stopPositionMonitor();
+    _positionTicker?.dispose();
     _overlayEntry?.remove();
     _triggerFocusNode.dispose();
     super.dispose();

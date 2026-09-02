@@ -36,6 +36,10 @@ class OrganizationApi {
     return getById(id);
   }
 
+  /// Atualiza uma organização existente via `PUT /api/v1/organizations/{id}`.
+  Future<Organization> update(String id, Map<String, dynamic> body) =>
+      _client.put('/api/v1/organizations/$id', body, Organization.fromJson);
+
   /// Clubes/universidades associados a uma federação/liga/associação.
   Future<List<Organization>> listClubs(String organizationId) =>
       _client.getList(
