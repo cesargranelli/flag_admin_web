@@ -352,7 +352,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
             child: ClipOval(
               child: hasLogo
                   ? Image.network(
-                      org.logoUrl!,
+                      AppConfig.resolveImageUrl(org.logoUrl!),
                       width: 64,
                       height: 64,
                       fit: BoxFit.cover,

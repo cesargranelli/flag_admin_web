@@ -10,9 +10,19 @@ class AppConfig {
   );
 
   static const String environment = String.fromEnvironment(
-    'ENVIRONMENT',
+    'ENVITY',
     defaultValue: 'dev',
   );
+
+  /// Converte URL relativa (ex.: /api/v1/uploads/arquivo.jpg) para absoluta,
+  /// prependendo [apiBaseUrl]. URLs já absolutas são retornadas sem alteração.
+  /// Necessário porque o Flutter Web roda em porta diferente da API.
+  static String resolveImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/')) return '$apiBaseUrl$url';
+    return url;
+  }
 
   const AppConfig._();
 }

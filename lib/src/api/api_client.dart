@@ -139,7 +139,12 @@ class ApiClient {
         data: formData,
         options: Options(headers: headers),
       );
-      return response.data!['url'] as String;
+      // A API retorna URL relativa (ex.: /api/v1/uploads/arquivo.jpg).
+      // Converter para URL absoluta para Image.network funcionar no Flutter
+      // Web (que roda em porta diferente da API).
+      final url = response.data!['url'] as String;
+      if (url.startsWith('/')) return '${AppConfig.apiBaseUrl}$url';
+      return url;
     } on DioException catch (e) {
       throw RepositoryException.fromDio(e);
     }

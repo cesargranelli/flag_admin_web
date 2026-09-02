@@ -639,7 +639,7 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    logo,
+                    AppConfig.resolveImageUrl(logo),
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,
