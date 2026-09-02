@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/flag_api.dart';
 import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/core/widgets/image_upload_field.dart';
 import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -543,20 +544,11 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
   }
 
   Widget _logoField() {
-    return KicksterInput(
-      label: 'URL do logo (opcional)',
-      controller: _logoUrl,
-      keyboardType: TextInputType.url,
-      hintText: 'https://exemplo.com/logo.png',
-      validator: (v) {
-        if (v == null || v.trim().isEmpty) return null;
-        final uri = Uri.tryParse(v.trim());
-        return (uri != null &&
-                (uri.scheme == 'http' || uri.scheme == 'https') &&
-                uri.host.isNotEmpty)
-            ? null
-            : 'URL inválida';
-      },
+    return ImageUploadField(
+      label: 'Logo (opcional)',
+      apiClient: ref.read(apiClientProvider),
+      imageUrl: _logoUrl.text.isEmpty ? null : _logoUrl.text,
+      onUrlChanged: (url) => setState(() => _logoUrl.text = url ?? ''),
     );
   }
 

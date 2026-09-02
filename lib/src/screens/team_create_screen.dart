@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/flag_api.dart';
 import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/core/widgets/image_upload_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,16 +82,6 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
     }
   }
 
-  String? _validateLogoUrl(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    final uri = Uri.tryParse(value.trim());
-    final valid =
-        uri != null &&
-        (uri.scheme == 'http' || uri.scheme == 'https') &&
-        uri.host.isNotEmpty;
-    return valid ? null : 'Informe uma URL válida (http/https)';
-  }
-
   @override
   Widget build(BuildContext context) {
     return AppScreen(
@@ -121,12 +112,12 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
                   hintText: 'Ex.: FLA',
                 ),
                 const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'URL do logo',
-                  controller: _logoUrl,
-                  keyboardType: TextInputType.url,
-                  hintText: 'Ex.: https://...',
-                  validator: _validateLogoUrl,
+                ImageUploadField(
+                  label: 'Logo do time',
+                  apiClient: ref.read(apiClientProvider),
+                  imageUrl: _logoUrl.text.isEmpty ? null : _logoUrl.text,
+                  onUrlChanged: (url) =>
+                      setState(() => _logoUrl.text = url ?? ''),
                 ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 8),
