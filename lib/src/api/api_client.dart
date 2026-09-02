@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 
 import 'package:flag_admin_web/src/core/flag_core.dart';
@@ -108,6 +110,36 @@ class ApiClient {
         options: Options(headers: await _headers()),
       );
       return fromJson(response.data!);
+    } on DioException catch (e) {
+      throw RepositoryException.fromDio(e);
+    }
+  }
+
+  /// Faz upload de bytes (imagem) via multipart POST e retorna a URL
+  /// pública do arquivo salvo pelo backend.
+  ///
+  /// No Flutter Web, `file_picker` retorna bytes (Uint8List), não caminhos
+  /// locais — por isso o método aceita bytes diretamente.
+  Future<String> uploadBytes(
+    Uint8List bytes,
+    String filename, {
+    String fieldName = 'file',
+  }) async {
+    try {
+      final headers = await _headers();
+      // Remove Content-Type para que Dio defina o boundary do multipart.
+      headers.remove('Content-Type');
+
+      final formData = FormData.fromMap({
+        fieldName: MultipartFile.fromBytes(bytes, filename: filename),
+      });
+
+      final response = await dio.post<Map<String, dynamic>>(
+        '/api/v1/upload',
+        data: formData,
+        options: Options(headers: headers),
+      );
+      return response.data!['url'] as String;
     } on DioException catch (e) {
       throw RepositoryException.fromDio(e);
     }

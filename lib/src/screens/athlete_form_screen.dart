@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/flag_api.dart';
 import 'package:flag_admin_web/src/core/flag_core.dart';
+import 'package:flag_admin_web/src/core/widgets/image_upload_field.dart';
 import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,14 +85,7 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
         : null;
   }
 
-  String? _validatePhotoUrl(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    final uri = Uri.tryParse(value.trim());
-    final valid = uri != null &&
-        (uri.scheme == 'http' || uri.scheme == 'https') &&
-        uri.host.isNotEmpty;
-    return valid ? null : 'Informe uma URL válida (http/https)';
-  }
+
 
   Map<String, dynamic> _body() => {
         'name': _name.text.trim(),
@@ -301,12 +295,13 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
                   validator: _validateNumber,
                 ),
                 const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'URL da foto',
-                  controller: _photoUrl,
-                  keyboardType: TextInputType.url,
-                  hintText: 'Ex.: https://...',
-                  validator: _validatePhotoUrl,
+                ImageUploadField(
+                  label: 'Foto do atleta',
+                  apiClient: ref.read(apiClientProvider),
+                  imageUrl:
+                      _photoUrl.text.isEmpty ? null : _photoUrl.text,
+                  onUrlChanged: (url) =>
+                      setState(() => _photoUrl.text = url ?? ''),
                 ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 8),
