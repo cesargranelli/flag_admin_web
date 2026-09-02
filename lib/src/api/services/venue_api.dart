@@ -15,7 +15,6 @@ class VenueApi {
       _client.getOne('/api/v1/venues/$id', Venue.fromJson);
 
   Future<Venue> create({
-    required String organizationId,
     required String name,
     String? address,
     String? mapsUrl,
@@ -23,7 +22,6 @@ class VenueApi {
       _client.post(
         '/api/v1/venues',
         {
-          'organizationId': organizationId,
           'name': name,
           'address': ?address,
           'mapsUrl': ?mapsUrl,
@@ -33,7 +31,6 @@ class VenueApi {
 
   Future<Venue> update(
     String id, {
-    required String organizationId,
     required String name,
     String? address,
     String? mapsUrl,
@@ -41,7 +38,6 @@ class VenueApi {
       _client.put(
         '/api/v1/venues/$id',
         {
-          'organizationId': organizationId,
           'name': name,
           'address': ?address,
           'mapsUrl': ?mapsUrl,
@@ -49,4 +45,3 @@ class VenueApi {
         Venue.fromJson,
       );
 }
-

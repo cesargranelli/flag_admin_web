@@ -25,7 +25,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
   late final TextEditingController _name;
   late final TextEditingController _address;
   late final TextEditingController _mapsUrl;
-  String? _organizationId;
   bool _submitting = false;
   String? _errorMessage;
 
@@ -38,7 +37,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
     _name = TextEditingController(text: venue?.name ?? '');
     _address = TextEditingController(text: venue?.address ?? '');
     _mapsUrl = TextEditingController(text: venue?.mapsUrl ?? '');
-    _organizationId = venue?.organizationId;
   }
 
   @override
@@ -52,9 +50,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final organizationId = _organizationId;
-    if (organizationId == null) return;
-
     setState(() {
       _submitting = true;
       _errorMessage = null;
@@ -65,7 +60,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
       final id = widget.venueId ?? widget.venue?.id;
       if (id == null) {
         await api.create(
-          organizationId: organizationId,
           name: _name.text.trim(),
           address: _address.text.trim().isEmpty ? null : _address.text.trim(),
           mapsUrl: _mapsUrl.text.trim().isEmpty ? null : _mapsUrl.text.trim(),
@@ -73,7 +67,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
       } else {
         await api.update(
           id,
-          organizationId: organizationId,
           name: _name.text.trim(),
           address: _address.text.trim().isEmpty ? null : _address.text.trim(),
           mapsUrl: _mapsUrl.text.trim().isEmpty ? null : _mapsUrl.text.trim(),
@@ -108,8 +101,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final organizations = ref.watch(organizationsProvider);
-
     return AppScreen(
       title: _isEditing ? 'Editar campo' : 'Novo campo',
       body: Column(
@@ -121,39 +112,6 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                organizations.when(
-                  loading: () => const AppLoading(
-                    message: 'Carregando organizações...',
-                  ),
-                  error: (e, s) => AppErrorState(
-                    message: 'Erro ao carregar organizações',
-                    onRetry: () => ref.invalidate(organizationsProvider),
-                  ),
-                  data: (orgs) {
-                    if (orgs.isEmpty) {
-                      return const KicksterEmptyState(
-                        icon: Icons.business,
-                        message:
-                            'Cadastre uma organização antes de criar campos',
-                      );
-                    }
-                    return KicksterDropdown<String>(
-                      label: 'Organização',
-                      value: _organizationId,
-                      items: orgs
-                          .map((o) => DropdownMenuItem(
-                                value: o.id,
-                                child: Text(o.tradeName),
-                              ))
-                          .toList(),
-                      onChanged: (value) =>
-                          setState(() => _organizationId = value),
-                      validator: (value) => (value == null || value.isEmpty)
-                          ? 'Selecione a organização'
-                          : null,
-                    );
-                  },
-                ),
                 const SizedBox(height: 12),
                 KicksterInput(
                   label: 'Nome',

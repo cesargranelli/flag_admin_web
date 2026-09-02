@@ -31,7 +31,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
   @override
   Widget build(BuildContext context) {
     final venues = ref.watch(venuesProvider);
-    final organizations = ref.watch(organizationsProvider);
 
     return AppScreen(
       title: 'Campos',
@@ -74,17 +73,10 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     ),
                   );
                 }
-                final orgNames = organizations.valueOrNull ??
-                    const <Organization>[];
-                // Pré-computa o mapa orgId → nome UMA vez (lookup O(1) no card)
-                // em vez de percorrer a lista de organizações por card (O(n²)).
-                final orgNameById = <String, String>{
-                  for (final o in orgNames) o.id: o.tradeName,
-                };
                 return AppEntityListScreen<Venue>(
                   items: items,
                   cardBuilder: (venue) =>
-                      _venueCard(context, venue, orgNameById),
+                      _venueCard(context, venue),
                   searchField: _searchController,
                   countLabel: 'campos',
                   countLabelSingular: 'campo',
@@ -105,22 +97,17 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
   }
 
   /// Card de campo no padrão Kickster (core #439): ícone de futebol, nome
-  /// e subtítulo com organização + endereço.
+  /// e subtítulo com endereço.
   Widget _venueCard(
     BuildContext context,
     Venue venue,
-    Map<String, String> orgNameById,
   ) {
-    final orgName = orgNameById[venue.organizationId] ?? '';
-    final subtitle = [
-      if (orgName.isNotEmpty) orgName,
-      if (venue.address != null && venue.address!.isNotEmpty) venue.address!,
-    ].join(' • ');
+    final subtitle = venue.address;
 
     return KicksterCard(
       icon: Icons.sports_soccer,
       title: venue.name,
-      subtitle: subtitle.isEmpty ? null : subtitle,
+      subtitle: (subtitle != null && subtitle.isNotEmpty) ? subtitle : null,
       onTap: () => context.push('/venues/${venue.id}', extra: venue),
     );
   }

@@ -2,7 +2,6 @@ import 'package:flag_admin_web/src/core/flag_core.dart';
 import 'package:flag_admin_web/src/domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
 import '../widgets/app_entity_list_screen.dart';
@@ -39,11 +38,6 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
           Row(
             children: [
               const Spacer(),
-              KicksterButton(
-                label: 'Novo',
-                icon: Icons.add,
-                onPressed: () => context.push('/users/new'),
-              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -58,16 +52,11 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
               ),
               data: (items) {
                 if (items.isEmpty) {
-                  return KicksterEmptyState(
+                  return const KicksterEmptyState(
                     icon: Icons.people_outline,
                     message: 'Nenhum usuário cadastrado',
                     description:
-                        'Crie o primeiro usuário para começar a usar.',
-                    action: KicksterButton(
-                      label: 'Criar usuário',
-                      icon: Icons.add,
-                      onPressed: () => context.push('/users/new'),
-                    ),
+                        'Os usuários se cadastram pelo formulário de cadastro público.',
                   );
                 }
                 return AppEntityListScreen<User>(

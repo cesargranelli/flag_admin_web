@@ -599,25 +599,27 @@ class _RosterCard extends ConsumerWidget {
             KicksterBadge(label: 'Inativo', color: AppColors.danger),
             const SizedBox(width: 8),
           ],
-          if (deactivating)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+          if (!isInactive) ...[
+            if (deactivating)
+              const Padding(
+                padding: EdgeInsets.all(8),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else
+              IconButton(
+                tooltip: 'Desativar elenco',
+                icon: const Icon(
+                  Icons.pause_circle_outline,
+                  color: AppColors.danger,
+                  size: 20,
+                ),
+                onPressed: onDeactivate,
               ),
-            )
-          else
-            IconButton(
-              tooltip: 'Desativar elenco',
-              icon: const Icon(
-                Icons.pause_circle_outline,
-                color: AppColors.danger,
-                size: 20,
-              ),
-              onPressed: onDeactivate,
-            ),
+          ],
         ],
       ),
     );

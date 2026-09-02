@@ -42,7 +42,6 @@ import '../screens/team_roster_screen.dart';
 import '../screens/roster_add_athlete_screen.dart';
 import '../screens/roster_import_screen.dart';
 import '../screens/signup_screen.dart';
-import '../screens/user_form_screen.dart';
 import '../screens/users_screen.dart';
 import '../widgets/admin_shell.dart';
 
@@ -627,13 +626,6 @@ class AppRouter {
                   path: '/users',
                   name: 'users',
                   builder: (context, state) => const UsersScreen(),
-                  routes: [
-                    GoRoute(
-                      path: 'new',
-                      name: 'userNew',
-                      builder: (context, state) => const UserFormScreen(),
-                    ),
-                  ],
                 ),
               ],
             ),

@@ -31,6 +31,9 @@ class CompetitionDetailScreen extends ConsumerStatefulWidget {
 
 class _CompetitionDetailScreenState
     extends ConsumerState<CompetitionDetailScreen> {
+  /// Times com o card expandido no detalhe do campeonato.
+  final Set<String> _expandedTeams = {};
+
   @override
   Widget build(BuildContext context) {
     final compFuture = widget.competition != null
@@ -360,9 +363,8 @@ class _CompetitionDetailScreenState
     );
   }
 
-  /// Seção 7 — Times (#12): lista dos times inscritos no campeonato +
-  /// botão para a tela de inscrição. O time é a unidade inscrita (não a
-  /// organização), então não há mais resolução `Team.organizationId` → `Organization`.
+  /// Seção 7 — Times (#12): lista dos times inscritos no campeonato em
+  /// cards expansíveis com atletas do elenco.
   Widget _teamsCard(
     BuildContext context,
     Competition comp,
@@ -377,62 +379,121 @@ class _CompetitionDetailScreenState
         message: 'Não foi possível carregar os times.',
         onRetry: () => ref.invalidate(teamsProvider(comp.id)),
       ),
-      data: (items) => AppInfoCard(
-        children: [
-          if (items.isEmpty)
-            const Text(
-              'Nenhum time inscrito. Configure o elenco de um time '
-              'a partir do detalhe do time para inscrevê-lo automaticamente.',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final team in items)
-                  _teamChip(
-                    team.name,
-                    subtitle:
-                        team.shortName?.isNotEmpty == true
-                        ? team.shortName
-                        : null,
-                  ),
-              ],
-            ),
-        ],
-      ),
+      data: (items) {
+        if (items.isEmpty) {
+          return const Text(
+            'Nenhum time inscrito. Configure o elenco de um time '
+            'a partir do detalhe do time para inscrevê-lo automaticamente.',
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              _expandableTeamCard(context, comp.id, items[i]),
+              if (i < items.length - 1) const SizedBox(height: 8),
+            ],
+          ],
+        );
+      },
     );
   }
 
-  Widget _teamChip(String name, {String? subtitle}) {
-    final label = subtitle == null ? name : '$name · $subtitle';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.grayFill,
-        borderRadius: BorderRadius.circular(10),
+  Widget _expandableTeamCard(
+    BuildContext context,
+    String competitionId,
+    Team team,
+  ) {
+    final isExpanded = _expandedTeams.contains(team.id);
+    final orgs =
+        ref.watch(organizationsProvider).valueOrNull ?? const <Organization>[];
+    final orgName = orgs
+        .where((o) => o.id == team.organizationId)
+        .map((o) => o.tradeName)
+        .firstOrNull;
+
+    return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(
-            Icons.groups,
-            size: 14,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textPrimary,
+          InkWell(
+            onTap: () => setState(() {
+              if (!_expandedTeams.remove(team.id)) {
+                _expandedTeams.add(team.id);
+              }
+            }),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: KicksterAvatar(
+                      name: team.name,
+                      imageUrl: team.logoUrl,
+                      icon: Icons.groups_outlined,
+                      size: 40,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          team.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        if (orgName != null && orgName.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            orgName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
               ),
             ),
           ),
+          if (isExpanded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: _TeamRosterBody(
+                teamId: team.id,
+                competitionId: competitionId,
+              ),
+            ),
         ],
       ),
     );
@@ -596,5 +657,107 @@ class _CompetitionDetailScreenState
     } on FormatException {
       return 'Não definido';
     }
+  }
+}
+
+/// Corpo expansível de um time na seção "Times" do detalhe do campeonato:
+/// exibe os atletas do elenco do time na competição atual.
+class _TeamRosterBody extends ConsumerWidget {
+  const _TeamRosterBody({
+    required this.teamId,
+    required this.competitionId,
+  });
+
+  final String teamId;
+  final String competitionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rosterAsync = ref.watch(
+      teamRosterProvider((teamId: teamId, competitionId: competitionId)),
+    );
+
+    return rosterAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      error: (error, stackTrace) => const Text(
+        'Não foi possível carregar o elenco.',
+        style: TextStyle(fontSize: 13, color: AppColors.danger),
+      ),
+      data: (entries) {
+        if (entries.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'Nenhum atleta no elenco',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          );
+        }
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final entry in entries)
+              _athleteChip(entry),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _athleteChip(RosterEntry entry) {
+    final displayNickname = entry.nickname ?? entry.athleteNickname;
+    final parts = <String>[
+      entry.athleteName,
+      if (entry.position != null) entry.position!.label,
+    ];
+    final label = parts.join(' · ');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.grayFill,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.person_outline,
+            size: 12,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Tooltip(
+              message: label,
+              child: Text(
+                displayNickname != null && displayNickname.isNotEmpty
+                    ? '$label ($displayNickname)'
+                    : label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

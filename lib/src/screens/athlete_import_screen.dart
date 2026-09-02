@@ -40,9 +40,10 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
         title: const Text('Modelo CSV'),
         content: const Text(
           'Use o formato abaixo (ponto-e-vírgula, UTF-8):\n\n'
-          'nome;apelido;posicao;numero;foto\n'
-          'Maria Silva;Ma;WR;10;https://...\n\n'
-          'Colunas: nome (obrigatório), apelido, posicao, numero, foto.',
+          'nome;apelido;posicao;numero;foto;datanascimento;genero\n'
+          'Maria Silva;Ma;WR;10;https://...;01/01/2000;FEMALE\n\n'
+          'Colunas: nome (obrigatório), apelido, posicao, numero, foto, '
+          'datanascimento (dd/MM/yyyy), genero (MALE/FEMALE/MIXED).',
         ),
         actions: [
           KicksterButton(
@@ -162,6 +163,9 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
         if (r['numero'] != null && int.tryParse(r['numero']) != null)
           'number': int.parse(r['numero']),
         if (r['foto'] != null) 'photoUrl': r['foto'],
+        if (r['datanascimento'] != null)
+          'birthDate': _parseBirthDate(r['datanascimento']),
+        if (r['genero'] != null) 'gender': r['genero'],
       };
     }).toList();
   }
@@ -190,6 +194,21 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
       }
     }
     return null;
+  }
+
+  /// Converte uma data no formato `dd/MM/yyyy` para ISO 8601 (`YYYY-MM-DD`).
+  String? _parseBirthDate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final parts = value.trim().split('/');
+    if (parts.length != 3) return null;
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return null;
+    final date = DateTime(year, month, day);
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 
   Future<void> _import() async {
