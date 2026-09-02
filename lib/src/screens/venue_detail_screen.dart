@@ -48,11 +48,6 @@ class VenueDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildDetail(BuildContext context, WidgetRef ref, Venue venue) {
-    // P3 #471: resolve a organização pelo family (autoDispose) em vez de
-    // assistir a lista completa.
-    final orgAsync = ref.watch(organizationProvider(venue.organizationId));
-    final orgName = orgAsync.valueOrNull?.tradeName ?? '';
-
     return AppLayout.detail(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,14 +88,6 @@ class VenueDetailScreen extends ConsumerWidget {
                                 venue.name,
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
-                              const SizedBox(height: 2),
-                              if (orgName.isNotEmpty)
-                                Text(
-                                  orgName,
-                                  style: AppTextStyles.paragraph.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
                             ],
                           ),
                         ),
@@ -121,8 +108,6 @@ class VenueDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             AppInfoCard(children: [
-              if (orgName.isNotEmpty)
-                AppInfoRow(label: 'Organização', value: orgName),
               AppInfoRow(
                 label: 'Endereço',
                 value: venue.address?.isNotEmpty == true ? venue.address! : '—',

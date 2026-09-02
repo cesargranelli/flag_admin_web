@@ -3,7 +3,6 @@
 /// Shape de `/api/v1/venues`.
 class Venue {
   final String id;
-  final String organizationId;
   final String name;
   final String? address;
   final String? mapsUrl;
@@ -12,7 +11,6 @@ class Venue {
 
   const Venue({
     required this.id,
-    required this.organizationId,
     required this.name,
     this.address,
     this.mapsUrl,
@@ -22,7 +20,6 @@ class Venue {
 
   factory Venue.fromJson(Map<String, dynamic> json) => Venue(
         id: json['id'] as String,
-        organizationId: json['organizationId'] as String,
         name: json['name'] as String,
         address: json['address'] as String?,
         mapsUrl: json['mapsUrl'] as String?,
@@ -36,7 +33,6 @@ class Venue {
 
   /// Corpo de criação/atualização (`POST/PUT /api/v1/venues`).
   Map<String, dynamic> toJson() => {
-        'organizationId': organizationId,
         'name': name,
         if (address != null) 'address': address,
         if (mapsUrl != null) 'mapsUrl': mapsUrl,

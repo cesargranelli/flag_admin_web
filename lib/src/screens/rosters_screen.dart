@@ -5,15 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/providers.dart';
-import '../utils/mutation.dart';
 import '../widgets/app_screen.dart';
 
 /// Tela de elencos: lista os times já inscritos no campeonato selecionado e,
 /// ao expandir cada card, mostra os atletas dentro do elenco daquele time.
 ///
-/// Para inscrever novos times, navega para `/teams/associate`. Para
-/// desativar a inscrição, o ícone no card executa a desativação lógica do
-/// time (`teamApi.deactivate`).
+/// Para inscrever novos times, navega para `/teams/associate`.
 class RostersScreen extends ConsumerStatefulWidget {
   const RostersScreen({super.key});
 
@@ -22,8 +19,6 @@ class RostersScreen extends ConsumerStatefulWidget {
 }
 
 class _RostersScreenState extends ConsumerState<RostersScreen> {
-  static const _deactivateScope = 'roster-deactivate';
-  static const _rosterToggleScope = 'roster-toggle';
   final _searchController = TextEditingController();
   String _query = '';
 
@@ -131,16 +126,10 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
       ),
       data: (teams) {
         if (teams.isEmpty) {
-          return KicksterEmptyState(
+          return const KicksterEmptyState(
             icon: Icons.groups_outlined,
             message: 'Nenhum time inscrito',
-            description: 'Inscreva times no campeonato para criar elencos.',
-            action: KicksterButton(
-              label: 'Inscrever time',
-              icon: Icons.add,
-              onPressed: () => context.push('/teams/associate',
-                  extra: competitionId),
-            ),
+            description: 'Nenhum time está inscrito neste campeonato.',
           );
         }
 
@@ -182,13 +171,6 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                         ),
                       ),
                     const Spacer(),
-                    KicksterButton(
-                      label: 'Inscrever time',
-                      icon: Icons.add,
-                      onPressed: () => context.push('/teams/associate',
-                          extra: competitionId),
-                    ),
-                    const SizedBox(width: 12),
                     SizedBox(
                       width: 280,
                       child: KicksterSearchField(
@@ -237,8 +219,8 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
   }
 }
 
-/// Card expansível de um time inscrito: header com nome + ações e, quando
-/// expandido, a lista de atletas do elenco (via [teamRosterProvider]).
+/// Card expansível de um time inscrito: header com nome + expand/collapse e,
+/// quando expandido, a lista de atletas do elenco (via [teamRosterProvider]).
 class _TeamRosterCard extends ConsumerWidget {
   const _TeamRosterCard({
     required this.team,
@@ -254,13 +236,6 @@ class _TeamRosterCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deactivating = ref
-        .watch(mutationProgressProvider(_RostersScreenState._deactivateScope))
-        .contains(team.id);
-    final togglingRoster = ref
-        .watch(mutationProgressProvider(_RostersScreenState._rosterToggleScope))
-        .contains(team.id);
-
     // Dados completos do time (shortName) — o mapping de `teamsProvider` só
     // carrega name/logo; o detalhe resolve o restante quando disponível.
     final detail = ref.watch(teamProvider(team.id)).valueOrNull;
@@ -340,44 +315,6 @@ class _TeamRosterCard extends ConsumerWidget {
                     color: AppColors.textSecondary,
                   ),
                   const SizedBox(width: 4),
-                  if (togglingRoster)
-                    const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  else
-                    IconButton(
-                      tooltip: 'Desativar elenco',
-                      icon: const Icon(
-                        Icons.visibility_off_outlined,
-                        color: AppColors.textSecondary,
-                      ),
-                      onPressed: () => _deactivateRoster(context, ref),
-                    ),
-                  const SizedBox(width: 4),
-                  if (deactivating)
-                    const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  else
-                    IconButton(
-                      tooltip: 'Desativar time',
-                      icon: const Icon(
-                        Icons.pause_circle_outline,
-                        color: AppColors.danger,
-                      ),
-                      onPressed: () =>
-                          _deactivate(context, ref, team, competitionId),
-                    ),
                 ],
               ),
             ),
@@ -393,68 +330,6 @@ class _TeamRosterCard extends ConsumerWidget {
             ),
         ],
       ),
-    );
-  }
-
-  /// Desativa o time (status INACTIVE, desativação lógica).
-  ///
-  /// Exibe confirmação antes de executar a mutação e, após o sucesso,
-  /// invalida a listagem de inscritos do campeonato (o time desativado deixa
-  /// de aparecer como ativo).
-  Future<void> _deactivate(
-    BuildContext context,
-    WidgetRef ref,
-    Team team,
-    String competitionId,
-  ) async {
-    final confirmed = await showKicksterConfirm(
-      context: context,
-      title: 'Desativar time',
-      content: '"${team.name}" ficará inativo até ser reativado.',
-      confirmLabel: 'Desativar',
-      danger: true,
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    await runMutation(
-      context,
-      ref: ref,
-      scope: _RostersScreenState._deactivateScope,
-      action: () => ref.read(teamApiProvider).deactivate(team.id),
-      successMessage: '${team.name} desativado.',
-      errorMessage: 'Não foi possível desativar o time.',
-      progressId: team.id,
-      onSuccess: () => ref.invalidate(teamsProvider(competitionId)),
-    );
-  }
-
-  /// Desativa o elenco do time na competição (status INACTIVE).
-  ///
-  /// Decisão pragmática: a tela de elencos não expõe o status do roster
-  /// (o provider carrega apenas as entradas), então o botão executa a
-  /// desativação sem espelhar estado — a reativação fica por conta do
-  /// backend/futura tela dedicada.
-  Future<void> _deactivateRoster(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    await runMutation(
-      context,
-      ref: ref,
-      scope: _RostersScreenState._rosterToggleScope,
-      action: () =>
-          ref.read(rosterApiProvider).deactivate(team.id, competitionId),
-      successMessage: 'Elenco de ${team.name} desativado.',
-      errorMessage: 'Não foi possível desativar o elenco.',
-      progressId: team.id,
-      onSuccess: () {
-        ref.invalidate(
-          teamRosterProvider(
-            (teamId: team.id, competitionId: competitionId),
-          ),
-        );
-        ref.invalidate(teamsProvider(competitionId));
-      },
     );
   }
 }
