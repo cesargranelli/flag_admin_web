@@ -107,7 +107,7 @@ class _CompetitionDetailScreenState
             _section(
               title: 'Times',
               icon: Icons.groups,
-              child: _teamsCard(context, comp, canEdit, isDraft),
+              child: _teamsCard(context, comp),
             ),
           ],
         ),
@@ -366,8 +366,6 @@ class _CompetitionDetailScreenState
   Widget _teamsCard(
     BuildContext context,
     Competition comp,
-    bool canEdit,
-    bool isDraft,
   ) {
     final teams = ref.watch(teamsProvider(comp.id));
 
@@ -383,7 +381,8 @@ class _CompetitionDetailScreenState
         children: [
           if (items.isEmpty)
             const Text(
-              'Nenhum time inscrito.',
+              'Nenhum time inscrito. Configure o elenco de um time '
+              'a partir do detalhe do time para inscrevê-lo automaticamente.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             )
           else
@@ -400,23 +399,6 @@ class _CompetitionDetailScreenState
                         : null,
                   ),
               ],
-            ),
-          const SizedBox(height: 12),
-          if (canEdit && isDraft)
-            KicksterButton(
-              label: 'Inscrever times',
-              icon: Icons.add,
-              onPressed: () {
-                ref.read(selectedCompetitionProvider.notifier).state =
-                    comp.id;
-                context.push('/teams/associate', extra: comp.id);
-              },
-            )
-          else
-            const Text(
-              'Apenas o criador do campeonato pode inscrever times.',
-              style:
-                  TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
         ],
       ),

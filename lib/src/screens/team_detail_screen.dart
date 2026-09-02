@@ -414,6 +414,17 @@ class TeamDetailScreen extends ConsumerWidget {
     );
 
     if (competitionId == null || !context.mounted) return;
+
+    // Inscreve o time no campeonato automaticamente ao configurar o elenco.
+    // Se já inscrito (409), ignora silenciosamente.
+    try {
+      await ref.read(teamApiProvider).enroll(competitionId, team.id);
+    } catch (_) {
+      // Ignora erro de inscrição (ex.: já inscrito). O roster ainda pode
+      // ser criado — o backend usa getOrCreateRoster independentemente.
+    }
+
+    if (!context.mounted) return;
     context.push('/teams/${team.id}/roster', extra: competitionId);
   }
 
