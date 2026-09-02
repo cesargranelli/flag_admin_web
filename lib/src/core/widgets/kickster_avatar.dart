@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../config/app_config.dart';
 import '../theme/app_colors.dart';
 
 /// Avatar no estilo do kit Kickster (issue #441).
@@ -54,9 +55,10 @@ class KicksterAvatar extends StatelessWidget {
 
     if (imageUrl == null) return fallback;
 
+    final resolvedUrl = AppConfig.resolveImageUrl(imageUrl);
     return ClipOval(
       child: Image.network(
-        imageUrl!,
+        resolvedUrl,
         width: size,
         height: size,
         fit: BoxFit.cover,

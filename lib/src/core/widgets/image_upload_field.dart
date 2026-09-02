@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../api/api_client.dart';
+import '../config/app_config.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import 'kickster_modal.dart';
@@ -242,7 +243,7 @@ class _ImageUploadFieldState extends State<ImageUploadField> {
       ),
       child: ClipOval(
         child: Image.network(
-          widget.imageUrl!,
+          AppConfig.resolveImageUrl(widget.imageUrl!),
           width: 100,
           height: 100,
           fit: BoxFit.cover,

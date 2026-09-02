@@ -533,7 +533,7 @@ class TeamDetailScreen extends ConsumerWidget {
       ),
       child: validLogo
           ? Image.network(
-              logo,
+              AppConfig.resolveImageUrl(logo),
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => const Icon(
                 Icons.groups_outlined,
