@@ -9,11 +9,11 @@ import '../providers/providers.dart';
 ///
 /// - **Header pessoal**: avatar + nome + greeting + home icon (sticky)
 /// - **Barra superior** (sticky, abaixo do header pessoal, apenas quando há
-///   tela anterior na pilha — `canPop`): link "Voltar para {label}" à
-///   esquerda (ícone + rótulo num único [InkWell]) e o **título da página
+///   tela anterior na pilha): link "Voltar para {label}" à esquerda
+///   (ícone + rótulo num único [InkWell]) e o **título da página
 ///   centralizado** no meio da barra.
 /// - **Page Body** (scrollável, padding 24px): conteúdo da tela
-class AppScreen extends StatelessWidget {
+class AppScreen extends ConsumerWidget {
   const AppScreen({
     super.key,
     required this.title,
@@ -37,27 +37,16 @@ class AppScreen extends StatelessWidget {
   final bool scrollable;
 
   @override
-  Widget build(BuildContext context) {
-    // Verifica se há mais de 1 rota na pilha (excluindo a raiz /).
-    // Usa a lista de matches ao invés de canPop() porque com
-    // StatefulShellRoute.indexedStack o canPop pode não funcionar
-    // corretamente ao navegar entre branches diferentes.
-    final matches = GoRouter.of(context)
-        .routerDelegate
-        .currentConfiguration
-        .matches;
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentPath =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
     final isHome = currentPath == '/';
-    // Há algo na pilha além da home?
-    final hasStack = matches.length > 1 || (!isHome && currentPath != '/');
+
+    // Registra o path atual no histórico (deduplicado pelo notifier).
+    ref.read(navigationHistoryProvider.notifier).navigate(currentPath);
+
     final backLabel = _resolveBackLabel(context, this.backLabel);
-    // Sem histórico: volta para a home (ex.: listagens vindas da home via
-    // `go`, sem pilha). Sem rótulo conhecido: mostra apenas "Voltar".
-    final fallbackHome = !hasStack && !isHome;
-    final backText = fallbackHome
-        ? 'Voltar para Início'
-        : (backLabel == null ? 'Voltar' : 'Voltar para $backLabel');
+    final backText = backLabel == null ? 'Voltar' : 'Voltar para $backLabel';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -82,11 +71,14 @@ class AppScreen extends StatelessWidget {
                       label: backText,
                       child: InkWell(
                         onTap: () {
-                          // Tenta pop(); se não há pilha, vai para home.
-                          // Em GoRouter com StatefulShellRoute, pop() funciona
-                          // mesmo entre branches quando a rota foi via push().
-                          if (hasStack) {
-                            context.pop();
+                          // Usa o histórico customizado para navegar de volta.
+                          // Com StatefulShellRoute.indexedStack, pop() não
+                          // funciona entre branches — o histórico resolve.
+                          final previousPath = ref
+                              .read(navigationHistoryProvider.notifier)
+                              .goBack();
+                          if (previousPath != null) {
+                            context.go(previousPath);
                           } else {
                             context.go('/');
                           }

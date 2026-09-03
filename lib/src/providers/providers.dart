@@ -268,3 +268,42 @@ final venuesProvider = FutureProvider<List<Venue>>(
 final venueProvider = FutureProvider.autoDispose.family<Venue, String>(
   (ref, id) => ref.watch(venueApiProvider).getById(id),
 );
+
+// ---------------------------------------------------------------------------
+// Navigation History — rastreia o histórico de navegação entre branches
+// do StatefulShellRoute.indexedStack, onde pop() não funciona entre branches.
+// ---------------------------------------------------------------------------
+
+/// Histórico de navegação (pilha de paths).
+/// Cada vez que o usuário navega, o path atual é empilhado.
+/// O botão "Voltar" desempilha e navega para o path anterior.
+final navigationHistoryProvider =
+    NotifierProvider<NavigationHistory, List<String>>(
+  NavigationHistory.new,
+);
+
+class NavigationHistory extends Notifier<List<String>> {
+  @override
+  List<String> build() => ['/'];
+
+  /// Registra uma navegação (chamar sempre que usar context.push/go).
+  void navigate(String path) {
+    // Não duplica o topo da pilha.
+    if (state.isEmpty || state.last != path) {
+      state = [...state, path];
+    }
+  }
+
+  /// Remove e retorna o path anterior ao atual.
+  /// Retorna null se só há a home na pilha.
+  String? goBack() {
+    if (state.length <= 1) return null;
+    state = state.sublist(0, state.length - 1);
+    return state.last;
+  }
+
+  /// Limpa o histórico e define um novo path (ex.: ao ir para home).
+  void reset(String path) {
+    state = [path];
+  }
+}
