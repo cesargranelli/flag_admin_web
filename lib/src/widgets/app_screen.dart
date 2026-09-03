@@ -9,11 +9,11 @@ import '../providers/providers.dart';
 ///
 /// - **Header pessoal**: avatar + nome + greeting + home icon (sticky)
 /// - **Barra superior** (sticky, abaixo do header pessoal, apenas quando há
-///   tela anterior na pilha — `canPop`): link "Voltar para {label}" à
-///   esquerda (ícone + rótulo num único [InkWell]) e o **título da página
+///   tela anterior na pilha): link "Voltar para {label}" à esquerda
+///   (ícone + rótulo num único [InkWell]) e o **título da página
 ///   centralizado** no meio da barra.
 /// - **Page Body** (scrollável, padding 24px): conteúdo da tela
-class AppScreen extends StatelessWidget {
+class AppScreen extends ConsumerWidget {
   const AppScreen({
     super.key,
     required this.title,
@@ -37,15 +37,13 @@ class AppScreen extends StatelessWidget {
   final bool scrollable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final canPop = GoRouter.of(context).canPop();
-    // Tela atual (path) — a home (/) é a raiz e não mostra botão voltar.
     final currentPath =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
     final isHome = currentPath == '/';
     final backLabel = _resolveBackLabel(context, this.backLabel);
-    // Sem histórico: volta para a home (ex.: listagens vindas da home via
-    // `go`, sem pilha). Sem rótulo conhecido: mostra apenas "Voltar".
+    // Sem histórico: volta para a home. Sem rótulo: apenas "Voltar".
     final fallbackHome = !canPop && !isHome;
     final backText = fallbackHome
         ? 'Voltar para Início'

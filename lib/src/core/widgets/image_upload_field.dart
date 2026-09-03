@@ -247,6 +247,29 @@ class _ImageUploadFieldState extends State<ImageUploadField> {
           width: 100,
           height: 100,
           fit: BoxFit.cover,
+          // Exibe placeholder enquanto a primeira frame não é pintada.
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded || frame != null) return child;
+            return _buildPlaceholder();
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              width: 100,
+              height: 100,
+              decoration: const BoxDecoration(
+                color: AppColors.grayFill,
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            );
+          },
           errorBuilder: (_, _, _) => Container(
             width: 100,
             height: 100,
