@@ -38,15 +38,23 @@ class AppScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canPop = GoRouter.of(context).canPop();
-    // Tela atual (path) — a home (/) é a raiz e não mostra botão voltar.
+    // Verifica se há mais de 1 rota na pilha (excluindo a raiz /).
+    // Usa a lista de matches ao invés de canPop() porque com
+    // StatefulShellRoute.indexedStack o canPop pode não funcionar
+    // corretamente ao navegar entre branches diferentes.
+    final matches = GoRouter.of(context)
+        .routerDelegate
+        .currentConfiguration
+        .matches;
     final currentPath =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
     final isHome = currentPath == '/';
+    // Há algo na pilha além da home?
+    final hasStack = matches.length > 1 || (!isHome && currentPath != '/');
     final backLabel = _resolveBackLabel(context, this.backLabel);
     // Sem histórico: volta para a home (ex.: listagens vindas da home via
     // `go`, sem pilha). Sem rótulo conhecido: mostra apenas "Voltar".
-    final fallbackHome = !canPop && !isHome;
+    final fallbackHome = !hasStack && !isHome;
     final backText = fallbackHome
         ? 'Voltar para Início'
         : (backLabel == null ? 'Voltar' : 'Voltar para $backLabel');
@@ -73,8 +81,16 @@ class AppScreen extends StatelessWidget {
                       button: true,
                       label: backText,
                       child: InkWell(
-                        onTap: () =>
-                            canPop ? context.pop() : context.go('/'),
+                        onTap: () {
+                          // Tenta pop(); se não há pilha, vai para home.
+                          // Em GoRouter com StatefulShellRoute, pop() funciona
+                          // mesmo entre branches quando a rota foi via push().
+                          if (hasStack) {
+                            context.pop();
+                          } else {
+                            context.go('/');
+                          }
+                        },
                         borderRadius: BorderRadius.circular(8),
                         hoverColor:
                             AppColors.primary.withValues(alpha: 0.08),
