@@ -10,15 +10,15 @@ import 'package:flutter/material.dart';
 class AdminShell extends StatelessWidget {
   const AdminShell({
     super.key,
-    required this.navigationShell,
+    required this.child,
   });
 
-  final Widget navigationShell;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      body: child,
     );
   }
 }

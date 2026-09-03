@@ -38,15 +38,16 @@ class AppScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final canPop = GoRouter.of(context).canPop();
     final currentPath =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
     final isHome = currentPath == '/';
-
-    // Registra o path atual no histórico (deduplicado pelo notifier).
-    ref.read(navigationHistoryProvider.notifier).navigate(currentPath);
-
     final backLabel = _resolveBackLabel(context, this.backLabel);
-    final backText = backLabel == null ? 'Voltar' : 'Voltar para $backLabel';
+    // Sem histórico: volta para a home. Sem rótulo: apenas "Voltar".
+    final fallbackHome = !canPop && !isHome;
+    final backText = fallbackHome
+        ? 'Voltar para Início'
+        : (backLabel == null ? 'Voltar' : 'Voltar para $backLabel');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,19 +71,8 @@ class AppScreen extends ConsumerWidget {
                       button: true,
                       label: backText,
                       child: InkWell(
-                        onTap: () {
-                          // Usa o histórico customizado para navegar de volta.
-                          // Com StatefulShellRoute.indexedStack, pop() não
-                          // funciona entre branches — o histórico resolve.
-                          final previousPath = ref
-                              .read(navigationHistoryProvider.notifier)
-                              .goBack();
-                          if (previousPath != null) {
-                            context.go(previousPath);
-                          } else {
-                            context.go('/');
-                          }
-                        },
+                        onTap: () =>
+                            canPop ? context.pop() : context.go('/'),
                         borderRadius: BorderRadius.circular(8),
                         hoverColor:
                             AppColors.primary.withValues(alpha: 0.08),
