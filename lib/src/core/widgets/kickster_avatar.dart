@@ -68,6 +68,10 @@ class KicksterAvatar extends StatelessWidget {
         cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
         cacheHeight: (size * MediaQuery.devicePixelRatioOf(context)).round(),
         gaplessPlayback: true,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded || frame != null) return child;
+          return fallback;
+        },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(

@@ -94,7 +94,12 @@ class TeamDetailScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      _avatar(team, size: 64),
+                      KicksterAvatar(
+                        imageUrl: team.logoUrl,
+                        name: team.name,
+                        size: 64,
+                        icon: Icons.groups_outlined,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -512,40 +517,6 @@ class TeamDetailScreen extends ConsumerWidget {
       onSuccess: () {
         ref.invalidate(teamRostersProvider(team.id));
       },
-    );
-  }
-
-  /// Avatar do time: logo (Image.network) quando a URL é válida, ou o ícone
-  /// de grupos como fallback.
-  Widget _avatar(Team team, {required double size}) {
-    final logo = team.logoUrl;
-    final validLogo =
-        logo != null &&
-        logo.isNotEmpty &&
-        (Uri.tryParse(logo)?.hasScheme ?? false);
-    return Container(
-      width: size,
-      height: size,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-      ),
-      child: validLogo
-          ? Image.network(
-              AppConfig.resolveImageUrl(logo),
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.groups_outlined,
-                color: AppColors.primary,
-                size: 32,
-              ),
-            )
-          : const Icon(
-              Icons.groups_outlined,
-              color: AppColors.primary,
-              size: 32,
-            ),
     );
   }
 }
