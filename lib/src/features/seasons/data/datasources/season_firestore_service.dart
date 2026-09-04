@@ -12,6 +12,7 @@ class Season {
   final DateTime? endDate;
   final String? status;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Season({
     required this.id,
@@ -22,6 +23,7 @@ class Season {
     this.endDate,
     this.status,
     this.createdAt,
+    this.updatedAt,
   });
 
   factory Season.fromFirestore(DocumentSnapshot doc) {
@@ -35,6 +37,7 @@ class Season {
       endDate: (data['endDate'] as Timestamp?)?.toDate(),
       status: data['status'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -47,6 +50,7 @@ class Season {
       if (endDate != null) 'endDate': Timestamp.fromDate(endDate!),
       if (status != null) 'status': status,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 }

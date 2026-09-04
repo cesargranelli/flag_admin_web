@@ -12,6 +12,7 @@ class Team {
   final String? sport;
   final String? status;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? organizationName;
 
   const Team({
@@ -23,6 +24,7 @@ class Team {
     this.sport,
     this.status,
     this.createdAt,
+    this.updatedAt,
     this.organizationName,
   });
 
@@ -37,6 +39,7 @@ class Team {
       sport: data['sport'] as String?,
       status: data['status'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       organizationName: data['organizationName'] as String?,
     );
   }
@@ -50,6 +53,7 @@ class Team {
       if (sport != null) 'sport': sport,
       if (status != null) 'status': status,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
       if (organizationName != null) 'organizationName': organizationName,
     };
   }

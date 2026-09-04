@@ -10,6 +10,7 @@ class Venue {
   final Map<String, dynamic>? address;
   final String? mapsUrl;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Venue({
     required this.id,
@@ -18,6 +19,7 @@ class Venue {
     this.address,
     this.mapsUrl,
     this.createdAt,
+    this.updatedAt,
   });
 
   factory Venue.fromFirestore(DocumentSnapshot doc) {
@@ -29,6 +31,7 @@ class Venue {
       address: data['address'] as Map<String, dynamic>?,
       mapsUrl: data['mapsUrl'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -39,6 +42,7 @@ class Venue {
       if (address != null) 'address': address,
       if (mapsUrl != null) 'mapsUrl': mapsUrl,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 }

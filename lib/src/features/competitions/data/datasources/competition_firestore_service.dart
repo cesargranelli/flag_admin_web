@@ -19,6 +19,7 @@ class Competition {
   final String? status;
   final Map<String, dynamic>? eligibilityRules;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? organizationName;
   final String? seasonName;
   final String? venueName;
@@ -39,6 +40,7 @@ class Competition {
     this.status,
     this.eligibilityRules,
     this.createdAt,
+    this.updatedAt,
     this.organizationName,
     this.seasonName,
     this.venueName,
@@ -62,6 +64,7 @@ class Competition {
       status: data['status'] as String?,
       eligibilityRules: data['eligibilityRules'] as Map<String, dynamic>?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       organizationName: data['organizationName'] as String?,
       seasonName: data['seasonName'] as String?,
       venueName: data['venueName'] as String?,
@@ -84,6 +87,7 @@ class Competition {
       if (status != null) 'status': status,
       if (eligibilityRules != null) 'eligibilityRules': eligibilityRules,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
       if (organizationName != null) 'organizationName': organizationName,
       if (seasonName != null) 'seasonName': seasonName,
       if (venueName != null) 'venueName': venueName,
