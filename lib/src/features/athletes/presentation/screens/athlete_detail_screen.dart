@@ -1,12 +1,10 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
-import '../../../../utils/date_formats.dart';
-import '../../../../core/widgets/app_screen.dart';
 
 /// Detalhe de um atleta: apresenta os dados e oferece a edição.
 ///

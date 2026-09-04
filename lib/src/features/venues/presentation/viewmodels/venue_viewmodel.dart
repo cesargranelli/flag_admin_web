@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/datasources/venue_firestore_service.dart';
-import '../domain/entities/venue.dart';
+import '../../../../providers/providers.dart';
+
+import '../../data/datasources/venue_firestore_service.dart';
 
 /// ViewModel para gerenciar estado dos venues.
 class VenueViewModel extends StateNotifier<AsyncValue<List<Venue>>> {

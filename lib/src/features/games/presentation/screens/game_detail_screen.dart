@@ -1,14 +1,11 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/competition_permissions.dart';
-import '../providers/providers.dart';
-import '../utils/date_formats.dart';
-import '../widgets/app_screen.dart';
-import '../widgets/edit_restriction_note.dart';
+import '../../../../features/auth/domain/competition_permissions.dart';
+import '../../../../providers/providers.dart';
 
 /// Detalhe de um jogo: confronto, placar, status e informações.
 class GameDetailScreen extends ConsumerWidget {

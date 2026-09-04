@@ -1,10 +1,9 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/providers.dart';
-import '../utils/mutation.dart';
+import '../../../../providers/providers.dart';
 
 /// Valor-sentinela da opção "— sem conferência —" do dropdown.
 const String _kNoConference = '';

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/datasources/game_firestore_service.dart';
-import '../domain/entities/game.dart';
+import '../../../../providers/providers.dart';
+
+import '../../data/datasources/game_firestore_service.dart';
 
 /// ViewModel para gerenciar estado dos jogos.
 class GameViewModel extends StateNotifier<AsyncValue<List<Game>>> {

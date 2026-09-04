@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Nota informativa exibida quando as ações de edição ficam ocultas

@@ -6,9 +6,6 @@ publish_to: none
 environment:
   sdk: ^3.11.4
 
-workspace:
-  - packages/*
-
 dependencies:
   flutter:
     sdk: flutter
@@ -25,10 +22,11 @@ dependencies:
   cloud_firestore: ^5.6.5
   firebase_storage: ^12.4.7
   firebase_auth: ^5.5.1
-  flag_core: ^0.3.0
-  flag_api: ^0.3.0
-  flag_domain: ^0.3.0
 
+  dio: any
+  flutter_secure_storage: any
+  google_fonts: any
+  shared_preferences: ^2.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,6 +1,4 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform;
 
 /// Configuração do Firebase para o Flag Admin Web.
 ///

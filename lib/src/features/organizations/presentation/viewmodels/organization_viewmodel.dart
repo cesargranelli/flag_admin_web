@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/datasources/organization_firestore_service.dart';
-import '../domain/entities/organization.dart';
+import '../../../../providers/providers.dart';
+
+import '../../data/datasources/organization_firestore_service.dart';
 
 /// ViewModel para gerenciar estado das organizações.
 ///

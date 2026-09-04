@@ -1,10 +1,10 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
+import '../../../../providers/providers.dart';
 
 /// Passo 3 do fluxo: define a nova senha usando o token do link do e-mail.
 class ResetPasswordScreen extends ConsumerStatefulWidget {

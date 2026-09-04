@@ -1,5 +1,4 @@
-import '../data/datasources/organization_firestore_service.dart';
-import '../domain/entities/organization.dart';
+import '../datasources/organization_firestore_service.dart';
 
 /// Repository para organizações.
 ///
@@ -25,8 +24,8 @@ class OrganizationRepository {
   }
 
   /// Atualiza organização existente.
-  Future<Organization> update(String id, Map<String, dynamic> data) async {
-    return await _datasource.update(id, data);
+  Future<void> update(String id, Map<String, dynamic> data) async {
+    await _datasource.update(id, data);
   }
 
   /// Remove organização.
