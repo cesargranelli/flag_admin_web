@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
+import '../../../../providers/providers.dart';
 
 /// Tela de cadastro do organizador no visual do kit Kickster (issue #443),
 /// com pendência de aprovação de administrador.

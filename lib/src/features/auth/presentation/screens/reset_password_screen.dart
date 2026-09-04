@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
+import '../../../../providers/providers.dart';
 
 /// Passo 3 do fluxo: define a nova senha usando o token do link do e-mail.
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -165,3 +165,4 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     );
   }
 }
+
