@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
+import '../../../../core/widgets/app_screen.dart';
 
 /// Importação em lote de atletas a partir de um arquivo CSV/TXT.
 ///
