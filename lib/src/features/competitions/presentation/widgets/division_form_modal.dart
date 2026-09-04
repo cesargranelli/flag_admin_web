@@ -3,7 +3,7 @@ import 'package:flag_domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/providers.dart';
+import '../../../../providers/providers.dart';
 import '../utils/mutation.dart';
 
 /// Valor-sentinela da opção "— sem conferência —" do dropdown.
@@ -202,3 +202,4 @@ class _DivisionFormModalState extends ConsumerState<DivisionFormModal> {
     );
   }
 }
+

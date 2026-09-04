@@ -4,7 +4,7 @@ import 'package:flag_domain/flag_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../utils/date_formats.dart';
+import '../../../../utils/date_formats.dart';
 
 /// Controller compartilhado do formulário de campeonato (criar/editar).
 ///

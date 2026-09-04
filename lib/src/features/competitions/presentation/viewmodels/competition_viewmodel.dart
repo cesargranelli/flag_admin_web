@@ -99,3 +99,4 @@ final competitionStreamProvider = StreamProvider<List<Competition>>((ref) {
   final service = ref.watch(competitionFirestoreServiceProvider);
   return service.streamList();
 });
+

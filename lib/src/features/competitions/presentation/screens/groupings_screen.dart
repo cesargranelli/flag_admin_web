@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../auth/competition_permissions.dart';
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
+import '../../../core/widgets/app_screen.dart';
 import '../widgets/club_assignment_modal.dart';
-import '../widgets/conference_form_modal.dart';
-import '../widgets/division_form_modal.dart';
+import '../../../core/widgets/conference_form_modal.dart';
+import '../../../core/widgets/division_form_modal.dart';
 import '../widgets/edit_restriction_note.dart';
 
 /// Gestão de conferências e divisões por campeonato.
@@ -776,3 +776,4 @@ String _plural(int count, String singular, String plural) =>
 /// Parte do rótulo de contadores; [count] nulo indica falha de carregamento.
 String _countPart(int? count, String singular, String plural) =>
     count == null ? '$plural indisponíveis' : _plural(count, singular, plural);
+

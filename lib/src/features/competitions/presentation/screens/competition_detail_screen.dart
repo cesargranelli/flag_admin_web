@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../auth/competition_permissions.dart';
-import '../providers/providers.dart';
-import '../utils/date_formats.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
+import '../../../../utils/date_formats.dart';
+import '../../../core/widgets/app_screen.dart';
 
 /// Detalhe de um campeonato em página única (#455): todas as seções
 /// (campeonato, modalidade, categoria, temporada, conferências, agrupamento,
