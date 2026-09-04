@@ -1,10 +1,19 @@
-name: CI
+# CI desativado temporariamente
+#
+# Este workflow está INATIVO de propósito. O projeto flag_admin_web NÃO é um
+# workspace Melos, então `melos bootstrap` sempre falha (todas as runs até
+# aqui terminaram em failure).
+#
+# Decisão do time (2026-09-04): CI será revisitado/reativado quando o projeto
+# estiver mais maduro. Para reativar, restaure os gatilhos abaixo:
+#
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened]
+#   push:
+#     branches: [main, develop]
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-  push:
-    branches: [main, develop]
+name: CI
 
 jobs:
   analyze:
