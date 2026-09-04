@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/competition_permissions.dart';
+import '../../../auth/domain/competition_permissions.dart';
 import '../../../../providers/providers.dart';
-import '../../../core/widgets/app_screen.dart';
-import '../../../core/widgets/competition_form_controller.dart';
-import '../../../core/widgets/competition_form_sections.dart';
+import '../../../../core/widgets/app_screen.dart';
+import '../widgets/competition_form_controller.dart';
+import '../widgets/competition_form_sections.dart';
 
 /// Edição de campeonato (issue #287) — classe separada da criação.
 ///
