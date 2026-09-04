@@ -8,8 +8,8 @@ Admin Web do Flag Platform — gestão de cadastros pelo organizador (Flutter We
 ├── lib/                        # Código do app
 │   └── src/
 │       ├── api/                # Cliente HTTP (dio) e serviços da API REST
-│       ├── config/             # Configuração (Firebase, ambiente)
-│       ├── core/               # Widgets Kickster, tema, utilitários, FirestoreService
+│       ├── core/               # Widgets Kickster, tema, utilitários, FirestoreService, config
+│       │   └── config/         # Configuração (Firebase, ambiente)
 │       ├── domain/             # Models, enums
 │       ├── features/           # Modulos por feature (MVVM)
 │       │   ├── {feature}/
@@ -45,7 +45,7 @@ flutter run -d chrome
 ### Configuração Firebase
 
 O projeto Firebase usado é `flag-platform` (projeto Firestore em `us-central1`).
-Os valores do `lib/src/config/firebase_options.dart` usam **defaults do ambiente dev**
+Os valores do `lib/src/core/config/firebase_options.dart` usam **defaults do ambiente dev**
 e podem ser sobrescritos via `--dart-define`:
 
 ```bash
