@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
 import '../../../../utils/date_formats.dart';
-import '../../../core/widgets/app_screen.dart';
+import '../../../../core/widgets/app_screen.dart';
 
 /// Detalhe de um atleta: apresenta os dados e oferece a edição.
 ///
