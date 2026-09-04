@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
-import '../widgets/selectable_card.dart';
+import '../../../../providers/providers.dart';
+import '../../../../core/widgets/app_screen.dart';
+import '../../../core/widgets/selectable_card.dart';
 
 /// Formulário de criação/edição de atleta.
 class AthleteFormScreen extends ConsumerStatefulWidget {
