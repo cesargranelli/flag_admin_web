@@ -2,43 +2,19 @@ rules_version = '2';
 
 // Regras do Firestore para o Flag Platform.
 //
-// O acesso é restrito a usuários autenticados no Firebase Auth.
-// O backend (Firebase Admin SDK) ignora estas regras (privilegiado).
+// A escrita única é feita pelo backend Java REST via Firebase Admin SDK,
+// que ignora estas regras (privilégios de administrador). O cliente web
+// (Flutter) apenas LÊ os dados via streams/consultas.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ===== Coleções administradas pelo org (CRUD via admin_web) =====
-    match /organizations/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /persons/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /teams/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /venues/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /seasons/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /competitions/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /games/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /rounds/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /rosters/{document=**} {
-      allow read, write: if request.auth != null;
-    }
+    // ===== Leitura pública =====
+    // Qualquer cliente pode ler as coleções (dados públicos de campeonato).
+    allow read: if true;
 
-    // ===== Demais coleções (padrão) =====
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
+    // ===== Escrita negada ao cliente =====
+    // O cliente web não escreve direto no Firestore; toda escrita é feita
+    // pelo backend Java (Admin SDK), que ignora estas regras.
+    allow write: if false;
   }
 }

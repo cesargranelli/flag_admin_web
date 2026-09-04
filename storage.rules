@@ -2,34 +2,19 @@ rules_version = '2';
 
 // Regras do Firebase Storage para o Flag Platform.
 //
-// O admin_web faz upload de imagens (person/team/venue photos) e download
-// para visualização no navegador. Usuários autenticados podem ler/escrever.
+// Os uploads de imagens serão feitos pelo backend Java via Firebase Admin
+// SDK (issues H14), que ignora estas regras. O cliente web apenas lê
+// (download de imagens para exibição no navegador).
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // ===== Uploads de imagem de entidades =====
-    match /persons/{uid}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && request.resource.size < 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
-    }
-    match /teams/{document=**}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && request.resource.size < 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
-    }
-    match /venues/{document=**}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && request.resource.size < 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
-    }
+    // ===== Leitura pública =====
+    // Imagens são públicas (exibidas no app web sem autenticação).
+    allow read: if true;
 
-    // ===== Demais objetos (padrão) =====
-    match /{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
+    // ===== Escrita negada ao cliente =====
+    // O cliente web não envia arquivos direto ao Storage; uploads são feitos
+    // pelo backend Java (Admin SDK), que ignora estas regras.
+    allow write: if false;
   }
 }
