@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../utils/mutation.dart';
-import '../widgets/app_entity_list_screen.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
+import '../../../../utils/mutation.dart';
+import '../../../core/widgets/app_screen.dart';
+import '../../../core/widgets/app_entity_list_screen.dart';
 
 /// Gestão de organizações: cards de acesso e navegação para o detalhe.
 ///
