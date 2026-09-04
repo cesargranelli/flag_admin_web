@@ -14,6 +14,7 @@ class Organization {
   final String? secondaryColor;
   final String? status;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Organization({
     required this.id,
@@ -26,6 +27,7 @@ class Organization {
     this.secondaryColor,
     this.status,
     this.createdAt,
+    this.updatedAt,
   });
 
   factory Organization.fromFirestore(DocumentSnapshot doc) {
@@ -41,6 +43,7 @@ class Organization {
       secondaryColor: data['secondaryColor'] as String?,
       status: data['status'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -55,6 +58,7 @@ class Organization {
       if (secondaryColor != null) 'secondaryColor': secondaryColor,
       if (status != null) 'status': status,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 }

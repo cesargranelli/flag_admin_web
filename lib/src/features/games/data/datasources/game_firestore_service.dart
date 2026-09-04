@@ -18,6 +18,7 @@ class Game {
   final String? status;
   final String? notes;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? competitionName;
   final String? homeTeamName;
   final String? awayTeamName;
@@ -38,6 +39,7 @@ class Game {
     this.status,
     this.notes,
     this.createdAt,
+    this.updatedAt,
     this.competitionName,
     this.homeTeamName,
     this.awayTeamName,
@@ -61,6 +63,7 @@ class Game {
       status: data['status'] as String?,
       notes: data['notes'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       competitionName: data['competitionName'] as String?,
       homeTeamName: data['homeTeamName'] as String?,
       awayTeamName: data['awayTeamName'] as String?,
@@ -85,6 +88,7 @@ class Game {
       if (status != null) 'status': status,
       if (notes != null) 'notes': notes,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
       if (competitionName != null) 'competitionName': competitionName,
       if (homeTeamName != null) 'homeTeamName': homeTeamName,
       if (awayTeamName != null) 'awayTeamName': awayTeamName,

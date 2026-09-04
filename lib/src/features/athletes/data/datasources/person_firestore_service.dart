@@ -15,6 +15,7 @@ class Person {
   final List<String> roles;
   final String? status;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Person({
     required this.id,
@@ -28,6 +29,7 @@ class Person {
     this.roles = const [],
     this.status,
     this.createdAt,
+    this.updatedAt,
   });
 
   factory Person.fromFirestore(DocumentSnapshot doc) {
@@ -44,6 +46,7 @@ class Person {
       roles: List<String>.from(data['roles'] ?? []),
       status: data['status'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -59,6 +62,7 @@ class Person {
       'roles': roles,
       if (status != null) 'status': status,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 

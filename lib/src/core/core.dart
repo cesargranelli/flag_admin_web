@@ -5,7 +5,7 @@ library;
 
 // Config
 export 'config/app_config.dart';
-export '../config/firebase_options.dart';
+export 'config/firebase_options.dart';
 
 // Layout
 export 'layout/app_layout.dart';
