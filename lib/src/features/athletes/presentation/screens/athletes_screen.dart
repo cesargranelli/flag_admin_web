@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
-import '../../../core/widgets/app_screen.dart';
-import '../../../core/widgets/app_entity_list_screen.dart';
+import '../../../../core/widgets/app_screen.dart';
+import '../../../../core/widgets/app_entity_list_screen.dart';
 
 /// Gestão de atletas: cards e navegação para o detalhe.
 class AthletesScreen extends ConsumerStatefulWidget {
