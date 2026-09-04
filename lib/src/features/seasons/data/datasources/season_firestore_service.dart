@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'firestore_service.dart';
+import '../../../core/services/firestore_service.dart';
 
 /// Modelo de temporada.
 class Season {
@@ -67,3 +67,4 @@ class SeasonFirestoreService extends FirestoreService<Season> {
     return listWhere('organizationId', organizationId);
   }
 }
+

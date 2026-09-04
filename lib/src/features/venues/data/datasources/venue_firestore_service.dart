@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'firestore_service.dart';
+import '../../../core/services/firestore_service.dart';
 
 /// Modelo de venue.
 class Venue {
@@ -54,3 +54,4 @@ class VenueFirestoreService extends FirestoreService<Venue> {
   @override
   Map<String, dynamic> toFirestore(Venue item) => item.toFirestore();
 }
+

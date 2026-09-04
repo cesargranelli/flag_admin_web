@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'firestore_service.dart';
+import '../../../core/services/firestore_service.dart';
 
 /// Modelo de jogo.
 class Game {
@@ -202,3 +202,4 @@ class GameFirestoreService extends FirestoreService<Game> {
             snapshot.docs.map((doc) => fromFirestore(doc)).toList());
   }
 }
+

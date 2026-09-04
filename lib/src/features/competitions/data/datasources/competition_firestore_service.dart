@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'firestore_service.dart';
+import '../../../core/services/firestore_service.dart';
 
 /// Modelo de competição.
 class Competition {
@@ -219,3 +219,4 @@ class CompetitionFirestoreService extends FirestoreService<Competition> {
     return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
   }
 }
+

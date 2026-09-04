@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../providers/providers.dart';
 import '../../../../utils/date_formats.dart';
 import '../../../../utils/mutation.dart';
-import '../../../core/widgets/app_screen.dart';
-import '../../../core/widgets/app_entity_list_screen.dart';
+import '../../../../core/widgets/app_screen.dart';
+import '../../../../core/widgets/app_entity_list_screen.dart';
 
 /// Tela exclusiva do super usuário (ADMIN) para aprovar/rejeitar contas.
 class ApprovalsScreen extends ConsumerStatefulWidget {
