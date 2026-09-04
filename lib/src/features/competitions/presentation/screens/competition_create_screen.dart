@@ -7,9 +7,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
 import '../../../../utils/date_formats.dart';
-import '../../../core/widgets/app_screen.dart';
-import '../../../core/widgets/competition_form_controller.dart';
-import '../../../core/widgets/competition_form_sections.dart';
+import '../../../../core/widgets/app_screen.dart';
+import '../widgets/competition_form_controller.dart';
+import '../widgets/competition_form_sections.dart';
 
 /// CRIAÇÃO de campeonato em página única (#455): todas as seções
 /// (campeonato, modalidade, categoria, temporada, conferências, agrupamento)
