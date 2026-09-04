@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/datasources/season_firestore_service.dart';
-import '../domain/entities/season.dart';
+import '../../../../providers/providers.dart';
+
+import '../../data/datasources/season_firestore_service.dart';
 
 /// ViewModel para gerenciar estado das temporadas.
 class SeasonViewModel extends StateNotifier<AsyncValue<List<Season>>> {

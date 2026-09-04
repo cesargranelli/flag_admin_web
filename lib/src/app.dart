@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Card selecionável do design system (issues #287/#290–#300).

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/datasources/competition_firestore_service.dart';
-import '../domain/entities/competition.dart';
+import '../../../../providers/providers.dart';
+
+import '../../data/datasources/competition_firestore_service.dart';
 
 /// ViewModel para gerenciar estado das competições.
 class CompetitionViewModel extends StateNotifier<AsyncValue<List<Competition>>> {

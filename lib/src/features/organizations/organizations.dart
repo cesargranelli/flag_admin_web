@@ -8,7 +8,7 @@ export 'data/datasources/organization_firestore_service.dart';
 export 'data/repositories/organization_repository.dart';
 
 // Domain layer
-export 'domain/entities/organization.dart';
+// (o modelo Organization vive em data/datasources/organization_firestore_service.dart)
 
 // Presentation layer
 export 'presentation/viewmodels/organization_viewmodel.dart';

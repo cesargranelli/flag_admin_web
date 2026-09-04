@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/datasources/person_firestore_service.dart';
-import '../domain/entities/person.dart';
+import '../../../../providers/providers.dart';
+
+import '../../data/datasources/person_firestore_service.dart';
 
 /// ViewModel para gerenciar estado das pessoas (atletas, técnicos, etc.).
 class PersonViewModel extends StateNotifier<AsyncValue<List<Person>>> {
