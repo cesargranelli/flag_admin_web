@@ -57,11 +57,11 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
     );
 
     return AppScreen(
-      title: 'Jogos',
+      title: AppStrings.games,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Jogos'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.games),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

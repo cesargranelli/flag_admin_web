@@ -113,7 +113,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
     return AppScreen(
       title: 'Novo time',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.teams, route: '/teams'),
         BreadcrumbItem('Novo'),
       ],

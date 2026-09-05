@@ -62,12 +62,12 @@ class AdminHomeScreen extends ConsumerWidget {
     ];
 
     return AppScreen(
-      title: 'Início',
+      title: AppStrings.home,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Seção "Módulos"
-          _SectionHeader(title: 'Módulos'),
+          _SectionHeader(title: AppStrings.modules),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {

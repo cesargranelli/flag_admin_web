@@ -52,10 +52,10 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
     final canManage = canEdit && isDraft;
 
     return AppScreen(
-      title: 'Rodadas',
+      title: AppStrings.rounds,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.rounds, route: '/rounds'),
       ],
       body: Column(

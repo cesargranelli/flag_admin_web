@@ -21,7 +21,7 @@ class TeamDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: team?.name ?? 'Time',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.teams, route: '/teams'),
         if (team?.name != null) BreadcrumbItem(team!.name),
       ],

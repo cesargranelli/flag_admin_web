@@ -228,7 +228,7 @@ class _CompetitionEditScreenState
       loading: () => AppScreen(
         title: 'Editar competição',
         breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
+          const BreadcrumbItem(AppStrings.home, route: '/'),
           const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           if (widget.competition?.name != null)
             BreadcrumbItem(widget.competition!.name),
@@ -238,7 +238,7 @@ class _CompetitionEditScreenState
       error: (error, stackTrace) => AppScreen(
         title: 'Editar competição',
         breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
+          const BreadcrumbItem(AppStrings.home, route: '/'),
           const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           if (widget.competition?.name != null)
             BreadcrumbItem(widget.competition!.name),
@@ -256,7 +256,7 @@ class _CompetitionEditScreenState
           return AppScreen(
             title: 'Editar competição',
             breadcrumb: [
-              const BreadcrumbItem('Início', route: '/'),
+              const BreadcrumbItem(AppStrings.home, route: '/'),
               const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
               BreadcrumbItem(competition.name),
             ],
@@ -271,7 +271,7 @@ class _CompetitionEditScreenState
           return AppScreen(
             title: 'Editar competição',
             breadcrumb: [
-              const BreadcrumbItem('Início', route: '/'),
+              const BreadcrumbItem(AppStrings.home, route: '/'),
               const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
               BreadcrumbItem(competition.name),
             ],
@@ -300,7 +300,7 @@ class _CompetitionEditScreenState
       child: AppScreen(
         title: 'Editar competição',
         breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
+          const BreadcrumbItem(AppStrings.home, route: '/'),
           const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           if (c.name.text.isNotEmpty) BreadcrumbItem(c.name.text),
         ],

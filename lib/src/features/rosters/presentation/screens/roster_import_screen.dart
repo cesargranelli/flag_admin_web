@@ -192,7 +192,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
       return AppScreen(
         title: 'Importar elenco',
         breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
+          BreadcrumbItem(AppStrings.home, route: '/'),
           BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
           BreadcrumbItem('Importar'),
         ],
@@ -215,7 +215,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     return AppScreen(
       title: 'Importar elenco',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
         BreadcrumbItem('Importar'),
       ],

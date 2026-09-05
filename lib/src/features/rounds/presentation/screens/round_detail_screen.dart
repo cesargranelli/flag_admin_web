@@ -21,7 +21,7 @@ class RoundDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: round?.name ?? 'Rodada',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.rounds, route: '/rounds'),
         if (round?.name != null) BreadcrumbItem(round!.name),
       ],

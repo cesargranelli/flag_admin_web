@@ -37,7 +37,7 @@ class _CompetitionDetailScreenState
     return AppScreen(
       title: widget.competition?.name ?? 'Competição',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
         if (widget.competition?.name != null)
           BreadcrumbItem(widget.competition!.name),

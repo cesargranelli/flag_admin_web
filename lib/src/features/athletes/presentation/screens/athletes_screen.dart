@@ -28,11 +28,11 @@ class _AthletesScreenState extends ConsumerState<AthletesScreen> {
     final athletes = ref.watch(athletesProvider);
 
     return AppScreen(
-      title: 'Atletas',
+      title: AppStrings.athletes,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Atletas'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.athletes),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

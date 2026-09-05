@@ -54,11 +54,11 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
     );
 
     return AppScreen(
-      title: 'Times',
+      title: AppStrings.teams,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Times'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.teams),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

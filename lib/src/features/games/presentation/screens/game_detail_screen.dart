@@ -21,7 +21,7 @@ class GameDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: game?.homeTeamName ?? 'Jogo',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.games, route: '/games'),
         if (game?.homeTeamName != null) BreadcrumbItem(game!.homeTeamName!),
       ],

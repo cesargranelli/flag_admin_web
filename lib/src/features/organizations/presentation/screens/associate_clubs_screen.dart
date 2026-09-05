@@ -152,12 +152,12 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     final competitions = ref.watch(competitionsProvider);
 
     return AppScreen(
-      title: 'Associar clubes',
+      title: AppStrings.associateClubs,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.teams, route: '/teams'),
-        BreadcrumbItem('Associar clubes'),
+        BreadcrumbItem(AppStrings.associateClubs),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
