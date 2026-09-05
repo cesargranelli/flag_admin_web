@@ -128,18 +128,11 @@ class OrganizationDetailScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                      organizationTypeIcon(org.organizationType),
-                      color: AppColors.primary,
-                      size: 36,
-                    ),
+                KicksterAvatar(
+                  imageUrl: org.logoUrl,
+                  name: org.tradeName,
+                  icon: Icons.business_outlined,
+                  size: 64,
                 ),
                 const SizedBox(width: 16),
                 Expanded(

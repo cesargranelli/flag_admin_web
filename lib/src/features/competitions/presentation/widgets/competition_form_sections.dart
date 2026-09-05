@@ -30,6 +30,14 @@ Widget competitionSection({
       const SizedBox(height: 12),
       Card(
         margin: EdgeInsets.zero,
+        elevation: 1,
+        shadowColor: AppColors.black.withValues(alpha: 0.08),
+        color: AppColors.surface,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.line, width: 1),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: child,
