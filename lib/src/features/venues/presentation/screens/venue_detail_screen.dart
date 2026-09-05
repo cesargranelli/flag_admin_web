@@ -55,7 +55,7 @@ class VenueDetailScreen extends ConsumerWidget {
     // assistir a lista completa.
     //
     // #53: o backend não persiste `organizationId` (campo só para
-    // compatibilidade REST; default '' no espelho Firestore) — com o id
+    // compatibilidade REST de escrita; default '') — com o id
     // vazio, evita disparar um GET /organizations/ sem sentido.
     final orgAsync = venue.organizationId.isEmpty
         ? null

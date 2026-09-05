@@ -3,13 +3,9 @@
 /// Exporta todas as partes da feature.
 library;
 
-// Data layer
-export 'data/datasources/organization_firestore_service.dart';
-export 'data/repositories/organization_repository.dart';
-
-// Domain layer
+// Data + Domain layers
 // (o modelo Organization vive em lib/src/domain/models/organization.dart;
-// mapeado do Firestore em data/datasources/organization_firestore_service.dart)
+// o acesso a dados é 100% via REST — OrganizationApi em lib/src/api/services)
 
 // Presentation layer
 export 'presentation/screens/organizations_screen.dart';
