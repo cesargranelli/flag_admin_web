@@ -1,16 +1,6 @@
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/features/athletes/data/datasources/person_firestore_service.dart'
-    as person_ds;
-import 'package:flag_admin_web/src/features/competitions/data/datasources/competition_firestore_service.dart'
-    as competition_ds;
-import 'package:flag_admin_web/src/features/games/data/datasources/game_firestore_service.dart'
-    as game_ds;
-import 'package:flag_admin_web/src/features/seasons/data/datasources/season_firestore_service.dart'
-    as season_ds;
-import 'package:flag_admin_web/src/features/teams/data/datasources/team_firestore_service.dart'
-    as team_ds;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -249,33 +239,4 @@ final venueProvider = FutureProvider.autoDispose.family<Venue, String>(
   (ref, id) => ref.watch(venueApiProvider).getById(id),
 );
 
-// ── Firestore ────────────────────────────────────────────────────────
-//
-// Providers dos serviços Firestore (Fase 2 - migração).
-// Cada provider expõe o serviço CRUD genérico para a sua feature.
 
-/// Serviço Firestore de pessoas.
-final personFirestoreServiceProvider = Provider<person_ds.PersonFirestoreService>(
-  (ref) => person_ds.PersonFirestoreService(),
-);
-
-/// Serviço Firestore de competições.
-final competitionFirestoreServiceProvider =
-    Provider<competition_ds.CompetitionFirestoreService>(
-  (ref) => competition_ds.CompetitionFirestoreService(),
-);
-
-/// Serviço Firestore de jogos.
-final gameFirestoreServiceProvider = Provider<game_ds.GameFirestoreService>(
-  (ref) => game_ds.GameFirestoreService(),
-);
-
-/// Serviço Firestore de temporadas.
-final seasonFirestoreServiceProvider = Provider<season_ds.SeasonFirestoreService>(
-  (ref) => season_ds.SeasonFirestoreService(),
-);
-
-/// Serviço Firestore de times.
-final teamFirestoreServiceProvider = Provider<team_ds.TeamFirestoreService>(
-  (ref) => team_ds.TeamFirestoreService(),
-);
