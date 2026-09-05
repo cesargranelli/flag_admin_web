@@ -38,7 +38,14 @@ class SelectableCard extends StatelessWidget {
         enabled: enabled,
         child: Card(
           margin: EdgeInsets.zero,
+          elevation: 1,
+          shadowColor: AppColors.black.withValues(alpha: 0.08),
+          color: AppColors.surface,
           clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.line, width: 1),
+          ),
           child: InkWell(
             onTap: enabled ? onTap : null,
             child: Container(
