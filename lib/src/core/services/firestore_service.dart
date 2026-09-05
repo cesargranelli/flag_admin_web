@@ -73,4 +73,15 @@ abstract class FirestoreService<T> {
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => fromFirestore(doc)).toList());
   }
+
+  /// Escuta um documento por id em tempo real.
+  ///
+  /// Emite `null` enquanto o documento não existir (ex.: removido ou id
+  /// inexistente), e volta a emitir o valor quando ele reaparecer.
+  Stream<T?> streamById(String id) {
+    return collection
+        .doc(id)
+        .snapshots()
+        .map((doc) => doc.exists ? fromFirestore(doc) : null);
+  }
 }

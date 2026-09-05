@@ -57,12 +57,20 @@ final organizationApiProvider = Provider<OrganizationApi>(
   (ref) => OrganizationApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de organizações da tela de gestão.
-final organizationsProvider = FutureProvider<List<Organization>>(
-  (ref) => ref.watch(organizationApiProvider).list(),
+/// Lista de organizações da tela de gestão (issue #52 — piloto Firestore).
+///
+/// Leitura em tempo real via Firestore (espelho de escrita, ADR-006),
+/// expondo apenas organizações ATIVAS (`streamActive()` → status == 'ACTIVE').
+/// A escrita permanece 100% via REST (`organizationApiProvider`).
+final organizationsProvider = StreamProvider<List<Organization>>(
+  (ref) =>
+      ref.watch(organizationFirestoreServiceProvider).streamActive(),
 );
 
 /// Listagem para ADMIN: inclui desativadas quando [includeDisabled].
+///
+/// Permanece via REST — a decisão de visibilidade (#52) mantém o controle de
+/// organizações desativadas no backend (protegido por role ADMIN).
 final organizationsAdminProvider =
     FutureProvider.family<List<Organization>, bool>(
   (ref, includeDisabled) => ref
@@ -71,6 +79,9 @@ final organizationsAdminProvider =
 );
 
 /// Detalhe de uma organização por id.
+///
+/// Permanece via REST (leitura pontual, não realtime) — os consumidores
+/// secundários (venue_detail etc.) e o controle de INACTIVE não mudam na #52.
 final organizationProvider = FutureProvider.autoDispose.family<Organization, String>(
   (ref, id) => ref.watch(organizationApiProvider).getById(id),
 );
