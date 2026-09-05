@@ -43,11 +43,11 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
         : ref.watch(competitionsProvider);
 
     return AppScreen(
-      title: 'Campeonatos',
+      title: AppStrings.competitions,
       scrollable: false,
       breadcrumb: const [
         BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Campeonatos'),
+        BreadcrumbItem(AppStrings.competitions),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

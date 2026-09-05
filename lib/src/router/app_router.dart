@@ -199,8 +199,8 @@ class AppRouter {
                 ),
               ],
             ),
-            // Branch Campeonatos (inclui conferências/divisões, rodadas e
-            // jogos — acessados por contexto de campeonato).
+            // Branch Competições (inclui conferências/divisões, rodadas e
+            // jogos — acessados por contexto de competição).
             StatefulShellBranch(
               routes: [
                 GoRoute(
