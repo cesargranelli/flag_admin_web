@@ -22,7 +22,10 @@ class Venue {
 
   factory Venue.fromJson(Map<String, dynamic> json) => Venue(
         id: json['id'] as String,
-        organizationId: json['organizationId'] as String,
+        // #53: o backend (entity/response) NÃO devolve `organizationId` no REST
+        // — o campo existe no model apenas para compatibilidade de escrita
+        // (POST/PUT). Tolerância default '' (mesma do espelho Firestore).
+        organizationId: json['organizationId'] as String? ?? '',
         name: json['name'] as String,
         address: json['address'] as String?,
         mapsUrl: json['mapsUrl'] as String?,

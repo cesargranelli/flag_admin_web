@@ -145,12 +145,19 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
     return Semantics(
       button: true,
       label: widget.triggerLabel,
-      child: InkWell(
-        key: _triggerKey,
+      // Sem InkWell/Material no trigger (regressão #a82130d): InkWell pinta
+      // o Material ancestral e gera borda sombreada no Flutter Web. Usa
+      // Focus + GestureDetector + MouseRegion (cursor pointer) no lugar.
+      child: Focus(
         focusNode: _triggerFocusNode,
-        onTap: _toggleMenu,
-        borderRadius: BorderRadius.circular(8),
-        child: widget.trigger,
+        child: GestureDetector(
+          key: _triggerKey,
+          onTap: _toggleMenu,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: widget.trigger,
+          ),
+        ),
       ),
     );
   }
@@ -284,7 +291,8 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
               includeSemantics: false,
               onKeyEvent: _handleKeyEvent,
               child: Material(
-                color: Colors.transparent,
+                type: MaterialType.transparency,
+                elevation: 0,
                 child: _withMaxHeight(
                   Container(
                     decoration: BoxDecoration(
@@ -333,7 +341,9 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
   Widget _buildItem(int index, KicksterMenuItem item) {
     final interactive = item.enabled && item.onTap != null;
 
-    final content = Ink(
+    // Sem Ink/InkWell (regressão #a82130d): Ink pinta o Material ancestral e
+    // gera sombreado no Flutter Web. Container + interação custom no lugar.
+    final content = Container(
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DefaultTextStyle(
@@ -353,7 +363,7 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
     Widget result = content;
     if (interactive) {
       final nodeIndex = _nodeIndexForItem[index]!;
-      result = InkWell(
+      result = _KicksterMenuItemInteraction(
         focusNode: _itemNodes[nodeIndex],
         onFocusChange: (hasFocus) {
           if (hasFocus) _activeIndex = nodeIndex;
@@ -367,5 +377,59 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
       result = Opacity(opacity: 0.5, child: result);
     }
     return result;
+  }
+}
+
+/// Item interativo do menu: suporta foco por Tab, hover e ativação via Enter/
+/// clique, sem depender de Material/InkWell (evita sombreado no Flutter Web).
+class _KicksterMenuItemInteraction extends StatefulWidget {
+  const _KicksterMenuItemInteraction({
+    required this.child,
+    required this.onTap,
+    this.focusNode,
+    this.onFocusChange,
+  });
+
+  final Widget child;
+  final VoidCallback onTap;
+  final FocusNode? focusNode;
+  final ValueChanged<bool>? onFocusChange;
+
+  @override
+  State<_KicksterMenuItemInteraction> createState() =>
+      _KicksterMenuItemInteractionState();
+}
+
+class _KicksterMenuItemInteractionState
+    extends State<_KicksterMenuItemInteraction> {
+  bool _hovering = false;
+  bool _pressing = false;
+
+  bool get _highlighted => _hovering || _pressing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: widget.focusNode,
+      onFocusChange: widget.onFocusChange,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressing = true),
+        onTapUp: (_) {
+          setState(() => _pressing = false);
+          widget.onTap();
+        },
+        onTapCancel: () => setState(() => _pressing = false),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovering = true),
+          onExit: (_) => setState(() => _hovering = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            color: _highlighted ? AppColors.line.withValues(alpha: 0.4) : null,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -237,12 +237,19 @@ final venueApiProvider = Provider<VenueApi>(
   (ref) => VenueApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de campos de jogo.
-final venuesProvider = FutureProvider<List<Venue>>(
-  (ref) => ref.watch(venueApiProvider).list(),
+/// Lista de campos de jogo da tela de gestão (issue #53 — réplica do #52).
+///
+/// Leitura em tempo real via Firestore (espelho de escrita, ADR-006), sem
+/// filtro de status (não existe ACTIVE para venue — lista TODOS).
+/// A escrita permanece 100% via REST (`venueApiProvider`).
+final venuesProvider = StreamProvider<List<Venue>>(
+  (ref) => ref.watch(venueFirestoreServiceProvider).streamList(),
 );
 
 /// Detalhe de um campo por id.
+///
+/// Permanece via REST (leitura pontual, não realtime) — consumidores
+/// secundários (venue_detail) não mudam na #53.
 final venueProvider = FutureProvider.autoDispose.family<Venue, String>(
   (ref, id) => ref.watch(venueApiProvider).getById(id),
 );
