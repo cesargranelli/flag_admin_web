@@ -39,18 +39,24 @@ class KicksterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasDetails = subtitle != null || trailing != null;
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: hasDetails ? _buildRowLayout() : _buildTileLayout(),
+    // Semântica de botão + label (acessibilidade): leitores de tela
+    // anunciam o card como ação navegável com o título do módulo/registro.
+    return Semantics(
+      button: true,
+      label: title,
+      child: Card(
+        elevation: 1,
+        shadowColor: AppColors.black.withValues(alpha: 0.08),
+        color: AppColors.surface,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.line, width: 1),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: hasDetails ? _buildRowLayout() : _buildTileLayout(),
+        ),
       ),
     );
   }
@@ -114,6 +120,8 @@ class KicksterCard extends StatelessWidget {
   }
 
   /// Layout em tile (home #433): ícone grande centralizado acima do título.
+  /// Título com [maxLines] + ellipsis em vez de `FittedBox` (#71): evita
+  /// encolher o texto em grades de 2 colunas no mobile.
   Widget _buildTileLayout() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -128,20 +136,17 @@ class KicksterCard extends StatelessWidget {
           child: Icon(icon, size: 28, color: AppColors.primary),
         ),
         const SizedBox(height: 12),
-        Flexible(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
           ),
         ),
