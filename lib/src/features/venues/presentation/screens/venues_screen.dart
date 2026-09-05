@@ -113,9 +113,9 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     Venue venue,
     Map<String, String> orgNameById,
   ) {
-    // #53: o backend não persiste `organizationId` (default '' no espelho
-    // Firestore, campo só para compatibilidade REST) — o lookup vazio cai no
-    // fallback e o card mostra apenas o endereço.
+    // #53: o backend não persiste `organizationId` (default '' no model de
+    // domínio, campo só para compatibilidade REST de escrita) — o lookup
+    // vazio cai no fallback e o card mostra apenas o endereço.
     final orgName = orgNameById[venue.organizationId] ?? '';
     final subtitle = [
       if (orgName.isNotEmpty) orgName,
