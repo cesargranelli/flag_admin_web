@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// Card selecionável do design system (issues #287/#290–#300).
 ///
 /// Mesmo padrão de interação dos cards de lista (ex. lista de
-/// campeonatos): [Card] + [InkWell] com a tinta padrão do tema — sem
+/// competições): [Card] + [InkWell] com a tinta padrão do tema — sem
 /// hover/splash customizados, que causam cintilação no web (#300).
 /// A seleção é comunicada por um `Container` interno com preenchimento:
 /// não selecionado = card `surface` padrão; selecionado = fundo

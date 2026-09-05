@@ -6,7 +6,7 @@ import '../theme/app_colors.dart';
 
 /// Item de dropdown com ícone à esquerda (issue #365).
 ///
-/// Usado nos seletores de entidades (organizações/clubes, campeonatos,
+/// Usado nos seletores de entidades (organizações/clubes, competições,
 /// tipos de organização) para dar contexto visual ao item dentro do menu
 /// aberto e no valor selecionado. Mantém o rótulo em uma linha com ellipsis,
 /// respeitando a largura do campo.

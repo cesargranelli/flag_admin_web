@@ -8,7 +8,7 @@ class ConferenceApi {
 
   ConferenceApi(this._client);
 
-  /// Lista as conferências de um campeonato (endpoint público).
+  /// Lista as conferências de uma competição (endpoint público).
   Future<List<Conference>> listByCompetition(String competitionId) =>
       _client.getList(
         '/api/v1/competitions/$competitionId/conferences',

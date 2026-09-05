@@ -2,14 +2,14 @@ import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Nota informativa exibida quando as ações de edição ficam ocultas
-/// porque o usuário logado não é o criador do campeonato nem ADMIN.
+/// porque o usuário logado não é o criador da competição nem ADMIN.
 ///
 /// Segue o padrão visual da issue #251: texto discreto em
 /// [AppColors.textSecondary] com fontSize 13, sem contorno nem botão.
 class EditRestrictionNote extends StatelessWidget {
   const EditRestrictionNote({
     super.key,
-    this.message = 'Apenas o criador do campeonato pode fazer alterações.',
+    this.message = 'Apenas o criador da competição pode fazer alterações.',
     this.padding = const EdgeInsets.only(top: 8),
   });
 

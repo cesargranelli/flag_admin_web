@@ -1,4 +1,4 @@
-/// Conferência de um campeonato (agrupamento opcional de divisões).
+/// Conferência de uma competição (agrupamento opcional de divisões).
 ///
 /// Shape de `/api/v1/conferences`.
 class Conference {

@@ -28,7 +28,7 @@ abstract final class AppStrings {
   static const hello = 'Olá';
   static const quickActions = 'Ações rápidas';
   static const modules = 'Módulos';
-  static const newCompetition = 'Novo campeonato';
+  static const newCompetition = 'Nova competição';
   static const newGame = 'Novo jogo';
   static const importAthletes = 'Importar atletas';
   static const newOrganization = 'Nova organização';

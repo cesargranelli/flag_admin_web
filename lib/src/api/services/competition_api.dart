@@ -2,13 +2,13 @@ import 'package:flag_admin_web/src/domain/domain.dart';
 
 import '../api_client.dart';
 
-/// Serviço REST de campeonatos.
+/// Serviço REST de competições.
 class CompetitionApi {
   final ApiClient _client;
 
   CompetitionApi(this._client);
 
-  /// Lista todos os campeonatos (endpoint público, ordenado por nome).
+  /// Lista todas as competições (endpoint público, ordenado por nome).
   /// ADMIN pode passar includeDisabled para receber também os desativados.
   Future<List<Competition>> listAll({bool includeDisabled = false}) =>
       _client.getList(
@@ -25,11 +25,11 @@ class CompetitionApi {
   Future<Competition> getById(String id) =>
       _client.getOne('/api/v1/competitions/$id', Competition.fromJson);
 
-  /// Exclusão lógica: marca o campeonato como desativado (DISABLED).
+  /// Exclusão lógica: marca a competição como desativada (DISABLED).
   Future<void> deactivate(String id) =>
       _client.delete('/api/v1/competitions/$id');
 
-  /// Reativa o campeonato (exclusivo ADMIN), voltando para DRAFT.
+  /// Reativa a competição (exclusivo ADMIN), voltando para DRAFT.
   Future<void> reactivate(String id) =>
       _client.post('/api/v1/competitions/$id/reactivate', <String, dynamic>{},
           (json) => json);

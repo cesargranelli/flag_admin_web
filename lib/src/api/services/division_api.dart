@@ -8,7 +8,7 @@ class DivisionApi {
 
   DivisionApi(this._client);
 
-  /// Lista as divisões de um campeonato (endpoint público).
+  /// Lista as divisões de uma competição (endpoint público).
   Future<List<Division>> listByCompetition(String competitionId) =>
       _client.getList(
         '/api/v1/competitions/$competitionId/divisions',

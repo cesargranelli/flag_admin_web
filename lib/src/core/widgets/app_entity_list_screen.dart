@@ -80,7 +80,7 @@ class AppEntityListScreen<T> extends StatefulWidget {
   final Widget? toolbarLeading;
 
   /// Widget extra depois do `Spacer`, antes do campo de busca (ex.:
-  /// campeonatos com o toggle de desativados).
+  /// competições com o toggle de desativados).
   final Widget? toolbarTrailing;
 
   /// Largura do campo de busca.

@@ -8,7 +8,7 @@ class TeamApi {
 
   TeamApi(this._client);
 
-  /// Lista os times de um campeonato (endpoint público).
+  /// Lista os times de uma competição (endpoint público).
   Future<List<Team>> listByCompetition(String competitionId) => _client.getList(
     '/api/v1/competitions/$competitionId/teams',
     Team.fromJson,
@@ -41,7 +41,7 @@ class TeamApi {
     'logoUrl': ?logoUrl,
   }, Team.fromJson);
 
-  /// Associa um clube (organização) a um campeonato, criando o time
+  /// Associa um clube (organização) a uma competição, criando o time
   /// automaticamente com o nome do clube (rota própria de associação, #377).
   Future<Team> associateClub({
     required String competitionId,
@@ -75,6 +75,6 @@ class TeamApi {
     'logoUrl': ?logoUrl,
   }, Team.fromJson);
 
-  /// Remove a inscrição do clube no campeonato (desassociar).
+  /// Remove a inscrição do clube na competição (desassociar).
   Future<void> delete(String id) => _client.delete('/api/v1/teams/$id');
 }
