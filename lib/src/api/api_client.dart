@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flag_admin_web/src/core/core.dart';
 
@@ -6,17 +7,14 @@ import 'repository_exception.dart';
 
 /// Cliente HTTP da API REST do Flag Platform.
 ///
-/// Usa [AppConfig.apiBaseUrl] como base URL e injeta o token JWT via
-/// [SessionManager] quando autenticado.
+/// Usa [AppConfig.apiBaseUrl] como base URL e injeta o Firebase ID Token
+/// via [FirebaseAuth] quando autenticado (Migração Firebase Auth #33).
 class ApiClient {
   final Dio dio;
-  final SessionManager _session;
 
   ApiClient({
-    required SessionManager session,
     Dio? dio,
-  })  : _session = session,
-        dio = dio ??
+  }) : dio = dio ??
             Dio(
               BaseOptions(
                 baseUrl: AppConfig.apiBaseUrl,
@@ -28,11 +26,22 @@ class ApiClient {
 
   ApiClient get public => this;
 
+  /// Retorna os headers HTTP, incluindo o Firebase ID Token quando disponível.
+  ///
+  /// Usa Firebase Auth ID Token (Bearer) em vez do JWT custom anterior.
+  /// O token é obtido do [FirebaseAuth.currentUser] e renovado automaticamente
+  /// pelo SDK Firebase.
   Future<Map<String, dynamic>> _headers() async {
-    final token = await _session.getToken();
+    String? idToken;
+    try {
+      idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+    } catch (_) {
+      // Firebase não disponível (ex: em testes)
+    }
+
     return {
       'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
+      if (idToken != null) 'Authorization': 'Bearer $idToken',
     };
   }
 

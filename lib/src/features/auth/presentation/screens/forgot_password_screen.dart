@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,10 +40,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
+      // Issue #33: usa Firebase Auth para envio do e-mail de reset
       await ref
-          .read(authApiProvider)
-          .forgotPassword(_emailController.text.trim());
+          .read(firebaseAuthServiceProvider)
+          .sendPasswordResetEmail(_emailController.text.trim());
       if (mounted) setState(() => _sent = true);
+    } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() => _errorMessage = e.message);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);
     } catch (_) {

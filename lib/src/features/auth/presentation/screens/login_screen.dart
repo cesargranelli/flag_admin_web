@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,6 +51,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: _passwordController.text,
             keepConnected: _keepConnected,
           );
+    } on FirebaseAuthException catch (e) {
+      // Erro de autenticação Firebase (issue #33)
+      setState(() => _errorMessage = e.message);
     } on RepositoryException catch (e) {
       setState(() => _errorMessage = e.message);
     } catch (_) {

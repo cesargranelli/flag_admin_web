@@ -1,23 +1,29 @@
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/features/auth/data/repositories/auth_controller.dart';
+import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/auth/data/repositories/auth_controller.dart';
 import '../router/app_router.dart';
 
-/// Gerenciador de sessão do Admin Web (persiste o token JWT).
+/// Gerenciador de sessão do Admin Web (persiste dados de sessão Firebase/JWT).
 final sessionManagerProvider = Provider<SessionManager>(
   (ref) => SessionManager(),
 );
 
-/// Cliente HTTP da API REST com o token da sessão injetado.
+/// Cliente HTTP da API REST com o Firebase ID Token injetado.
 final apiClientProvider = Provider<ApiClient>(
-  (ref) => ApiClient(session: ref.watch(sessionManagerProvider)),
+  (ref) => ApiClient(),
 );
 
-/// Serviço de autenticação.
+/// Serviço de autenticação Firebase (issue #33).
+final firebaseAuthServiceProvider = Provider<FirebaseAuthService>(
+  (ref) => FirebaseAuthService(),
+);
+
+/// Serviço de autenticação (API REST).
 final authApiProvider = Provider<AuthApi>(
   (ref) => AuthApi(ref.watch(apiClientProvider)),
 );
@@ -27,6 +33,7 @@ final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
   final controller = AuthController(
     session: ref.watch(sessionManagerProvider),
     api: ref.watch(authApiProvider),
+    firebaseAuth: ref.watch(firebaseAuthServiceProvider),
   );
   controller.restore();
   return controller;
