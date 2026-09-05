@@ -60,13 +60,23 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(onPressed: () => context.go('/login'))),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: _done ? _buildDone() : _buildForm(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.surfaceMuted, AppColors.background],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: _done ? _buildDone() : _buildForm(),
+              ),
+            ),
           ),
         ),
       ),
@@ -85,11 +95,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           const Text(
             'Definir nova senha',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppTextStyles.headline1,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Crie uma nova senha para acessar sua conta',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 24),
           KicksterInput(
@@ -134,6 +146,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             label: 'Redefinir senha',
             onPressed: _submitting ? null : _submit,
             loading: _submitting,
+          ),
+          const SizedBox(height: 8),
+          KicksterButton(
+            label: 'Voltar ao login',
+            variant: KicksterButtonVariant.outline,
+            onPressed: () => context.go('/login'),
           ),
         ],
       ),
