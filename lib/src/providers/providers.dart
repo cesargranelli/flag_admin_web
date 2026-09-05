@@ -7,14 +7,10 @@ import 'package:flag_admin_web/src/features/competitions/data/datasources/compet
     as competition_ds;
 import 'package:flag_admin_web/src/features/games/data/datasources/game_firestore_service.dart'
     as game_ds;
-import 'package:flag_admin_web/src/features/organizations/data/datasources/organization_firestore_service.dart'
-    as organization_ds;
 import 'package:flag_admin_web/src/features/seasons/data/datasources/season_firestore_service.dart'
     as season_ds;
 import 'package:flag_admin_web/src/features/teams/data/datasources/team_firestore_service.dart'
     as team_ds;
-import 'package:flag_admin_web/src/features/venues/data/datasources/venue_firestore_service.dart'
-    as venue_ds;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -57,14 +53,13 @@ final organizationApiProvider = Provider<OrganizationApi>(
   (ref) => OrganizationApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de organizações da tela de gestão (issue #52 — piloto Firestore).
+/// Listagem de organizações da tela de gestão.
 ///
-/// Leitura em tempo real via Firestore (espelho de escrita, ADR-006),
-/// expondo apenas organizações ATIVAS (`streamActive()` → status == 'ACTIVE').
-/// A escrita permanece 100% via REST (`organizationApiProvider`).
-final organizationsProvider = StreamProvider<List<Organization>>(
-  (ref) =>
-      ref.watch(organizationFirestoreServiceProvider).streamActive(),
+/// Listagem via REST (`GET /api/v1/organizations?includeDisabled=false`),
+/// expondo apenas organizações ATIVAS (decisão de visibilidade #52).
+/// Recarrega via `ref.invalidate(organizationsProvider)` após mutações.
+final organizationsProvider = FutureProvider<List<Organization>>(
+  (ref) => ref.watch(organizationApiProvider).list(),
 );
 
 /// Listagem para ADMIN: inclui desativadas quando [includeDisabled].
@@ -237,13 +232,13 @@ final venueApiProvider = Provider<VenueApi>(
   (ref) => VenueApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de campos de jogo da tela de gestão (issue #53 — réplica do #52).
+/// Listagem de campos de jogo da tela de gestão.
 ///
-/// Leitura em tempo real via Firestore (espelho de escrita, ADR-006), sem
-/// filtro de status (não existe ACTIVE para venue — lista TODOS).
-/// A escrita permanece 100% via REST (`venueApiProvider`).
-final venuesProvider = StreamProvider<List<Venue>>(
-  (ref) => ref.watch(venueFirestoreServiceProvider).streamList(),
+/// Listagem via REST (`GET /api/v1/venues`), sem filtro de status (não
+/// existe ACTIVE para venue — lista TODOS). Recarrega via
+/// `ref.invalidate(venuesProvider)` após mutações.
+final venuesProvider = FutureProvider<List<Venue>>(
+  (ref) => ref.watch(venueApiProvider).list(),
 );
 
 /// Detalhe de um campo por id.
@@ -275,12 +270,6 @@ final gameFirestoreServiceProvider = Provider<game_ds.GameFirestoreService>(
   (ref) => game_ds.GameFirestoreService(),
 );
 
-/// Serviço Firestore de organizações.
-final organizationFirestoreServiceProvider =
-    Provider<organization_ds.OrganizationFirestoreService>(
-  (ref) => organization_ds.OrganizationFirestoreService(),
-);
-
 /// Serviço Firestore de temporadas.
 final seasonFirestoreServiceProvider = Provider<season_ds.SeasonFirestoreService>(
   (ref) => season_ds.SeasonFirestoreService(),
@@ -289,9 +278,4 @@ final seasonFirestoreServiceProvider = Provider<season_ds.SeasonFirestoreService
 /// Serviço Firestore de times.
 final teamFirestoreServiceProvider = Provider<team_ds.TeamFirestoreService>(
   (ref) => team_ds.TeamFirestoreService(),
-);
-
-/// Serviço Firestore de campos de jogo.
-final venueFirestoreServiceProvider = Provider<venue_ds.VenueFirestoreService>(
-  (ref) => venue_ds.VenueFirestoreService(),
 );
