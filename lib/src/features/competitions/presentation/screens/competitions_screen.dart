@@ -46,7 +46,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
       title: AppStrings.competitions,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.competitions),
       ],
       body: Column(

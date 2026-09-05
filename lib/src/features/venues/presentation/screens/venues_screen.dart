@@ -32,11 +32,11 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     final organizations = ref.watch(organizationsProvider);
 
     return AppScreen(
-      title: 'Campos',
+      title: AppStrings.venues,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Campos'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.venues),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

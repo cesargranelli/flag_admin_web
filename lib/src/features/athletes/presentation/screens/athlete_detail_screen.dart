@@ -25,7 +25,7 @@ class AthleteDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: athlete?.name ?? 'Atleta',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.athletes, route: '/athletes'),
         if (athlete?.name != null) BreadcrumbItem(athlete!.name),
       ],

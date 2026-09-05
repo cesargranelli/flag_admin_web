@@ -112,7 +112,7 @@ class _VenueFormScreenState extends ConsumerState<VenueFormScreen> {
     return AppScreen(
       title: _isEditing ? 'Editar campo' : 'Novo campo',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.venues, route: '/venues'),
         BreadcrumbItem('Formulário'),
       ],

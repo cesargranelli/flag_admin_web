@@ -46,11 +46,11 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
     return AppScreen(
-      title: 'Elencos',
+      title: AppStrings.rosters,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Elencos'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.rosters),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

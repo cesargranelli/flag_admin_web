@@ -177,7 +177,7 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
     return AppScreen(
       title: _isEditing ? 'Editar atleta' : 'Novo atleta',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.athletes, route: '/athletes'),
         BreadcrumbItem('Formulário'),
       ],

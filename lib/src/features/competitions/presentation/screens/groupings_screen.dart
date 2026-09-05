@@ -28,11 +28,11 @@ class GroupingsScreen extends ConsumerWidget {
     final selectedCompetitionId = ref.watch(selectedCompetitionProvider);
 
     return AppScreen(
-      title: 'Conferências e divisões',
+      title: AppStrings.groupings,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
-        BreadcrumbItem('Conferências e divisões'),
+        BreadcrumbItem(AppStrings.groupings),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

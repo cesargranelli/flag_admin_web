@@ -30,7 +30,7 @@ class OrganizationDetailScreen extends ConsumerWidget {
     // Breadcrumb dinâmico com nome da organização
     final orgName = org?.tradeName;
     final breadcrumb = [
-      const BreadcrumbItem('Início', route: '/'),
+      const BreadcrumbItem(AppStrings.home, route: '/'),
       const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
       if (orgName != null) BreadcrumbItem(orgName),
     ];

@@ -199,7 +199,7 @@ class _CompetitionCreateScreenState
       child: AppScreen(
         title: 'Nova competição',
         breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
+          BreadcrumbItem(AppStrings.home, route: '/'),
           BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           BreadcrumbItem('Novo'),
         ],

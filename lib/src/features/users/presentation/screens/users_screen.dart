@@ -28,11 +28,11 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final users = ref.watch(usersProvider);
 
     return AppScreen(
-      title: 'Usuários',
+      title: AppStrings.users,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Usuários'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.users),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

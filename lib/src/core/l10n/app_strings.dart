@@ -45,4 +45,10 @@ abstract final class AppStrings {
   static const athletes = 'Atletas';
   static const rosters = 'Elencos';
   static const users = 'Usuários';
+  static const groupings = 'Conferências e divisões';
+  static const associateClubs = 'Associar clubes';
+  static const home = 'Início';
+  static const notFoundTitle = 'Página não encontrada';
+  static const notFoundMessage = 'O link que você acessou não existe.';
+  static const backToHome = 'Voltar ao início';
 }

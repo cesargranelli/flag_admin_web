@@ -42,11 +42,11 @@ class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
         : ref.watch(organizationsProvider);
 
     return AppScreen(
-      title: 'Organizações',
+      title: AppStrings.organizations,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Organizações'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.organizations),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

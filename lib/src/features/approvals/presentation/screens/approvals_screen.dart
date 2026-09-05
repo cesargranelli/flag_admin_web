@@ -29,11 +29,11 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
     final pending = ref.watch(pendingUsersProvider);
 
     return AppScreen(
-      title: 'Aprovações',
+      title: AppStrings.approvals,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Aprovações'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.approvals),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

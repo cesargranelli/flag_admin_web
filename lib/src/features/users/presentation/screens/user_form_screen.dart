@@ -83,7 +83,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
     return AppScreen(
       title: 'Novo usuário',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.users, route: '/users'),
         BreadcrumbItem('Novo'),
       ],

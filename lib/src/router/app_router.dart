@@ -93,29 +93,54 @@ class AppRouter {
         return null;
       },
       errorBuilder: (context, state) => Scaffold(
-        appBar: AppBar(title: const Text('Página não encontrada')),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.location_off, size: 56, color: AppColors.danger),
-              const SizedBox(height: 12),
-              Text(
-                'Página não encontrada',
-                style: AppTextStyles.headline1.copyWith(fontSize: 20),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.surfaceMuted, AppColors.background],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.location_off,
+                        size: 56,
+                        color: AppColors.danger,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppStrings.notFoundTitle,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.headline1.copyWith(fontSize: 28),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppStrings.notFoundMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      KicksterButton(
+                        label: AppStrings.backToHome,
+                        variant: KicksterButtonVariant.outline,
+                        onPressed: () => context.go('/'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'O link que você acessou não existe.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              const SizedBox(height: 24),
-              KicksterButton(
-                label: 'Voltar ao início',
-                variant: KicksterButtonVariant.outline,
-                onPressed: () => context.go('/'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
