@@ -27,18 +27,38 @@ class AdminHomeScreen extends ConsumerWidget {
         '/organizations',
       ),
       _Module(
+        Icons.shield_outlined,
+        AppStrings.teams,
+        '/teams',
+      ),
+      _Module(
+        Icons.groups_outlined,
+        AppStrings.rosters,
+        '/rosters',
+      ),
+      _Module(
+        Icons.person_outline,
+        AppStrings.athletes,
+        '/athletes',
+      ),
+      _Module(
         Icons.emoji_events_outlined,
         AppStrings.competitions,
         '/competitions',
       ),
-      _Module(Icons.sports_soccer, AppStrings.venues, '/venues'),
-      _Module(Icons.person_outline, AppStrings.athletes, '/athletes'),
-      _Module(Icons.groups_outlined, AppStrings.teams, '/teams'),
-      _Module(Icons.groups_2_outlined, AppStrings.rosters, '/rosters'),
+      _Module(
+        Icons.stadium_outlined,
+        AppStrings.venues,
+        '/venues',
+      ),
       if (isAdmin)
-        _Module(Icons.fact_check_outlined, 'Aprovações', '/approvals'),
+        _Module(Icons.fact_check_outlined, AppStrings.approvals, '/approvals'),
       if (isAdmin)
-        _Module(Icons.admin_panel_settings, AppStrings.users, '/users'),
+        _Module(
+          Icons.manage_accounts_outlined,
+          AppStrings.users,
+          '/users',
+        ),
     ];
 
     return AppScreen(

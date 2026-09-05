@@ -35,7 +35,8 @@ abstract final class AppStrings {
   static const logout = 'Sair';
   static const homeHint = 'Selecione uma opção para gerenciar os cadastros.';
   static const organizations = 'Organizações';
-  static const competitions = 'Campeonatos';
+  static const competitions = 'Competições';
+  static const approvals = 'Aprovações';
   static const categories = 'Categorias';
   static const venues = 'Campos';
   static const teams = 'Times';
