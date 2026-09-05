@@ -9,12 +9,12 @@ import '../../../../providers/providers.dart';
 import '../widgets/competition_form_controller.dart';
 import '../widgets/competition_form_sections.dart';
 
-/// CRIAÇÃO de campeonato em página única (#455): todas as seções
-/// (campeonato, modalidade, categoria, temporada, conferências, agrupamento)
+/// CRIAÇÃO de competição em página única (#455): todas as seções
+/// (competição, modalidade, categoria, temporada, conferências, agrupamento)
 /// empilhadas com títulos de seção — o scroll é do body, sem barras internas.
 ///
-/// O botão "Criar campeonato" valida as seções de cadastro e grava o
-/// campeonato (sempre RASCUNHO), habilitando a seguir as seções de estrutura
+/// O botão "Criar competição" valida as seções de cadastro e grava a
+/// competição (sempre RASCUNHO), habilitando a seguir as seções de estrutura
 /// (Conferências → Agrupamento: Divisões ou Grupos), ambas com opção de
 /// declínio — o fluxo nunca trava. Após configurar, "Concluir" persiste a
 /// escolha de agrupamento e vai ao detalhe (issues #287/#304/#338).
@@ -34,7 +34,7 @@ class _CompetitionCreateScreenState
     extends ConsumerState<CompetitionCreateScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  /// Campeonato recém-criado — alimenta as seções de estrutura (#304).
+  /// Competição recém-criada — alimenta as seções de estrutura (#304).
   Competition? _created;
 
   late final CompetitionFormController _controller;
@@ -85,7 +85,7 @@ class _CompetitionCreateScreenState
     await _createDraft();
   }
 
-  /// Cria o campeonato em RASCUNHO e habilita as seções de estrutura (#304).
+  /// Cria a competição em RASCUNHO e habilita as seções de estrutura (#304).
   Future<void> _createDraft() async {
     final c = _controller;
     c.submitting = true;
@@ -124,7 +124,7 @@ class _CompetitionCreateScreenState
       c.errorMessage = e.message;
       c.onChanged();
     } catch (_) {
-      c.errorMessage = 'Não foi possível criar o campeonato.';
+      c.errorMessage = 'Não foi possível criar a competição.';
       c.onChanged();
     } finally {
       c.submitting = false;
@@ -179,7 +179,7 @@ class _CompetitionCreateScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Rascunho criado. Abra o campeonato para publicar quando '
+            'Rascunho criado. Abra a competição para publicar quando '
             'estiver pronto.',
           ),
         ),
@@ -197,7 +197,7 @@ class _CompetitionCreateScreenState
         if (!didPop) c.handleBack(context, isMounted: () => mounted);
       },
       child: AppScreen(
-        title: 'Novo campeonato',
+        title: 'Nova competição',
         breadcrumb: const [
           BreadcrumbItem('Início', route: '/'),
           BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
@@ -215,7 +215,7 @@ class _CompetitionCreateScreenState
                     if (c.errorMessage != null)
                       competitionErrorBanner(c.errorMessage!),
                     competitionSection(
-                      title: 'Campeonato',
+                      title: 'Competição',
                       icon: Icons.emoji_events_outlined,
                       child: CompetitionIdentitySection(
                         controller: c,
@@ -262,7 +262,7 @@ class _CompetitionCreateScreenState
                     const SizedBox(height: 8),
                     KicksterButton(
                       label: _created == null
-                          ? 'Criar campeonato'
+                          ? 'Criar competição'
                           : 'Concluir',
                       icon: _created == null
                           ? Icons.check

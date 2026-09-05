@@ -138,8 +138,8 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // O campeonato vem dos argumentos de navegação; sem eles (ex.: deep link),
-    // usa o campeonato selecionado no contexto global.
+    // A competição vem dos argumentos de navegação; sem eles (ex.: deep link),
+    // usa a competição selecionada no contexto global.
     final competitionId =
         widget.args?.competitionId ?? ref.watch(selectedCompetitionProvider);
     final rounds = competitionId == null

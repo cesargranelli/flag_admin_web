@@ -173,7 +173,7 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
                 ),
                 const SizedBox(height: 12),
                 KicksterDropdown<String>(
-                  label: 'Campeonato',
+                  label: 'Competição',
                   value: effectiveComp,
                   items: compItems
                       .map(
@@ -187,7 +187,7 @@ class _TeamEditScreenState extends ConsumerState<TeamEditScreen> {
                         value;
                   },
                   validator: (value) => (value == null || value.isEmpty)
-                      ? 'Selecione o campeonato'
+                      ? 'Selecione a competição'
                       : null,
                 ),
                 const SizedBox(height: 12),

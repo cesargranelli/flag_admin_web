@@ -46,12 +46,12 @@ class RoundDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildDetail(BuildContext context, WidgetRef ref, Round round) {
-    // P3 #471: resolve o campeonato pelo family (autoDispose) em vez de
+    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
     // assistir a lista completa.
     final compAsync = ref.watch(competitionProvider(round.competitionId));
     final competitionName = compAsync.valueOrNull?.name ?? '';
-    // Issue #261: edição da rodada exige ser criador do campeonato ou ADMIN.
-    // Issue #305: e o campeonato precisa estar em DRAFT (estrutura travada
+    // Issue #261: edição da rodada exige ser criador da competição ou ADMIN.
+    // Issue #305: e a competição precisa estar em DRAFT (estrutura travada
     // após a publicação).
     final competition = compAsync.valueOrNull;
     final isDraft = competition?.status == CompetitionStatus.draft;
@@ -132,8 +132,8 @@ class RoundDetailScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Issue #347: confrontos/jogos geridos via contexto do
-                      // campeonato (rodada → jogos), sem atalho global da home.
+                      // Issue #347: confrontos/jogos geridos via contexto da
+                      // competição (rodada → jogos), sem atalho global da home.
                       KicksterButton(
                         label: 'Confrontos',
                         icon: Icons.sports,
@@ -151,9 +151,9 @@ class RoundDetailScreen extends ConsumerWidget {
                     ] else
                       EditRestrictionNote(
                         message: !isDraft
-                            ? 'Campeonato publicado — as rodadas estão '
+                            ? 'Competição publicada — as rodadas estão '
                                 'travadas.'
-                            : 'Apenas o criador do campeonato pode editar '
+                            : 'Apenas o criador da competição pode editar '
                                 'esta rodada.',
                       ),
                   ],
@@ -165,7 +165,7 @@ class RoundDetailScreen extends ConsumerWidget {
               AppInfoRow(label: 'Número', value: '${round.number}'),
               AppInfoRow(label: 'Nome', value: round.name),
               AppInfoRow(label: 'Tipo', value: round.type.label),
-              AppInfoRow(label: 'Campeonato', value: competitionName),
+              AppInfoRow(label: 'Competição', value: competitionName),
             ]),
             const SizedBox(height: 16),
             Text(

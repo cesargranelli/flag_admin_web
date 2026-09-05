@@ -10,12 +10,12 @@ import '../../../../features/organizations/presentation/widgets/club_assignment_
 import '../widgets/conference_form_modal.dart';
 import '../widgets/division_form_modal.dart';
 
-/// Gestão de conferências e divisões por campeonato.
+/// Gestão de conferências e divisões por competição.
 ///
-/// Redesign da issue #218: cabeçalho de contexto (campeonato selecionado,
+/// Redesign da issue #218: cabeçalho de contexto (competição selecionada,
 /// status, contadores e seletor), conferências como cards expansíveis com
 /// suas divisões e ações de criação unificadas nos cabeçalhos de seção.
-/// O fluxo continua: campeonato → conferências → divisões (migração V24).
+/// O fluxo continua: competição → conferências → divisões (migração V24).
 ///
 /// Issue #258: criação/edição de conferências/divisões e associação de
 /// clubes acontecem em modais (sem rotas dedicadas).
@@ -39,26 +39,26 @@ class GroupingsScreen extends ConsumerWidget {
         children: [
           competitions.when(
             loading: () =>
-                const AppLoading(message: 'Carregando campeonatos...'),
+                const AppLoading(message: 'Carregando competições...'),
             error: (error, stackTrace) => AppErrorState(
-              message: 'Não foi possível carregar os campeonatos',
+              message: 'Não foi possível carregar as competições',
               onRetry: () => ref.invalidate(competitionsProvider),
             ),
             data: (compItems) {
               if (compItems.isEmpty) {
                 return KicksterEmptyState(
                   icon: Icons.emoji_events_outlined,
-                  message: 'Nenhum campeonato cadastrado',
+                  message: 'Nenhuma competição cadastrada',
                   description:
-                      'Crie um campeonato para organizar conferências e divisões.',
+                      'Crie uma competição para organizar conferências e divisões.',
                   action: KicksterButton(
-                    label: 'Criar campeonato',
+                    label: 'Criar competição',
                     icon: Icons.add,
                     onPressed: () => context.go('/competitions/new'),
                   ),
                 );
               }
-              // O id selecionado pode estar obsoleto (ex.: campeonato removido
+              // O id selecionado pode estar obsoleto (ex.: competição removida
               // em outra sessão); nesse caso cai para o primeiro disponível.
               var selected = compItems.first;
               for (final c in compItems) {
@@ -79,7 +79,7 @@ class GroupingsScreen extends ConsumerWidget {
   }
 }
 
-/// Corpo da tela para o campeonato selecionado.
+/// Corpo da tela para a competição selecionada.
 class _GroupingsBody extends ConsumerStatefulWidget {
   const _GroupingsBody({required this.competitions, required this.competition});
 
@@ -107,8 +107,8 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
     final conferences = ref.watch(conferencesProvider(competition.id));
     final divisions = ref.watch(divisionsProvider(competition.id));
     // Issue #261: criação/edição de conferências e divisões exige ser
-    // criador do campeonato ou ADMIN (o backend já bloqueia as escritas).
-    // Issue #305: e apenas com o campeonato em DRAFT — publicado/encerrado
+    // criador da competição ou ADMIN (o backend já bloqueia as escritas).
+    // Issue #305: e apenas com a competição em DRAFT — publicado/encerrado
     // tem a estrutura travada (somente leitura).
     final canEdit =
         canEditCompetition(
@@ -159,13 +159,13 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
           if (!canEdit && !lockedByStatus)
             const EditRestrictionNote(
               message:
-                  'Apenas o criador do campeonato pode gerenciar '
+                  'Apenas o criador da competição pode gerenciar '
                   'conferências e divisões.',
             ),
           if (lockedByStatus)
             const EditRestrictionNote(
               message:
-                  'Campeonato publicado — conferências, divisões e grupos '
+                  'Competição publicada — conferências, divisões e grupos '
                   'estão travados.',
             ),
           const SizedBox(height: 24),
@@ -202,7 +202,7 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
     return confCount + divCount;
   }
 
-  /// Cabeçalho de contexto: campeonato, status, contadores e seletor.
+  /// Cabeçalho de contexto: competição, status, contadores e seletor.
   Widget _contextHeader(
     BuildContext context,
     WidgetRef ref,
@@ -273,7 +273,7 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 360),
                 child: KicksterDropdown<String>(
-                  label: 'Campeonato',
+                  label: 'Competição',
                   value: competition.id,
                   items: widget.competitions
                       .map(
@@ -356,7 +356,7 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
               return const AppEmptyState(
                 message:
                     'Nenhuma conferência criada. '
-                    'Crie a primeira para organizar seu campeonato.',
+                    'Crie a primeira para organizar sua competição.',
                 icon: Icons.account_tree_outlined,
               );
             }
@@ -484,7 +484,7 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
     );
   }
 
-  /// Chip de status do campeonato (mesmo padrão da tela de detalhe).
+  /// Chip de status da competição (mesmo padrão da tela de detalhe).
   Widget _statusChip(CompetitionStatus status) {
     final color = switch (status) {
       CompetitionStatus.draft => AppColors.textSecondary,
@@ -548,7 +548,7 @@ class _ConferenceCard extends StatefulWidget {
   final String competitionId;
 
   /// Issue #261: oculta ações de edição quando o usuário não é o criador
-  /// do campeonato nem ADMIN.
+  /// da competição nem ADMIN.
   final bool canEdit;
 
   @override

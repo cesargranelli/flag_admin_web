@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
 
-/// Elenco de um clube (time) num campeonato (issue #360/#363).
+/// Elenco de um clube (time) numa competição (issue #360/#363).
 ///
 /// A tela combina [athletesProvider] (atletas da plataforma) com o
 /// [rosterProvider] do time e permite **incluir** atletas ("Incluir") e

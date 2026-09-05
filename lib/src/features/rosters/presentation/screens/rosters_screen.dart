@@ -10,10 +10,10 @@ import '../../../../providers/providers.dart';
 /// Gestão de elencos (roster): clube ou universidade do usuário → elenco da
 /// organização.
 ///
-/// O fluxo (issue #360) é: campeonato → clubes/universidades (organizações)
+/// O fluxo (issue #360) é: competição → clubes/universidades (organizações)
 /// do usuário → elenco da organização. A lista passa a exibir **todas** as
 /// organizações clube/universidade do usuário (issue #381) — mesmo as que
-/// ainda não participam do campeonato selecionado: nesse caso o card oferece
+/// ainda não participam da competição selecionada: nesse caso o card oferece
 /// a ação "Associar à temporada" (cria o [Team] via `associateClub`). Os cards
 /// seguem o padrão de grid da tela de atletas e navegam para
 /// `/teams/:id/roster` quando o time (clube+competição) já existe.
@@ -42,7 +42,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     final competitions = ref.watch(competitionsProvider);
 
     final compItems = competitions.valueOrNull ?? const [];
-    // P4 #461: campeonato efetivo = selecionado ?? primeiro da lista.
+    // P4 #461: competição efetiva = selecionada ?? primeira da lista.
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
     return AppScreen(
@@ -59,20 +59,20 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
           Expanded(
             child: competitions.when(
               loading: () =>
-                  const AppLoading(message: 'Carregando campeonatos...'),
+                  const AppLoading(message: 'Carregando competições...'),
               error: (error, stackTrace) => AppErrorState(
-                message: 'Não foi possível carregar os campeonatos',
+                message: 'Não foi possível carregar as competições',
                 onRetry: () => ref.invalidate(competitionsProvider),
               ),
               data: (_) {
                 if (compItems.isEmpty) {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
-                    message: 'Nenhum campeonato cadastrado',
+                    message: 'Nenhuma competição cadastrada',
                     description:
-                        'Crie um campeonato para organizar os elencos.',
+                        'Crie uma competição para organizar os elencos.',
                     action: KicksterButton(
-                      label: 'Criar campeonato',
+                      label: 'Criar competição',
                       icon: Icons.add,
                       onPressed: () => context.go('/competitions/new'),
                     ),
@@ -86,7 +86,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                         child: KicksterDropdown<String>(
                           key: ValueKey('comp-$effectiveComp'),
-                          label: 'Campeonato',
+                          label: 'Competição',
                           value: effectiveComp,
                           items: compItems
                               .map(
@@ -112,7 +112,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
                       child: effectiveComp != null
                           ? _clubList(context, effectiveComp)
                           : const AppEmptyState(
-                              message: 'Selecione um campeonato',
+                              message: 'Selecione uma competição',
                               icon: Icons.emoji_events_outlined,
                             ),
                     ),
@@ -132,7 +132,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
   /// `club` ou `university` — ignora apenas os tipos explicitamente excluídos:
   /// federação/liga/associação/outro). Não filtra por `createdBy` para garantir
   /// que os clubes/universidades apareçam (#385). Para cada organização,
-  /// localiza o [Team] (se houver) no campeonato via [teamsProvider].
+  /// localiza o [Team] (se houver) na competição via [teamsProvider].
   Widget _clubList(BuildContext context, String competitionId) {
     final teamsAsync = ref.watch(teamsProvider(competitionId));
     final orgsAsync = ref.watch(organizationsProvider);
@@ -150,7 +150,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     final orgs = orgsAsync.value ?? const <Organization>[];
     final teams = teamsAsync.value ?? const <Team>[];
 
-    // Mapa organização → time no campeonato selecionado.
+    // Mapa organização → time na competição selecionada.
     final teamByOrgId = <String, Team>{
       for (final team in teams)
         if (team.organizationId != null) team.organizationId!: team,
@@ -310,7 +310,7 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     );
   }
 
-  /// Tocar no card: com time no campeonato → elenco; sem time → associa à
+  /// Tocar no card: com time na competição → elenco; sem time → associa à
   /// temporada.
   void _handleCardTap(Organization org, Team? team, String competitionId) {
     final associated = team;

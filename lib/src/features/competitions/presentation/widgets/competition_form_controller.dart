@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 
-/// Controller compartilhado do formulário de campeonato (criar/editar).
+/// Controller compartilhado do formulário de competição (criar/editar).
 ///
 /// Consolida o estado e as regras duplicados entre `CompetitionCreateScreen`
 /// e `CompetitionEditScreen` (#460): 7 `TextEditingController`, seleções
@@ -37,7 +37,7 @@ class CompetitionFormController {
   /// estado que precise refletir na UI (o padrão original era `setState`).
   final VoidCallback onChanged;
 
-  /// Id do campeonato vigente — `null` no create antes do rascunho criado.
+  /// Id da competição vigente — `null` no create antes do rascunho criado.
   final String? Function() competitionId;
 
   // ── Dependências de API (injetadas pelo host via ref.read) ──────────────
@@ -203,7 +203,7 @@ class CompetitionFormController {
 
   // ── Declínios e agrupamento (estrutura) ─────────────────────────────────
 
-  /// "Este campeonato não usa conferências" (#304/#345).
+  /// "Esta competição não usa conferências" (#304/#345).
   void declineConferences() {
     declinedConferences = true;
     _touch();

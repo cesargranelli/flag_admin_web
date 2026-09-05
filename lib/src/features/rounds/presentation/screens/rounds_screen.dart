@@ -7,9 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../features/auth/domain/competition_permissions.dart';
 import '../../../../providers/providers.dart';
 
-/// Gestão de rodadas: lista por campeonato e acesso ao detalhe.
+/// Gestão de rodadas: lista por competição e acesso ao detalhe.
 ///
-/// O fluxo agora é: campeonato → rodadas.
+/// O fluxo agora é: competição → rodadas.
 /// As categories foram removidas; as rodadas associam-se diretamente
 /// ao competition_id (migração V24).
 class RoundsScreen extends ConsumerStatefulWidget {
@@ -33,12 +33,12 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
     final competitions = ref.watch(competitionsProvider);
 
     final compItems = competitions.valueOrNull ?? const [];
-    // P4 #461: campeonato efetivo = selecionado ?? primeiro da lista.
+    // P4 #461: competição efetiva = selecionada ?? primeira da lista.
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
-    // Issue #261: criação/edição de rodadas exige ser criador do
-    // campeonato ou ADMIN (o backend já bloqueia as escritas).
-    // Issue #305: e apenas com o campeonato em DRAFT — publicado/encerrado
+    // Issue #261: criação/edição de rodadas exige ser criador da
+    // competição ou ADMIN (o backend já bloqueia as escritas).
+    // Issue #305: e apenas com a competição em DRAFT — publicado/encerrado
     // tem a estrutura travada (somente leitura).
     final selectedCompetitionObj = compItems
         .where((c) => c.id == effectiveComp)
@@ -79,19 +79,20 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
           Expanded(
             child: competitions.when(
               loading: () =>
-                  const AppLoading(message: 'Carregando campeonatos...'),
+                  const AppLoading(message: 'Carregando competições...'),
               error: (error, stackTrace) => AppErrorState(
-                message: 'Não foi possível carregar os campeonatos',
+                message: 'Não foi possível carregar as competições',
                 onRetry: () => ref.invalidate(competitionsProvider),
               ),
               data: (_) {
                 if (compItems.isEmpty) {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
-                    message: 'Nenhum campeonato cadastrado',
-                    description: 'Crie um campeonato para adicionar rodadas.',
+                    message: 'Nenhuma competição cadastrada',
+                    description:
+                        'Crie uma competição para adicionar rodadas.',
                     action: KicksterButton(
-                      label: 'Criar campeonato',
+                      label: 'Criar competição',
                       icon: Icons.add,
                       onPressed: () => context.go('/competitions/new'),
                     ),
@@ -105,7 +106,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                       children: [
                         KicksterDropdown<String>(
                           key: ValueKey('comp-$effectiveComp'),
-                          label: 'Campeonato',
+                          label: 'Competição',
                           value: effectiveComp,
                           items: compItems
                               .map(
@@ -126,9 +127,9 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                         if (!canManage)
                           EditRestrictionNote(
                             message: !isDraft
-                                ? 'Campeonato publicado — as rodadas estão '
+                                ? 'Competição publicada — as rodadas estão '
                                     'travadas.'
-                                : 'Apenas o criador do campeonato pode '
+                                : 'Apenas o criador da competição pode '
                                     'gerenciar rodadas.',
                           ),
                       ],
@@ -157,7 +158,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                                         message:
                                             'Nenhuma rodada cadastrada',
                                         description:
-                                            'Crie a primeira rodada do campeonato.',
+                                            'Crie a primeira rodada da competição.',
                                         action: KicksterButton(
                                           label: 'Criar rodada',
                                           icon: Icons.add,
@@ -195,9 +196,9 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                               icon: Icons.format_list_numbered,
                               message: 'Nenhuma rodada cadastrada',
                               description:
-                                  'Crie um campeonato para adicionar rodadas.',
+                                  'Crie uma competição para adicionar rodadas.',
                               action: KicksterButton(
-                                label: 'Criar campeonato',
+                                label: 'Criar competição',
                                 icon: Icons.add,
                                 onPressed: () =>
                                     context.go('/competitions/new'),

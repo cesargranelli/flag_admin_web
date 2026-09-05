@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/src/domain/domain.dart';
 
-/// Regras de permissão de edição sobre um campeonato (issue #261).
+/// Regras de permissão de edição sobre uma competição (issue #261).
 ///
 /// O backend (PR #262) já bloqueia update/delete via ownership guard
 /// (`assertManagedBy`); aqui a mesma regra é espelhada apenas para
@@ -12,7 +12,7 @@ bool isAdminUser(User? user) => user?.role == UserRole.admin;
 
 /// Usuário logado pode gerenciar [competition]?
 ///
-/// Regra: ADMIN sempre pode; o criador pode editar seus campeonatos;
+/// Regra: ADMIN sempre pode; o criador pode editar suas competições;
 /// registros legados sem `createdBy` ficam restritos ao ADMIN.
 /// Sem usuário logado ou sem a competição resolvida, apenas ADMIN edita.
 bool canEditCompetition(User? user, Competition? competition) {
