@@ -53,8 +53,14 @@ class VenueDetailScreen extends ConsumerWidget {
   Widget _buildDetail(BuildContext context, WidgetRef ref, Venue venue) {
     // P3 #471: resolve a organização pelo family (autoDispose) em vez de
     // assistir a lista completa.
-    final orgAsync = ref.watch(organizationProvider(venue.organizationId));
-    final orgName = orgAsync.valueOrNull?.tradeName ?? '';
+    //
+    // #53: o backend não persiste `organizationId` (campo só para
+    // compatibilidade REST; default '' no espelho Firestore) — com o id
+    // vazio, evita disparar um GET /organizations/ sem sentido.
+    final orgAsync = venue.organizationId.isEmpty
+        ? null
+        : ref.watch(organizationProvider(venue.organizationId));
+    final orgName = orgAsync?.valueOrNull?.tradeName ?? '';
 
     return AppLayout.detail(
         child: Column(
