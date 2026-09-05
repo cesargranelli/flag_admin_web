@@ -46,7 +46,7 @@ class TeamDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildDetail(BuildContext context, WidgetRef ref, Team team) {
-    // P3 #471: resolve o campeonato pelo family (autoDispose) em vez de
+    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
     // assistir a lista completa.
     final compAsync = ref.watch(competitionProvider(team.competitionId));
     final competitionName = compAsync.valueOrNull?.name ?? '';
@@ -57,7 +57,7 @@ class TeamDetailScreen extends ConsumerWidget {
             .map((d) => d.name)
             .firstOrNull ??
         '';
-    // Issue #261: edição do time exige ser criador do campeonato ou ADMIN.
+    // Issue #261: edição do time exige ser criador da competição ou ADMIN.
     final competition = compAsync.valueOrNull;
     final canEdit = canEditCompetition(
       ref.watch(authControllerProvider.select((a) => a.state.user)),
@@ -129,7 +129,7 @@ class TeamDetailScreen extends ConsumerWidget {
                     else
                       const EditRestrictionNote(
                         message:
-                            'Apenas o criador do campeonato pode editar '
+                            'Apenas o criador da competição pode editar '
                             'este time.',
                       ),
                   ],

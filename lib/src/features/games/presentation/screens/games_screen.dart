@@ -9,7 +9,7 @@ import '../../../../providers/providers.dart';
 
 /// Gestão de jogos: lista por rodada e acesso ao detalhe.
 ///
-/// O fluxo agora é: campeonato → divisão → rodada → jogo.
+/// O fluxo agora é: competição → divisão → rodada → jogo.
 /// As categories foram removidas; a associação competition→round
 /// ocorre diretamente pela competition_id (migração V24).
 class GamesScreen extends ConsumerStatefulWidget {
@@ -34,10 +34,10 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
     final selectedRound = ref.watch(selectedRoundProvider);
 
     final compItems = competitions.valueOrNull ?? const [];
-    // P4 #461: campeonato efetivo = selecionado ?? primeiro da lista.
+    // P4 #461: competição efetiva = selecionada ?? primeira da lista.
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
-    // Rodadas do campeonato efetivo + rodada "efetiva" (B1 #457): quando
+    // Rodadas da competição efetiva + rodada "efetiva" (B1 #457): quando
     // nenhuma rodada foi selecionada, usa a primeira — a lista de jogos
     // aparece sem depender de um clique no dropdown.
     final roundsAsync = effectiveComp != null
@@ -47,7 +47,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
     final effectiveRound = selectedRound ?? roundItems.firstOrNull?.id;
 
     // Issue #261: criação/edição de jogos (incluída a importação CSV)
-    // exige ser criador do campeonato ou ADMIN.
+    // exige ser criador da competição ou ADMIN.
     final selectedCompetitionObj = compItems
         .where((c) => c.id == effectiveComp)
         .firstOrNull;
@@ -105,19 +105,19 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
           Expanded(
             child: competitions.when(
               loading: () =>
-                  const AppLoading(message: 'Carregando campeonatos...'),
+                  const AppLoading(message: 'Carregando competições...'),
               error: (error, stackTrace) => AppErrorState(
-                message: 'Não foi possível carregar os campeonatos',
+                message: 'Não foi possível carregar as competições',
                 onRetry: () => ref.invalidate(competitionsProvider),
               ),
               data: (_) {
                 if (compItems.isEmpty) {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
-                    message: 'Nenhum campeonato cadastrado',
-                    description: 'Crie um campeonato para adicionar jogos.',
+                    message: 'Nenhuma competição cadastrada',
+                    description: 'Crie uma competição para adicionar jogos.',
                     action: KicksterButton(
-                      label: 'Criar campeonato',
+                      label: 'Criar competição',
                       icon: Icons.add,
                       onPressed: () => context.go('/competitions/new'),
                     ),
@@ -131,7 +131,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                       children: [
                         KicksterDropdown<String>(
                           key: ValueKey('comp-$effectiveComp'),
-                          label: 'Campeonato',
+                          label: 'Competição',
                           value: effectiveComp,
                           items: compItems
                               .map(
@@ -190,7 +190,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                         if (!canEdit)
                           const EditRestrictionNote(
                             message:
-                                'Apenas o criador do campeonato pode '
+                                'Apenas o criador da competição pode '
                                 'gerenciar jogos.',
                           ),
                       ],

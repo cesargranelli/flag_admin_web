@@ -2,14 +2,14 @@ import '../enums/competition_status.dart';
 import '../enums/grouping_type.dart';
 import '../enums/modality.dart';
 
-/// Campeonato do Flag Platform.
+/// Competição do Flag Platform.
 ///
 /// Aceita os dois shapes retornados pela API:
 /// - resumo (`GET /api/v1/competitions`): id, name, organizationName, status;
 /// - completo (`GET /api/v1/competitions/{id}`): id, organizationId, name,
 ///   description, startDate, endDate, status, createdBy, createdAt, updatedAt.
 class Competition {
-  /// Identificador UUID do campeonato.
+  /// Identificador UUID da competição.
   final String id;
 
   final String name;
@@ -38,7 +38,7 @@ class Competition {
   /// Nulo em registros legados (tratado como Divisões).
   final GroupingType? groupingType;
 
-  /// UUID do usuário criador do campeonato (base da regra de edição
+  /// UUID do usuário criador da competição (base da regra de edição
   /// restrita ao criador ou ADMIN). Nulo em registros legados.
   final String? createdBy;
 

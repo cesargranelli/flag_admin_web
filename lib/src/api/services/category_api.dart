@@ -8,7 +8,7 @@ class CategoryApi {
 
   CategoryApi(this._client);
 
-  /// Lista as categorias de um campeonato (endpoint público).
+  /// Lista as categorias de uma competição (endpoint público).
   Future<List<Category>> listByCompetition(String competitionId) =>
       _client.getList(
         '/api/v1/competitions/$competitionId/categories',

@@ -1,4 +1,4 @@
-/// Rótulo do agrupamento da estrutura do campeonato (#308).
+/// Rótulo do agrupamento da estrutura da competição (#308).
 ///
 /// Divisões e Grupos têm a mesma dinâmica — muda apenas o label.
 enum GroupingType {

@@ -1,4 +1,4 @@
-/// Seções do formulário de campeonato compartilhadas entre criação e edição
+/// Seções do formulário de competição compartilhadas entre criação e edição
 /// (#460). Cada seção recebe o [CompetitionFormController] e os parâmetros
 /// que preservam as divergências legítimas entre as duas telas.
 library;
@@ -201,7 +201,7 @@ IconData _genderIcon(Gender gender) => switch (gender) {
     };
 
 // ---------------------------------------------------------------------------
-// Seção 1 — Campeonato: organização, nome e descrição.
+// Seção 1 — Competição: organização, nome e descrição.
 // ---------------------------------------------------------------------------
 
 /// Seção 1 — organização, nome e descrição (#455).
@@ -395,7 +395,7 @@ class CompetitionModalitySection extends ConsumerWidget {
       children: [
         _groupLabel(title),
         const SizedBox(height: 4),
-        _hint('Formato de jogo do campeonato'),
+        _hint('Formato de jogo da competição'),
         const SizedBox(height: 12),
         LayoutBuilder(
           builder: (context, constraints) {
@@ -575,7 +575,7 @@ class CompetitionSeasonSection extends ConsumerWidget {
             runSpacing: 8,
             children: [
               _summaryChip(
-                c.name.text.trim().isEmpty ? 'Campeonato' : c.name.text.trim(),
+                c.name.text.trim().isEmpty ? 'Competição' : c.name.text.trim(),
                 Icons.emoji_events_outlined,
               ),
               if (c.modality != null)
@@ -588,7 +588,7 @@ class CompetitionSeasonSection extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _hint(
-            'Ao criar, o campeonato é salvo como rascunho e você poderá '
+            'Ao criar, a competição é salva como rascunho e você poderá '
             'configurar conferências, divisões ou grupos abaixo.',
           ),
         ],
@@ -603,8 +603,8 @@ class CompetitionSeasonSection extends ConsumerWidget {
 
 /// Seção 5 — conferências: criar/listar com declínio.
 ///
-/// [competitionId] `null` (create antes do rascunho) mostra a dica "Crie o
-/// campeonato acima..." e desabilita o input/botão — no edit nunca é null.
+/// [competitionId] `null` (create antes do rascunho) mostra a dica "Crie a
+/// competição acima..." e desabilita o input/botão — no edit nunca é null.
 class CompetitionConferencesSection extends ConsumerWidget {
   const CompetitionConferencesSection({
     super.key,
@@ -614,7 +614,7 @@ class CompetitionConferencesSection extends ConsumerWidget {
 
   final CompetitionFormController controller;
 
-  /// Id do campeonato — `null` no create antes do rascunho (estrutura travada).
+  /// Id da competição — `null` no create antes do rascunho (estrutura travada).
   final String? competitionId;
 
   @override
@@ -629,7 +629,7 @@ class CompetitionConferencesSection extends ConsumerWidget {
       children: [
         if (competitionId == null) ...[
           _hint(
-            'Crie o campeonato acima para habilitar a configuração '
+            'Crie a competição acima para habilitar a configuração '
             'da estrutura.',
           ),
           const SizedBox(height: 12),
@@ -637,8 +637,8 @@ class CompetitionConferencesSection extends ConsumerWidget {
         _groupLabel('Conferências'),
         const SizedBox(height: 4),
         _hint(
-          'Opcional. Use conferências para separar grandes blocos do '
-          'campeonato (ex.: Conferência Norte/Sul).',
+          'Opcional. Use conferências para separar grandes blocos da '
+          'competição (ex.: Conferência Norte/Sul).',
         ),
         const SizedBox(height: 12),
         if (c.declinedConferences) ...[
@@ -651,7 +651,7 @@ class CompetitionConferencesSection extends ConsumerWidget {
               color: AppColors.grayFill.withValues(alpha: 0.5),
             ),
             child: const Text(
-              'Este campeonato não usará conferências.',
+              'Esta competição não usará conferências.',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -711,7 +711,7 @@ class CompetitionConferencesSection extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           KicksterButton(
-            label: 'Este campeonato não usa conferências',
+            label: 'Esta competição não usa conferências',
             variant: KicksterButtonVariant.outline,
             onPressed: c.declineConferences,
           ),
@@ -738,7 +738,7 @@ class CompetitionStructureSection extends ConsumerWidget {
 
   final CompetitionFormController controller;
 
-  /// Id do campeonato — `null` no create antes do rascunho (estrutura travada).
+  /// Id da competição — `null` no create antes do rascunho (estrutura travada).
   final String? competitionId;
 
   @override
@@ -759,7 +759,7 @@ class CompetitionStructureSection extends ConsumerWidget {
       children: [
         if (competitionId == null) ...[
           _hint(
-            'Crie o campeonato acima para habilitar a configuração '
+            'Crie a competição acima para habilitar a configuração '
             'da estrutura.',
           ),
           const SizedBox(height: 12),
@@ -806,14 +806,14 @@ class CompetitionStructureSection extends ConsumerWidget {
               color: AppColors.grayFill.withValues(alpha: 0.5),
             ),
             child: const Text(
-              'Este campeonato não usará divisões nem grupos.',
+              'Esta competição não usará divisões nem grupos.',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           )
         else if (c.groupingChoice == null)
           _hint(
-            'Selecione Divisões ou Grupos acima, ou declare que este '
-            'campeonato não usará agrupamentos.',
+            'Selecione Divisões ou Grupos acima, ou declare que esta '
+            'competição não usará agrupamentos.',
           )
         else ...[
           if (conferenceItems.isNotEmpty) ...[

@@ -1,4 +1,4 @@
-/// Divisão de um campeonato (agrupamento de times).
+/// Divisão de uma competição (agrupamento de times).
 ///
 /// Opcionalmente vinculada a uma conferência. Shape de `/api/v1/divisions`.
 class Division {

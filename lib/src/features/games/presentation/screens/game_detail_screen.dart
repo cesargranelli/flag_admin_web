@@ -46,13 +46,13 @@ class GameDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildDetail(BuildContext context, WidgetRef ref, Game game) {
-    // P3 #471: resolve o campeonato pelo family (autoDispose) em vez de
+    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
     // assistir a lista completa — rebuild só quando ESTA competição muda.
     final compAsync = game.competitionId != null
         ? ref.watch(competitionProvider(game.competitionId!))
         : null;
     final competitionName = compAsync?.valueOrNull?.name ?? '';
-    // Issue #261: edição do jogo exige ser criador do campeonato ou ADMIN.
+    // Issue #261: edição do jogo exige ser criador da competição ou ADMIN.
     final competition = compAsync?.valueOrNull;
     final canEdit = canEditCompetition(
       ref.watch(authControllerProvider.select((a) => a.state.user)),
@@ -110,7 +110,7 @@ class GameDetailScreen extends ConsumerWidget {
                     else
                       const EditRestrictionNote(
                         message:
-                            'Apenas o criador do campeonato pode editar '
+                            'Apenas o criador da competição pode editar '
                             'este jogo.',
                       ),
                   ],
@@ -124,7 +124,7 @@ class GameDetailScreen extends ConsumerWidget {
                 value: game.roundNumber?.toString() ?? '—',
               ),
               if (competitionName.isNotEmpty)
-                AppInfoRow(label: 'Campeonato', value: competitionName),
+                AppInfoRow(label: 'Competição', value: competitionName),
               AppInfoRow(label: 'Horário', value: formatBrDateTime(game.scheduledAt)),
               if (game.venueName != null && game.venueName!.isNotEmpty)
                 AppInfoRow(label: 'Campo', value: game.venueName!),

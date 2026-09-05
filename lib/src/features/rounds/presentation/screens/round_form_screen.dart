@@ -15,7 +15,7 @@ class RoundFormScreen extends ConsumerStatefulWidget {
   final String? roundId;
   final Round? round;
 
-  /// Campeonato vindo da listagem (via extra da rota) — evita perder o
+  /// Competição vinda da listagem (via extra da rota) — evita perder o
   /// contexto ao abrir "Nova rodada" (B5 #457).
   final String? competitionId;
 
@@ -114,7 +114,7 @@ class _RoundFormScreenState extends ConsumerState<RoundFormScreen> {
   Widget build(BuildContext context) {
     final competitions = ref.watch(competitionsProvider);
     final compItems = competitions.valueOrNull ?? const [];
-    // P4 #461: campeonato efetivo = selecionado ?? primeiro da lista.
+    // P4 #461: competição efetiva = selecionada ?? primeira da lista.
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
     return AppScreen(
@@ -134,7 +134,7 @@ class _RoundFormScreenState extends ConsumerState<RoundFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 KicksterDropdown<String>(
-                  label: 'Campeonato',
+                  label: 'Competição',
                   value: effectiveComp,
                   items: compItems
                       .map(
@@ -147,7 +147,7 @@ class _RoundFormScreenState extends ConsumerState<RoundFormScreen> {
                         value;
                   },
                   validator: (value) => (value == null || value.isEmpty)
-                      ? 'Selecione o campeonato'
+                      ? 'Selecione a competição'
                       : null,
                 ),
                 const SizedBox(height: 12),

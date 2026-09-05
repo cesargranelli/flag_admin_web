@@ -14,7 +14,7 @@ import '../theme/app_colors.dart';
 ///   usado na home (#433).
 /// - **Linha** (com [subtitle] e/ou [trailing]): ícone à esquerda + coluna
 ///   título/subtítulo + widget de apoio à direita — usado nas listagens de
-///   módulos do admin (org, campeonato, campo, time, atleta).
+///   módulos do admin (org, competição, campo, time, atleta).
 class KicksterCard extends StatelessWidget {
   const KicksterCard({
     super.key,

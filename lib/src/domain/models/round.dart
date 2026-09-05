@@ -1,6 +1,6 @@
 import '../enums/round_type.dart';
 
-/// Rodada de um campeonato.
+/// Rodada de uma competição.
 ///
 /// Shape de `/api/v1/rounds`.
 class Round {

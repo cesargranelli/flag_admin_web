@@ -8,7 +8,7 @@ class RoundApi {
 
   RoundApi(this._client);
 
-  /// Lista as rodadas de um campeonato (endpoint público).
+  /// Lista as rodadas de uma competição (endpoint público).
   Future<List<Round>> listByCompetition(String competitionId) => _client
       .getList('/api/v1/competitions/$competitionId/rounds', Round.fromJson);
 

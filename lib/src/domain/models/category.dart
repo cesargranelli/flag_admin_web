@@ -1,9 +1,9 @@
 import '../enums/age_group.dart';
 import '../enums/gender.dart';
 
-/// Categoria de um campeonato.
+/// Categoria de uma competição.
 ///
-/// Shape público do endpoint de categorias por campeonato: ids são UUID
+/// Shape público do endpoint de categorias por competição: ids são UUID
 /// (String) e as datas de auditoria são opcionais. A categoria é a combinação
 /// estruturada de modalidade + gênero + faixa etária.
 class Category {

@@ -8,7 +8,7 @@ class StandingApi {
 
   StandingApi(this._client);
 
-  /// Lista a tabela de classificação de um campeonato (endpoint público,
+  /// Lista a tabela de classificação de uma competição (endpoint público,
   /// ordenada por pontos, saldo e gols pró).
   Future<List<Standing>> listByCompetition(String competitionId) =>
       _client.getList(

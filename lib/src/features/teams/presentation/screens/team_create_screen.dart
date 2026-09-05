@@ -7,11 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
 
-/// Formulário de criação de time (clube inscrito em um campeonato).
+/// Formulário de criação de time (clube inscrito em uma competição).
 class TeamCreateScreen extends ConsumerStatefulWidget {
   const TeamCreateScreen({super.key, this.competitionId});
 
-  /// Campeonato vindo da listagem (via extra da rota) — evita perder o
+  /// Competição vinda da listagem (via extra da rota) — evita perder o
   /// contexto ao abrir "Novo time" (B5 #457).
   final String? competitionId;
 
@@ -152,7 +152,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
                 ),
                 const SizedBox(height: 12),
                 KicksterDropdown<String>(
-                  label: 'Campeonato',
+                  label: 'Competição',
                   value: effectiveComp,
                   items: compItems
                       .map(
@@ -166,7 +166,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
                         value;
                   },
                   validator: (value) => (value == null || value.isEmpty)
-                      ? 'Selecione o campeonato'
+                      ? 'Selecione a competição'
                       : null,
                 ),
                 const SizedBox(height: 12),

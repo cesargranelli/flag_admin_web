@@ -7,10 +7,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../features/auth/domain/competition_permissions.dart';
 import '../../../../providers/providers.dart';
 
-/// Gestão de campeonatos: cards de acesso e navegação para o detalhe.
+/// Gestão de competições: cards de acesso e navegação para o detalhe.
 ///
 /// Listagem em grid de cards (padrão web); clicar navega para a tela de
-/// detalhe do campeonato. ADMIN pode exibir desativados e gerenciá-los.
+/// detalhe da competição. ADMIN pode exibir desativados e gerenciá-los.
 class CompetitionsScreen extends ConsumerStatefulWidget {
   const CompetitionsScreen({super.key});
 
@@ -68,9 +68,9 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
           Expanded(
             child: competitions.when(
               loading: () =>
-                  const AppLoading(message: 'Carregando campeonatos...'),
+                  const AppLoading(message: 'Carregando competições...'),
               error: (error, stackTrace) => AppErrorState(
-                message: 'Não foi possível carregar os campeonatos',
+                message: 'Não foi possível carregar as competições',
                 onRetry: () => showDisabled
                     ? ref.invalidate(competitionsAdminProvider(true))
                     : ref.invalidate(competitionsProvider),
@@ -79,11 +79,11 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
                 if (items.isEmpty) {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
-                    message: 'Nenhum campeonato cadastrado',
+                    message: 'Nenhuma competição cadastrada',
                     description:
-                        'Crie o primeiro campeonato para começar a usar.',
+                        'Crie a primeira competição para começar a usar.',
                     action: KicksterButton(
-                      label: 'Criar campeonato',
+                      label: 'Criar competição',
                       icon: Icons.add,
                       onPressed: () => context.go('/competitions/new'),
                     ),
@@ -94,14 +94,14 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
                   cardBuilder: (competition) =>
                       _competitionCard(context, competition, user),
                   searchField: _searchController,
-                  countLabel: 'campeonatos',
-                  emptyMessage: 'Nenhum campeonato encontrado',
+                  countLabel: 'competições',
+                  emptyMessage: 'Nenhuma competição encontrada',
                   toolbarTrailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (isAdmin)
                         Tooltip(
-                          message: 'Exibir campeonatos desativados',
+                          message: 'Exibir competições desativadas',
                           child: IconButton(
                             isSelected: _showDisabled,
                             selectedIcon: const Icon(Icons.visibility),
@@ -128,7 +128,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
     );
   }
 
-  /// Card de campeonato no padrão Kickster (core #439): ícone do troféu,
+  /// Card de competição no padrão Kickster (core #439): ícone do troféu,
   /// nome (+ organização como subtítulo) e menu de gestão para quem pode
   /// editar (#261). Badges de modalidade/gênero/faixa e status continuam
   /// visíveis no detalhe.
@@ -144,7 +144,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
       onTap: () =>
           context.push('/competitions/${competition.id}', extra: competition),
       // Issue #261: ações de gestão (desativar/reativar) exigem
-      // ser criador do campeonato ou ADMIN — o backend já bloqueia.
+      // ser criador da competição ou ADMIN — o backend já bloqueia.
       trailing: canEditCompetition(
         user,
         competition,
@@ -155,7 +155,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
                 if (value == 'deactivate') {
                   final ok = await _confirm(
                     context,
-                    'Desativar campeonato',
+                    'Desativar competição',
                     '"${competition.name}" ficará invisível para os '
                         'demais usuários até ser reativado.',
                   );
@@ -200,14 +200,14 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
         competition,
         activate: false,
         successMessage: '${competition.name} desativado.',
-        errorMessage: 'Não foi possível desativar o campeonato.',
+        errorMessage: 'Não foi possível desativar a competição.',
       );
 
   Future<void> _reactivate(Competition competition) => _toggleActive(
         competition,
         activate: true,
         successMessage: '${competition.name} reativado.',
-        errorMessage: 'Não foi possível reativar o campeonato.',
+        errorMessage: 'Não foi possível reativar a competição.',
       );
 
   Future<void> _toggleActive(

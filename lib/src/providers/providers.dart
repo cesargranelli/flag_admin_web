@@ -71,12 +71,12 @@ final organizationProvider = FutureProvider.autoDispose.family<Organization, Str
   (ref, id) => ref.watch(organizationApiProvider).getById(id),
 );
 
-/// Serviço de campeonatos.
+/// Serviço de competições.
 final competitionApiProvider = Provider<CompetitionApi>(
   (ref) => CompetitionApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de campeonatos da tela de gestão.
+/// Lista de competições da tela de gestão.
 final competitionsProvider = FutureProvider<List<Competition>>(
   (ref) => ref.watch(competitionApiProvider).listAll(),
 );
@@ -89,15 +89,15 @@ final competitionsAdminProvider =
       .listAll(includeDisabled: includeDisabled),
 );
 
-/// Detalhe de um campeonato por id.
+/// Detalhe de uma competição por id.
 final competitionProvider = FutureProvider.autoDispose.family<Competition, String>(
   (ref, id) => ref.watch(competitionApiProvider).getById(id),
 );
 
-/// Campeonato selecionado na tela de competições.
+/// Competição selecionada na tela de competições.
 final selectedCompetitionProvider = StateProvider<String?>((ref) => null);
 
-/// Campeonato "efetivo" (P4 #461): o selecionado, ou o primeiro da lista
+/// Competição "efetiva" (P4 #461): a selecionada, ou a primeira da lista
 /// quando nada foi escolhido — padrão `selected ?? first` duplicado em
 /// várias telas (games, rounds, teams, rosters, associate_clubs, game_form).
 final effectiveCompetitionProvider = Provider<String?>((ref) {
@@ -122,19 +122,19 @@ final divisionApiProvider = Provider<DivisionApi>(
   (ref) => DivisionApi(ref.watch(apiClientProvider)),
 );
 
-/// Conferências de um campeonato.
+/// Conferências de uma competição.
 final conferencesProvider = FutureProvider.autoDispose.family<List<Conference>, String>(
   (ref, competitionId) =>
       ref.watch(conferenceApiProvider).listByCompetition(competitionId),
 );
 
-/// Divisões de um campeonato.
+/// Divisões de uma competição.
 final divisionsProvider = FutureProvider.autoDispose.family<List<Division>, String>(
   (ref, competitionId) =>
       ref.watch(divisionApiProvider).listByCompetition(competitionId),
 );
 
-/// Times de um campeonato.
+/// Times de uma competição.
 final teamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
   (ref, competitionId) =>
       ref.watch(teamApiProvider).listByCompetition(competitionId),
@@ -150,7 +150,7 @@ final roundApiProvider = Provider<RoundApi>(
   (ref) => RoundApi(ref.watch(apiClientProvider)),
 );
 
-/// Rodadas de um campeonato.
+/// Rodadas de uma competição.
 final roundsProvider = FutureProvider.autoDispose.family<List<Round>, String>(
   (ref, competitionId) =>
       ref.watch(roundApiProvider).listByCompetition(competitionId),

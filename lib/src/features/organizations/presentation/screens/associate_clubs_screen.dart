@@ -6,11 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
 
-/// Associação de clubes (organizações) a um campeonato (issue #351).
+/// Associação de clubes (organizações) a uma competição (issue #351).
 ///
 /// Lista todos os clubes da plataforma com busca por nome fantasia
-/// ([Organization.tradeName]) e indica quais já estão inscritos no
-/// campeonato selecionado (existe um [Team] com `organizationId` do clube).
+/// ([Organization.tradeName]) e indica quais já estão inscritos na
+/// competição selecionada (existe um [Team] com `organizationId` do clube).
 /// Clubes já associados aparecem com marcação e podem ser **desassociados**
 /// (issue #354), removendo o [Team] via `teamApiProvider.delete(...)`.
 /// Os demais podem ser associados individualmente ("Associar") ou **em lote**,
@@ -18,9 +18,9 @@ import '../../../../providers/providers.dart';
 /// barra de seleção, que cria um [Team] para cada um via
 /// `teamApiProvider.create(...)`.
 ///
-/// A tela fica "travada" no campeonato informado via [lockedCompetitionId]
-/// (usado ao vir do detalhe do campeonato, #349); sem o valor, resolve o
-/// campeonato selecionado ou o primeiro da lista.
+/// A tela fica "travada" na competição informada via [lockedCompetitionId]
+/// (usado ao vir do detalhe da competição, #349); sem o valor, resolve a
+/// competição selecionada ou a primeira da lista.
 class AssociateClubsScreen extends ConsumerStatefulWidget {
   const AssociateClubsScreen({super.key, this.lockedCompetitionId});
 
@@ -50,7 +50,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
     super.dispose();
   }
 
-  /// Cria o [Team] que inscreve o clube no campeonato.
+  /// Cria o [Team] que inscreve o clube na competição.
   Future<void> _associate(Organization club, String competitionId) async {
     await runMutation(
       context,
@@ -59,21 +59,21 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       action: () => ref
           .read(teamApiProvider)
           .associateClub(competitionId: competitionId, organizationId: club.id),
-      successMessage: '${club.tradeName} associado ao campeonato.',
+      successMessage: '${club.tradeName} associado à competição.',
       errorMessage: 'Não foi possível associar o clube.',
       progressId: club.id,
       onSuccess: () => ref.invalidate(teamsProvider(competitionId)),
     );
   }
 
-  /// Remove a inscrição do clube no campeonato (desassociar).
+  /// Remove a inscrição do clube na competição (desassociar).
   Future<void> _disassociate(Team team, String competitionId) async {
     await runMutation(
       context,
       ref: ref,
       scope: _disassociateScope,
       action: () => ref.read(teamApiProvider).delete(team.id),
-      successMessage: 'Clube desassociado do campeonato.',
+      successMessage: 'Clube desassociado da competição.',
       errorMessage: 'Não foi possível desassociar o clube.',
       progressId: team.id,
       onSuccess: () {
@@ -166,9 +166,9 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
           Expanded(
             child: competitions.when(
               loading: () =>
-                  const AppLoading(message: 'Carregando campeonatos...'),
+                  const AppLoading(message: 'Carregando competições...'),
               error: (error, stackTrace) => AppErrorState(
-                message: 'Não foi possível carregar os campeonatos',
+                message: 'Não foi possível carregar as competições',
                 onRetry: () => ref.invalidate(competitionsProvider),
               ),
               data: (compItems) {
@@ -180,11 +180,11 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                 if (effectiveComp == null) {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
-                    message: 'Nenhum campeonato cadastrado',
+                    message: 'Nenhuma competição cadastrada',
                     description:
-                        'Crie um campeonato para associar clubes a ele.',
+                        'Crie uma competição para associar clubes a ela.',
                     action: KicksterButton(
-                      label: 'Criar campeonato',
+                      label: 'Criar competição',
                       icon: Icons.add,
                       onPressed: () => context.go('/competitions/new'),
                     ),
@@ -192,7 +192,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                 }
 
                 // Issue #357: largura padrão dos formulários (600px), como nas
-                // telas de cadastro de organizações/campeonatos.
+                // telas de cadastro de organizações/competições.
                 return AppLayout.form(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +236,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
         onRetry: () => ref.invalidate(teamsProvider(competitionId)),
       ),
       data: (teams) {
-        // Organizações já inscritas neste campeonato (id do clube → Team).
+        // Organizações já inscritas nesta competição (id do clube → Team).
         final orgIdToTeam = <String, Team>{
           for (final team in teams)
             if (team.organizationId != null) team.organizationId!: team,
@@ -259,7 +259,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                 message: 'Nenhum clube/universidade disponível',
                 description:
                     'Crie a organização clube/universidade para associá-la '
-                    'ao campeonato.',
+                    'à competição.',
                 action: KicksterButton(
                   label: 'Criar organização',
                   icon: Icons.add,

@@ -7,7 +7,7 @@ import '../../../../providers/providers.dart';
 
 /// Modal de associação de clubes a uma divisão (issue #258).
 ///
-/// Lista os times do campeonato com busca textual; tocar em um clube alterna
+/// Lista os times da competição com busca textual; tocar em um clube alterna
 /// sua divisão para a divisão-alvo do modal (ou remove, caso já pertença a
 /// ela). Clubes podem ficar sem divisão — comportamento permitido pelo
 /// backend. Substitui o fluxo manual de editar cada time individualmente.
@@ -147,7 +147,7 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
 
                     if (teams.isEmpty) {
                       return const AppEmptyState(
-                        message: 'Nenhum clube inscrito neste campeonato.',
+                        message: 'Nenhum clube inscrito nesta competição.',
                         icon: Icons.groups_outlined,
                       );
                     }
