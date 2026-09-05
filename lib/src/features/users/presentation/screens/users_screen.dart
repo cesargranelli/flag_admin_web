@@ -99,61 +99,12 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
 
   Widget _userCard(BuildContext context, User user) {
     final role = user.role.label;
-    return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(_roleIcon(user.role),
-                  color: AppColors.primary, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    user.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    user.email,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 13, color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            _roleChip(user.role, role),
-          ],
-        ),
-      ),
+    return KicksterCard(
+      icon: Icons.person_outline,
+      title: user.name,
+      subtitle: user.email,
+      onTap: () {},
+      trailing: _roleChip(user.role, role),
     );
   }
 
@@ -165,10 +116,4 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     };
     return KicksterBadge(label: label, color: color);
   }
-
-  IconData _roleIcon(UserRole role) => switch (role) {
-        UserRole.admin => Icons.admin_panel_settings,
-        UserRole.mesa => Icons.sports_score,
-        UserRole.organizer => Icons.person,
-      };
 }

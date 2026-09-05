@@ -69,6 +69,15 @@ class TeamDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -76,7 +85,12 @@ class TeamDetailScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        _avatar(team, size: 64, radius: 16),
+                        KicksterAvatar(
+                          imageUrl: team.logoUrl,
+                          name: team.name,
+                          size: 64,
+                          icon: Icons.groups_outlined,
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -145,38 +159,6 @@ class TeamDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
-    );
-  }
-
-  Widget _avatar(Team team, {required double size, required double radius}) {
-    final logo = team.logoUrl;
-    final validLogo =
-        logo != null &&
-        logo.isNotEmpty &&
-        (Uri.tryParse(logo)?.hasScheme ?? false);
-    return Container(
-      width: size,
-      height: size,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: validLogo
-          ? Image.network(
-              logo,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.groups_outlined,
-                color: AppColors.primary,
-                size: 32,
-              ),
-            )
-          : const Icon(
-              Icons.groups_outlined,
-              color: AppColors.primary,
-              size: 32,
-            ),
     );
   }
 }
