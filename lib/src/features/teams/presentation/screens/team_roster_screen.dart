@@ -308,7 +308,15 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
         ref.watch(mutationProgressProvider(_removeScope)).contains(athlete.id);
 
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Row(
@@ -467,11 +475,15 @@ class _RosterDetailsDialogState extends State<_RosterDetailsDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        KicksterButton(
+          label: 'Cancelar',
+          variant: KicksterButtonVariant.text,
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Confirmar')),
+        KicksterButton(
+          label: 'Confirmar',
+          onPressed: _submit,
+        ),
       ],
     );
   }

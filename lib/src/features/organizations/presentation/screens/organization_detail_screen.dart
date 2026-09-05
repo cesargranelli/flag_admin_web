@@ -111,6 +111,15 @@ class OrganizationDetailScreen extends ConsumerWidget {
   /// Seção 1 — Identificação (#323): card hero consolidado + dados.
   Widget _identificacaoCard(Organization org) {
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: EdgeInsets.zero,
       child: Container(
         constraints: const BoxConstraints(minHeight: 160),
         padding: const EdgeInsets.all(20),
