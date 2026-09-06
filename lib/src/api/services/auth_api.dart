@@ -8,13 +8,13 @@ class AuthApi {
 
   AuthApi(this._client);
 
-  Future<LoginResponse> login({
-    required String email,
-    required String password,
+  /// Login via Firebase ID Token (backend valida e retorna JWT de sessão).
+  Future<LoginResponse> loginWithFirebaseToken({
+    required String firebaseIdToken,
   }) =>
       _client.post(
         '/api/v1/auth/login',
-        {'email': email, 'password': password},
+        {'firebaseIdToken': firebaseIdToken},
         LoginResponse.fromJson,
       );
 

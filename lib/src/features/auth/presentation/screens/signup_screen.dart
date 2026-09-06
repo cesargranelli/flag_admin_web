@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -45,14 +46,31 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     final email = _emailController.text.trim();
     final localPart = email.contains('@') ? email.split('@').first : 'Organizador';
+    final password = _passwordController.text;
 
     try {
+      // 1. Cria usuário no Firebase Auth (SDK do cliente)
+      final firebaseService = ref.read(firebaseAuthServiceProvider);
+      await firebaseService.signUpWithEmailPassword(
+        email: email,
+        password: password,
+      );
+
+      // 2. Faz logout do Firebase IMEDIATAMENTE para que o POST /register
+      //    NÃO envie o Authorization header (endpoint público).
+      //    O token Firebase causaria erro 401 no backend.
+      await firebaseService.signOut();
+
+      // 3. Registra no backend (PostgreSQL) — status PENDING
       await ref.read(authApiProvider).register(
             name: localPart.isEmpty ? 'Organizador' : localPart,
             email: email,
-            password: _passwordController.text,
+            password: password,
           );
+
       if (mounted) setState(() => _created = true);
+    } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() => _errorMessage = e.message);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);
     } catch (_) {
