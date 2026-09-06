@@ -26,3 +26,4 @@ export 'services/round_api.dart';
 export 'services/standing_api.dart';
 export 'services/team_api.dart';
 export 'services/venue_api.dart';
+export 'services/institution_api.dart';

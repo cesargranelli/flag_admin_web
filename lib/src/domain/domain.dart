@@ -17,6 +17,7 @@ export 'enums/organization_status.dart';
 export 'enums/organization_type.dart';
 export 'enums/round_type.dart';
 export 'enums/user_role.dart';
+export 'enums/institution_type.dart';
 
 // Models
 export 'models/athlete.dart';
@@ -38,3 +39,4 @@ export 'models/team.dart';
 export 'models/team_roster.dart';
 export 'models/user.dart';
 export 'models/venue.dart';
+export 'models/institution.dart';

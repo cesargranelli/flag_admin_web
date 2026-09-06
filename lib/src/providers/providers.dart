@@ -245,5 +245,8 @@ final venuesProvider = FutureProvider<List<Venue>>(
 final venueProvider = FutureProvider.autoDispose.family<Venue, String>(
   (ref, id) => ref.watch(venueApiProvider).getById(id),
 );
+final institutionApiProvider = Provider<InstitutionApi>((ref)=> InstitutionApi(ref.watch(apiClientProvider)));
+final institutionsProvider = FutureProvider<List<Institution>>((ref)=> ref.watch(institutionApiProvider).list());
+final institutionProvider = FutureProvider.autoDispose.family<Institution,String>((ref,id)=> ref.watch(institutionApiProvider).getById(id));
 
 

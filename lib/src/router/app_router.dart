@@ -42,6 +42,8 @@ import '../features/users/presentation/screens/users_screen.dart';
 import '../features/venues/presentation/screens/venue_detail_screen.dart';
 import '../features/venues/presentation/screens/venue_form_screen.dart';
 import '../features/venues/presentation/screens/venues_screen.dart';
+import '../features/institutions/presentation/screens/institutions_screen.dart';
+import '../features/institutions/presentation/screens/institution_form_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -560,6 +562,7 @@ class AppRouter {
                 ),
               ],
             ),
+            StatefulShellBranch(routes:[GoRoute(path:'/institutions',name:'institutions',builder:(c,s)=>const InstitutionsScreen(),routes:[GoRoute(path:'new',name:'institutionNew',builder:(c,s)=>const InstitutionFormScreen()),GoRoute(path:':id/edit',name:'institutionEdit',builder:(c,s)=>InstitutionFormScreen(id:s.pathParameters['id']))])]),
             // Branch Usuários (somente ADMIN).
             StatefulShellBranch(
               routes: [
