@@ -8,24 +8,14 @@ class AuthApi {
 
   AuthApi(this._client);
 
-  /// Login via Firebase ID Token (backend valida e retorna JWT de sessão).
-  Future<LoginResponse> loginWithFirebaseToken({
-    required String firebaseIdToken,
-  }) =>
-      _client.post(
-        '/api/v1/auth/login',
-        {'firebaseIdToken': firebaseIdToken},
-        LoginResponse.fromJson,
-      );
-
+  /// Registra novo organizador (status PENDING).
   Future<User> register({
     required String name,
     required String email,
-    required String password,
   }) =>
       _client.post(
         '/api/v1/auth/register',
-        {'name': name, 'email': email, 'password': password},
+        {'name': name, 'email': email},
         User.fromJson,
       );
 
@@ -38,12 +28,11 @@ class AuthApi {
   Future<User> createUser({
     required String name,
     required String email,
-    required String password,
     required String role,
   }) =>
       _client.post(
         '/api/v1/auth/users',
-        {'name': name, 'email': email, 'password': password, 'role': role},
+        {'name': name, 'email': email, 'role': role},
         User.fromJson,
       );
 
@@ -60,24 +49,5 @@ class AuthApi {
         '/api/v1/auth/users/$id/reject',
         {},
         User.fromJson,
-      );
-
-  Future<String> forgotPassword(String email) async {
-    final result = await _client.post<String>(
-      '/api/v1/auth/forgot-password',
-      {'email': email},
-      (json) => json['resetToken'] as String? ?? '',
-    );
-    return result;
-  }
-
-  Future<void> resetPassword({
-    required String token,
-    required String newPassword,
-  }) =>
-      _client.post(
-        '/api/v1/auth/reset-password',
-        {'token': token, 'newPassword': newPassword},
-        (json) => json,
       );
 }

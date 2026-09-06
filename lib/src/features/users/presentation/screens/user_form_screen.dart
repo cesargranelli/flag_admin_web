@@ -20,7 +20,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
 
   late final TextEditingController _name;
   late final TextEditingController _email;
-  late final TextEditingController _password;
   UserRole _role = UserRole.organizer;
   bool _submitting = false;
   String? _errorMessage;
@@ -30,14 +29,12 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
     super.initState();
     _name = TextEditingController();
     _email = TextEditingController();
-    _password = TextEditingController();
   }
 
   @override
   void dispose() {
     _name.dispose();
     _email.dispose();
-    _password.dispose();
     super.dispose();
   }
 
@@ -53,7 +50,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
       await ref.read(authApiProvider).createUser(
             name: _name.text.trim(),
             email: _email.text.trim(),
-            password: _password.text,
             role: _role.toJson(),
           );
       ref.invalidate(usersProvider);
@@ -111,15 +107,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   validator: _validateEmail,
-                ),
-                const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'Senha',
-                  controller: _password,
-                  obscureText: true,
-                  validator: (value) => (value == null || value.length < 6)
-                      ? 'Mínimo de 6 caracteres'
-                      : null,
                 ),
                 const SizedBox(height: 12),
                 KicksterDropdown<UserRole>(

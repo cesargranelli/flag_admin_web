@@ -62,10 +62,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       await firebaseService.signOut();
 
       // 3. Registra no backend (PostgreSQL) — status PENDING
+      //    A senha NÃO é enviada ao backend — o Firebase Auth gerencia.
       await ref.read(authApiProvider).register(
             name: localPart.isEmpty ? 'Organizador' : localPart,
             email: email,
-            password: password,
           );
 
       if (mounted) setState(() => _created = true);

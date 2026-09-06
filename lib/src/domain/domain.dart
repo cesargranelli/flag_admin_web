@@ -28,7 +28,6 @@ export 'models/conference.dart';
 export 'models/division.dart';
 export 'models/game.dart';
 export 'models/game_batch.dart';
-export 'models/login_response.dart';
 export 'models/organization.dart';
 export 'models/roster_batch.dart';
 export 'models/roster_entry.dart';

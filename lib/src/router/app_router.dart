@@ -12,7 +12,6 @@ import '../features/approvals/presentation/screens/approvals_screen.dart';
 import '../features/auth/data/repositories/auth_controller.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
-import '../features/auth/presentation/screens/reset_password_screen.dart';
 import '../features/auth/presentation/screens/signup_screen.dart';
 import '../features/competitions/presentation/screens/competition_create_screen.dart';
 import '../features/competitions/presentation/screens/competition_detail_screen.dart';
@@ -74,8 +73,7 @@ class AppRouter {
         final isPublicAuth =
             location == '/login' ||
             location == '/signup' ||
-            location == '/forgot-password' ||
-            location == '/reset-password';
+            location == '/forgot-password';
         final isBoot = location == '/boot';
 
         // Não autenticado: guarda o destino e vai para o login (#429).
@@ -167,13 +165,6 @@ class AppRouter {
           path: '/forgot-password',
           name: 'forgotPassword',
           builder: (context, state) => const ForgotPasswordScreen(),
-        ),
-        GoRoute(
-          path: '/reset-password',
-          name: 'resetPassword',
-          builder: (context, state) => ResetPasswordScreen(
-            token: state.uri.queryParameters['token'] ?? '',
-          ),
         ),
         // ---------------------------------------------------------------- //
         // Shell do site (header global: marca + usuário) com branches por
