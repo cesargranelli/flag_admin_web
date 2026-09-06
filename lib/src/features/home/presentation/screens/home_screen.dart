@@ -27,6 +27,11 @@ class AdminHomeScreen extends ConsumerWidget {
         '/organizations',
       ),
       _Module(
+        Icons.groups_outlined,
+        AppStrings.institutions,
+        '/institutions',
+      ),
+      _Module(
         Icons.shield_outlined,
         AppStrings.teams,
         '/teams',
