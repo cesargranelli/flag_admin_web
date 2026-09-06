@@ -111,8 +111,13 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
   Widget _roleChip(UserRole role, String label) {
     final color = switch (role) {
       UserRole.admin => AppColors.danger,
+      UserRole.adminLiga => AppColors.danger,
       UserRole.mesa => AppColors.success,
       UserRole.organizer => AppColors.primary,
+      UserRole.manager => AppColors.primary,
+      UserRole.referee => AppColors.warning,
+      UserRole.clubManager => AppColors.primary,
+      UserRole.fan => AppColors.textSecondary,
     };
     return KicksterBadge(label: label, color: color);
   }
