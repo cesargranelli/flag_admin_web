@@ -116,7 +116,7 @@ class _UserHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
-    final user = authState?.state.user;
+    final user = authState.state.user;
     final name = (user?.name ?? '').trim();
     final email = (user?.email ?? '').trim();
     final displayName = name.isNotEmpty ? name : email;

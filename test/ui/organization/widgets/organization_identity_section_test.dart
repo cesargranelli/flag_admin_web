@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flag_admin_web/src/core/theme/app_colors.dart';
 import 'package:flag_admin_web/ui/organization/widgets/components/organization_identity_section.dart';
 
 void main() {
@@ -13,7 +12,6 @@ void main() {
     late TextEditingController tertiaryColorController;
     late TextEditingController quaternaryColorController;
     late TextEditingController localeController;
-    bool dirtyCalled = false;
 
     setUp(() {
       tradeNameController = TextEditingController(text: 'Time Teste');
@@ -24,7 +22,6 @@ void main() {
       tertiaryColorController = TextEditingController();
       quaternaryColorController = TextEditingController();
       localeController = TextEditingController(text: 'pt_BR');
-      dirtyCalled = false;
     });
 
     tearDown(() {
@@ -53,7 +50,7 @@ void main() {
                 quaternaryColorController: quaternaryColorController,
                 localeController: localeController,
                 localeOptions: const [('pt_BR', 'Português (Brasil)')],
-                onDirty: () => dirtyCalled = true,
+                onDirty: () {},
               ),
             ),
           ),
