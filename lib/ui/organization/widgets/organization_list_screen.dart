@@ -89,9 +89,13 @@ class _OrganizationListScreenState
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(organizationViewModelProvider);
-    final isAdmin =
-        ref.watch(authControllerProvider.select((a) => a.state.user?.role)) ==
-        UserRole.admin;
+    final userRole =
+        ref.watch(authControllerProvider.select((a) => a.state.user?.role));
+    final canWrite = userRole == UserRole.admin ||
+        userRole == UserRole.organizer ||
+        userRole == UserRole.manager ||
+        userRole == UserRole.adminLiga;
+    final isAdmin = userRole == UserRole.admin;
 
     return ListenableBuilder(
       listenable: vm,
@@ -107,25 +111,26 @@ class _OrganizationListScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Barra de ações superior
-              Row(
-                children: [
-                  const Spacer(),
-                  KicksterButton(
-                    label: 'Novo',
-                    icon: Icons.add,
-                    onPressed: () async {
-                      await context.push('/organizations/new');
-                      if (context.mounted) {
-                        vm.load(forceRefresh: true);
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+              if (canWrite)
+                Row(
+                  children: [
+                    const Spacer(),
+                    KicksterButton(
+                      label: 'Novo',
+                      icon: Icons.add,
+                      onPressed: () async {
+                        await context.push('/organizations/new');
+                        if (context.mounted) {
+                          vm.load(forceRefresh: true);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              if (canWrite) const SizedBox(height: 16),
               // Conteúdo principal reagindo ao estado do ViewModel
               Expanded(
-                child: _buildBody(context, vm, isAdmin),
+                child: _buildBody(context, vm, canWrite, isAdmin),
               ),
             ],
           ),
@@ -137,6 +142,7 @@ class _OrganizationListScreenState
   Widget _buildBody(
     BuildContext context,
     OrganizationViewModel vm,
+    bool canWrite,
     bool isAdmin,
   ) {
     if (vm.isLoading && vm.organizations.isEmpty) {
@@ -158,7 +164,7 @@ class _OrganizationListScreenState
         Expanded(
           child: vm.filteredOrganizations.isEmpty
               ? _buildEmptyState(vm)
-              : _buildList(context, vm, isAdmin),
+              : _buildList(context, vm, canWrite),
         ),
       ],
     );
@@ -259,7 +265,7 @@ class _OrganizationListScreenState
   Widget _buildList(
     BuildContext context,
     OrganizationViewModel vm,
-    bool isAdmin,
+    bool canWrite,
   ) {
     final list = vm.filteredOrganizations;
     return LayoutBuilder(
@@ -278,7 +284,7 @@ class _OrganizationListScreenState
             ),
             itemCount: list.length,
             itemBuilder: (context, index) {
-              return _buildCard(context, list[index], vm, isAdmin);
+              return _buildCard(context, list[index], vm, canWrite);
             },
           ),
         );
@@ -290,7 +296,7 @@ class _OrganizationListScreenState
     BuildContext context,
     Organization organization,
     OrganizationViewModel vm,
-    bool isAdmin,
+    bool canWrite,
   ) {
     final isDisabled = organization.status == OrganizationStatus.inactive;
     final isBusy = vm.actionInProgressId == organization.id;
@@ -329,7 +335,7 @@ class _OrganizationListScreenState
                 color: AppColors.danger,
               ),
             ),
-          if (isAdmin)
+          if (canWrite)
             KicksterMenuAnchor(
               triggerLabel: 'Ações de ${organization.tradeName}',
               alignment: Alignment.topRight,
@@ -377,10 +383,10 @@ class _OrganizationListScreenState
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.block_outlined, size: 18, color: AppColors.danger),
+                        Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
                         SizedBox(width: 10),
                         Text(
-                          'Desativar',
+                          'Excluir',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -392,11 +398,10 @@ class _OrganizationListScreenState
                     onTap: () async {
                       final ok = await showKicksterConfirm(
                         context: context,
-                        title: 'Desativar organização',
+                        title: 'Excluir organização',
                         content:
-                            'A organização "${organization.tradeName}" ficará invisível '
-                            'para os demais usuários até ser reativada.',
-                        confirmLabel: 'Desativar',
+                            'Deseja realmente excluir "${organization.tradeName}"?',
+                        confirmLabel: 'Excluir',
                         danger: true,
                       );
                       if (ok == true && context.mounted) {
@@ -406,8 +411,8 @@ class _OrganizationListScreenState
                             SnackBar(
                               content: Text(
                                 success
-                                    ? 'Organização desativada.'
-                                    : 'Não foi possível desativar a organização.',
+                                    ? 'Organização excluída com sucesso.'
+                                    : 'Não foi possível excluir a organização.',
                               ),
                               backgroundColor:
                                   success ? AppColors.success : AppColors.danger,
