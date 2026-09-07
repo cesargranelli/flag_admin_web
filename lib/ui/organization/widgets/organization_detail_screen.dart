@@ -102,11 +102,6 @@ class _OrganizationDetailScreenState
             icon: Icons.location_on_outlined,
             child: _localizacaoCard(org),
           ),
-          _section(
-            title: 'Identidade',
-            icon: Icons.palette_outlined,
-            child: _identidadeCard(org),
-          ),
         ],
       ),
     );
@@ -359,6 +354,8 @@ class _OrganizationDetailScreenState
                   AppInfoRow(label: 'Sigla Oficial', value: org.abbreviation!),
                 if (org.document != null && org.document!.isNotEmpty)
                   AppInfoRow(label: 'CNPJ', value: org.document!),
+                if (org.locale.isNotEmpty)
+                  AppInfoRow(label: 'Idioma', value: org.locale),
                 if (org.createdAt != null) ...[
                   const SizedBox(height: 4),
                   Text(
@@ -435,68 +432,6 @@ class _OrganizationDetailScreenState
           AppInfoRow(label: 'Estado', value: org.state!),
         if (org.city != null && org.city!.isNotEmpty)
           AppInfoRow(label: 'Cidade', value: org.city!),
-      ],
-    );
-  }
-
-  /// Seção 5 — Identidade (#323 / #93): cores completas e logo visual.
-  Widget _identidadeCard(Organization org) {
-    return AppInfoCard(
-      children: [
-        if (org.locale.isNotEmpty) AppInfoRow(label: 'Idioma', value: org.locale),
-        if (org.primaryColor != null && org.primaryColor!.isNotEmpty)
-          AppInfoColorRow(label: 'Cor primária', hex: org.primaryColor!),
-        if (org.secondaryColor != null && org.secondaryColor!.isNotEmpty)
-          AppInfoColorRow(label: 'Cor secundária', hex: org.secondaryColor!),
-        if (org.tertiaryColor != null && org.tertiaryColor!.isNotEmpty)
-          AppInfoColorRow(label: 'Cor terciária', hex: org.tertiaryColor!),
-        if (org.quaternaryColor != null && org.quaternaryColor!.isNotEmpty)
-          AppInfoColorRow(label: 'Cor quaternária', hex: org.quaternaryColor!),
-        if (org.logoUrl != null && org.logoUrl!.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(
-                width: 140,
-                child: Text(
-                  'Logotipo',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.line),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(4),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    org.logoUrl!,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Center(
-                      child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ],
     );
   }
