@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flag_admin_web/ui/organizations/view_models/associate_clubs_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
 
 void main() {
   group('AssociateClubsViewModel', () {

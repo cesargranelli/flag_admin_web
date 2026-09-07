@@ -6,19 +6,19 @@ import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import '../view_models/organization_view_model.dart';
 
-/// Screen principal de Organizações (camada Views - ADR-001 / MVVM).
+/// Screen principal de listagem de Organizações (camada Views - ADR-001 / MVVM).
 ///
 /// Apresenta os dados e despacha comandos para o [OrganizationViewModel].
 /// Não contém lógica de negócio nem chamadas diretas a APIs REST.
-class OrganizationsScreen extends ConsumerStatefulWidget {
-  const OrganizationsScreen({super.key});
+class OrganizationListScreen extends ConsumerStatefulWidget {
+  const OrganizationListScreen({super.key});
 
   @override
-  ConsumerState<OrganizationsScreen> createState() =>
-      _OrganizationsScreenState();
+  ConsumerState<OrganizationListScreen> createState() =>
+      _OrganizationListScreenState();
 }
 
-class _OrganizationsScreenState extends ConsumerState<OrganizationsScreen> {
+class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen> {
   late final TextEditingController _searchController;
 
   @override
