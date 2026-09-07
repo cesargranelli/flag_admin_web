@@ -15,17 +15,19 @@ import 'kickster_button.dart';
 class KicksterImageUploader extends ConsumerStatefulWidget {
   final String label;
   final String? currentImageUrl;
-  final ValueChanged<String> onUploaded;
-  final VoidCallback onRemoved;
+  final TextEditingController? controller;
+  final ValueChanged<String>? onUploaded;
+  final VoidCallback? onRemoved;
   final String helperText;
   final int maxSizeBytes;
 
   const KicksterImageUploader({
     super.key,
     required this.label,
-    required this.currentImageUrl,
-    required this.onUploaded,
-    required this.onRemoved,
+    this.currentImageUrl,
+    this.controller,
+    this.onUploaded,
+    this.onRemoved,
     this.helperText = 'PNG, JPG ou WebP (máx. 5MB)',
     this.maxSizeBytes = 5 * 1024 * 1024, // 5MB
   });
@@ -39,6 +41,45 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
   bool _isUploading = false;
   double _progress = 0.0;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller?.addListener(_onControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant KicksterImageUploader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.removeListener(_onControllerChanged);
+      widget.controller?.addListener(_onControllerChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  String? get _effectiveImageUrl {
+    final fromCtrl = widget.controller?.text.trim();
+    if (fromCtrl != null && fromCtrl.isNotEmpty) {
+      return fromCtrl;
+    }
+    final fromProp = widget.currentImageUrl?.trim();
+    if (fromProp != null && fromProp.isNotEmpty) {
+      return fromProp;
+    }
+    return null;
+  }
 
   Future<void> _pickAndUpload() async {
     setState(() {
@@ -96,7 +137,10 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
         _progress = 1.0;
       });
 
-      widget.onUploaded(downloadUrl);
+      if (widget.controller != null) {
+        widget.controller!.text = downloadUrl;
+      }
+      widget.onUploaded?.call(downloadUrl);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -108,10 +152,20 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
     }
   }
 
+  void _handleRemove() {
+    setState(() {
+      _isUploading = false;
+      _progress = 0.0;
+      _errorMessage = null;
+    });
+    widget.controller?.clear();
+    widget.onRemoved?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasImage = widget.currentImageUrl != null &&
-        widget.currentImageUrl!.trim().isNotEmpty;
+    final currentUrl = _effectiveImageUrl;
+    final hasImage = currentUrl != null && currentUrl.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -161,7 +215,7 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
           child: _isUploading
               ? _buildUploadingState()
               : hasImage
-                  ? _buildPreviewState(widget.currentImageUrl!.trim())
+                  ? _buildPreviewState(currentUrl)
                   : _buildEmptyState(),
         ),
 
@@ -300,16 +354,24 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
   Widget _buildPreviewState(String imageUrl) {
     return Row(
       children: [
-        // Miniatura da Imagem
+        // Miniatura da Imagem ampliada para 80x80
         Container(
-          width: 64,
-          height: 64,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
-            color: AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.line),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
           clipBehavior: Clip.antiAlias,
+          padding: const EdgeInsets.all(4),
           child: Image.network(
             imageUrl,
             fit: BoxFit.contain,
@@ -368,9 +430,7 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
             IconButton(
               tooltip: 'Remover logotipo',
               icon: const Icon(Icons.delete_outline, color: AppColors.danger),
-              onPressed: () {
-                widget.onRemoved();
-              },
+              onPressed: _handleRemove,
             ),
           ],
         ),

@@ -103,17 +103,21 @@ class OrganizationIdentitySection extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Upload do Logo (Firebase Storage)
-                KicksterImageUploader(
-                  label: 'Logotipo da Organização (opcional)',
-                  currentImageUrl: logoUrlController.text,
-                  onUploaded: (url) {
-                    logoUrlController.text = url;
-                    onDirty();
-                  },
-                  onRemoved: () {
-                    logoUrlController.clear();
-                    onDirty();
-                  },
+                ListenableBuilder(
+                  listenable: logoUrlController,
+                  builder: (context, _) => KicksterImageUploader(
+                    label: 'Logotipo da Organização (opcional)',
+                    controller: logoUrlController,
+                    currentImageUrl: logoUrlController.text,
+                    onUploaded: (url) {
+                      logoUrlController.text = url;
+                      onDirty();
+                    },
+                    onRemoved: () {
+                      logoUrlController.clear();
+                      onDirty();
+                    },
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -331,7 +335,7 @@ class OrganizationIdentitySection extends StatelessWidget {
             children: [
               // Banner da Marca com Gradiente Esportivo
               Container(
-                height: 80,
+                height: 100,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -342,30 +346,31 @@ class OrganizationIdentitySection extends StatelessWidget {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
                   children: [
-                    // Avatar / Logo com borda dupla
+                    // Avatar / Logo ampliado com borda dupla
                     Container(
-                      width: 52,
-                      height: 52,
+                      width: 70,
+                      height: 70,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(color: Colors.white, width: 2.5),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
+                      padding: const EdgeInsets.all(3),
                       child: ClipOval(
                         child: logoUrl.isNotEmpty
                             ? Image.network(
                                 logoUrl,
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                                 errorBuilder: (_, _, _) => _buildLogoFallback(primary),
                               )
                             : _buildLogoFallback(primary),
@@ -482,7 +487,7 @@ class OrganizationIdentitySection extends StatelessWidget {
     return Container(
       color: AppColors.surfaceMuted,
       child: Center(
-        child: Icon(Icons.shield_outlined, size: 26, color: primary),
+        child: Icon(Icons.shield_outlined, size: 36, color: primary),
       ),
     );
   }
