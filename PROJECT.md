@@ -6,7 +6,7 @@
 - **Semantical Commits**: Commits atômicos e descritivos diretamente na `develop`.
 - **Release Milestone Merges**: Merge na `main` e criação de tags de release somente na finalização de módulos completos.
 - **Concise Responses**: Foco em respostas ultra-objetivas e no código relevante.
-- **Quality Gates**: `dart analyze` e `flutter test` obrigatórios localmente antes de cada commit.
+- **Quality Gates & No Internal Unit Tests**: Sem testes unitários/widget/fakes internos nos projetos da aplicação. Todos os testes são de responsabilidade do `flag_tester_e2e` (Playwright). Validação local apenas via `dart analyze` (0 erros) e compilação do Maven.
 
 ## Architecture
 - **Distributed Repositories Overview**:

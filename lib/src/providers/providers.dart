@@ -21,9 +21,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flag_admin_web/data/repositories/institution_repository.dart';
 import 'package:flag_admin_web/data/services/institution_service.dart';
 import 'package:flag_admin_web/data/services/storage_service.dart';
-import 'package:flag_admin_web/ui/institutions/view_models/institution_view_model.dart';
-import 'package:flag_admin_web/ui/institutions/view_models/institution_detail_view_model.dart';
-import 'package:flag_admin_web/ui/institutions/view_models/institution_form_view_model.dart';
+import 'package:flag_admin_web/ui/institution/view_models/institution_view_model.dart';
+import 'package:flag_admin_web/ui/institution/view_models/institution_detail_view_model.dart';
+import 'package:flag_admin_web/ui/institution/view_models/institution_form_view_model.dart';
 
 import '../router/app_router.dart';
 

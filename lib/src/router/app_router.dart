@@ -42,9 +42,9 @@ import '../features/users/presentation/screens/users_screen.dart';
 import '../features/venues/presentation/screens/venue_detail_screen.dart';
 import '../features/venues/presentation/screens/venue_form_screen.dart';
 import '../features/venues/presentation/screens/venues_screen.dart';
-import 'package:flag_admin_web/ui/institutions/widgets/institution_detail_screen.dart';
-import 'package:flag_admin_web/ui/institutions/widgets/institution_form_screen.dart';
-import 'package:flag_admin_web/ui/institutions/widgets/institutions_screen.dart';
+import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.dart';
+import 'package:flag_admin_web/ui/institution/widgets/institution_form_screen.dart';
+import 'package:flag_admin_web/ui/institution/widgets/institution_list_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -568,7 +568,7 @@ class AppRouter {
                 GoRoute(
                   path: '/institutions',
                   name: 'institutions',
-                  builder: (context, state) => const InstitutionsScreen(),
+                  builder: (context, state) => const InstitutionListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',

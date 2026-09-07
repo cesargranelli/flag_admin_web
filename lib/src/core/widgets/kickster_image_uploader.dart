@@ -20,6 +20,11 @@ class KicksterImageUploader extends ConsumerStatefulWidget {
   final VoidCallback? onRemoved;
   final String helperText;
   final int maxSizeBytes;
+  final Future<String> Function({
+    required Uint8List bytes,
+    required String filename,
+    void Function(double progress)? onProgress,
+  })? uploadFunction;
 
   const KicksterImageUploader({
     super.key,
@@ -30,6 +35,7 @@ class KicksterImageUploader extends ConsumerStatefulWidget {
     this.onRemoved,
     this.helperText = 'PNG, JPG ou WebP (máx. 5MB)',
     this.maxSizeBytes = 5 * 1024 * 1024, // 5MB
+    this.uploadFunction,
   });
 
   @override
@@ -119,17 +125,29 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
       });
 
       final storageService = ref.read(storageServiceProvider);
-      final downloadUrl = await storageService.uploadOrganizationLogo(
-        bytes: bytes,
-        filename: pickedFile.name,
-        onProgress: (p) {
-          if (mounted) {
-            setState(() {
-              _progress = p.clamp(0.0, 1.0);
-            });
-          }
-        },
-      );
+      final downloadUrl = widget.uploadFunction != null
+          ? await widget.uploadFunction!(
+              bytes: bytes,
+              filename: pickedFile.name,
+              onProgress: (p) {
+                if (mounted) {
+                  setState(() {
+                    _progress = p.clamp(0.0, 1.0);
+                  });
+                }
+              },
+            )
+          : await storageService.uploadOrganizationLogo(
+              bytes: bytes,
+              filename: pickedFile.name,
+              onProgress: (p) {
+                if (mounted) {
+                  setState(() {
+                    _progress = p.clamp(0.0, 1.0);
+                  });
+                }
+              },
+            );
 
       if (!mounted) return;
       setState(() {
