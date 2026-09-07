@@ -774,3 +774,4 @@ String _plural(int count, String singular, String plural) =>
 /// Parte do rótulo de contadores; [count] nulo indica falha de carregamento.
 String _countPart(int? count, String singular, String plural) =>
     count == null ? '$plural indisponíveis' : _plural(count, singular, plural);
+

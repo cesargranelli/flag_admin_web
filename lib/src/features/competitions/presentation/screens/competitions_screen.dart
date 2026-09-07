@@ -230,3 +230,4 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
     );
   }
 }
+
