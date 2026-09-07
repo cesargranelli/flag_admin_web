@@ -2,6 +2,7 @@ import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:flag_admin_web/src/providers/providers.dart';
 
@@ -101,6 +102,11 @@ class _OrganizationDetailScreenState
             title: 'Localização',
             icon: Icons.location_on_outlined,
             child: _localizacaoCard(org),
+          ),
+          _section(
+            title: 'Agremiações Filiadas',
+            icon: Icons.shield_outlined,
+            child: _agremiacoesFiliadasCard(context, org),
           ),
         ],
       ),
@@ -433,6 +439,80 @@ class _OrganizationDetailScreenState
         if (org.city != null && org.city!.isNotEmpty)
           AppInfoRow(label: 'Cidade', value: org.city!),
       ],
+    );
+  }
+
+  /// Seção 5 — Agremiações Filiadas (Clubes e Universidades filiados a esta organização).
+  Widget _agremiacoesFiliadasCard(BuildContext context, Organization org) {
+    final institutionsAsync = ref.watch(institutionsProvider);
+
+    return institutionsAsync.when(
+      data: (institutions) {
+        final affiliated = institutions
+            .where((inst) => inst.organizations.contains(org.id))
+            .toList();
+
+        if (affiliated.isEmpty) {
+          return Card(
+            elevation: 1,
+            color: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.line, width: 1),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                'Nenhuma agremiação filiada a esta organização até o momento.',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+          );
+        }
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 600;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isWide ? 2 : 1,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                mainAxisExtent: 96,
+              ),
+              itemCount: affiliated.length,
+              itemBuilder: (context, index) {
+                final inst = affiliated[index];
+                final subtitle = [
+                  inst.type.label,
+                  if (inst.abbreviation != null && inst.abbreviation!.isNotEmpty)
+                    inst.abbreviation!,
+                  if (inst.city != null && inst.city!.isNotEmpty)
+                    inst.city!,
+                ].join(' • ');
+
+                return KicksterCard(
+                  imageUrl: inst.logoUrl,
+                  icon: institutionTypeIcon(inst.type),
+                  title: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
+                  subtitle: subtitle,
+                  onTap: () => context.push(
+                    '/institutions/${inst.id}',
+                    extra: inst,
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+      loading: () => const AppLoading(message: 'Carregando agremiações filiadas...'),
+      error: (err, _) => Text(
+        'Erro ao carregar agremiações filiadas: $err',
+        style: const TextStyle(color: AppColors.danger),
+      ),
     );
   }
 }

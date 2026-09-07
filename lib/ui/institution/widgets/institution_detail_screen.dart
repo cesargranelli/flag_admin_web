@@ -183,10 +183,10 @@ class _InstitutionDetailScreenState
             child: _localizacaoCard(inst),
           ),
 
-          // Seção 5: Filiações
+          // Seção 5: Filiação a Organizações
           _section(
-            title: 'Organizações Filiadas',
-            icon: Icons.business_outlined,
+            title: 'Filiação a Organizações',
+            icon: Icons.account_balance_outlined,
             child: _filiacoesCard(inst, orgsAsync),
           ),
         ],
@@ -459,7 +459,7 @@ class _InstitutionDetailScreenState
             final affiliated = orgs.where((o) => inst.organizations.contains(o.id)).toList();
             if (affiliated.isEmpty) {
               return const Text(
-                'Nenhuma organização filiada vinculada.',
+                'Esta agremiação ainda não possui filiação a organizações (ligas ou federações).',
                 style: TextStyle(color: AppColors.textSecondary),
               );
             }
@@ -467,11 +467,16 @@ class _InstitutionDetailScreenState
               spacing: 8,
               runSpacing: 8,
               children: affiliated.map((org) {
-                return Chip(
-                  avatar: const Icon(Icons.business, size: 16, color: AppColors.primary),
+                return ActionChip(
+                  avatar: Icon(
+                    organizationTypeIcon(org.organizationType),
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   label: Text(org.tradeName.isNotEmpty ? org.tradeName : org.legalName),
                   backgroundColor: AppColors.primary.withValues(alpha: 0.08),
-                  side: BorderSide.none,
+                  side: const BorderSide(color: AppColors.line),
+                  onPressed: () => context.push('/organizations/${org.id}', extra: org),
                 );
               }).toList(),
             );

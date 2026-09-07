@@ -67,67 +67,85 @@ class InstitutionIdentitySection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const KicksterSectionTitle(
-          title: 'Identidade Visual & Cores',
+          title: 'Identidade e Marca',
           icon: Icons.palette_outlined,
         ),
         const SizedBox(height: 12),
-
-        // Preview Esportivo Dinamico
-        _buildSportBrandPreview(),
-        const SizedBox(height: 16),
-
-        // Upload de Logotipo
-        KicksterImageUploader(
-          label: 'Escudo / Logotipo da Agremiação',
-          controller: logoUrlController,
-          uploadFunction: ({required bytes, required filename, onProgress}) =>
-              storageService.uploadInstitutionLogo(
-            bytes: bytes,
-            filename: filename,
-            onProgress: onProgress,
+        Card(
+          margin: EdgeInsets.zero,
+          elevation: 1,
+          shadowColor: AppColors.black.withValues(alpha: 0.08),
+          color: AppColors.surface,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.line, width: 1),
           ),
-          onUploaded: (url) => onDirty(),
-          onRemoved: () => onDirty(),
-        ),
-        const SizedBox(height: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Preview Esportivo Dinamico
+                _buildSportBrandPreview(),
+                const SizedBox(height: 16),
 
-        // Inputs das 4 cores com preview individual e reatividade
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildColorInputField(
-              context,
-              label: 'Cor Primária',
-              controller: primaryColorController,
-              fallbackColor: const Color(0xFFFD6B22),
+                // Upload de Logotipo
+                KicksterImageUploader(
+                  label: 'Escudo / Logotipo da Agremiação',
+                  controller: logoUrlController,
+                  uploadFunction: ({required bytes, required filename, onProgress}) =>
+                      storageService.uploadInstitutionLogo(
+                    bytes: bytes,
+                    filename: filename,
+                    onProgress: onProgress,
+                  ),
+                  onUploaded: (url) => onDirty(),
+                  onRemoved: () => onDirty(),
+                ),
+                const SizedBox(height: 16),
+
+                // Inputs das 4 cores com preview individual e reatividade
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildColorInputField(
+                      context,
+                      label: 'Cor Primária',
+                      controller: primaryColorController,
+                      fallbackColor: const Color(0xFFFD6B22),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildColorInputField(
+                      context,
+                      label: 'Cor Secundária',
+                      controller: secondaryColorController,
+                      fallbackColor: const Color(0xFF1E293B),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildColorInputField(
+                      context,
+                      label: 'Cor Terciária',
+                      controller: tertiaryColorController,
+                      fallbackColor: const Color(0xFF64748B),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildColorInputField(
+                      context,
+                      label: 'Cor Quaternária',
+                      controller: quaternaryColorController,
+                      fallbackColor: const Color(0xFF94A3B8),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            _buildColorInputField(
-              context,
-              label: 'Cor Secundária',
-              controller: secondaryColorController,
-              fallbackColor: const Color(0xFF1E293B),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildColorInputField(
-              context,
-              label: 'Cor Terciária',
-              controller: tertiaryColorController,
-              fallbackColor: const Color(0xFF64748B),
-            ),
-            const SizedBox(width: 12),
-            _buildColorInputField(
-              context,
-              label: 'Cor Quaternária',
-              controller: quaternaryColorController,
-              fallbackColor: const Color(0xFF94A3B8),
-            ),
-          ],
+          ),
         ),
       ],
     );

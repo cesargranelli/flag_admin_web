@@ -251,218 +251,189 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_errorMessage != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.danger.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.danger),
-                    ),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: AppColors.danger),
-                    ),
-                  ),
+                if (_errorMessage != null) _errorBanner(_errorMessage!),
 
                 // 1. DADOS BÁSICOS
-                const KicksterSectionTitle(
-                  title: 'Dados Básicos',
-                  icon: Icons.info_outline,
-                ),
-                const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'Nome Fantasia *',
-                  controller: _tradeName,
-                  hintText: 'Ex: São Paulo Spartans, Poli Flag...',
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Informe o nome fantasia'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'Razão Social',
-                  controller: _legalName,
-                  hintText: 'Ex: Associação Esportiva Spartans de Flag Football',
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: KicksterDropdown<InstitutionType>(
-                        label: 'Tipo de Agremiação *',
-                        value: _type,
-                        items: InstitutionType.values.map((t) {
-                          return DropdownMenuItem(
-                            value: t,
-                            child: Row(
-                              children: [
-                                Icon(institutionTypeIcon(t), size: 18),
-                                const SizedBox(width: 8),
-                                Text(t.label),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            setState(() => _type = v);
+                _section('Dados básicos', Icons.business_outlined, [
+                  KicksterInput(
+                    label: 'Nome Fantasia *',
+                    controller: _tradeName,
+                    hintText: 'Ex: São Paulo Spartans, Poli Flag...',
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Informe o nome fantasia'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  KicksterInput(
+                    label: 'Razão Social',
+                    controller: _legalName,
+                    hintText: 'Ex: Associação Esportiva Spartans de Flag Football',
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: KicksterDropdown<InstitutionType>(
+                          label: 'Tipo de Agremiação *',
+                          value: _type,
+                          items: InstitutionType.values.map((t) {
+                            return DropdownMenuItem(
+                              value: t,
+                              child: Row(
+                                children: [
+                                  Icon(institutionTypeIcon(t), size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(t.label),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (v) {
+                            if (v != null) {
+                              setState(() => _type = v);
+                              _markDirty();
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Sigla / Abreviação',
+                          controller: _abbreviation,
+                          hintText: 'Ex: SPS, POLI',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: KicksterDropdown<DocumentType>(
+                          label: 'Tipo de Documento',
+                          value: _documentType,
+                          items: DocumentType.values.map((d) {
+                            return DropdownMenuItem(
+                              value: d,
+                              child: Text(d.label),
+                            );
+                          }).toList(),
+                          onChanged: (v) {
+                            setState(() => _documentType = v);
                             _markDirty();
-                          }
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Sigla / Abreviação',
-                        controller: _abbreviation,
-                        hintText: 'Ex: SPS, POLI',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Número do Documento',
+                          controller: _document,
+                          hintText: '00.000.000/0000-00',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: KicksterDropdown<DocumentType>(
-                        label: 'Tipo de Documento',
-                        value: _documentType,
-                        items: DocumentType.values.map((d) {
-                          return DropdownMenuItem(
-                            value: d,
-                            child: Text(d.label),
-                          );
-                        }).toList(),
-                        onChanged: (v) {
-                          setState(() => _documentType = v);
-                          _markDirty();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Número do Documento (CNPJ)',
-                        controller: _document,
-                        hintText: '00.000.000/0000-00',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                ]),
 
                 // 2. PRESIDENTE / REPRESENTANTE
-                const KicksterSectionTitle(
-                  title: 'Representação & Diretoria',
-                  icon: Icons.person_outline,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: KicksterInput(
-                        label: 'Nome do Presidente / Representante',
-                        controller: _presidentName,
-                        hintText: 'Ex: João Silva',
+                _section('Representação & Diretoria', Icons.person_outline, [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: KicksterInput(
+                          label: 'Nome do Presidente / Representante',
+                          controller: _presidentName,
+                          hintText: 'Ex: João Silva',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'CPF do Presidente',
-                        controller: _presidentCpf,
-                        hintText: '000.000.000-00',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'CPF do Presidente',
+                          controller: _presidentCpf,
+                          hintText: '000.000.000-00',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                ]),
 
                 // 3. CONTATO & REDES
-                const KicksterSectionTitle(
-                  title: 'Contato & Redes Sociais',
-                  icon: Icons.contact_mail_outlined,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'E-mail Oficial',
-                        controller: _email,
-                        hintText: 'contato@time.com.br',
+                _section('Contato', Icons.contact_mail_outlined, [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'E-mail Oficial',
+                          controller: _email,
+                          hintText: 'contato@time.com.br',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Telefone / WhatsApp',
-                        controller: _phone,
-                        hintText: '(11) 99999-9999',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Telefone / WhatsApp',
+                          controller: _phone,
+                          hintText: '(11) 99999-9999',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Site Oficial',
-                        controller: _website,
-                        hintText: 'https://seutime.com.br',
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Site Oficial',
+                          controller: _website,
+                          hintText: 'https://seutime.com.br',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Instagram (@)',
-                        controller: _instagram,
-                        hintText: '@seutimeflag',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Instagram (@)',
+                          controller: _instagram,
+                          hintText: '@seutimeflag',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                ]),
 
                 // 4. LOCALIZAÇÃO
-                const KicksterSectionTitle(
-                  title: 'Localização',
-                  icon: Icons.location_on_outlined,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Cidade',
-                        controller: _city,
-                        hintText: 'Ex: São Paulo',
+                _section('Localização', Icons.location_on_outlined, [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Cidade',
+                          controller: _city,
+                          hintText: 'Ex: São Paulo',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterInput(
-                        label: 'Estado (UF)',
-                        controller: _state,
-                        hintText: 'Ex: SP',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterInput(
+                          label: 'Estado (UF)',
+                          controller: _state,
+                          hintText: 'Ex: SP',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                ]),
 
-                // 5. IDENTIDADE VISUAL & CORES (KICKSTER)
+                // 5. IDENTIDADE VISUAL & CORES
                 InstitutionIdentitySection(
                   nameController: _tradeName,
                   abbreviationController: _abbreviation,
@@ -473,51 +444,71 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                   quaternaryColorController: _quaternaryColor,
                   onDirty: _markDirty,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
                 // 6. FILIAÇÃO A ORGANIZAÇÕES
-                const KicksterSectionTitle(
-                  title: 'Filiação a Organizações',
-                  icon: Icons.business_outlined,
+                _section(
+                  'Filiação a Organizações',
+                  Icons.account_balance_outlined,
+                  [
+                    const Text(
+                      'Selecione as organizações (ligas, federações ou confederações) às quais esta agremiação é filiada:',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    orgsAsync.when(
+                      data: (orgs) {
+                        if (orgs.isEmpty) {
+                          return const Text(
+                            'Nenhuma organização cadastrada na plataforma.',
+                            style: TextStyle(color: AppColors.textSecondary),
+                          );
+                        }
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: orgs.map((org) {
+                            final isAffiliated = _selectedOrgs.contains(org.id);
+                            return FilterChip(
+                              selected: isAffiliated,
+                              avatar: Icon(
+                                organizationTypeIcon(org.organizationType),
+                                size: 16,
+                                color: isAffiliated
+                                    ? Colors.white
+                                    : AppColors.textSecondary,
+                              ),
+                              label: Text(
+                                org.tradeName.isNotEmpty
+                                    ? org.tradeName
+                                    : org.legalName,
+                              ),
+                              onSelected: (val) {
+                                setState(() {
+                                  if (val) {
+                                    _selectedOrgs.add(org.id);
+                                  } else {
+                                    _selectedOrgs.remove(org.id);
+                                  }
+                                });
+                                _markDirty();
+                              },
+                            );
+                          }).toList(),
+                        );
+                      },
+                      loading: () => const AppLoading(),
+                      error: (err, _) => Text(
+                        'Erro ao carregar organizações: $err',
+                        style: const TextStyle(color: AppColors.danger),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                orgsAsync.when(
-                  data: (orgs) {
-                    if (orgs.isEmpty) {
-                      return const Text(
-                        'Nenhuma organização cadastrada na plataforma.',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      );
-                    }
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: orgs.map((org) {
-                        final selected = _selectedOrgs.contains(org.id);
-                        return FilterChip(
-                          label: Text(org.tradeName.isNotEmpty ? org.tradeName : org.legalName),
-                          selected: selected,
-                          onSelected: (val) {
-                            setState(() {
-                              if (val) {
-                                _selectedOrgs.add(org.id);
-                              } else {
-                                _selectedOrgs.remove(org.id);
-                              }
-                            });
-                            _markDirty();
-                          },
-                        );
-                      }).toList(),
-                    );
-                  },
-                  loading: () => const AppLoading(),
-                  error: (err, _) => Text(
-                    'Erro ao carregar organizações: $err',
-                    style: const TextStyle(color: AppColors.danger),
-                  ),
-                ),
-                const SizedBox(height: 32),
 
                 // BOTÕES DE AÇÃO
                 Row(
@@ -530,8 +521,11 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                     ),
                     const SizedBox(width: 16),
                     KicksterButton(
-                      label: isSubmitting ? 'Salvando...' : 'Salvar Agremiação',
+                      label: isSubmitting
+                          ? 'Salvando...'
+                          : (isEditing ? 'Salvar alterações' : 'Criar agremiação'),
                       icon: Icons.check,
+                      loading: isSubmitting,
                       onPressed: isSubmitting ? null : _save,
                     ),
                   ],
@@ -539,6 +533,76 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _errorBanner(String message) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.danger.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.danger),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.danger),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _section(String title, IconData icon, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KicksterSectionTitle(title: title, icon: icon),
+        const SizedBox(height: 12),
+        _card(null, children),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _card(String? title, List<Widget> children) {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (title != null) ...[
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            ...children,
+          ],
         ),
       ),
     );
