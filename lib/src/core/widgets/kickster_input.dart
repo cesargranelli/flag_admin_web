@@ -24,6 +24,7 @@ class KicksterInput extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.enabled = true,
+    this.autofocus = false,
     this.autofillHints,
     this.textInputAction,
     this.onFieldSubmitted,
@@ -40,6 +41,7 @@ class KicksterInput extends StatelessWidget {
 
   final String label;
   final TextEditingController controller;
+  final bool autofocus;
   final bool obscureText;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
@@ -81,6 +83,7 @@ class KicksterInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      autofocus: autofocus,
       obscureText: obscureText,
       validator: validator,
       keyboardType: keyboardType,
