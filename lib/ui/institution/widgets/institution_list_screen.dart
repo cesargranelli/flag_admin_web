@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,18 +19,47 @@ class InstitutionListScreen extends ConsumerStatefulWidget {
       _InstitutionListScreenState();
 }
 
-class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
+class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
+    with WidgetsBindingObserver {
   late final TextEditingController _searchController;
   String? _lastActivePath;
+  Timer? _syncTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final vm = ref.read(institutionViewModelProvider);
     _searchController = TextEditingController(text: vm.searchQuery);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(institutionViewModelProvider).load(forceRefresh: true);
     });
+    _startPeriodicSync();
+  }
+
+  void _startPeriodicSync() {
+    _syncTimer?.cancel();
+    // Sincronização periódica em background (SWR a cada 25 segundos)
+    _syncTimer = Timer.periodic(const Duration(seconds: 25), (_) {
+      _revalidateIfActive(silent: true);
+    });
+  }
+
+  void _revalidateIfActive({bool silent = true}) {
+    if (!mounted) return;
+    final currentPath = GoRouterState.of(context).uri.path;
+    if (currentPath == '/institutions') {
+      ref
+          .read(institutionViewModelProvider)
+          .load(forceRefresh: true, silent: silent);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _revalidateIfActive(silent: true);
+    }
   }
 
   @override
@@ -38,9 +69,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
     if (currentPath == '/institutions' && _lastActivePath != currentPath) {
       _lastActivePath = currentPath;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ref.read(institutionViewModelProvider).load(forceRefresh: true);
-        }
+        _revalidateIfActive(silent: true);
       });
     } else {
       _lastActivePath = currentPath;
@@ -49,6 +78,8 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
 
   @override
   void dispose() {
+    _syncTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
@@ -176,10 +207,18 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
         ),
         const SizedBox(width: 8),
         Tooltip(
-          message: 'Atualizar lista',
+          message: vm.isRevalidating ? 'Sincronizando...' : 'Atualizar lista',
           child: IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => vm.load(forceRefresh: true),
+            icon: vm.isRevalidating
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh),
+            onPressed: vm.isRevalidating
+                ? null
+                : () => vm.load(forceRefresh: true),
           ),
         ),
       ],

@@ -18,6 +18,9 @@ class InstitutionViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isRevalidating = false;
+  bool get isRevalidating => _isRevalidating;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -50,11 +53,16 @@ class InstitutionViewModel extends ChangeNotifier {
     }).toList(growable: false);
   }
 
-  /// Carrega as agremiações a partir do repositório.
-  Future<void> load({bool forceRefresh = false}) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  /// Carrega as agremiações a partir do repositório (Stale-While-Revalidate).
+  Future<void> load({bool forceRefresh = false, bool silent = false}) async {
+    if (_institutions.isEmpty && !silent) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    } else {
+      _isRevalidating = true;
+      notifyListeners();
+    }
 
     try {
       final data =
@@ -62,9 +70,12 @@ class InstitutionViewModel extends ChangeNotifier {
       _institutions = List<Institution>.unmodifiable(data);
       _errorMessage = null;
     } catch (e) {
-      _errorMessage = e.toString();
+      if (_institutions.isEmpty) {
+        _errorMessage = e.toString();
+      }
     } finally {
       _isLoading = false;
+      _isRevalidating = false;
       notifyListeners();
     }
   }

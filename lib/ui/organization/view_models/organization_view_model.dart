@@ -21,6 +21,9 @@ class OrganizationViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isRevalidating = false;
+  bool get isRevalidating => _isRevalidating;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -52,11 +55,16 @@ class OrganizationViewModel extends ChangeNotifier {
     }).toList(growable: false);
   }
 
-  /// Carrega as organizações da camada Repository.
-  Future<void> load({bool forceRefresh = false}) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  /// Carrega as organizações da camada Repository (Stale-While-Revalidate).
+  Future<void> load({bool forceRefresh = false, bool silent = false}) async {
+    if (_organizations.isEmpty && !silent) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    } else {
+      _isRevalidating = true;
+      notifyListeners();
+    }
 
     try {
       final data = await _repository.getOrganizations(
@@ -66,16 +74,19 @@ class OrganizationViewModel extends ChangeNotifier {
       _organizations = List<Organization>.unmodifiable(data);
       _errorMessage = null;
     } catch (e) {
-      _errorMessage = e.toString();
+      if (_organizations.isEmpty) {
+        _errorMessage = e.toString();
+      }
     } finally {
       _isLoading = false;
+      _isRevalidating = false;
       notifyListeners();
     }
   }
 
   /// Alias explícito conforme ADR-001.
-  Future<void> loadOrganizations({bool forceRefresh = false}) =>
-      load(forceRefresh: forceRefresh);
+  Future<void> loadOrganizations({bool forceRefresh = false, bool silent = false}) =>
+      load(forceRefresh: forceRefresh, silent: silent);
 
   /// Exclui/desativa uma organização.
   Future<bool> delete(String id) async {
