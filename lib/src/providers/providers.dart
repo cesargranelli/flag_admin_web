@@ -1,8 +1,12 @@
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/features/auth/data/repositories/auth_controller.dart';
-import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_service.dart';
+import 'package:flag_admin_web/data/repositories/auth_controller.dart';
+import 'package:flag_admin_web/data/repositories/auth_repository.dart';
+import 'package:flag_admin_web/data/services/auth_service.dart';
+import 'package:flag_admin_web/ui/auth/view_models/forgot_password_view_model.dart';
+import 'package:flag_admin_web/ui/auth/view_models/login_view_model.dart';
+import 'package:flag_admin_web/ui/auth/view_models/signup_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,12 +35,20 @@ final apiClientProvider = Provider<ApiClient>(
   (ref) => ApiClient(),
 );
 
-/// Serviço de autenticação Firebase (issue #33).
-final firebaseAuthServiceProvider = Provider<FirebaseAuthService>(
-  (ref) => FirebaseAuthService(),
+/// Serviço de autenticação Firebase e REST (ADR-001).
+final authServiceProvider = Provider<AuthService>(
+  (ref) => AuthService(ref.watch(apiClientProvider)),
 );
 
-/// Serviço de autenticação (API REST).
+/// Repositório de autenticação (ADR-001 / Single Source of Truth).
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(
+    service: ref.watch(authServiceProvider),
+    session: ref.watch(sessionManagerProvider),
+  );
+});
+
+/// Serviço de autenticação REST legado (compatibilidade com approvals_screen).
 final authApiProvider = Provider<AuthApi>(
   (ref) => AuthApi(ref.watch(apiClientProvider)),
 );
@@ -44,12 +56,36 @@ final authApiProvider = Provider<AuthApi>(
 /// Controlador de autenticação (restaura a sessão ao iniciar).
 final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
   final controller = AuthController(
-    session: ref.watch(sessionManagerProvider),
-    api: ref.watch(authApiProvider),
-    firebaseAuth: ref.watch(firebaseAuthServiceProvider),
+    repository: ref.watch(authRepositoryProvider),
   );
   controller.restore();
   return controller;
+});
+
+/// ViewModel para a tela de Login (ADR-001 / MVVM 1:1).
+final loginViewModelProvider =
+    ChangeNotifierProvider.autoDispose<LoginViewModel>((ref) {
+  return LoginViewModel(
+    repository: ref.watch(authRepositoryProvider),
+    onAuthStateChanged: () =>
+        ref.read(authControllerProvider).syncFromRepository(),
+  );
+});
+
+/// ViewModel para a tela de Cadastro (ADR-001 / MVVM 1:1).
+final signupViewModelProvider =
+    ChangeNotifierProvider.autoDispose<SignupViewModel>((ref) {
+  return SignupViewModel(
+    repository: ref.watch(authRepositoryProvider),
+  );
+});
+
+/// ViewModel para a tela de Esqueci a Senha (ADR-001 / MVVM 1:1).
+final forgotPasswordViewModelProvider =
+    ChangeNotifierProvider.autoDispose<ForgotPasswordViewModel>((ref) {
+  return ForgotPasswordViewModel(
+    repository: ref.watch(authRepositoryProvider),
+  );
 });
 
 /// Router com proteção de rotas.

@@ -1,18 +1,10 @@
-import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_service.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../providers/providers.dart';
-
-/// Tela de login do Admin Web no visual do kit Kickster (issue #443).
-///
-/// Formulário centralizado (sem split): marca compacta, saudação, campos
-/// `KicksterInput`, manter conectado/esqueci a senha, botão primário,
-/// divisor social "OU" e ação Google desabilitada (backend ainda sem OAuth —
-/// follow-up registrado).
+/// Tela de login do Admin Web no visual do kit Kickster (ADR-001 / MVVM 1:1).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -25,11 +17,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool _obscurePassword = true;
-  bool _keepConnected = false;
-  bool _submitting = false;
-  String? _errorMessage;
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -40,33 +27,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _submitting = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await ref.read(authControllerProvider.notifier).login(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            keepConnected: _keepConnected,
-          );
-    } on FirebaseAuthException catch (e) {
-      // Erro de autenticação Firebase (issue #33)
-      setState(() => _errorMessage = e.message);
-    } on RepositoryException catch (e) {
-      setState(() => _errorMessage = e.message);
-    } catch (_) {
-      setState(() => _errorMessage = AppStrings.loginConnectionError);
-    } finally {
-      if (mounted) {
-        setState(() => _submitting = false);
-      }
-    }
+    final vm = ref.read(loginViewModelProvider);
+    await vm.login(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = ref.watch(loginViewModelProvider);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -87,12 +58,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (_errorMessage != null) ...[
-                        _errorBanner(_errorMessage!),
+                      if (vm.errorMessage != null) ...[
+                        _errorBanner(vm.errorMessage!),
                         const SizedBox(height: 16),
                       ],
                       const SizedBox(height: 24),
-                      // Marca compacta no topo.
+                      // Marca compacta no topo
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -125,6 +96,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       KicksterInput(
                         label: AppStrings.loginEmail,
                         controller: _emailController,
+                        autofocus: true,
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: Icons.mail_outline,
                         autofillHints: const [
@@ -146,17 +118,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       KicksterInput(
                         label: AppStrings.loginPassword,
                         controller: _passwordController,
-                        obscureText: _obscurePassword,
+                        obscureText: vm.obscurePassword,
                         prefixIcon: Icons.lock_outline,
                         suffixIcon: IconButton(
-                          tooltip: _obscurePassword
+                          tooltip: vm.obscurePassword
                               ? 'Mostrar senha'
                               : 'Ocultar senha',
-                          icon: Icon(_obscurePassword
+                          icon: Icon(vm.obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: vm.toggleObscurePassword,
                         ),
                         autofillHints: const [AutofillHints.password],
                         textInputAction: TextInputAction.done,
@@ -171,9 +142,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           KicksterCheckbox(
-                            value: _keepConnected,
-                            onChanged: (value) => setState(
-                                () => _keepConnected = value),
+                            value: vm.keepConnected,
+                            onChanged: (value) => vm.setKeepConnected(value),
                             label: 'Manter conectado',
                           ),
                           TextButton(
@@ -189,8 +159,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 24),
                       KicksterButton(
                         label: AppStrings.loginSubmit,
-                        onPressed: _submitting ? null : _submit,
-                        loading: _submitting,
+                        onPressed: vm.isLoading ? null : _submit,
+                        loading: vm.isLoading,
                       ),
                       const SizedBox(height: 24),
                       const KicksterSocialDivider(),
@@ -228,8 +198,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  /// Banner de erro no topo do formulário (padrão danger tint de
-  /// competition_form_screen._errorBanner).
   Widget _errorBanner(String message) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -245,8 +213,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Expanded(
             child: Text(
               message,
-              style:
-                  AppTextStyles.paragraph.copyWith(color: AppColors.danger),
+              style: AppTextStyles.paragraph.copyWith(color: AppColors.danger),
             ),
           ),
         ],
