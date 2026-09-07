@@ -13,11 +13,13 @@ class InstitutionListScreen extends ConsumerStatefulWidget {
   const InstitutionListScreen({super.key});
 
   @override
-  ConsumerState<InstitutionListScreen> createState() => _InstitutionListScreenState();
+  ConsumerState<InstitutionListScreen> createState() =>
+      _InstitutionListScreenState();
 }
 
 class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
   late final TextEditingController _searchController;
+  String? _lastActivePath;
 
   @override
   void initState() {
@@ -25,22 +27,30 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
     final vm = ref.read(institutionViewModelProvider);
     _searchController = TextEditingController(text: vm.searchQuery);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(institutionViewModelProvider).load();
+      ref.read(institutionViewModelProvider).load(forceRefresh: true);
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentPath = GoRouterState.of(context).uri.path;
+    if (currentPath == '/institutions' && _lastActivePath != currentPath) {
+      _lastActivePath = currentPath;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(institutionViewModelProvider).load(forceRefresh: true);
+        }
+      });
+    } else {
+      _lastActivePath = currentPath;
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  Color _parseHexColor(String hex) {
-    try {
-      return Color(int.parse(hex.replaceFirst('#', ''), radix: 16) + 0xFF000000);
-    } catch (_) {
-      return AppColors.surfaceMuted;
-    }
   }
 
   @override
@@ -74,7 +84,12 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
                     KicksterButton(
                       label: 'Nova Agremiação',
                       icon: Icons.add,
-                      onPressed: () => context.go('/institutions/new'),
+                      onPressed: () async {
+                        await context.push('/institutions/new');
+                        if (context.mounted) {
+                          vm.load(forceRefresh: true);
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -120,7 +135,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildFilters(context, vm),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Expanded(
           child: vm.filteredInstitutions.isEmpty
               ? _buildEmptyState(vm)
@@ -130,52 +145,44 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
     );
   }
 
+  /// Barra de pesquisa e filtro seguindo o padrão Kickster (Pill 52px, raio 24).
   Widget _buildFilters(BuildContext context, InstitutionViewModel vm) {
-    return Card(
-      elevation: 0,
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar por nome...',
-                  prefixIcon: Icon(Icons.search, size: 20),
-                  isDense: true,
-                  border: InputBorder.none,
-                ),
-                onChanged: vm.setSearchQuery,
-              ),
-            ),
-            const VerticalDivider(width: 24),
-            DropdownButton<InstitutionType?>(
-              value: vm.typeFilter,
-              underline: const SizedBox.shrink(),
-              hint: const Text('Todos os tipos'),
-              items: [
-                const DropdownMenuItem(
-                  value: null,
-                  child: Text('Todos os tipos'),
-                ),
-                ...InstitutionType.values.map(
-                  (t) => DropdownMenuItem(
-                    value: t,
-                    child: Text(t.label),
-                  ),
-                ),
-              ],
-              onChanged: vm.setTypeFilter,
-            ),
-          ],
+    return Row(
+      children: [
+        Expanded(
+          child: KicksterSearchField(
+            controller: _searchController,
+            hint: 'Buscar por nome...',
+            onChanged: vm.setSearchQuery,
+          ),
         ),
-      ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 240,
+          child: KicksterDropdown<InstitutionType?>(
+            label: '',
+            value: vm.typeFilter,
+            values: [null, ...InstitutionType.values],
+            labels: [
+              'Todos os tipos',
+              ...InstitutionType.values.map((t) => t.label),
+            ],
+            icons: [
+              null,
+              ...InstitutionType.values.map(institutionTypeIcon),
+            ],
+            onChanged: vm.setTypeFilter,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Atualizar lista',
+          child: IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => vm.load(forceRefresh: true),
+          ),
+        ),
+      ],
     );
   }
 
@@ -186,7 +193,11 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.shield_outlined, size: 56, color: AppColors.textSecondary),
+          const Icon(
+            Icons.shield_outlined,
+            size: 56,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 12),
           Text(
             hasFilters
@@ -199,23 +210,38 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
     );
   }
 
+  /// Lista em 2 colunas responsivas no padrão de Organizações.
   Widget _buildList(
     BuildContext context,
     InstitutionViewModel vm,
     bool canWrite,
   ) {
     final list = vm.filteredInstitutions;
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      itemCount: list.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final inst = list[index];
-        return _buildCard(context, inst, vm, canWrite);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 600;
+        return RefreshIndicator(
+          onRefresh: () => vm.load(forceRefresh: true),
+          child: GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isWide ? 2 : 1,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              mainAxisExtent: 96,
+            ),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              return _buildCard(context, list[index], vm, canWrite);
+            },
+          ),
+        );
       },
     );
   }
 
+  /// Card padronizado com o formato do card de Organizações.
   Widget _buildCard(
     BuildContext context,
     Institution inst,
@@ -223,16 +249,6 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
     bool canWrite,
   ) {
     final isBusy = vm.actionInProgressId == inst.id;
-
-    // Cores para os swatches (combina 4 cores individuais ou array legados)
-    final displayColors = <String>[];
-    if (inst.primaryColor != null) displayColors.add(inst.primaryColor!);
-    if (inst.secondaryColor != null) displayColors.add(inst.secondaryColor!);
-    if (inst.tertiaryColor != null) displayColors.add(inst.tertiaryColor!);
-    if (inst.quaternaryColor != null) displayColors.add(inst.quaternaryColor!);
-    if (displayColors.isEmpty && inst.colors.isNotEmpty) {
-      displayColors.addAll(inst.colors.take(4));
-    }
 
     final subtitle = inst.abbreviation != null && inst.abbreviation!.isNotEmpty
         ? '${inst.type.label} • ${inst.abbreviation}'
@@ -243,10 +259,15 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
       imageUrl: inst.logoUrl,
       title: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
       subtitle: subtitle,
-      onTap: () => context.push(
-        '/institutions/${inst.id}',
-        extra: inst,
-      ),
+      onTap: () async {
+        await context.push(
+          '/institutions/${inst.id}',
+          extra: inst,
+        );
+        if (context.mounted) {
+          vm.load(forceRefresh: true);
+        }
+      },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -259,38 +280,25 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
-          // Círculos de cores da agremiação
-          if (displayColors.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: displayColors.map((hex) {
-                  return Container(
-                    width: 14,
-                    height: 14,
-                    margin: const EdgeInsets.only(left: 3),
-                    decoration: BoxDecoration(
-                      color: _parseHexColor(hex),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black26),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
           if (canWrite)
             PopupMenuButton<String>(
               tooltip: 'Ações',
               enabled: !isBusy,
               onSelected: (value) async {
                 if (value == 'edit') {
-                  context.push('/institutions/${inst.id}/edit', extra: inst);
+                  await context.push(
+                    '/institutions/${inst.id}/edit',
+                    extra: inst,
+                  );
+                  if (context.mounted) {
+                    vm.load(forceRefresh: true);
+                  }
                 } else if (value == 'delete') {
                   final ok = await showKicksterConfirm(
                     context: context,
                     title: 'Excluir agremiação',
-                    content: 'Deseja realmente excluir "${inst.tradeName.isNotEmpty ? inst.tradeName : inst.name}"?',
+                    content:
+                        'Deseja realmente excluir "${inst.tradeName.isNotEmpty ? inst.tradeName : inst.name}"?',
                     confirmLabel: 'Excluir',
                     danger: true,
                   );

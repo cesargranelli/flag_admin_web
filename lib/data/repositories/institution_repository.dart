@@ -11,20 +11,27 @@ class InstitutionRepository {
       : _service = service;
 
   List<Institution>? _cache;
+  DateTime? _lastFetch;
+  static const Duration _cacheTtl = Duration(seconds: 30);
 
-  /// Retorna a lista de agremiações com suporte a cache em memória.
+  /// Retorna a lista de agremiações com suporte a cache em memória com TTL de 30s.
   Future<List<Institution>> getInstitutions({bool forceRefresh = false}) async {
-    if (!forceRefresh && _cache != null) {
+    final isCacheValid = _cache != null &&
+        _lastFetch != null &&
+        DateTime.now().difference(_lastFetch!) < _cacheTtl;
+
+    if (!forceRefresh && isCacheValid) {
       return _cache!;
     }
     final data = await _service.getInstitutions();
     _cache = List<Institution>.unmodifiable(data);
+    _lastFetch = DateTime.now();
     return _cache!;
   }
 
   /// Busca uma agremiação por ID.
-  Future<Institution> getInstitution(String id) async {
-    if (_cache != null) {
+  Future<Institution> getInstitution(String id, {bool forceRefresh = false}) async {
+    if (!forceRefresh && _cache != null) {
       final match = _cache!.where((i) => i.id == id);
       if (match.isNotEmpty) return match.first;
     }
@@ -63,5 +70,6 @@ class InstitutionRepository {
   /// Limpa o cache local.
   void clearCache() {
     _cache = null;
+    _lastFetch = null;
   }
 }

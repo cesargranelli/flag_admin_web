@@ -18,8 +18,10 @@ class OrganizationListScreen extends ConsumerStatefulWidget {
       _OrganizationListScreenState();
 }
 
-class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen> {
+class _OrganizationListScreenState
+    extends ConsumerState<OrganizationListScreen> {
   late final TextEditingController _searchController;
+  String? _lastActivePath;
 
   @override
   void initState() {
@@ -27,8 +29,24 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
     final vm = ref.read(organizationViewModelProvider);
     _searchController = TextEditingController(text: vm.searchQuery);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(organizationViewModelProvider).load();
+      ref.read(organizationViewModelProvider).load(forceRefresh: true);
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentPath = GoRouterState.of(context).uri.path;
+    if (currentPath == '/organizations' && _lastActivePath != currentPath) {
+      _lastActivePath = currentPath;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(organizationViewModelProvider).load(forceRefresh: true);
+        }
+      });
+    } else {
+      _lastActivePath = currentPath;
+    }
   }
 
   @override
@@ -64,7 +82,12 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
                   KicksterButton(
                     label: 'Novo',
                     icon: Icons.add,
-                    onPressed: () => context.go('/organizations/new'),
+                    onPressed: () async {
+                      await context.push('/organizations/new');
+                      if (context.mounted) {
+                        vm.load(forceRefresh: true);
+                      }
+                    },
                   ),
                 ],
               ),
@@ -96,69 +119,131 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
       );
     }
 
-    if (vm.organizations.isEmpty) {
-      return KicksterEmptyState(
-        icon: Icons.business,
-        message: 'Nenhuma organização cadastrada',
-        description: 'Crie a primeira organização para começar a usar.',
-        action: KicksterButton(
-          label: 'Criar organização',
-          icon: Icons.add,
-          onPressed: () => context.go('/organizations/new'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildFilters(context, vm, isAdmin),
+        const SizedBox(height: 16),
+        Expanded(
+          child: vm.filteredOrganizations.isEmpty
+              ? _buildEmptyState(vm)
+              : _buildList(context, vm, isAdmin),
         ),
-      );
-    }
+      ],
+    );
+  }
 
-    return AppEntityListScreen<Organization>(
-      items: vm.organizations,
-      cardBuilder: (org) => _buildCard(context, org, vm, isAdmin),
-      searchField: _searchController,
-      emptyMessage: 'Nenhuma organização encontrada',
-      searchWidth: 220,
-      filter: (all, query) {
-        if (query != vm.searchQuery) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            vm.setSearchQuery(query);
-          });
-        }
-        return vm.filteredOrganizations;
-      },
-      toolbarLeading: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+  /// Barra de pesquisa e filtro seguindo o padrão Kickster (idêntica à de Agremiações).
+  Widget _buildFilters(
+    BuildContext context,
+    OrganizationViewModel vm,
+    bool isAdmin,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: KicksterSearchField(
+            controller: _searchController,
+            hint: 'Buscar por nome...',
+            onChanged: vm.setSearchQuery,
+          ),
+        ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 240,
+          child: KicksterDropdown<OrganizationType?>(
+            label: '',
+            value: vm.typeFilter,
+            values: [null, ...OrganizationType.values],
+            labels: [
+              'Todos os tipos',
+              ...OrganizationType.values.map((t) => t.label),
+            ],
+            icons: [
+              null,
+              ...OrganizationType.values.map(organizationTypeIcon),
+            ],
+            onChanged: vm.setTypeFilter,
+          ),
+        ),
+        if (isAdmin) ...[
           const SizedBox(width: 8),
-          if (isAdmin) ...[
-            Tooltip(
-              message: 'Exibir organizações desativadas',
-              child: IconButton(
-                isSelected: vm.showDisabled,
-                selectedIcon: const Icon(Icons.visibility),
-                icon: const Icon(Icons.visibility_off_outlined),
-                tooltip: 'Desativadas',
-                onPressed: () => vm.setShowDisabled(!vm.showDisabled),
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-          SizedBox(
-            width: 260,
-            child: KicksterDropdown<OrganizationType?>(
-              label: 'Filtrar por tipo',
-              value: vm.typeFilter,
-              values: [null, ...OrganizationType.values],
-              labels: [
-                'Todas as organizações',
-                ...OrganizationType.values.map((t) => t.label),
-              ],
-              icons: [
-                null,
-                ...OrganizationType.values.map(organizationTypeIcon),
-              ],
-              onChanged: (value) => vm.setTypeFilter(value),
+          Tooltip(
+            message: vm.showDisabled
+                ? 'Ocultar organizações desativadas'
+                : 'Exibir organizações desativadas',
+            child: IconButton(
+              isSelected: vm.showDisabled,
+              selectedIcon: const Icon(Icons.visibility),
+              icon: const Icon(Icons.visibility_off_outlined),
+              onPressed: () => vm.setShowDisabled(!vm.showDisabled),
             ),
           ),
         ],
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Atualizar lista',
+          child: IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => vm.load(forceRefresh: true),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(OrganizationViewModel vm) {
+    final hasFilters =
+        vm.searchQuery.isNotEmpty || vm.typeFilter != null;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.business_outlined,
+            size: 56,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            hasFilters
+                ? 'Nenhuma organização encontrada para os filtros aplicados.'
+                : 'Nenhuma organização cadastrada.',
+            style: const TextStyle(color: AppColors.textSecondary),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Lista em 2 colunas responsivas com o mesmo padrão de Agremiações.
+  Widget _buildList(
+    BuildContext context,
+    OrganizationViewModel vm,
+    bool isAdmin,
+  ) {
+    final list = vm.filteredOrganizations;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 600;
+        return RefreshIndicator(
+          onRefresh: () => vm.load(forceRefresh: true),
+          child: GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isWide ? 2 : 1,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              mainAxisExtent: 96,
+            ),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              return _buildCard(context, list[index], vm, isAdmin);
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -176,10 +261,15 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
       icon: organizationTypeIcon(organization.organizationType),
       title: organization.tradeName,
       subtitle: organization.legalName,
-      onTap: () => context.push(
-        '/organizations/${organization.id}',
-        extra: organization,
-      ),
+      onTap: () async {
+        await context.push(
+          '/organizations/${organization.id}',
+          extra: organization,
+        );
+        if (context.mounted) {
+          vm.load(forceRefresh: true);
+        }
+      },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -193,8 +283,8 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
               ),
             ),
           if (isDisabled)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
+            const Padding(
+              padding: EdgeInsets.only(right: 4),
               child: KicksterBadge(
                 label: 'Desativada',
                 color: AppColors.danger,
@@ -209,7 +299,8 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
                   final ok = await showKicksterConfirm(
                     context: context,
                     title: 'Desativar organização',
-                    content: '  ficará invisível '
+                    content:
+                        'A organização "${organization.tradeName}" ficará invisível '
                         'para os demais usuários até ser reativada.',
                     confirmLabel: 'Desativar',
                     danger: true,
@@ -221,9 +312,11 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
                         SnackBar(
                           content: Text(
                             success
-                                ? ' desativada.'
+                                ? 'Organização desativada.'
                                 : 'Não foi possível desativar a organização.',
                           ),
+                          backgroundColor:
+                              success ? AppColors.success : AppColors.danger,
                         ),
                       );
                     }
@@ -235,9 +328,11 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
                       SnackBar(
                         content: Text(
                           success
-                              ? ' reativada.'
+                              ? 'Organização reativada.'
                               : 'Não foi possível reativar a organização.',
                         ),
+                        backgroundColor:
+                            success ? AppColors.success : AppColors.danger,
                       ),
                     );
                   }

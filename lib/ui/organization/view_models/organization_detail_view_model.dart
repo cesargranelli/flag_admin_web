@@ -32,7 +32,10 @@ class OrganizationDetailViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _organization = await _repository.getOrganization(organizationId);
+      _organization = await _repository.getOrganization(
+        organizationId,
+        forceRefresh: forceRefresh,
+      );
       _errorMessage = null;
     } catch (e) {
       _errorMessage = e.toString();

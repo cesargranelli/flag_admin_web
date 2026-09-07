@@ -32,9 +32,9 @@ class _OrganizationDetailScreenState
   void initState() {
     super.initState();
     final id = widget.organizationId ?? widget.organization?.id;
-    if (id != null && widget.organization == null) {
+    if (id != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(organizationDetailViewModelProvider(id)).load();
+        ref.read(organizationDetailViewModelProvider(id)).load(forceRefresh: true);
       });
     }
   }
@@ -43,7 +43,7 @@ class _OrganizationDetailScreenState
   Widget build(BuildContext context) {
     final id = widget.organizationId ?? widget.organization?.id ?? '';
     final vm = ref.watch(organizationDetailViewModelProvider(id));
-    final org = widget.organization ?? vm.organization;
+    final org = vm.organization ?? widget.organization;
 
     // Breadcrumb dinâmico com nome da organização
     final orgName = org?.tradeName;

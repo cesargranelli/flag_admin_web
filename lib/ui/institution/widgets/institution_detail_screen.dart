@@ -26,11 +26,9 @@ class _InstitutionDetailScreenState
   @override
   void initState() {
     super.initState();
-    if (widget.institution == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(institutionDetailViewModelProvider(widget.id)).load();
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(institutionDetailViewModelProvider(widget.id)).load(forceRefresh: true);
+    });
   }
 
   Color? _parseHex(String? text) {
@@ -91,7 +89,7 @@ class _InstitutionDetailScreenState
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(institutionDetailViewModelProvider(widget.id));
-    final inst = widget.institution ?? vm.institution;
+    final inst = vm.institution ?? widget.institution;
     final orgsAsync = ref.watch(organizationsProvider);
 
     final instName = inst?.tradeName.isNotEmpty == true ? inst!.tradeName : inst?.name;
@@ -138,10 +136,20 @@ class _InstitutionDetailScreenState
               KicksterButton(
                 label: 'Editar',
                 icon: Icons.edit_outlined,
-                onPressed: () => context.push(
-                  '/institutions/${inst.id}/edit',
-                  extra: inst,
-                ),
+                onPressed: () async {
+                  await context.push(
+                    '/institutions/${inst.id}/edit',
+                    extra: inst,
+                  );
+                  if (context.mounted) {
+                    ref
+                        .read(institutionDetailViewModelProvider(widget.id))
+                        .load(forceRefresh: true);
+                    ref
+                        .read(institutionViewModelProvider)
+                        .load(forceRefresh: true);
+                  }
+                },
               ),
             ],
           ),

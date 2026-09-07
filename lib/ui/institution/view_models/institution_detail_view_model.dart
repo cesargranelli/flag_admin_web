@@ -32,7 +32,10 @@ class InstitutionDetailViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _institution = await _repository.getInstitution(institutionId);
+      _institution = await _repository.getInstitution(
+        institutionId,
+        forceRefresh: forceRefresh,
+      );
       _errorMessage = null;
     } catch (e) {
       _errorMessage = e.toString();

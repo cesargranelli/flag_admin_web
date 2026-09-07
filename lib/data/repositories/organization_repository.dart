@@ -14,14 +14,20 @@ class OrganizationRepository {
 
   // Cache em memória mapeado por flag includeDisabled
   final Map<bool, List<Organization>> _cache = {};
+  final Map<bool, DateTime> _lastFetch = {};
+  static const Duration _cacheTtl = Duration(seconds: 30);
 
-  /// Retorna as organizações.
-  /// Se [forceRefresh] for falso e houver cache válido, retorna do cache em memória.
+  /// Retorna as organizações com suporte a cache em memória e TTL de 30s.
+  /// Se [forceRefresh] for falso e houver cache válido recente, retorna do cache.
   Future<List<Organization>> getOrganizations({
     bool forceRefresh = false,
     bool includeDisabled = false,
   }) async {
-    if (!forceRefresh && _cache.containsKey(includeDisabled)) {
+    final isCacheValid = _cache.containsKey(includeDisabled) &&
+        _lastFetch.containsKey(includeDisabled) &&
+        DateTime.now().difference(_lastFetch[includeDisabled]!) < _cacheTtl;
+
+    if (!forceRefresh && isCacheValid) {
       return _cache[includeDisabled]!;
     }
 
@@ -30,18 +36,21 @@ class OrganizationRepository {
         includeDisabled: includeDisabled,
       );
       _cache[includeDisabled] = List<Organization>.unmodifiable(organizations);
+      _lastFetch[includeDisabled] = DateTime.now();
       return organizations;
     } catch (_) {
       rethrow;
     }
   }
 
-  /// Busca organização por id. Se presente no cache, retorna imediatamente;
-  /// caso contrário, busca via service.
-  Future<Organization> getOrganization(String id) async {
-    for (final list in _cache.values) {
-      final match = list.where((o) => o.id == id);
-      if (match.isNotEmpty) return match.first;
+  /// Busca organização por id. Se presente no cache e não for forceRefresh,
+  /// retorna imediatamente; caso contrário, busca via service.
+  Future<Organization> getOrganization(String id, {bool forceRefresh = false}) async {
+    if (!forceRefresh) {
+      for (final list in _cache.values) {
+        final match = list.where((o) => o.id == id);
+        if (match.isNotEmpty) return match.first;
+      }
     }
     return _service.getOrganization(id);
   }
@@ -68,5 +77,6 @@ class OrganizationRepository {
   /// Limpa o cache local em memória.
   void clearCache() {
     _cache.clear();
+    _lastFetch.clear();
   }
 }

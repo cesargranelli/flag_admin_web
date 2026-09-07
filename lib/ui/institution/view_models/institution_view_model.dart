@@ -38,7 +38,11 @@ class InstitutionViewModel extends ChangeNotifier {
       }
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase().trim();
-        if (!inst.name.toLowerCase().contains(query)) {
+        final nameMatch = inst.name.toLowerCase().contains(query);
+        final tradeMatch = inst.tradeName.toLowerCase().contains(query);
+        final abbrMatch =
+            inst.abbreviation?.toLowerCase().contains(query) ?? false;
+        if (!nameMatch && !tradeMatch && !abbrMatch) {
           return false;
         }
       }
