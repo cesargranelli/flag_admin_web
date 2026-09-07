@@ -12,10 +12,16 @@ import 'components/organization_identity_section.dart';
 /// empilhadas com títulos de seção — o scroll é do body, sem barras internas.
 /// A validação cobre TODAS as seções no submit.
 ///
-/// V250: organizações não são editáveis após a criação — este formulário
-/// apenas cria. Alterações de cadastro não são suportadas.
+/// Formulário de criação e edição de organização (ADR-001 / MVVM / Kickster).
 class OrganizationCreateScreen extends ConsumerStatefulWidget {
-  const OrganizationCreateScreen({super.key});
+  final String? id;
+  final Organization? organization;
+
+  const OrganizationCreateScreen({
+    super.key,
+    this.id,
+    this.organization,
+  });
 
   @override
   ConsumerState<OrganizationCreateScreen> createState() =>
@@ -56,28 +62,62 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
   @override
   void initState() {
     super.initState();
-    // Formulário apenas de criação: todos os campos iniciam vazios.
-    _tradeName = TextEditingController();
-    _legalName = TextEditingController();
-    _abbreviation = TextEditingController();
-    _document = TextEditingController();
-    _presidentName = TextEditingController();
-    _presidentCpf = TextEditingController();
-    _email = TextEditingController();
-    _phone = TextEditingController();
-    _website = TextEditingController();
-    _instagram = TextEditingController();
-    _state = TextEditingController();
-    _city = TextEditingController();
-    _logoUrl = TextEditingController();
-    _primaryColor = TextEditingController();
-    _secondaryColor = TextEditingController();
-    _tertiaryColor = TextEditingController();
-    _quaternaryColor = TextEditingController();
-    _locale = TextEditingController(text: 'pt-BR');
-    _country = 'BR';
-    _type = null;
-    _documentType = DocumentType.cnpj;
+    final org = widget.organization;
+
+    _tradeName = TextEditingController(text: org?.tradeName ?? '');
+    _legalName = TextEditingController(text: org?.legalName ?? '');
+    _abbreviation = TextEditingController(text: org?.abbreviation ?? '');
+    _document = TextEditingController(text: org?.document ?? '');
+    _presidentName = TextEditingController(text: org?.presidentName ?? '');
+    _presidentCpf = TextEditingController(text: org?.presidentCpf ?? '');
+    _email = TextEditingController(text: org?.email ?? '');
+    _phone = TextEditingController(text: org?.phone ?? '');
+    _website = TextEditingController(text: org?.website ?? '');
+    _instagram = TextEditingController(text: org?.instagram ?? '');
+    _state = TextEditingController(text: org?.state ?? '');
+    _city = TextEditingController(text: org?.city ?? '');
+    _logoUrl = TextEditingController(text: org?.logoUrl ?? '');
+    _primaryColor = TextEditingController(text: org?.primaryColor ?? '#FD6B22');
+    _secondaryColor = TextEditingController(text: org?.secondaryColor ?? '#1E293B');
+    _tertiaryColor = TextEditingController(text: org?.tertiaryColor ?? '');
+    _quaternaryColor = TextEditingController(text: org?.quaternaryColor ?? '');
+    _locale = TextEditingController(text: org?.locale ?? 'pt-BR');
+    _country = org?.country.isNotEmpty == true ? org!.country : 'BR';
+    _type = org?.organizationType;
+    _documentType = org?.documentType ?? DocumentType.cnpj;
+
+    if (org == null && widget.id != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final fetched = await ref
+            .read(organizationRepositoryProvider)
+            .getOrganization(widget.id!);
+        if (mounted) {
+          setState(() {
+            _tradeName.text = fetched.tradeName;
+            _legalName.text = fetched.legalName;
+            _abbreviation.text = fetched.abbreviation ?? '';
+            _document.text = fetched.document ?? '';
+            _presidentName.text = fetched.presidentName ?? '';
+            _presidentCpf.text = fetched.presidentCpf ?? '';
+            _email.text = fetched.email ?? '';
+            _phone.text = fetched.phone ?? '';
+            _website.text = fetched.website ?? '';
+            _instagram.text = fetched.instagram ?? '';
+            _state.text = fetched.state ?? '';
+            _city.text = fetched.city ?? '';
+            _logoUrl.text = fetched.logoUrl ?? '';
+            _primaryColor.text = fetched.primaryColor ?? '#FD6B22';
+            _secondaryColor.text = fetched.secondaryColor ?? '#1E293B';
+            _tertiaryColor.text = fetched.tertiaryColor ?? '';
+            _quaternaryColor.text = fetched.quaternaryColor ?? '';
+            _locale.text = fetched.locale;
+            _country = fetched.country.isNotEmpty ? fetched.country : 'BR';
+            _type = fetched.organizationType;
+            _documentType = fetched.documentType ?? DocumentType.cnpj;
+          });
+        }
+      });
+    }
 
     for (final controller in [
       _tradeName, _legalName, _abbreviation, _document, _presidentName,
@@ -149,17 +189,26 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
 
     final formVm = ref.read(organizationFormViewModelProvider);
     final body = _buildBody();
-    final success = await formVm.createOrganization(body);
+    final success = await formVm.save(id: widget.id, body: body);
     if (!mounted) return;
 
-    if (success && formVm.createdOrganization != null) {
+    if (success && formVm.savedOrganization != null) {
       _saved = true;
       ref.invalidate(organizationsProvider);
       ref.read(organizationViewModelProvider).load(forceRefresh: true);
+      if (widget.id != null) {
+        ref.invalidate(organizationProvider(widget.id!));
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Organização salva com sucesso')),
+        SnackBar(
+          content: Text(
+            widget.id != null
+                ? 'Organização atualizada com sucesso'
+                : 'Organização salva com sucesso',
+          ),
+        ),
       );
-      context.go('/organizations/${formVm.createdOrganization!.id}');
+      context.go('/organizations/${formVm.savedOrganization!.id}');
     } else {
       setState(() {
         _errorMessage = formVm.errorMessage ??
@@ -200,6 +249,8 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
   Widget build(BuildContext context) {
     final isSubmitting =
         ref.watch(organizationFormViewModelProvider).isSubmitting;
+    final isEditing = widget.id != null;
+    final title = isEditing ? 'Editar organização' : 'Nova organização';
 
     return PopScope(
       canPop: !_hasChanges || isSubmitting || _saved,
@@ -207,11 +258,11 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
         if (!didPop) _handleBack();
       },
       child: AppScreen(
-        title: 'Nova organização',
-        breadcrumb: const [
-          BreadcrumbItem(AppStrings.home, route: '/'),
-          BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-          BreadcrumbItem('Nova'),
+        title: title,
+        breadcrumb: [
+          const BreadcrumbItem(AppStrings.home, route: '/'),
+          const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
+          BreadcrumbItem(isEditing ? 'Editar' : 'Nova'),
         ],
         body: AppLayout.form(
           child: Form(
@@ -306,7 +357,9 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
                 ),
                 const SizedBox(height: 16),
                 KicksterButton(
-                  label: 'Criar organização',
+                  label: isSubmitting
+                      ? 'Salvando...'
+                      : (isEditing ? 'Salvar alterações' : 'Criar organização'),
                   icon: Icons.check,
                   loading: isSubmitting,
                   onPressed: isSubmitting ? null : _save,

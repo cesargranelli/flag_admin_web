@@ -330,63 +330,125 @@ class _OrganizationListScreenState
               ),
             ),
           if (isAdmin)
-            PopupMenuButton<String>(
-              tooltip: 'Ações',
-              enabled: !isBusy,
-              onSelected: (value) async {
-                if (value == 'deactivate') {
-                  final ok = await showKicksterConfirm(
-                    context: context,
-                    title: 'Desativar organização',
-                    content:
-                        'A organização "${organization.tradeName}" ficará invisível '
-                        'para os demais usuários até ser reativada.',
-                    confirmLabel: 'Desativar',
-                    danger: true,
-                  );
-                  if (ok == true && context.mounted) {
-                    final success = await vm.delete(organization.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success
-                                ? 'Organização desativada.'
-                                : 'Não foi possível desativar a organização.',
-                          ),
-                          backgroundColor:
-                              success ? AppColors.success : AppColors.danger,
+            KicksterMenuAnchor(
+              triggerLabel: 'Ações de ${organization.tradeName}',
+              alignment: Alignment.topRight,
+              width: 170,
+              trigger: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.more_vert,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              items: [
+                KicksterMenuItem(
+                  child: const Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                      SizedBox(width: 10),
+                      Text(
+                        'Editar',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
                         ),
-                      );
-                    }
-                  }
-                } else if (value == 'reactivate') {
-                  final success = await vm.reactivate(organization.id);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success
-                              ? 'Organização reativada.'
-                              : 'Não foi possível reativar a organização.',
-                        ),
-                        backgroundColor:
-                            success ? AppColors.success : AppColors.danger,
                       ),
+                    ],
+                  ),
+                  onTap: () async {
+                    await context.push(
+                      '/organizations/${organization.id}/edit',
+                      extra: organization,
                     );
-                  }
-                }
-              },
-              itemBuilder: (_) => [
+                    if (context.mounted) {
+                      vm.load(forceRefresh: true);
+                    }
+                  },
+                ),
                 if (!isDisabled)
-                  const PopupMenuItem(
-                    value: 'deactivate',
-                    child: Text('Desativar'),
+                  KicksterMenuItem(
+                    child: const Row(
+                      children: [
+                        Icon(Icons.block_outlined, size: 18, color: AppColors.danger),
+                        SizedBox(width: 10),
+                        Text(
+                          'Desativar',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.danger,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () async {
+                      final ok = await showKicksterConfirm(
+                        context: context,
+                        title: 'Desativar organização',
+                        content:
+                            'A organização "${organization.tradeName}" ficará invisível '
+                            'para os demais usuários até ser reativada.',
+                        confirmLabel: 'Desativar',
+                        danger: true,
+                      );
+                      if (ok == true && context.mounted) {
+                        final success = await vm.delete(organization.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? 'Organização desativada.'
+                                    : 'Não foi possível desativar a organização.',
+                              ),
+                              backgroundColor:
+                                  success ? AppColors.success : AppColors.danger,
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
                 if (isDisabled)
-                  const PopupMenuItem(
-                    value: 'reactivate',
-                    child: Text('Reativar'),
+                  KicksterMenuItem(
+                    child: const Row(
+                      children: [
+                        Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
+                        SizedBox(width: 10),
+                        Text(
+                          'Reativar',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () async {
+                      final success = await vm.reactivate(organization.id);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success
+                                  ? 'Organização reativada.'
+                                  : 'Não foi possível reativar a organização.',
+                            ),
+                            backgroundColor:
+                                success ? AppColors.success : AppColors.danger,
+                          ),
+                        );
+                      }
+                    },
                   ),
               ],
             ),

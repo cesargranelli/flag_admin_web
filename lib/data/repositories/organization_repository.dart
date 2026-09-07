@@ -62,6 +62,13 @@ class OrganizationRepository {
     return created;
   }
 
+  /// Atualiza uma organização existente e invalida o cache.
+  Future<Organization> updateOrganization(String id, Map<String, dynamic> body) async {
+    final updated = await _service.updateOrganization(id, body);
+    clearCache();
+    return updated;
+  }
+
   /// Desativa/exclui logicamente a organização e invalida o cache.
   Future<void> deleteOrganization(String id) async {
     await _service.deleteOrganization(id);

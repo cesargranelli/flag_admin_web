@@ -83,6 +83,31 @@ class _OrganizationDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Ações superiores
+          Row(
+            children: [
+              const Spacer(),
+              KicksterButton(
+                label: 'Editar',
+                icon: Icons.edit_outlined,
+                onPressed: () async {
+                  await context.push(
+                    '/organizations/${org.id}/edit',
+                    extra: org,
+                  );
+                  if (context.mounted) {
+                    ref
+                        .read(organizationDetailViewModelProvider(org.id))
+                        .load(forceRefresh: true);
+                    ref
+                        .read(organizationViewModelProvider)
+                        .load(forceRefresh: true);
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           _section(
             title: 'Identificação',
             icon: Icons.business_outlined,

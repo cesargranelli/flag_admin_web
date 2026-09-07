@@ -320,65 +320,90 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
               ),
             ),
           if (canWrite)
-            PopupMenuButton<String>(
-              tooltip: 'Ações',
-              enabled: !isBusy,
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  await context.push(
-                    '/institutions/${inst.id}/edit',
-                    extra: inst,
-                  );
-                  if (context.mounted) {
-                    vm.load(forceRefresh: true);
-                  }
-                } else if (value == 'delete') {
-                  final ok = await showKicksterConfirm(
-                    context: context,
-                    title: 'Excluir agremiação',
-                    content:
-                        'Deseja realmente excluir "${inst.tradeName.isNotEmpty ? inst.tradeName : inst.name}"?',
-                    confirmLabel: 'Excluir',
-                    danger: true,
-                  );
-                  if (ok == true && context.mounted) {
-                    final success = await vm.delete(inst.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success
-                                ? 'Agremiação excluída com sucesso.'
-                                : 'Erro ao excluir: ${vm.errorMessage}',
-                          ),
-                          backgroundColor:
-                              success ? AppColors.success : AppColors.danger,
-                        ),
-                      );
-                    }
-                  }
-                }
-              },
-              itemBuilder: (_) => const [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
+            KicksterMenuAnchor(
+              triggerLabel: 'Ações de ${inst.tradeName}',
+              alignment: Alignment.topRight,
+              width: 160,
+              trigger: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.more_vert,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              items: [
+                KicksterMenuItem(
+                  child: const Row(
                     children: [
-                      Icon(Icons.edit_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('Editar'),
+                      Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                      SizedBox(width: 10),
+                      Text(
+                        'Editar',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ],
                   ),
+                  onTap: () async {
+                    await context.push(
+                      '/institutions/${inst.id}/edit',
+                      extra: inst,
+                    );
+                    if (context.mounted) {
+                      vm.load(forceRefresh: true);
+                    }
+                  },
                 ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
+                KicksterMenuItem(
+                  child: const Row(
                     children: [
                       Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
-                      SizedBox(width: 8),
-                      Text('Excluir', style: TextStyle(color: AppColors.danger)),
+                      SizedBox(width: 10),
+                      Text(
+                        'Excluir',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.danger,
+                        ),
+                      ),
                     ],
                   ),
+                  onTap: () async {
+                    final ok = await showKicksterConfirm(
+                      context: context,
+                      title: 'Excluir agremiação',
+                      content:
+                          'Deseja realmente excluir "${inst.tradeName.isNotEmpty ? inst.tradeName : inst.name}"?',
+                      confirmLabel: 'Excluir',
+                      danger: true,
+                    );
+                    if (ok == true && context.mounted) {
+                      final success = await vm.delete(inst.id);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success
+                                  ? 'Agremiação excluída com sucesso.'
+                                  : 'Erro ao excluir: ${vm.errorMessage}',
+                            ),
+                            backgroundColor:
+                                success ? AppColors.success : AppColors.danger,
+                          ),
+                        );
+                      }
+                    }
+                  },
                 ),
               ],
             ),

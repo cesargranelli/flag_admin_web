@@ -14,20 +14,25 @@ class OrganizationFormViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  Organization? _createdOrganization;
-  Organization? get createdOrganization => _createdOrganization;
+  Organization? _savedOrganization;
+  Organization? get savedOrganization => _savedOrganization;
+  Organization? get createdOrganization => _savedOrganization;
 
   OrganizationFormViewModel({required OrganizationRepository repository})
       : _repository = repository;
 
-  /// Cria a organização chamando a camada de dados.
-  Future<bool> createOrganization(Map<String, dynamic> body) async {
+  /// Salva (cria ou atualiza) a organização.
+  Future<bool> save({String? id, required Map<String, dynamic> body}) async {
     _isSubmitting = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _createdOrganization = await _repository.createOrganization(body);
+      if (id != null) {
+        _savedOrganization = await _repository.updateOrganization(id, body);
+      } else {
+        _savedOrganization = await _repository.createOrganization(body);
+      }
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -39,10 +44,13 @@ class OrganizationFormViewModel extends ChangeNotifier {
     }
   }
 
+  /// Cria a organização chamando a camada de dados (compatibilidade).
+  Future<bool> createOrganization(Map<String, dynamic> body) => save(body: body);
+
   void reset() {
     _isSubmitting = false;
     _errorMessage = null;
-    _createdOrganization = null;
+    _savedOrganization = null;
     notifyListeners();
   }
 }

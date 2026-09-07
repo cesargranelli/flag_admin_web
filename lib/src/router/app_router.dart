@@ -214,6 +214,19 @@ class AppRouter {
                         );
                       },
                     ),
+                    GoRoute(
+                      path: ':id/edit',
+                      name: 'organizationEdit',
+                      builder: (context, state) {
+                        final org = state.extra is Organization
+                            ? state.extra as Organization
+                            : null;
+                        return OrganizationCreateScreen(
+                          id: state.pathParameters['id'],
+                          organization: org,
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],

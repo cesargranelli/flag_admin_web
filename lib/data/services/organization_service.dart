@@ -11,6 +11,7 @@ abstract class OrganizationService {
   Future<List<Organization>> getOrganizations({bool includeDisabled = false});
   Future<Organization> getOrganization(String id);
   Future<Organization> createOrganization(Map<String, dynamic> body);
+  Future<Organization> updateOrganization(String id, Map<String, dynamic> body);
   Future<void> deleteOrganization(String id);
   Future<void> reactivateOrganization(String id);
 }
@@ -41,6 +42,10 @@ class ApiOrganizationService implements OrganizationService {
     );
     return getOrganization(id);
   }
+
+  @override
+  Future<Organization> updateOrganization(String id, Map<String, dynamic> body) =>
+      _client.put('/api/v1/organizations/$id', body, Organization.fromJson);
 
   @override
   Future<void> deleteOrganization(String id) =>

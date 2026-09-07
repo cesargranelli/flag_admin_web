@@ -52,11 +52,15 @@ class KicksterMenuAnchor extends StatefulWidget {
     this.triggerLabel,
     this.width,
     this.maxHeight,
+    this.alignment = Alignment.topLeft,
     this.onOpenChanged,
   });
 
   /// Conteúdo visual do botão que abre o menu.
   final Widget trigger;
+
+  /// Alinhamento horizontal do menu em relação ao trigger (topLeft ou topRight).
+  final Alignment alignment;
 
   /// Itens do menu (cabeçalho informativo, ações, etc.).
   final List<KicksterMenuItem> items;
@@ -111,6 +115,7 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
         anchorHeight: size.height,
         width: widget.width,
         maxHeight: widget.maxHeight,
+        alignment: widget.alignment,
         items: widget.items,
         onClose: _closeMenu,
         onSelect: (item) {
@@ -177,6 +182,7 @@ class _KicksterMenuOverlay extends StatefulWidget {
     required this.anchorHeight,
     required this.width,
     required this.maxHeight,
+    required this.alignment,
     required this.items,
     required this.onClose,
     required this.onSelect,
@@ -187,6 +193,7 @@ class _KicksterMenuOverlay extends StatefulWidget {
   final double anchorHeight;
   final double? width;
   final double? maxHeight;
+  final Alignment alignment;
   final List<KicksterMenuItem> items;
   final VoidCallback onClose;
   final ValueChanged<KicksterMenuItem> onSelect;
@@ -274,6 +281,12 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
   @override
   Widget build(BuildContext context) {
     final width = widget.width ?? widget.anchorWidth.clamp(200, 300);
+    final dx = widget.alignment == Alignment.topRight ||
+            widget.alignment == Alignment.centerRight ||
+            widget.alignment == Alignment.bottomRight
+        ? widget.anchorWidth - width
+        : 0.0;
+
     return SizedBox.expand(
       child: Stack(
         children: [
@@ -289,7 +302,7 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
             child: CompositedTransformFollower(
               link: widget.layerLink,
               showWhenUnlinked: false,
-              offset: Offset(0, widget.anchorHeight + 8),
+              offset: Offset(dx, widget.anchorHeight + 8),
               child: SizedBox(
                 width: width,
                 child: FocusScope(
