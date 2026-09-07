@@ -112,7 +112,7 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
         'tradeName': _tradeName.text.trim(),
         if (_abbreviation.text.trim().isNotEmpty)
           'abbreviation': _abbreviation.text.trim(),
-        if (_type != null) 'organizationType': _type!.toJson(),
+        'organizationType': _type!.toJson(),
         if (_document.text.trim().isNotEmpty)
           'document': _document.text.trim().replaceAll(RegExp(r'\D'), ''),
         if (_documentType != null) 'documentType': _documentType!.toJson(),
@@ -379,6 +379,7 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
   Widget _typeDropdown() {
     return KicksterDropdown<OrganizationType>(
       label: 'Tipo',
+      hint: 'Selecione o tipo da organização',
       value: _type,
       items: OrganizationType.values
           .map((t) => DropdownMenuItem(
@@ -390,6 +391,8 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
         setState(() => _type = value);
         _markDirty();
       },
+      validator: (value) =>
+          value == null ? 'Selecione o tipo da organização' : null,
     );
   }
 
