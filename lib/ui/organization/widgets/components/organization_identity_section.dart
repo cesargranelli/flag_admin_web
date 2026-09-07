@@ -187,61 +187,66 @@ class OrganizationIdentitySection extends StatelessWidget {
     required TextEditingController controller,
     required Color fallbackColor,
   }) {
-    final parsed = _parseHex(controller.text) ?? fallbackColor;
     return Expanded(
-      child: KicksterInput(
-        label: label,
-        controller: controller,
-        hintText: '#FD6B22',
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[#0-9a-fA-F]')),
-          LengthLimitingTextInputFormatter(7),
-        ],
-        onChanged: (v) {
-          var t = v.toUpperCase();
-          if (t.isNotEmpty && !t.startsWith('#')) {
-            t = '#$t';
-          }
-          if (t != v) {
-            controller.value = TextEditingValue(
-              text: t,
-              selection: TextSelection.collapsed(offset: t.length),
-            );
-          }
-          onDirty();
-        },
-        validator: (v) {
-          if (v == null || v.trim().isEmpty) return null;
-          final trimmed = v.trim();
-          final formatted = trimmed.startsWith('#') ? trimmed : '#$trimmed';
-          return RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(formatted)
-              ? null
-              : 'Use #RRGGBB';
-        },
-        prefix: Padding(
-          padding: const EdgeInsets.only(left: 6, right: 6),
-          child: GestureDetector(
-            onTap: () => _pickColor(context, label, controller),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: parsed,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.line, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.black.withValues(alpha: 0.1),
-                      blurRadius: 3,
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          final parsed = _parseHex(controller.text) ?? fallbackColor;
+          return KicksterInput(
+            label: label,
+            controller: controller,
+            hintText: '#FD6B22',
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[#0-9a-fA-F]')),
+              LengthLimitingTextInputFormatter(7),
+            ],
+            onChanged: (v) {
+              var t = v.toUpperCase();
+              if (t.isNotEmpty && !t.startsWith('#')) {
+                t = '#$t';
+              }
+              if (t != v) {
+                controller.value = TextEditingValue(
+                  text: t,
+                  selection: TextSelection.collapsed(offset: t.length),
+                );
+              }
+              onDirty();
+            },
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return null;
+              final trimmed = v.trim();
+              final formatted = trimmed.startsWith('#') ? trimmed : '#$trimmed';
+              return RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(formatted)
+                  ? null
+                  : 'Use #RRGGBB';
+            },
+            prefix: Padding(
+              padding: const EdgeInsets.only(left: 6, right: 6),
+              child: GestureDetector(
+                onTap: () => _pickColor(context, label, controller),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: parsed,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.line, width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withValues(alpha: 0.1),
+                          blurRadius: 3,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
