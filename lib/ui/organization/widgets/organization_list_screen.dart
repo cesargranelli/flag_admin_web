@@ -176,7 +176,7 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
       title: organization.tradeName,
       subtitle: organization.legalName,
       onTap: () => context.push(
-        '/organizations/',
+        '/organizations/${organization.id}',
         extra: organization,
       ),
       trailing: Row(

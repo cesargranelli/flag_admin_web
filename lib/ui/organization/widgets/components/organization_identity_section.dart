@@ -102,21 +102,17 @@ class OrganizationIdentitySection extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Campo Logo
-                KicksterInput(
-                  label: 'URL do logo (opcional)',
-                  controller: logoUrlController,
-                  keyboardType: TextInputType.url,
-                  hintText: 'https://exemplo.com/logo.png',
-                  onChanged: (_) => onDirty(),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return null;
-                    final uri = Uri.tryParse(v.trim());
-                    return (uri != null &&
-                            (uri.scheme == 'http' || uri.scheme == 'https') &&
-                            uri.host.isNotEmpty)
-                        ? null
-                        : 'URL inválida';
+                // Upload do Logo (Firebase Storage)
+                KicksterImageUploader(
+                  label: 'Logotipo da Organização (opcional)',
+                  currentImageUrl: logoUrlController.text,
+                  onUploaded: (url) {
+                    logoUrlController.text = url;
+                    onDirty();
+                  },
+                  onRemoved: () {
+                    logoUrlController.clear();
+                    onDirty();
                   },
                 ),
                 const SizedBox(height: 16),
@@ -198,7 +194,10 @@ class OrganizationIdentitySection extends StatelessWidget {
           LengthLimitingTextInputFormatter(7),
         ],
         onChanged: (v) {
-          final t = v.toUpperCase();
+          var t = v.toUpperCase();
+          if (t.isNotEmpty && !t.startsWith('#')) {
+            t = '#$t';
+          }
           if (t != v) {
             controller.value = TextEditingValue(
               text: t,
@@ -209,7 +208,9 @@ class OrganizationIdentitySection extends StatelessWidget {
         },
         validator: (v) {
           if (v == null || v.trim().isEmpty) return null;
-          return RegExp(r'^#[0-9A-Fa-f]{6}\$').hasMatch(v.trim())
+          final trimmed = v.trim();
+          final formatted = trimmed.startsWith('#') ? trimmed : '#$trimmed';
+          return RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(formatted)
               ? null
               : 'Use #RRGGBB';
         },
