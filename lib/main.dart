@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'src/app.dart';
-import 'src/config/firebase_options.dart';
+import 'src/core/config/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

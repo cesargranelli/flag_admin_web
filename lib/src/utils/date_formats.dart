@@ -14,7 +14,7 @@ String formatIsoDate(DateTime? date) => date == null
         '${date.month.toString().padLeft(2, '0')}-'
         '${date.day.toString().padLeft(2, '0')}';
 
-/// `dd/MM/yyyy` em hora local — detalhes de entidades (atleta, campeonato,
+/// `dd/MM/yyyy` em hora local — detalhes de entidades (atleta, competição,
 /// organização, rodada, time, campo, jogo).
 /// `null` → `'—'`.
 String formatBrDate(DateTime? value) {

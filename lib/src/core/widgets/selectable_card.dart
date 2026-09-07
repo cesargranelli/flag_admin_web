@@ -1,10 +1,10 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Card selecionável do design system (issues #287/#290–#300).
 ///
 /// Mesmo padrão de interação dos cards de lista (ex. lista de
-/// campeonatos): [Card] + [InkWell] com a tinta padrão do tema — sem
+/// competições): [Card] + [InkWell] com a tinta padrão do tema — sem
 /// hover/splash customizados, que causam cintilação no web (#300).
 /// A seleção é comunicada por um `Container` interno com preenchimento:
 /// não selecionado = card `surface` padrão; selecionado = fundo
@@ -38,7 +38,14 @@ class SelectableCard extends StatelessWidget {
         enabled: enabled,
         child: Card(
           margin: EdgeInsets.zero,
+          elevation: 1,
+          shadowColor: AppColors.black.withValues(alpha: 0.08),
+          color: AppColors.surface,
           clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.line, width: 1),
+          ),
           child: InkWell(
             onTap: enabled ? onTap : null,
             child: Container(

@@ -1,11 +1,10 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
 /// Tela inicial do Admin Web — estrutura visual Kickster.
 ///
@@ -28,27 +27,52 @@ class AdminHomeScreen extends ConsumerWidget {
         '/organizations',
       ),
       _Module(
+        Icons.groups_outlined,
+        AppStrings.institutions,
+        '/institutions',
+      ),
+      _Module(
+        Icons.shield_outlined,
+        AppStrings.teams,
+        '/teams',
+      ),
+      _Module(
+        Icons.groups_outlined,
+        AppStrings.rosters,
+        '/rosters',
+      ),
+      _Module(
+        Icons.person_outline,
+        AppStrings.athletes,
+        '/athletes',
+      ),
+      _Module(
         Icons.emoji_events_outlined,
         AppStrings.competitions,
         '/competitions',
       ),
-      _Module(Icons.sports_soccer, AppStrings.venues, '/venues'),
-      _Module(Icons.person_outline, AppStrings.athletes, '/athletes'),
-      _Module(Icons.groups_outlined, AppStrings.teams, '/teams'),
-      _Module(Icons.groups_2_outlined, AppStrings.rosters, '/rosters'),
+      _Module(
+        Icons.stadium_outlined,
+        AppStrings.venues,
+        '/venues',
+      ),
       if (isAdmin)
-        _Module(Icons.fact_check_outlined, 'Aprovações', '/approvals'),
+        _Module(Icons.fact_check_outlined, AppStrings.approvals, '/approvals'),
       if (isAdmin)
-        _Module(Icons.admin_panel_settings, AppStrings.users, '/users'),
+        _Module(
+          Icons.manage_accounts_outlined,
+          AppStrings.users,
+          '/users',
+        ),
     ];
 
     return AppScreen(
-      title: 'Início',
+      title: AppStrings.home,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Seção "Módulos"
-          _SectionHeader(title: 'Módulos'),
+          _SectionHeader(title: AppStrings.modules),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {

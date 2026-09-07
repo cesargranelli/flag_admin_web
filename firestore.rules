@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Regras do Firestore para o Flag Platform.
+//
+// A escrita única é feita pelo backend Java REST via Firebase Admin SDK,
+// que ignora estas regras (privilégios de administrador). O cliente web
+// (Flutter) apenas LÊ os dados via streams/consultas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== Leitura pública =====
+    // Qualquer cliente pode ler as coleções (dados públicos de campeonato).
+    allow read: if true;
+
+    // ===== Escrita negada ao cliente =====
+    // O cliente web não escreve direto no Firestore; toda escrita é feita
+    // pelo backend Java (Admin SDK), que ignora estas regras.
+    allow write: if false;
+  }
+}

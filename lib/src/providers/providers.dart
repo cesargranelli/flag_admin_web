@@ -1,23 +1,66 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/data/repositories/auth_controller.dart';
+import 'package:flag_admin_web/data/repositories/auth_repository.dart';
+import 'package:flag_admin_web/data/services/auth_service.dart';
+import 'package:flag_admin_web/ui/auth/view_models/forgot_password_view_model.dart';
+import 'package:flag_admin_web/ui/auth/view_models/login_view_model.dart';
+import 'package:flag_admin_web/ui/auth/view_models/signup_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/auth_controller.dart';
+import 'package:flag_admin_web/data/repositories/organization_repository.dart';
+import 'package:flag_admin_web/data/services/organization_service.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_form_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flag_admin_web/data/repositories/institution_repository.dart';
+import 'package:flag_admin_web/data/services/institution_service.dart';
+import 'package:flag_admin_web/data/services/storage_service.dart';
+import 'package:flag_admin_web/ui/institutions/view_models/institution_view_model.dart';
+import 'package:flag_admin_web/ui/institutions/view_models/institution_detail_view_model.dart';
+import 'package:flag_admin_web/ui/institutions/view_models/institution_form_view_model.dart';
+
 import '../router/app_router.dart';
 
-/// Gerenciador de sessão do Admin Web (persiste o token JWT).
+/// Gerenciador de sessão do Admin Web (persiste dados de sessão Firebase/JWT).
 final sessionManagerProvider = Provider<SessionManager>(
   (ref) => SessionManager(),
 );
 
-/// Cliente HTTP da API REST com o token da sessão injetado.
+/// Cliente HTTP da API REST com o Firebase ID Token injetado.
 final apiClientProvider = Provider<ApiClient>(
-  (ref) => ApiClient(session: ref.watch(sessionManagerProvider)),
+  (ref) => ApiClient(),
 );
 
-/// Serviço de autenticação.
+/// Serviço de autenticação Firebase e REST (ADR-001).
+final authServiceProvider = Provider<AuthService>(
+  (ref) => AuthService(ref.watch(apiClientProvider)),
+);
+
+/// Repositório de autenticação (ADR-001 / Single Source of Truth).
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(
+    service: ref.watch(authServiceProvider),
+    session: ref.watch(sessionManagerProvider),
+  );
+});
+
+/// Instância do Firebase Storage.
+final firebaseStorageProvider = Provider<FirebaseStorage>(
+  (ref) => FirebaseStorage.instance,
+);
+
+/// Serviço de upload e armazenamento de mídia (Firebase Storage).
+final storageServiceProvider = Provider<StorageService>((ref) {
+  return FirebaseStorageService(ref.watch(firebaseStorageProvider));
+});
+
+/// Serviço de autenticação REST legado (compatibilidade com approvals_screen).
 final authApiProvider = Provider<AuthApi>(
   (ref) => AuthApi(ref.watch(apiClientProvider)),
 );
@@ -25,11 +68,36 @@ final authApiProvider = Provider<AuthApi>(
 /// Controlador de autenticação (restaura a sessão ao iniciar).
 final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
   final controller = AuthController(
-    session: ref.watch(sessionManagerProvider),
-    api: ref.watch(authApiProvider),
+    repository: ref.watch(authRepositoryProvider),
   );
   controller.restore();
   return controller;
+});
+
+/// ViewModel para a tela de Login (ADR-001 / MVVM 1:1).
+final loginViewModelProvider =
+    ChangeNotifierProvider.autoDispose<LoginViewModel>((ref) {
+  return LoginViewModel(
+    repository: ref.watch(authRepositoryProvider),
+    onAuthStateChanged: () =>
+        ref.read(authControllerProvider).syncFromRepository(),
+  );
+});
+
+/// ViewModel para a tela de Cadastro (ADR-001 / MVVM 1:1).
+final signupViewModelProvider =
+    ChangeNotifierProvider.autoDispose<SignupViewModel>((ref) {
+  return SignupViewModel(
+    repository: ref.watch(authRepositoryProvider),
+  );
+});
+
+/// ViewModel para a tela de Esqueci a Senha (ADR-001 / MVVM 1:1).
+final forgotPasswordViewModelProvider =
+    ChangeNotifierProvider.autoDispose<ForgotPasswordViewModel>((ref) {
+  return ForgotPasswordViewModel(
+    repository: ref.watch(authRepositoryProvider),
+  );
 });
 
 /// Router com proteção de rotas.
@@ -38,35 +106,117 @@ final routerProvider = Provider<GoRouter>((ref) {
   return AppRouter.build(auth);
 });
 
-/// Serviço de organizações.
-final organizationApiProvider = Provider<OrganizationApi>(
-  (ref) => OrganizationApi(ref.watch(apiClientProvider)),
+
+/// Serviço de organizações (REST).
+final organizationServiceProvider = Provider<OrganizationService>(
+  (ref) => OrganizationService(ref.watch(apiClientProvider)),
 );
 
-/// Lista de organizações da tela de gestão.
+/// Repository de organizações (Single Source of Truth, Caching).
+final organizationRepositoryProvider = Provider<OrganizationRepository>(
+  (ref) => OrganizationRepository(
+    service: ref.watch(organizationServiceProvider),
+  ),
+);
+
+/// ViewModel de organizações (UI State e Commands).
+final organizationViewModelProvider =
+    ChangeNotifierProvider<OrganizationViewModel>(
+  (ref) => OrganizationViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+  ),
+);
+
+/// ViewModel de detalhes de organização.
+final organizationDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<OrganizationDetailViewModel, String>(
+  (ref, id) => OrganizationDetailViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+    organizationId: id,
+  ),
+);
+
+/// ViewModel do formulário de organização.
+final organizationFormViewModelProvider =
+    ChangeNotifierProvider.autoDispose<OrganizationFormViewModel>(
+  (ref) => OrganizationFormViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+  ),
+);
+
+/// ViewModel de associação de clubes.
+final associateClubsViewModelProvider =
+    ChangeNotifierProvider.autoDispose<AssociateClubsViewModel>(
+  (ref) => AssociateClubsViewModel(),
+);
+
+/// Serviço de agremiações (REST).
+final institutionServiceProvider = Provider<InstitutionService>(
+  (ref) => ApiInstitutionService(ref.watch(apiClientProvider)),
+);
+
+/// Repository de agremiações (Single Source of Truth, Caching).
+final institutionRepositoryProvider = Provider<InstitutionRepository>(
+  (ref) => InstitutionRepository(
+    service: ref.watch(institutionServiceProvider),
+  ),
+);
+
+/// ViewModel de agremiações (UI State e Commands).
+final institutionViewModelProvider =
+    ChangeNotifierProvider<InstitutionViewModel>(
+  (ref) => InstitutionViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+  ),
+);
+
+/// ViewModel de detalhes de agremiação.
+final institutionDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<InstitutionDetailViewModel, String>(
+  (ref, id) => InstitutionDetailViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+    institutionId: id,
+  ),
+);
+
+/// ViewModel do formulário de agremiação.
+final institutionFormViewModelProvider =
+    ChangeNotifierProvider.autoDispose<InstitutionFormViewModel>(
+  (ref) => InstitutionFormViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+  ),
+);
+
+
+/// Listagem de organizações da tela de gestão.
+///
+/// Listagem via Repository, expondo apenas organizações ATIVAS.
+/// Recarrega via `ref.invalidate(organizationsProvider)` após mutações.
 final organizationsProvider = FutureProvider<List<Organization>>(
-  (ref) => ref.watch(organizationApiProvider).list(),
+  (ref) => ref.watch(organizationRepositoryProvider).getOrganizations(),
 );
 
 /// Listagem para ADMIN: inclui desativadas quando [includeDisabled].
 final organizationsAdminProvider =
     FutureProvider.family<List<Organization>, bool>(
   (ref, includeDisabled) => ref
-      .watch(organizationApiProvider)
-      .list(includeDisabled: includeDisabled),
+      .watch(organizationRepositoryProvider)
+      .getOrganizations(includeDisabled: includeDisabled),
 );
 
 /// Detalhe de uma organização por id.
-final organizationProvider = FutureProvider.autoDispose.family<Organization, String>(
-  (ref, id) => ref.watch(organizationApiProvider).getById(id),
+final organizationProvider =
+    FutureProvider.autoDispose.family<Organization, String>(
+  (ref, id) =>
+      ref.watch(organizationRepositoryProvider).getOrganization(id),
 );
 
-/// Serviço de campeonatos.
+/// Serviço de competições.
 final competitionApiProvider = Provider<CompetitionApi>(
   (ref) => CompetitionApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de campeonatos da tela de gestão.
+/// Lista de competições da tela de gestão.
 final competitionsProvider = FutureProvider<List<Competition>>(
   (ref) => ref.watch(competitionApiProvider).listAll(),
 );
@@ -79,15 +229,15 @@ final competitionsAdminProvider =
       .listAll(includeDisabled: includeDisabled),
 );
 
-/// Detalhe de um campeonato por id.
+/// Detalhe de uma competição por id.
 final competitionProvider = FutureProvider.autoDispose.family<Competition, String>(
   (ref, id) => ref.watch(competitionApiProvider).getById(id),
 );
 
-/// Campeonato selecionado na tela de competições.
+/// Competição selecionada na tela de competições.
 final selectedCompetitionProvider = StateProvider<String?>((ref) => null);
 
-/// Campeonato "efetivo" (P4 #461): o selecionado, ou o primeiro da lista
+/// Competição "efetiva" (P4 #461): a selecionada, ou a primeira da lista
 /// quando nada foi escolhido — padrão `selected ?? first` duplicado em
 /// várias telas (games, rounds, teams, rosters, associate_clubs, game_form).
 final effectiveCompetitionProvider = Provider<String?>((ref) {
@@ -112,19 +262,19 @@ final divisionApiProvider = Provider<DivisionApi>(
   (ref) => DivisionApi(ref.watch(apiClientProvider)),
 );
 
-/// Conferências de um campeonato.
+/// Conferências de uma competição.
 final conferencesProvider = FutureProvider.autoDispose.family<List<Conference>, String>(
   (ref, competitionId) =>
       ref.watch(conferenceApiProvider).listByCompetition(competitionId),
 );
 
-/// Divisões de um campeonato.
+/// Divisões de uma competição.
 final divisionsProvider = FutureProvider.autoDispose.family<List<Division>, String>(
   (ref, competitionId) =>
       ref.watch(divisionApiProvider).listByCompetition(competitionId),
 );
 
-/// Times de um campeonato.
+/// Times de uma competição.
 final teamsProvider = FutureProvider.autoDispose.family<List<Team>, String>(
   (ref, competitionId) =>
       ref.watch(teamApiProvider).listByCompetition(competitionId),
@@ -140,7 +290,7 @@ final roundApiProvider = Provider<RoundApi>(
   (ref) => RoundApi(ref.watch(apiClientProvider)),
 );
 
-/// Rodadas de um campeonato.
+/// Rodadas de uma competição.
 final roundsProvider = FutureProvider.autoDispose.family<List<Round>, String>(
   (ref, competitionId) =>
       ref.watch(roundApiProvider).listByCompetition(competitionId),
@@ -212,12 +362,40 @@ final venueApiProvider = Provider<VenueApi>(
   (ref) => VenueApi(ref.watch(apiClientProvider)),
 );
 
-/// Lista de campos de jogo.
+/// Listagem de campos de jogo da tela de gestão.
+///
+/// Listagem via REST (`GET /api/v1/venues`), sem filtro de status (não
+/// existe ACTIVE para venue — lista TODOS). Recarrega via
+/// `ref.invalidate(venuesProvider)` após mutações.
 final venuesProvider = FutureProvider<List<Venue>>(
   (ref) => ref.watch(venueApiProvider).list(),
 );
 
 /// Detalhe de um campo por id.
+///
+/// Permanece via REST (leitura pontual, não realtime) — consumidores
+/// secundários (venue_detail) não mudam na #53.
 final venueProvider = FutureProvider.autoDispose.family<Venue, String>(
   (ref, id) => ref.watch(venueApiProvider).getById(id),
 );
+/// Listagem de agremiações da tela de gestão.
+final institutionsProvider = FutureProvider<List<Institution>>(
+  (ref) => ref.watch(institutionRepositoryProvider).getInstitutions(),
+);
+
+/// Listagem para ADMIN: inclui desativadas quando [includeDisabled].
+final institutionsAdminProvider =
+    FutureProvider.family<List<Institution>, bool>(
+  (ref, includeDisabled) => ref
+      .watch(institutionRepositoryProvider)
+      .getInstitutions(forceRefresh: false),
+);
+
+/// Detalhe de uma agremiação por id.
+final institutionProvider =
+    FutureProvider.autoDispose.family<Institution, String>(
+  (ref, id) =>
+      ref.watch(institutionRepositoryProvider).getInstitution(id),
+);
+
+

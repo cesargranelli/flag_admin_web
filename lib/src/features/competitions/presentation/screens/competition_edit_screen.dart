@@ -1,19 +1,18 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../auth/domain/competition_permissions.dart';
+import '../../../../features/auth/domain/competition_permissions.dart';
 import '../../../../providers/providers.dart';
-import '../../../../core/widgets/app_screen.dart';
 import '../widgets/competition_form_controller.dart';
 import '../widgets/competition_form_sections.dart';
 
-/// Edição de campeonato (issue #287) — classe separada da criação.
+/// Edição de competição (issue #287) — classe separada da criação.
 ///
-/// Página única (#455): todas as seções (campeonato, modalidade, categoria,
+/// Página única (#455): todas as seções (competição, modalidade, categoria,
 /// temporada, conferências, agrupamento) empilhadas com títulos de seção — o
 /// scroll é do body, sem barras internas. A validação cobre TODAS as seções
 /// no submit.
@@ -150,7 +149,7 @@ class _CompetitionEditScreenState
       c.saved = true;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Campeonato salvo com sucesso')),
+          const SnackBar(content: Text('Competição salva com sucesso')),
         );
         context.go('/competitions/$id');
       }
@@ -158,7 +157,7 @@ class _CompetitionEditScreenState
       c.errorMessage = e.message;
       c.onChanged();
     } catch (_) {
-      c.errorMessage = 'Não foi possível salvar o campeonato.';
+      c.errorMessage = 'Não foi possível salvar a competição.';
       c.onChanged();
     } finally {
       c.submitting = false;
@@ -166,13 +165,13 @@ class _CompetitionEditScreenState
     }
   }
 
-  /// Publica o campeonato (DRAFT → PUBLISHED), ação irreversível com
+  /// Publica a competição (DRAFT → PUBLISHED), ação irreversível com
   /// confirmação. Após publicar, retorna ao detalhe (edição fica travada).
   Future<void> _publish() async {
     final confirmed = await showKicksterConfirm(
       context: context,
-      title: 'Publicar campeonato',
-      content: 'Após publicar, o campeonato não poderá mais ser editado.',
+      title: 'Publicar competição',
+      content: 'Após publicar, a competição não poderá mais ser editada.',
       confirmLabel: 'Publicar',
       danger: true,
     );
@@ -206,7 +205,7 @@ class _CompetitionEditScreenState
       c.saved = true;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Campeonato publicado')),
+          const SnackBar(content: Text('Competição publicada')),
         );
         context.go('/competitions/$id');
       }
@@ -214,7 +213,7 @@ class _CompetitionEditScreenState
       c.errorMessage = e.message;
       c.onChanged();
     } catch (_) {
-      c.errorMessage = 'Não foi possível publicar o campeonato.';
+      c.errorMessage = 'Não foi possível publicar a competição.';
       c.onChanged();
     } finally {
       c.submitting = false;
@@ -227,25 +226,25 @@ class _CompetitionEditScreenState
     final asyncComp = ref.watch(competitionProvider(widget.competitionId!));
     return asyncComp.when(
       loading: () => AppScreen(
-        title: 'Editar campeonato',
+        title: 'Editar competição',
         breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
+          const BreadcrumbItem(AppStrings.home, route: '/'),
           const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           if (widget.competition?.name != null)
             BreadcrumbItem(widget.competition!.name),
         ],
-        body: const AppLoading(message: 'Carregando campeonato...'),
+        body: const AppLoading(message: 'Carregando competição...'),
       ),
       error: (error, stackTrace) => AppScreen(
-        title: 'Editar campeonato',
+        title: 'Editar competição',
         breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
+          const BreadcrumbItem(AppStrings.home, route: '/'),
           const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           if (widget.competition?.name != null)
             BreadcrumbItem(widget.competition!.name),
         ],
         body: AppErrorState(
-          message: 'Não foi possível carregar o campeonato',
+          message: 'Não foi possível carregar a competição',
           onRetry: () =>
               ref.invalidate(competitionProvider(widget.competitionId!)),
         ),
@@ -255,14 +254,14 @@ class _CompetitionEditScreenState
         final user = ref.watch(authControllerProvider.select((a) => a.state.user));
         if (!canEditCompetition(user, competition)) {
           return AppScreen(
-            title: 'Editar campeonato',
+            title: 'Editar competição',
             breadcrumb: [
-              const BreadcrumbItem('Início', route: '/'),
+              const BreadcrumbItem(AppStrings.home, route: '/'),
               const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
               BreadcrumbItem(competition.name),
             ],
             body: const AppEmptyState(
-              message: 'Você não tem permissão para editar este campeonato.',
+              message: 'Você não tem permissão para editar esta competição.',
               icon: Icons.lock_outline,
             ),
           );
@@ -270,16 +269,16 @@ class _CompetitionEditScreenState
         // Issue #257 (M4): apenas RASCUNHO é editável.
         if (competition.status != CompetitionStatus.draft) {
           return AppScreen(
-            title: 'Editar campeonato',
+            title: 'Editar competição',
             breadcrumb: [
-              const BreadcrumbItem('Início', route: '/'),
+              const BreadcrumbItem(AppStrings.home, route: '/'),
               const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
               BreadcrumbItem(competition.name),
             ],
             body: AppEmptyState(
               message: competition.status == CompetitionStatus.published
-                  ? 'Campeonato publicado — não é mais editável.'
-                  : 'Campeonato '
+                  ? 'Competição publicada — não é mais editável.'
+                  : 'Competição '
                          '${_statusLabel(competition.status).toLowerCase()} — '
                          'não é mais editável.',
               icon: Icons.lock,
@@ -299,9 +298,9 @@ class _CompetitionEditScreenState
         if (!didPop) c.handleBack(context, isMounted: () => mounted);
       },
       child: AppScreen(
-        title: 'Editar campeonato',
+        title: 'Editar competição',
         breadcrumb: [
-          const BreadcrumbItem('Início', route: '/'),
+          const BreadcrumbItem(AppStrings.home, route: '/'),
           const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
           if (c.name.text.isNotEmpty) BreadcrumbItem(c.name.text),
         ],
@@ -339,7 +338,7 @@ class _CompetitionEditScreenState
                     if (c.errorMessage != null)
                       competitionErrorBanner(c.errorMessage!),
                     competitionSection(
-                      title: 'Campeonato',
+                      title: 'Competição',
                       icon: Icons.emoji_events_outlined,
                       child: CompetitionIdentitySection(
                         controller: c,

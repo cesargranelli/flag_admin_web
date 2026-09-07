@@ -1,15 +1,14 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
 typedef GameImportArgs = ({String roundId, String? competitionId});
 
@@ -245,7 +244,7 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
       return AppScreen(
         title: 'Importar jogos',
         breadcrumb: const [
-          BreadcrumbItem('Início', route: '/'),
+          BreadcrumbItem(AppStrings.home, route: '/'),
           BreadcrumbItem(AppStrings.games, route: '/games'),
           BreadcrumbItem('Importar'),
         ],
@@ -268,7 +267,7 @@ class _GameImportScreenState extends ConsumerState<GameImportScreen> {
     return AppScreen(
       title: 'Importar jogos',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.games, route: '/games'),
         BreadcrumbItem('Importar'),
       ],

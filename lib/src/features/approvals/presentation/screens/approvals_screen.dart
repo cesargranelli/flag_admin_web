@@ -1,13 +1,9 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/providers.dart';
-import '../../../../utils/date_formats.dart';
-import '../../../../utils/mutation.dart';
-import '../../../../core/widgets/app_screen.dart';
-import '../../../../core/widgets/app_entity_list_screen.dart';
 
 /// Tela exclusiva do super usuário (ADMIN) para aprovar/rejeitar contas.
 class ApprovalsScreen extends ConsumerStatefulWidget {
@@ -33,11 +29,11 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
     final pending = ref.watch(pendingUsersProvider);
 
     return AppScreen(
-      title: 'Aprovações',
+      title: AppStrings.approvals,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Aprovações'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.approvals),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -162,34 +158,26 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
             Row(
               children: [
                 Expanded(
-                  // TODO(#457): variante danger/semantic no KicksterButton
-                  // quando o core evoluir.
-                  child: FilledButton.icon(
+                  child: KicksterButton(
+                    label: 'Rejeitar',
+                    icon: Icons.close,
+                    variant: KicksterButtonVariant.danger,
                     onPressed:
                         ref.watch(mutationProgressProvider(_scope)).contains(user.id)
                             ? null
                             : () => _reject(context, ref, user),
-                    icon: const Icon(Icons.close),
-                    label: const Text('Rejeitar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger,
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  // TODO(#457): variante danger/semantic no KicksterButton
-                  // quando o core evoluir.
-                  child: FilledButton.icon(
+                  child: KicksterButton(
+                    label: 'Aprovar',
+                    icon: Icons.check,
+                    variant: KicksterButtonVariant.success,
                     onPressed:
                         ref.watch(mutationProgressProvider(_scope)).contains(user.id)
                             ? null
                             : () => _approve(context, ref, user),
-                    icon: const Icon(Icons.check),
-                    label: const Text('Aprovar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                    ),
                   ),
                 ),
               ],

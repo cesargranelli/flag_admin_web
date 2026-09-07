@@ -1,16 +1,14 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../auth/domain/competition_permissions.dart';
+import '../../../../features/auth/domain/competition_permissions.dart';
 import '../../../../providers/providers.dart';
-import '../../../../utils/date_formats.dart';
-import '../../../../core/widgets/app_screen.dart';
 
-/// Detalhe de um campeonato em página única (#455): todas as seções
-/// (campeonato, modalidade, categoria, temporada, conferências, agrupamento,
+/// Detalhe de uma competição em página única (#455): todas as seções
+/// (competição, modalidade, categoria, temporada, conferências, agrupamento,
 /// clubes) empilhadas com títulos de seção — o scroll é do body, sem barras
 /// internas.
 class CompetitionDetailScreen extends ConsumerStatefulWidget {
@@ -37,9 +35,9 @@ class _CompetitionDetailScreenState
         : ref.watch(competitionProvider(widget.competitionId!));
 
     return AppScreen(
-      title: widget.competition?.name ?? 'Campeonato',
+      title: widget.competition?.name ?? 'Competição',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.competitions, route: '/competitions'),
         if (widget.competition?.name != null)
           BreadcrumbItem(widget.competition!.name),
@@ -52,9 +50,9 @@ class _CompetitionDetailScreenState
               ? _buildDetail(context, widget.competition!)
               : compFuture.when(
                   loading: () =>
-                      const AppLoading(message: 'Carregando campeonato...'),
+                      const AppLoading(message: 'Carregando competição...'),
                   error: (error, stackTrace) => AppErrorState(
-                    message: 'Não foi possível carregar o campeonato',
+                    message: 'Não foi possível carregar a competição',
                     onRetry: () => ref.invalidate(
                       competitionProvider(widget.competitionId!),
                     ),
@@ -68,7 +66,7 @@ class _CompetitionDetailScreenState
 
   /// Página única: seções empilhadas, scroll do body (#455).
   Widget _buildDetail(BuildContext context, Competition comp) {
-    // Issue #261: edição exige ser criador do campeonato ou ADMIN.
+    // Issue #261: edição exige ser criador da competição ou ADMIN.
     final canEdit = canEditCompetition(
       ref.watch(authControllerProvider.select((a) => a.state.user)),
       comp,
@@ -80,9 +78,9 @@ class _CompetitionDetailScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _section(
-              title: 'Campeonato',
+              title: 'Competição',
               icon: Icons.emoji_events_outlined,
-              child: _campeonatoCard(context, comp, canEdit, isDraft),
+              child: _competitionCard(context, comp, canEdit, isDraft),
             ),
             _section(
               title: 'Modalidade',
@@ -136,15 +134,23 @@ class _CompetitionDetailScreenState
     );
   }
 
-  /// Seção 1 — Campeonato (#306): identidade + ações por status,
+  /// Seção 1 — Competição (#306): identidade + ações por status,
   /// espelhando a primeira seção do formulário de cadastro.
-  Widget _campeonatoCard(
+  Widget _competitionCard(
     BuildContext context,
     Competition comp,
     bool canEdit,
     bool isDraft,
   ) {
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
       child: Container(
         constraints: const BoxConstraints(minHeight: 160),
         padding: const EdgeInsets.all(20),
@@ -205,7 +211,7 @@ class _CompetitionDetailScreenState
                 runSpacing: 8,
                 children: [
                   KicksterButton(
-                    label: 'Editar campeonato',
+                    label: 'Editar competição',
                     icon: Icons.edit_outlined,
                     onPressed: () => context.go(
                       '/competitions/${comp.id}/edit',
@@ -213,7 +219,7 @@ class _CompetitionDetailScreenState
                     ),
                   ),
                   // Issue #381: novo ponto de entrada para rodadas/confrontos,
-                  // ao lado de "Editar campeonato" (recupera o acesso a /rounds).
+                  // ao lado de "Editar competição" (recupera o acesso a /rounds).
                   KicksterButton(
                     label: 'Rodadas',
                     icon: Icons.format_list_numbered,
@@ -229,14 +235,14 @@ class _CompetitionDetailScreenState
             else
               Text(
                 isDraft
-                    ? 'Apenas o criador do campeonato pode editá-lo.'
-                    : 'Campeonato publicado — não é mais editável.',
+                    ? 'Apenas o criador da competição pode editá-la.'
+                    : 'Competição publicada — não é mais editável.',
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
                 ),
               ),
-            // Descrição pertence à seção Campeonato (formulário).
+            // Descrição pertence à seção Competição (formulário).
             if (comp.description != null && comp.description!.isNotEmpty) ...[
               const SizedBox(height: 16),
               AppInfoRow(label: 'Descrição', value: comp.description!),
@@ -346,7 +352,7 @@ class _CompetitionDetailScreenState
   }
 
   /// Seção 7 — Clubes (#377): lista simples dos clubes (organizações)
-  /// associados ao campeonato + botão para a tela de associação.
+  /// associados à competição + botão para a tela de associação.
   Widget _clubsCard(
     BuildContext context,
     Competition comp,
@@ -413,7 +419,7 @@ class _CompetitionDetailScreenState
               )
             else
               const Text(
-                'Apenas o criador do campeonato pode associar clubes.',
+                'Apenas o criador da competição pode associar clubes.',
                 style:
                     TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
@@ -456,7 +462,7 @@ class _CompetitionDetailScreenState
     );
   }
 
-  /// Seção Conferências (#323/#345): lista as conferências do campeonato.
+  /// Seção Conferências (#323/#345): lista as conferências da competição.
   Widget _conferencesCard(Competition comp) {
     final conferences = ref.watch(conferencesProvider(comp.id));
     return conferences.when(

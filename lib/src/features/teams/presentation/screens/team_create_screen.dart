@@ -1,18 +1,17 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
-/// Formulário de criação de time (clube inscrito em um campeonato).
+/// Formulário de criação de time (clube inscrito em uma competição).
 class TeamCreateScreen extends ConsumerStatefulWidget {
   const TeamCreateScreen({super.key, this.competitionId});
 
-  /// Campeonato vindo da listagem (via extra da rota) — evita perder o
+  /// Competição vinda da listagem (via extra da rota) — evita perder o
   /// contexto ao abrir "Novo time" (B5 #457).
   final String? competitionId;
 
@@ -114,7 +113,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
     return AppScreen(
       title: 'Novo time',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.teams, route: '/teams'),
         BreadcrumbItem('Novo'),
       ],
@@ -153,7 +152,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
                 ),
                 const SizedBox(height: 12),
                 KicksterDropdown<String>(
-                  label: 'Campeonato',
+                  label: 'Competição',
                   value: effectiveComp,
                   items: compItems
                       .map(
@@ -167,7 +166,7 @@ class _TeamCreateScreenState extends ConsumerState<TeamCreateScreen> {
                         value;
                   },
                   validator: (value) => (value == null || value.isEmpty)
-                      ? 'Selecione o campeonato'
+                      ? 'Selecione a competição'
                       : null,
                 ),
                 const SizedBox(height: 12),

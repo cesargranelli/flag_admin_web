@@ -1,4 +1,4 @@
-import 'package:flag_core/flag_core.dart';
+import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Boilerplate de listagem em grid das telas do Admin Web (issue #459).
@@ -80,7 +80,7 @@ class AppEntityListScreen<T> extends StatefulWidget {
   final Widget? toolbarLeading;
 
   /// Widget extra depois do `Spacer`, antes do campo de busca (ex.:
-  /// campeonatos com o toggle de desativados).
+  /// competições com o toggle de desativados).
   final Widget? toolbarTrailing;
 
   /// Largura do campo de busca.

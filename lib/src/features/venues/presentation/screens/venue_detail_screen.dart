@@ -1,13 +1,11 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../providers/providers.dart';
-import '../utils/date_formats.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
 /// Detalhe de um campo de jogo: apresenta os dados e oferece a edição.
 ///
@@ -28,7 +26,7 @@ class VenueDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: venue?.name ?? 'Campo',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.venues, route: '/venues'),
         if (venue?.name != null) BreadcrumbItem(venue!.name),
       ],
@@ -55,14 +53,29 @@ class VenueDetailScreen extends ConsumerWidget {
   Widget _buildDetail(BuildContext context, WidgetRef ref, Venue venue) {
     // P3 #471: resolve a organização pelo family (autoDispose) em vez de
     // assistir a lista completa.
-    final orgAsync = ref.watch(organizationProvider(venue.organizationId));
-    final orgName = orgAsync.valueOrNull?.tradeName ?? '';
+    //
+    // #53: o backend não persiste `organizationId` (campo só para
+    // compatibilidade REST de escrita; default '') — com o id
+    // vazio, evita disparar um GET /organizations/ sem sentido.
+    final orgAsync = venue.organizationId.isEmpty
+        ? null
+        : ref.watch(organizationProvider(venue.organizationId));
+    final orgName = orgAsync?.valueOrNull?.tradeName ?? '';
 
     return AppLayout.detail(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(

@@ -1,48 +1,50 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/auth_controller.dart';
-import '../screens/approvals_screen.dart';
-import '../screens/forgot_password_screen.dart';
-import '../screens/home_screen.dart';
-import '../screens/login_screen.dart';
-import '../screens/competitions_screen.dart';
-import '../screens/groupings_screen.dart';
-import '../screens/competition_create_screen.dart';
-import '../screens/competition_edit_screen.dart';
-import '../screens/competition_detail_screen.dart';
-import '../screens/organization_detail_screen.dart';
-import '../screens/organization_form_screen.dart';
-import '../screens/organizations_screen.dart';
-import '../screens/reset_password_screen.dart';
-import '../screens/venue_form_screen.dart';
-import '../screens/venue_detail_screen.dart';
-import '../screens/venues_screen.dart';
-import '../screens/associate_clubs_screen.dart';
-import '../screens/team_create_screen.dart';
-import '../screens/team_edit_screen.dart';
-import '../screens/team_detail_screen.dart';
-import '../screens/teams_screen.dart';
-import '../screens/round_form_screen.dart';
-import '../screens/round_detail_screen.dart';
-import '../screens/rounds_screen.dart';
-import '../screens/game_form_screen.dart';
-import '../screens/game_detail_screen.dart';
-import '../screens/game_import_screen.dart';
-import '../screens/games_screen.dart';
-import '../screens/athlete_form_screen.dart';
-import '../screens/athlete_import_screen.dart';
-import '../screens/athlete_detail_screen.dart';
-import '../screens/athletes_screen.dart';
-import '../screens/rosters_screen.dart';
-import '../screens/team_roster_screen.dart';
-import '../screens/roster_import_screen.dart';
-import '../screens/signup_screen.dart';
-import '../screens/user_form_screen.dart';
-import '../screens/users_screen.dart';
-import '../widgets/admin_shell.dart';
+import '../core/widgets/admin_shell.dart';
+import '../features/athletes/presentation/screens/athlete_detail_screen.dart';
+import '../features/athletes/presentation/screens/athlete_form_screen.dart';
+import '../features/athletes/presentation/screens/athlete_import_screen.dart';
+import '../features/athletes/presentation/screens/athletes_screen.dart';
+import '../features/approvals/presentation/screens/approvals_screen.dart';
+import 'package:flag_admin_web/data/repositories/auth_controller.dart';
+import 'package:flag_admin_web/ui/auth/widgets/forgot_password_screen.dart';
+import 'package:flag_admin_web/ui/auth/widgets/login_screen.dart';
+import 'package:flag_admin_web/ui/auth/widgets/signup_screen.dart';
+import '../features/competitions/presentation/screens/competition_create_screen.dart';
+import '../features/competitions/presentation/screens/competition_detail_screen.dart';
+import '../features/competitions/presentation/screens/competition_edit_screen.dart';
+import '../features/competitions/presentation/screens/competitions_screen.dart';
+import '../features/competitions/presentation/screens/groupings_screen.dart';
+import '../features/games/presentation/screens/game_detail_screen.dart';
+import '../features/games/presentation/screens/game_form_screen.dart';
+import '../features/games/presentation/screens/game_import_screen.dart';
+import '../features/games/presentation/screens/games_screen.dart';
+import '../features/home/presentation/screens/home_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/associate_clubs_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
+import '../features/rosters/presentation/screens/roster_import_screen.dart';
+import '../features/rosters/presentation/screens/rosters_screen.dart';
+import '../features/rounds/presentation/screens/round_detail_screen.dart';
+import '../features/rounds/presentation/screens/round_form_screen.dart';
+import '../features/rounds/presentation/screens/rounds_screen.dart';
+import '../features/teams/presentation/screens/team_create_screen.dart';
+import '../features/teams/presentation/screens/team_detail_screen.dart';
+import '../features/teams/presentation/screens/team_edit_screen.dart';
+import '../features/teams/presentation/screens/team_roster_screen.dart';
+import '../features/teams/presentation/screens/teams_screen.dart';
+import '../features/users/presentation/screens/user_form_screen.dart';
+import '../features/users/presentation/screens/users_screen.dart';
+import '../features/venues/presentation/screens/venue_detail_screen.dart';
+import '../features/venues/presentation/screens/venue_form_screen.dart';
+import '../features/venues/presentation/screens/venues_screen.dart';
+import 'package:flag_admin_web/ui/institutions/widgets/institution_detail_screen.dart';
+import 'package:flag_admin_web/ui/institutions/widgets/institution_form_screen.dart';
+import 'package:flag_admin_web/ui/institutions/widgets/institutions_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -74,8 +76,7 @@ class AppRouter {
         final isPublicAuth =
             location == '/login' ||
             location == '/signup' ||
-            location == '/forgot-password' ||
-            location == '/reset-password';
+            location == '/forgot-password';
         final isBoot = location == '/boot';
 
         // Não autenticado: guarda o destino e vai para o login (#429).
@@ -93,29 +94,54 @@ class AppRouter {
         return null;
       },
       errorBuilder: (context, state) => Scaffold(
-        appBar: AppBar(title: const Text('Página não encontrada')),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.location_off, size: 56, color: AppColors.danger),
-              const SizedBox(height: 12),
-              Text(
-                'Página não encontrada',
-                style: AppTextStyles.headline1.copyWith(fontSize: 20),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.surfaceMuted, AppColors.background],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.location_off,
+                        size: 56,
+                        color: AppColors.danger,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppStrings.notFoundTitle,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.headline1.copyWith(fontSize: 28),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppStrings.notFoundMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      KicksterButton(
+                        label: AppStrings.backToHome,
+                        variant: KicksterButtonVariant.outline,
+                        onPressed: () => context.go('/'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'O link que você acessou não existe.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              const SizedBox(height: 24),
-              KicksterButton(
-                label: 'Voltar ao início',
-                variant: KicksterButtonVariant.outline,
-                onPressed: () => context.go('/'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -143,13 +169,6 @@ class AppRouter {
           name: 'forgotPassword',
           builder: (context, state) => const ForgotPasswordScreen(),
         ),
-        GoRoute(
-          path: '/reset-password',
-          name: 'resetPassword',
-          builder: (context, state) => ResetPasswordScreen(
-            token: state.uri.queryParameters['token'] ?? '',
-          ),
-        ),
         // ---------------------------------------------------------------- //
         // Shell do site (header global: marca + usuário) com branches por
         // módulo. A navegação entre módulos é feita pelos cards da home.
@@ -174,13 +193,13 @@ class AppRouter {
                 GoRoute(
                   path: '/organizations',
                   name: 'organizations',
-                  builder: (context, state) => const OrganizationsScreen(),
+                  builder: (context, state) => const OrganizationListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
                       name: 'organizationNew',
                       builder: (context, state) =>
-                          const OrganizationFormScreen(),
+                          const OrganizationCreateScreen(),
                     ),
                     GoRoute(
                       path: ':id',
@@ -199,8 +218,8 @@ class AppRouter {
                 ),
               ],
             ),
-            // Branch Campeonatos (inclui conferências/divisões, rodadas e
-            // jogos — acessados por contexto de campeonato).
+            // Branch Competições (inclui conferências/divisões, rodadas e
+            // jogos — acessados por contexto de competição).
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -541,6 +560,49 @@ class AppRouter {
                   path: '/approvals',
                   name: 'approvals',
                   builder: (context, state) => const ApprovalsScreen(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/institutions',
+                  name: 'institutions',
+                  builder: (context, state) => const InstitutionsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      name: 'institutionNew',
+                      builder: (context, state) =>
+                          const InstitutionFormScreen(),
+                    ),
+                    GoRoute(
+                      path: ':id',
+                      name: 'institutionDetail',
+                      builder: (context, state) {
+                        final inst = state.extra is Institution
+                            ? state.extra as Institution
+                            : null;
+                        return InstitutionDetailScreen(
+                          id: state.pathParameters['id']!,
+                          institution: inst,
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: ':id/edit',
+                      name: 'institutionEdit',
+                      builder: (context, state) {
+                        final inst = state.extra is Institution
+                            ? state.extra as Institution
+                            : null;
+                        return InstitutionFormScreen(
+                          id: state.pathParameters['id'],
+                          institution: inst,
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -1,14 +1,12 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../utils/mutation.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
-/// Elenco de um clube (time) num campeonato (issue #360/#363).
+/// Elenco de um clube (time) numa competição (issue #360/#363).
 ///
 /// A tela combina [athletesProvider] (atletas da plataforma) com o
 /// [rosterProvider] do time e permite **incluir** atletas ("Incluir") e
@@ -109,7 +107,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     final title = teamName ?? 'Elenco';
 
     final breadcrumb = [
-      const BreadcrumbItem('Início', route: '/'),
+      const BreadcrumbItem(AppStrings.home, route: '/'),
       const BreadcrumbItem(AppStrings.teams, route: '/teams'),
       if (teamName != null) BreadcrumbItem(teamName),
       const BreadcrumbItem('Elenco'),
@@ -310,7 +308,15 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
         ref.watch(mutationProgressProvider(_removeScope)).contains(athlete.id);
 
     return Card(
+      elevation: 1,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Row(
@@ -469,11 +475,15 @@ class _RosterDetailsDialogState extends State<_RosterDetailsDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        KicksterButton(
+          label: 'Cancelar',
+          variant: KicksterButtonVariant.text,
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Confirmar')),
+        KicksterButton(
+          label: 'Confirmar',
+          onPressed: _submit,
+        ),
       ],
     );
   }

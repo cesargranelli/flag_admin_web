@@ -1,13 +1,11 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../utils/date_formats.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
 /// Argumentos de navegação do formulário de jogo.
 typedef GameFormArgs = ({String? competitionId, String? roundId, Game? game});
@@ -140,8 +138,8 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // O campeonato vem dos argumentos de navegação; sem eles (ex.: deep link),
-    // usa o campeonato selecionado no contexto global.
+    // A competição vem dos argumentos de navegação; sem eles (ex.: deep link),
+    // usa a competição selecionada no contexto global.
     final competitionId =
         widget.args?.competitionId ?? ref.watch(selectedCompetitionProvider);
     final rounds = competitionId == null
@@ -155,7 +153,7 @@ class _GameFormScreenState extends ConsumerState<GameFormScreen> {
     return AppScreen(
       title: _isEditing ? 'Editar jogo' : 'Novo jogo',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.games, route: '/games'),
         BreadcrumbItem('Formulário'),
       ],

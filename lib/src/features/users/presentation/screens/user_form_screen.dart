@@ -1,12 +1,11 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/providers.dart';
-import '../widgets/app_screen.dart';
+import '../../../../providers/providers.dart';
 
 /// Formulário de criação de usuário (somente ADMIN).
 class UserFormScreen extends ConsumerStatefulWidget {
@@ -21,7 +20,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
 
   late final TextEditingController _name;
   late final TextEditingController _email;
-  late final TextEditingController _password;
   UserRole _role = UserRole.organizer;
   bool _submitting = false;
   String? _errorMessage;
@@ -31,14 +29,12 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
     super.initState();
     _name = TextEditingController();
     _email = TextEditingController();
-    _password = TextEditingController();
   }
 
   @override
   void dispose() {
     _name.dispose();
     _email.dispose();
-    _password.dispose();
     super.dispose();
   }
 
@@ -54,7 +50,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
       await ref.read(authApiProvider).createUser(
             name: _name.text.trim(),
             email: _email.text.trim(),
-            password: _password.text,
             role: _role.toJson(),
           );
       ref.invalidate(usersProvider);
@@ -84,7 +79,7 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
     return AppScreen(
       title: 'Novo usuário',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.users, route: '/users'),
         BreadcrumbItem('Novo'),
       ],
@@ -112,15 +107,6 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   validator: _validateEmail,
-                ),
-                const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'Senha',
-                  controller: _password,
-                  obscureText: true,
-                  validator: (value) => (value == null || value.length < 6)
-                      ? 'Mínimo de 6 caracteres'
-                      : null,
                 ),
                 const SizedBox(height: 12),
                 KicksterDropdown<UserRole>(

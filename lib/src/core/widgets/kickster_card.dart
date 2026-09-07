@@ -1,0 +1,221 @@
+import 'package:flutter/material.dart';
+
+import '../theme/app_colors.dart';
+
+/// Card de módulo no estilo do kit Kickster (issues #433/#436/#439).
+///
+/// Raio 12, fundo `surface` branco com elevação sutil e contorno `line`
+/// (Line do kit — borda clara de 1px). Interação via `Card` + `InkWell` com
+/// a tinta padrão do tema (#300) — sem hover/splash customizados.
+///
+/// Dois modos de layout:
+/// - **Tile** (padrão, sem [subtitle] e sem [trailing]): ícone grande em
+///   `primary` sobre um círculo `primary` @10% centralizado acima do título —
+///   usado na home (#433).
+/// - **Linha** (com [subtitle] e/ou [trailing]): ícone à esquerda + coluna
+///   título/subtítulo + widget de apoio à direita — usado nas listagens de
+///   módulos do admin (org, competição, campo, time, atleta).
+class KicksterCard extends StatelessWidget {
+  const KicksterCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+    this.trailing,
+    this.imageUrl,
+  });
+
+  final IconData icon;
+  final String title;
+
+  /// Linha secundária opcional (ex.: nome legal, endereço, contagem).
+  final String? subtitle;
+
+  /// Widget de apoio opcional à direita (ex.: menu de ações, badges).
+  final Widget? trailing;
+
+  /// URL da imagem ou escudo/logo exibido no card. Se nulo ou vazio, utiliza o [icon].
+  final String? imageUrl;
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasDetails = subtitle != null || trailing != null;
+    // Semântica de botão + label (acessibilidade): leitores de tela
+    // anunciam o card como ação navegável com o título do módulo/registro.
+    return Semantics(
+      button: true,
+      label: title,
+      child: Card(
+        elevation: 1,
+        shadowColor: AppColors.black.withValues(alpha: 0.08),
+        color: AppColors.surface,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.line, width: 1),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: hasDetails ? _buildRowLayout() : _buildTileLayout(),
+        ),
+      ),
+    );
+  }
+
+  /// Layout em linha (listagens): ícone à esquerda, título/subtítulo à
+  /// direita e o [trailing] na ponta.
+  Widget _buildRowLayout() {
+    // Subtítulo opcional: widget nulo é omitido pelo elemento null-aware (?).
+    final subtitleWidget = subtitle == null
+        ? null
+        : Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          );
+
+    final hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
+    final Widget leadingWidget;
+
+    if (hasImage) {
+      leadingWidget = Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.line, width: 1),
+        ),
+        padding: const EdgeInsets.all(2),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.network(
+            imageUrl!,
+            fit: BoxFit.contain,
+            cacheWidth: 96,
+            cacheHeight: 96,
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: AppColors.primary.withValues(alpha: 0.10),
+              child: Icon(icon, color: AppColors.primary, size: 24),
+            ),
+          ),
+        ),
+      );
+    } else {
+      leadingWidget = Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: AppColors.primary, size: 24),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          leadingWidget,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                ?subtitleWidget,
+              ],
+            ),
+          ),
+          ?trailing,
+        ],
+      ),
+    );
+  }
+
+  /// Layout em tile (home #433): ícone grande centralizado acima do título.
+  /// Título com [maxLines] + ellipsis em vez de `FittedBox` (#71): evita
+  /// encolher o texto em grades de 2 colunas no mobile.
+  Widget _buildTileLayout() {
+    final hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
+    final Widget iconWidget;
+
+    if (hasImage) {
+      iconWidget = Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.line, width: 1),
+        ),
+        padding: const EdgeInsets.all(2),
+        child: ClipOval(
+          child: Image.network(
+            imageUrl!,
+            fit: BoxFit.contain,
+            cacheWidth: 112,
+            cacheHeight: 112,
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: AppColors.primary.withValues(alpha: 0.10),
+              child: Icon(icon, size: 28, color: AppColors.primary),
+            ),
+          ),
+        ),
+      );
+    } else {
+      iconWidget = Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.10),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 28, color: AppColors.primary),
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        iconWidget,
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

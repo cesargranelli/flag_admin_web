@@ -1,14 +1,11 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/competition_permissions.dart';
-import '../providers/providers.dart';
-import '../utils/date_formats.dart';
-import '../widgets/app_screen.dart';
-import '../widgets/edit_restriction_note.dart';
+import '../../../../features/auth/domain/competition_permissions.dart';
+import '../../../../providers/providers.dart';
 
 /// Detalhe de uma rodada: apresenta os dados e oferece a edição.
 class RoundDetailScreen extends ConsumerWidget {
@@ -24,7 +21,7 @@ class RoundDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: round?.name ?? 'Rodada',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.rounds, route: '/rounds'),
         if (round?.name != null) BreadcrumbItem(round!.name),
       ],
@@ -49,12 +46,12 @@ class RoundDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildDetail(BuildContext context, WidgetRef ref, Round round) {
-    // P3 #471: resolve o campeonato pelo family (autoDispose) em vez de
+    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
     // assistir a lista completa.
     final compAsync = ref.watch(competitionProvider(round.competitionId));
     final competitionName = compAsync.valueOrNull?.name ?? '';
-    // Issue #261: edição da rodada exige ser criador do campeonato ou ADMIN.
-    // Issue #305: e o campeonato precisa estar em DRAFT (estrutura travada
+    // Issue #261: edição da rodada exige ser criador da competição ou ADMIN.
+    // Issue #305: e a competição precisa estar em DRAFT (estrutura travada
     // após a publicação).
     final competition = compAsync.valueOrNull;
     final isDraft = competition?.status == CompetitionStatus.draft;
@@ -69,6 +66,15 @@ class RoundDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -126,8 +132,8 @@ class RoundDetailScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Issue #347: confrontos/jogos geridos via contexto do
-                      // campeonato (rodada → jogos), sem atalho global da home.
+                      // Issue #347: confrontos/jogos geridos via contexto da
+                      // competição (rodada → jogos), sem atalho global da home.
                       KicksterButton(
                         label: 'Confrontos',
                         icon: Icons.sports,
@@ -145,9 +151,9 @@ class RoundDetailScreen extends ConsumerWidget {
                     ] else
                       EditRestrictionNote(
                         message: !isDraft
-                            ? 'Campeonato publicado — as rodadas estão '
+                            ? 'Competição publicada — as rodadas estão '
                                 'travadas.'
-                            : 'Apenas o criador do campeonato pode editar '
+                            : 'Apenas o criador da competição pode editar '
                                 'esta rodada.',
                       ),
                   ],
@@ -159,7 +165,7 @@ class RoundDetailScreen extends ConsumerWidget {
               AppInfoRow(label: 'Número', value: '${round.number}'),
               AppInfoRow(label: 'Nome', value: round.name),
               AppInfoRow(label: 'Tipo', value: round.type.label),
-              AppInfoRow(label: 'Campeonato', value: competitionName),
+              AppInfoRow(label: 'Competição', value: competitionName),
             ]),
             const SizedBox(height: 16),
             Text(

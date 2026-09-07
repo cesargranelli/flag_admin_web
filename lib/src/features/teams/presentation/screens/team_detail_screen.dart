@@ -1,14 +1,11 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/competition_permissions.dart';
-import '../providers/providers.dart';
-import '../utils/date_formats.dart';
-import '../widgets/app_screen.dart';
-import '../widgets/edit_restriction_note.dart';
+import '../../../../features/auth/domain/competition_permissions.dart';
+import '../../../../providers/providers.dart';
 
 /// Detalhe de um time: apresenta os dados e oferece a edição.
 class TeamDetailScreen extends ConsumerWidget {
@@ -24,7 +21,7 @@ class TeamDetailScreen extends ConsumerWidget {
     return AppScreen(
       title: team?.name ?? 'Time',
       breadcrumb: [
-        const BreadcrumbItem('Início', route: '/'),
+        const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.teams, route: '/teams'),
         if (team?.name != null) BreadcrumbItem(team!.name),
       ],
@@ -49,7 +46,7 @@ class TeamDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildDetail(BuildContext context, WidgetRef ref, Team team) {
-    // P3 #471: resolve o campeonato pelo family (autoDispose) em vez de
+    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
     // assistir a lista completa.
     final compAsync = ref.watch(competitionProvider(team.competitionId));
     final competitionName = compAsync.valueOrNull?.name ?? '';
@@ -60,7 +57,7 @@ class TeamDetailScreen extends ConsumerWidget {
             .map((d) => d.name)
             .firstOrNull ??
         '';
-    // Issue #261: edição do time exige ser criador do campeonato ou ADMIN.
+    // Issue #261: edição do time exige ser criador da competição ou ADMIN.
     final competition = compAsync.valueOrNull;
     final canEdit = canEditCompetition(
       ref.watch(authControllerProvider.select((a) => a.state.user)),
@@ -72,6 +69,15 @@ class TeamDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 1,
+              shadowColor: AppColors.black.withValues(alpha: 0.08),
+              color: AppColors.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line, width: 1),
+              ),
+              margin: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -79,7 +85,12 @@ class TeamDetailScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        _avatar(team, size: 64, radius: 16),
+                        KicksterAvatar(
+                          imageUrl: team.logoUrl,
+                          name: team.name,
+                          size: 64,
+                          icon: Icons.groups_outlined,
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -118,7 +129,7 @@ class TeamDetailScreen extends ConsumerWidget {
                     else
                       const EditRestrictionNote(
                         message:
-                            'Apenas o criador do campeonato pode editar '
+                            'Apenas o criador da competição pode editar '
                             'este time.',
                       ),
                   ],
@@ -148,38 +159,6 @@ class TeamDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
-    );
-  }
-
-  Widget _avatar(Team team, {required double size, required double radius}) {
-    final logo = team.logoUrl;
-    final validLogo =
-        logo != null &&
-        logo.isNotEmpty &&
-        (Uri.tryParse(logo)?.hasScheme ?? false);
-    return Container(
-      width: size,
-      height: size,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: validLogo
-          ? Image.network(
-              logo,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.groups_outlined,
-                color: AppColors.primary,
-                size: 32,
-              ),
-            )
-          : const Icon(
-              Icons.groups_outlined,
-              color: AppColors.primary,
-              size: 32,
-            ),
     );
   }
 }

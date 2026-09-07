@@ -1,25 +1,22 @@
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/competition_permissions.dart';
-import '../providers/providers.dart';
-import '../widgets/app_entity_list_screen.dart';
-import '../widgets/app_screen.dart';
-import '../widgets/edit_restriction_note.dart';
+import '../../../../features/auth/domain/competition_permissions.dart';
+import '../../../../providers/providers.dart';
 
-/// Gestão de times: lista por campeonato e acesso ao detalhe.
+/// Gestão de times: lista por competição e acesso ao detalhe.
 ///
-/// O fluxo agora é: campeonato → times.
+/// O fluxo agora é: competição → times.
 /// Os times associam-se diretamente ao competition_id (migração V24);
 /// as categories foram removidas.
 class TeamsScreen extends ConsumerStatefulWidget {
   const TeamsScreen({super.key, this.lockedCompetitionId});
 
-  /// Quando informado, a tela fica "travada" nesse campeonato (dropdown
-  /// desabilitado) — usado ao vir do detalhe do campeonato (#349).
+  /// Quando informado, a tela fica "travada" nessa competição (dropdown
+  /// desabilitado) — usado ao vir do detalhe da competição (#349).
   final String? lockedCompetitionId;
 
   @override
@@ -46,7 +43,7 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
         lockedCompetitionId ?? ref.watch(effectiveCompetitionProvider);
     final locked = lockedCompetitionId != null;
 
-    // Issue #261: inscrição de times exige ser criador do campeonato
+    // Issue #261: inscrição de times exige ser criador da competição
     // ou ADMIN (o backend já bloqueia as escritas).
     final selectedCompetitionObj = compItems
         .where((c) => c.id == effectiveComp)
@@ -57,11 +54,11 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
     );
 
     return AppScreen(
-      title: 'Times',
+      title: AppStrings.teams,
       scrollable: false,
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
-        BreadcrumbItem('Times'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
+        BreadcrumbItem(AppStrings.teams),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -84,19 +81,20 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
           Expanded(
             child: competitions.when(
               loading: () =>
-                  const AppLoading(message: 'Carregando campeonatos...'),
+                  const AppLoading(message: 'Carregando competições...'),
               error: (error, stackTrace) => AppErrorState(
-                message: 'Não foi possível carregar os campeonatos',
+                message: 'Não foi possível carregar as competições',
                 onRetry: () => ref.invalidate(competitionsProvider),
               ),
               data: (_) {
                 if (compItems.isEmpty) {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
-                    message: 'Nenhum campeonato cadastrado',
-                    description: 'Crie um campeonato para inscrever times.',
+                    message: 'Nenhuma competição cadastrada',
+                    description:
+                        'Crie uma competição para inscrever times.',
                     action: KicksterButton(
-                      label: 'Criar campeonato',
+                      label: 'Criar competição',
                       icon: Icons.add,
                       onPressed: () => context.go('/competitions/new'),
                     ),
@@ -110,8 +108,8 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                       children: [
                         KicksterDropdown<String>(
                           label: locked
-                              ? 'Campeonato (travado)'
-                              : 'Campeonato',
+                              ? 'Competição (travada)'
+                              : 'Competição',
                           value: effectiveComp,
                           items: compItems
                               .map(
@@ -136,7 +134,7 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                         if (!canEdit)
                           const EditRestrictionNote(
                             message:
-                                'Apenas o criador do campeonato pode '
+                                'Apenas o criador da competição pode '
                                 'inscrever times.',
                           ),
                       ],
@@ -164,7 +162,7 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                                         icon: Icons.groups_outlined,
                                         message: 'Nenhum time cadastrado',
                                         description:
-                                            'Inscreva o primeiro time no campeonato.',
+                                            'Inscreva o primeiro time na competição.',
                                         action: KicksterButton(
                                           label: 'Criar time',
                                           icon: Icons.add,
@@ -202,9 +200,9 @@ class _TeamsScreenState extends ConsumerState<TeamsScreen> {
                               icon: Icons.groups_outlined,
                               message: 'Nenhum time cadastrado',
                               description:
-                                  'Crie um campeonato para inscrever times.',
+                                  'Crie uma competição para inscrever times.',
                               action: KicksterButton(
-                                label: 'Criar campeonato',
+                                label: 'Criar competição',
                                 icon: Icons.add,
                                 onPressed: () =>
                                     context.go('/competitions/new'),

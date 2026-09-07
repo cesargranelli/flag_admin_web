@@ -1,13 +1,11 @@
-import 'package:flag_api/flag_api.dart';
-import 'package:flag_core/flag_core.dart';
-import 'package:flag_domain/flag_domain.dart';
+import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../providers/providers.dart';
-import '../../../../core/widgets/app_screen.dart';
-import '../../../../core/widgets/selectable_card.dart';
 
 /// Formulário de criação/edição de atleta.
 class AthleteFormScreen extends ConsumerStatefulWidget {
@@ -179,7 +177,7 @@ class _AthleteFormScreenState extends ConsumerState<AthleteFormScreen> {
     return AppScreen(
       title: _isEditing ? 'Editar atleta' : 'Novo atleta',
       breadcrumb: const [
-        BreadcrumbItem('Início', route: '/'),
+        BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.athletes, route: '/athletes'),
         BreadcrumbItem('Formulário'),
       ],
