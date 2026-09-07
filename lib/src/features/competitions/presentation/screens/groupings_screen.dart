@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../features/auth/domain/competition_permissions.dart';
 import '../../../../providers/providers.dart';
-import '../../../../features/organizations/presentation/widgets/club_assignment_modal.dart';
+import 'package:flag_admin_web/ui/organizations/widgets/club_assignment_modal.dart';
 import '../widgets/conference_form_modal.dart';
 import '../widgets/division_form_modal.dart';
 

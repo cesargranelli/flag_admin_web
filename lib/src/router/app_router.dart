@@ -23,10 +23,10 @@ import '../features/games/presentation/screens/game_form_screen.dart';
 import '../features/games/presentation/screens/game_import_screen.dart';
 import '../features/games/presentation/screens/games_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
-import '../features/organizations/presentation/screens/associate_clubs_screen.dart';
-import '../features/organizations/presentation/screens/organization_detail_screen.dart';
-import '../features/organizations/presentation/screens/organization_form_screen.dart';
-import '../features/organizations/presentation/screens/organizations_screen.dart';
+import 'package:flag_admin_web/ui/organizations/widgets/associate_clubs_screen.dart';
+import 'package:flag_admin_web/ui/organizations/widgets/organization_detail_screen.dart';
+import 'package:flag_admin_web/ui/organizations/widgets/organization_form_screen.dart';
+import 'package:flag_admin_web/ui/organizations/widgets/organizations_screen.dart';
 import '../features/rosters/presentation/screens/roster_import_screen.dart';
 import '../features/rosters/presentation/screens/rosters_screen.dart';
 import '../features/rounds/presentation/screens/round_detail_screen.dart';
@@ -42,8 +42,9 @@ import '../features/users/presentation/screens/users_screen.dart';
 import '../features/venues/presentation/screens/venue_detail_screen.dart';
 import '../features/venues/presentation/screens/venue_form_screen.dart';
 import '../features/venues/presentation/screens/venues_screen.dart';
-import '../features/institutions/presentation/screens/institutions_screen.dart';
-import '../features/institutions/presentation/screens/institution_form_screen.dart';
+import 'package:flag_admin_web/ui/institutions/widgets/institution_detail_screen.dart';
+import 'package:flag_admin_web/ui/institutions/widgets/institution_form_screen.dart';
+import 'package:flag_admin_web/ui/institutions/widgets/institutions_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -562,7 +563,49 @@ class AppRouter {
                 ),
               ],
             ),
-            StatefulShellBranch(routes:[GoRoute(path:'/institutions',name:'institutions',builder:(c,s)=>const InstitutionsScreen(),routes:[GoRoute(path:'new',name:'institutionNew',builder:(c,s)=>const InstitutionFormScreen()),GoRoute(path:':id/edit',name:'institutionEdit',builder:(c,s)=>InstitutionFormScreen(id:s.pathParameters['id']))])]),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/institutions',
+                  name: 'institutions',
+                  builder: (context, state) => const InstitutionsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      name: 'institutionNew',
+                      builder: (context, state) =>
+                          const InstitutionFormScreen(),
+                    ),
+                    GoRoute(
+                      path: ':id',
+                      name: 'institutionDetail',
+                      builder: (context, state) {
+                        final inst = state.extra is Institution
+                            ? state.extra as Institution
+                            : null;
+                        return InstitutionDetailScreen(
+                          id: state.pathParameters['id']!,
+                          institution: inst,
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: ':id/edit',
+                      name: 'institutionEdit',
+                      builder: (context, state) {
+                        final inst = state.extra is Institution
+                            ? state.extra as Institution
+                            : null;
+                        return InstitutionFormScreen(
+                          id: state.pathParameters['id'],
+                          institution: inst,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
             // Branch Usuários (somente ADMIN).
             StatefulShellBranch(
               routes: [

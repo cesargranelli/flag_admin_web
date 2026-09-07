@@ -162,12 +162,6 @@ class _RostersScreenState extends ConsumerState<RostersScreen> {
     final clubs = <Organization>[];
     final seenOrgIds = <String>{};
     for (final org in orgs) {
-      final type = org.organizationType;
-      if (type != null &&
-          type != OrganizationType.club &&
-          type != OrganizationType.university) {
-        continue;
-      }
       if (seenOrgIds.contains(org.id)) continue;
       seenOrgIds.add(org.id);
       clubs.add(org);

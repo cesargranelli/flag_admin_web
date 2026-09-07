@@ -6,6 +6,19 @@ import 'package:flag_admin_web/src/features/auth/data/services/firebase_auth_ser
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flag_admin_web/data/repositories/organization_repository.dart';
+import 'package:flag_admin_web/data/services/organization_service.dart';
+import 'package:flag_admin_web/ui/organizations/view_models/organization_view_model.dart';
+import 'package:flag_admin_web/ui/organizations/view_models/organization_detail_view_model.dart';
+import 'package:flag_admin_web/ui/organizations/view_models/organization_form_view_model.dart';
+import 'package:flag_admin_web/ui/organizations/view_models/associate_clubs_view_model.dart';
+
+import 'package:flag_admin_web/data/repositories/institution_repository.dart';
+import 'package:flag_admin_web/data/services/institution_service.dart';
+import 'package:flag_admin_web/ui/institutions/view_models/institution_view_model.dart';
+import 'package:flag_admin_web/ui/institutions/view_models/institution_detail_view_model.dart';
+import 'package:flag_admin_web/ui/institutions/view_models/institution_form_view_model.dart';
+
 import '../router/app_router.dart';
 
 /// Gerenciador de sessão do Admin Web (persiste dados de sessão Firebase/JWT).
@@ -45,37 +58,109 @@ final routerProvider = Provider<GoRouter>((ref) {
   return AppRouter.build(auth);
 });
 
-/// Serviço de organizações.
-final organizationApiProvider = Provider<OrganizationApi>(
-  (ref) => OrganizationApi(ref.watch(apiClientProvider)),
+
+/// Serviço de organizações (REST).
+final organizationServiceProvider = Provider<OrganizationService>(
+  (ref) => OrganizationService(ref.watch(apiClientProvider)),
 );
+
+/// Repository de organizações (Single Source of Truth, Caching).
+final organizationRepositoryProvider = Provider<OrganizationRepository>(
+  (ref) => OrganizationRepository(
+    service: ref.watch(organizationServiceProvider),
+  ),
+);
+
+/// ViewModel de organizações (UI State e Commands).
+final organizationViewModelProvider =
+    ChangeNotifierProvider<OrganizationViewModel>(
+  (ref) => OrganizationViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+  ),
+);
+
+/// ViewModel de detalhes de organização.
+final organizationDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<OrganizationDetailViewModel, String>(
+  (ref, id) => OrganizationDetailViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+    organizationId: id,
+  ),
+);
+
+/// ViewModel do formulário de organização.
+final organizationFormViewModelProvider =
+    ChangeNotifierProvider.autoDispose<OrganizationFormViewModel>(
+  (ref) => OrganizationFormViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+  ),
+);
+
+/// ViewModel de associação de clubes.
+final associateClubsViewModelProvider =
+    ChangeNotifierProvider.autoDispose<AssociateClubsViewModel>(
+  (ref) => AssociateClubsViewModel(),
+);
+
+/// Serviço de agremiações (REST).
+final institutionServiceProvider = Provider<InstitutionService>(
+  (ref) => ApiInstitutionService(ref.watch(apiClientProvider)),
+);
+
+/// Repository de agremiações (Single Source of Truth, Caching).
+final institutionRepositoryProvider = Provider<InstitutionRepository>(
+  (ref) => InstitutionRepository(
+    service: ref.watch(institutionServiceProvider),
+  ),
+);
+
+/// ViewModel de agremiações (UI State e Commands).
+final institutionViewModelProvider =
+    ChangeNotifierProvider<InstitutionViewModel>(
+  (ref) => InstitutionViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+  ),
+);
+
+/// ViewModel de detalhes de agremiação.
+final institutionDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<InstitutionDetailViewModel, String>(
+  (ref, id) => InstitutionDetailViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+    institutionId: id,
+  ),
+);
+
+/// ViewModel do formulário de agremiação.
+final institutionFormViewModelProvider =
+    ChangeNotifierProvider.autoDispose<InstitutionFormViewModel>(
+  (ref) => InstitutionFormViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+  ),
+);
+
 
 /// Listagem de organizações da tela de gestão.
 ///
-/// Listagem via REST (`GET /api/v1/organizations?includeDisabled=false`),
-/// expondo apenas organizações ATIVAS (decisão de visibilidade #52).
+/// Listagem via Repository, expondo apenas organizações ATIVAS.
 /// Recarrega via `ref.invalidate(organizationsProvider)` após mutações.
 final organizationsProvider = FutureProvider<List<Organization>>(
-  (ref) => ref.watch(organizationApiProvider).list(),
+  (ref) => ref.watch(organizationRepositoryProvider).getOrganizations(),
 );
 
 /// Listagem para ADMIN: inclui desativadas quando [includeDisabled].
-///
-/// Permanece via REST — a decisão de visibilidade (#52) mantém o controle de
-/// organizações desativadas no backend (protegido por role ADMIN).
 final organizationsAdminProvider =
     FutureProvider.family<List<Organization>, bool>(
   (ref, includeDisabled) => ref
-      .watch(organizationApiProvider)
-      .list(includeDisabled: includeDisabled),
+      .watch(organizationRepositoryProvider)
+      .getOrganizations(includeDisabled: includeDisabled),
 );
 
 /// Detalhe de uma organização por id.
-///
-/// Permanece via REST (leitura pontual, não realtime) — os consumidores
-/// secundários (venue_detail etc.) e o controle de INACTIVE não mudam na #52.
-final organizationProvider = FutureProvider.autoDispose.family<Organization, String>(
-  (ref, id) => ref.watch(organizationApiProvider).getById(id),
+final organizationProvider =
+    FutureProvider.autoDispose.family<Organization, String>(
+  (ref, id) =>
+      ref.watch(organizationRepositoryProvider).getOrganization(id),
 );
 
 /// Serviço de competições.
@@ -245,8 +330,24 @@ final venuesProvider = FutureProvider<List<Venue>>(
 final venueProvider = FutureProvider.autoDispose.family<Venue, String>(
   (ref, id) => ref.watch(venueApiProvider).getById(id),
 );
-final institutionApiProvider = Provider<InstitutionApi>((ref)=> InstitutionApi(ref.watch(apiClientProvider)));
-final institutionsProvider = FutureProvider<List<Institution>>((ref)=> ref.watch(institutionApiProvider).list());
-final institutionProvider = FutureProvider.autoDispose.family<Institution,String>((ref,id)=> ref.watch(institutionApiProvider).getById(id));
+/// Listagem de agremiações da tela de gestão.
+final institutionsProvider = FutureProvider<List<Institution>>(
+  (ref) => ref.watch(institutionRepositoryProvider).getInstitutions(),
+);
+
+/// Listagem para ADMIN: inclui desativadas quando [includeDisabled].
+final institutionsAdminProvider =
+    FutureProvider.family<List<Institution>, bool>(
+  (ref, includeDisabled) => ref
+      .watch(institutionRepositoryProvider)
+      .getInstitutions(forceRefresh: false),
+);
+
+/// Detalhe de uma agremiação por id.
+final institutionProvider =
+    FutureProvider.autoDispose.family<Institution, String>(
+  (ref, id) =>
+      ref.watch(institutionRepositoryProvider).getInstitution(id),
+);
 
 

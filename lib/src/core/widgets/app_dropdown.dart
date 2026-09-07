@@ -26,13 +26,17 @@ Widget appDropdownItem(IconData? icon, String label) {
   );
 }
 
-/// Ícone correspondente ao tipo de organização (issue #365).
+/// Ícone correspondente ao tipo de organização (apenas federações, ligas, associações).
 IconData organizationTypeIcon(OrganizationType? type) => switch (type) {
       OrganizationType.federation => Icons.account_balance_outlined,
       OrganizationType.league => Icons.emoji_events_outlined,
       OrganizationType.association => Icons.groups_outlined,
-      OrganizationType.university => Icons.school_outlined,
-      OrganizationType.club => Icons.shield_outlined,
-      OrganizationType.other => Icons.business_outlined,
       null => Icons.business_outlined,
+    };
+
+/// Ícone correspondente ao tipo de agremiação (clubes e universidades).
+IconData institutionTypeIcon(InstitutionType? type) => switch (type) {
+      InstitutionType.club => Icons.shield_outlined,
+      InstitutionType.university => Icons.school_outlined,
+      null => Icons.sports_outlined,
     };
