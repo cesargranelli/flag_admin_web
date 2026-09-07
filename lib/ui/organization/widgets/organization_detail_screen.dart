@@ -129,68 +129,269 @@ class _OrganizationDetailScreenState
     );
   }
 
-  /// Seção 1 — Identificação (#323): card hero consolidado + dados.
+  Color? _parseHex(String? text) {
+    if (text == null) return null;
+    var raw = text.trim();
+    if (raw.isEmpty) return null;
+    if (!raw.startsWith('#')) raw = '#$raw';
+    if (!RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(raw)) return null;
+    try {
+      return Color(int.parse('0xFF${raw.substring(1)}'));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Widget _buildLogoFallback(Organization org, Color primary) {
+    final initials = org.abbreviation?.isNotEmpty == true
+        ? org.abbreviation!.toUpperCase()
+        : (org.tradeName.isNotEmpty ? org.tradeName.substring(0, 1).toUpperCase() : 'O');
+    return Container(
+      color: AppColors.surfaceMuted,
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Seção 1 — Identificação (#323 / #93): Card Hero Esportivo Kickster com cores e logo real.
   Widget _identificacaoCard(Organization org) {
+    final primary = _parseHex(org.primaryColor) ?? AppColors.primary;
+    final secondary = _parseHex(org.secondaryColor) ?? const Color(0xFF1877F2);
+    final tertiary = _parseHex(org.tertiaryColor);
+    final quaternary = _parseHex(org.quaternaryColor);
+
+    final isLightPrimary = primary.computeLuminance() > 0.55;
+    final bannerTextColor = isLightPrimary ? AppColors.black : Colors.white;
+
     return Card(
-      elevation: 1,
+      elevation: 2,
       shadowColor: AppColors.black.withValues(alpha: 0.08),
       color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: AppColors.line, width: 1),
       ),
       margin: EdgeInsets.zero,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 160),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Banner Superior com Gradiente das Cores da Organizacao
+          Container(
+            height: 100,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  primary,
+                  Color.lerp(primary, secondary, 0.5) ?? secondary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                KicksterAvatar(
-                  imageUrl: org.logoUrl,
-                  name: org.tradeName,
-                  icon: Icons.business_outlined,
-                  size: 64,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        org.tradeName,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        org.legalName,
-                        style: const TextStyle(
-                            fontSize: 14, color: AppColors.textSecondary),
-                      ),
+                // Indicador de Cores Oficiais
+                Row(
+                  children: [
+                    _buildSwatchBadge(primary, 'Cor primária'),
+                    const SizedBox(width: 6),
+                    _buildSwatchBadge(secondary, 'Cor secundária'),
+                    if (tertiary != null) ...[
+                      const SizedBox(width: 6),
+                      _buildSwatchBadge(tertiary, 'Cor terciária'),
                     ],
-                  ),
+                    if (quaternary != null) ...[
+                      const SizedBox(width: 6),
+                      _buildSwatchBadge(quaternary, 'Cor quaternária'),
+                    ],
+                  ],
                 ),
+                // Sigla Oficial no Banner
+                if (org.abbreviation != null && org.abbreviation!.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: bannerTextColor.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: bannerTextColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      org.abbreviation!.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: bannerTextColor,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 16),
-            if (org.abbreviation != null && org.abbreviation!.isNotEmpty)
-              AppInfoRow(label: 'Sigla', value: org.abbreviation!),
-            if (org.organizationType != null)
-              AppInfoRow(label: 'Tipo', value: org.organizationType!.label),
-            if (org.document != null && org.document!.isNotEmpty)
-              AppInfoRow(label: 'CNPJ', value: org.document!),
-            if (org.createdAt != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                'Criada em ${formatBrDate(org.createdAt!)}',
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
-              ),
-            ],
+          ),
+
+          // Area de Identidade com Avatar Hero de 88px e Dados
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar Hero de 88px ampliado com borda e sombra
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.black.withValues(alpha: 0.14),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: ClipOval(
+                        child: org.logoUrl != null && org.logoUrl!.trim().isNotEmpty
+                            ? Image.network(
+                                org.logoUrl!.trim(),
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildLogoFallback(org, primary),
+                              )
+                            : _buildLogoFallback(org, primary),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+
+                    // Titulos e Badges
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            org.tradeName,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            org.legalName,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              if (org.organizationType != null)
+                                Chip(
+                                  avatar: Icon(
+                                    organizationTypeIcon(org.organizationType),
+                                    size: 16,
+                                    color: primary,
+                                  ),
+                                  label: Text(
+                                    org.organizationType!.label,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  backgroundColor: primary.withValues(alpha: 0.08),
+                                  side: BorderSide(color: primary.withValues(alpha: 0.2)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              if (org.country.isNotEmpty)
+                                Chip(
+                                  avatar: const Icon(
+                                    Icons.flag_outlined,
+                                    size: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  label: Text(
+                                    org.country,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  backgroundColor: AppColors.surfaceMuted,
+                                  side: const BorderSide(color: AppColors.line),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Divider(color: AppColors.line, height: 1),
+                const SizedBox(height: 16),
+
+                // Detalhes Cadastrais
+                if (org.abbreviation != null && org.abbreviation!.isNotEmpty)
+                  AppInfoRow(label: 'Sigla Oficial', value: org.abbreviation!),
+                if (org.document != null && org.document!.isNotEmpty)
+                  AppInfoRow(label: 'CNPJ', value: org.document!),
+                if (org.createdAt != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Cadastrada em ${formatBrDate(org.createdAt!)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwatchBadge(Color color, String tooltip) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 3,
+            ),
           ],
         ),
       ),
@@ -238,11 +439,11 @@ class _OrganizationDetailScreenState
     );
   }
 
-  /// Seção 5 — Identidade (#323): renomeado de 'Visual'.
+  /// Seção 5 — Identidade (#323 / #93): cores completas e logo visual.
   Widget _identidadeCard(Organization org) {
     return AppInfoCard(
       children: [
-        if (org.locale.isNotEmpty) AppInfoRow(label: 'Locale', value: org.locale),
+        if (org.locale.isNotEmpty) AppInfoRow(label: 'Idioma', value: org.locale),
         if (org.primaryColor != null && org.primaryColor!.isNotEmpty)
           AppInfoColorRow(label: 'Cor primária', hex: org.primaryColor!),
         if (org.secondaryColor != null && org.secondaryColor!.isNotEmpty)
@@ -251,8 +452,51 @@ class _OrganizationDetailScreenState
           AppInfoColorRow(label: 'Cor terciária', hex: org.tertiaryColor!),
         if (org.quaternaryColor != null && org.quaternaryColor!.isNotEmpty)
           AppInfoColorRow(label: 'Cor quaternária', hex: org.quaternaryColor!),
-        if (org.logoUrl != null && org.logoUrl!.isNotEmpty)
-          AppInfoRow(label: 'Logo', value: org.logoUrl!),
+        if (org.logoUrl != null && org.logoUrl!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 140,
+                child: Text(
+                  'Logotipo',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.line),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    org.logoUrl!,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
