@@ -20,6 +20,7 @@ export 'l10n/app_strings.dart';
 
 // Utils
 export 'utils/document_utils.dart';
+export 'utils/geo_constants.dart';
 export '../utils/date_formats.dart';
 export '../utils/mutation.dart';
 

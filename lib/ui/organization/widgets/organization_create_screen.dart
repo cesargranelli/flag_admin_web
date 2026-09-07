@@ -240,22 +240,43 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
                   _documentField(),
                 ]),
                 _section('Presidente', Icons.person_outline, [
-                  _field('Nome do presidente', _presidentName,
-                      hint: 'Informe o nome do presidente',
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Informe o nome do presidente'
-                          : null),
-                  const SizedBox(height: 12),
-                  _presidentCpfField(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _field('Nome do presidente', _presidentName,
+                            hint: 'Informe o nome do presidente',
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Informe o nome do presidente'
+                                : null),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: _presidentCpfField(),
+                      ),
+                    ],
+                  ),
                 ]),
                 _section('Contato', Icons.contact_mail_outlined, [
-                  _emailField(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _emailField()),
+                      const SizedBox(width: 12),
+                      Expanded(child: _phoneField()),
+                    ],
+                  ),
                   const SizedBox(height: 12),
-                  _phoneField(),
-                  const SizedBox(height: 12),
-                  _websiteField(),
-                  const SizedBox(height: 12),
-                  _instagramField(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _websiteField()),
+                      const SizedBox(width: 12),
+                      Expanded(child: _instagramField()),
+                    ],
+                  ),
                 ]),
                 _section('Localização', Icons.location_on_outlined, [
                   _countryDropdown(),
@@ -371,8 +392,8 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
 
   Widget _typeDropdown() {
     return KicksterDropdown<OrganizationType>(
-      label: 'Tipo',
-      hint: 'Selecione o tipo da organização',
+      label: '',
+      hint: 'Tipo de organização',
       value: _type,
       items: OrganizationType.values
           .map((t) => DropdownMenuItem(
@@ -530,8 +551,8 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
       label: 'Estado',
       hint: 'Selecione o estado',
       value: _state.text.isEmpty ? null : _state.text,
-      values: [for (final uf in _ufs) uf.$1],
-      labels: [for (final uf in _ufs) '${uf.$2} (${uf.$1})'],
+      values: [for (final uf in brazilUfs) uf.$1],
+      labels: [for (final uf in brazilUfs) '${uf.$2} (${uf.$1})'],
       onChanged: (value) {
         setState(() {
           _state.text = value ?? '';
@@ -557,43 +578,10 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
     );
   }
 
-  static const _ufs = <(String, String)>[
-    ('AC', 'Acre'), ('AL', 'Alagoas'), ('AP', 'Amapá'), ('AM', 'Amazonas'),
-    ('BA', 'Bahia'), ('CE', 'Ceará'), ('DF', 'Distrito Federal'),
-    ('ES', 'Espírito Santo'), ('GO', 'Goiás'), ('MA', 'Maranhão'),
-    ('MT', 'Mato Grosso'), ('MS', 'Mato Grosso do Sul'), ('MG', 'Minas Gerais'),
-    ('PA', 'Pará'), ('PB', 'Paraíba'), ('PR', 'Paraná'),
-    ('PE', 'Pernambuco'), ('PI', 'Piauí'), ('RJ', 'Rio de Janeiro'),
-    ('RN', 'Rio Grande do Norte'), ('RS', 'Rio Grande do Sul'),
-    ('RO', 'Rondônia'), ('RR', 'Roraima'), ('SC', 'Santa Catarina'),
-    ('SP', 'São Paulo'), ('SE', 'Sergipe'), ('TO', 'Tocantins'),
-  ];
-
-  static const _countries = <_Option>[
-    _Option('Brasil', 'BR'),
-    _Option('Argentina', 'AR'),
-    _Option('Estados Unidos', 'US'),
-    _Option('Portugal', 'PT'),
-    _Option('Espanha', 'ES'),
-    _Option('França', 'FR'),
-    _Option('Alemanha', 'DE'),
-    _Option('Reino Unido', 'GB'),
-    _Option('Itália', 'IT'),
-    _Option('Canadá', 'CA'),
-    _Option('México', 'MX'),
-    _Option('Colômbia', 'CO'),
-    _Option('Chile', 'CL'),
-    _Option('Peru', 'PE'),
-    _Option('Uruguai', 'UY'),
-    _Option('Paraguai', 'PY'),
-    _Option('Japão', 'JP'),
-    _Option('Austrália', 'AU'),
-  ];
-
-  List<_Option> get _countryOptions {
-    final options = [..._countries];
+  List<CountryOption> get _countryOptions {
+    final options = [...countryOptions];
     if (_country.isNotEmpty && !options.any((o) => o.code == _country)) {
-      options.insert(0, _Option(_country, _country));
+      options.insert(0, CountryOption(_country, _country));
     }
     return options;
   }
@@ -612,10 +600,4 @@ class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScr
     return '(${d.substring(0, 2)}) ${d.substring(2, 7)}-'
         '${d.substring(7, 11)}';
   }
-}
-
-class _Option {
-  const _Option(this.name, this.code);
-  final String name;
-  final String code;
 }

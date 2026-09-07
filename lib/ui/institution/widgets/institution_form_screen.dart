@@ -52,6 +52,14 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
   bool _saved = false;
   String? _errorMessage;
 
+  List<CountryOption> get _countryOptionList {
+    final list = [...countryOptions];
+    if (_country.isNotEmpty && !list.any((c) => c.code == _country)) {
+      list.insert(0, CountryOption(_country, _country));
+    }
+    return list;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -229,7 +237,6 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
   Widget build(BuildContext context) {
     final isSubmitting =
         ref.watch(institutionFormViewModelProvider).isSubmitting;
-    final orgsAsync = ref.watch(organizationsProvider);
     final isEditing = widget.id != null;
     final title = isEditing ? 'Editar Agremiação' : 'Nova Agremiação';
 
@@ -275,7 +282,8 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                     children: [
                       Expanded(
                         child: KicksterDropdown<InstitutionType>(
-                          label: 'Tipo de Agremiação *',
+                          label: '',
+                          hint: 'Tipo de agremiação',
                           value: _type,
                           items: InstitutionType.values.map((t) {
                             return DropdownMenuItem(
@@ -300,9 +308,9 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: KicksterInput(
-                          label: 'Sigla / Abreviação',
+                          label: '',
                           controller: _abbreviation,
-                          hintText: 'Ex: SPS, POLI',
+                          hintText: 'Sigla / Abreviação',
                         ),
                       ),
                     ],
@@ -313,7 +321,8 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                     children: [
                       Expanded(
                         child: KicksterDropdown<DocumentType>(
-                          label: 'Tipo de Documento',
+                          label: '',
+                          hint: 'Tipo de Documento',
                           value: _documentType,
                           items: DocumentType.values.map((d) {
                             return DropdownMenuItem(
@@ -330,9 +339,9 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: KicksterInput(
-                          label: 'Número do Documento',
+                          label: '',
                           controller: _document,
-                          hintText: '00.000.000/0000-00',
+                          hintText: 'Número do Documento',
                         ),
                       ),
                     ],
@@ -409,27 +418,22 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                   ),
                 ]),
 
-                // 4. LOCALIZAÇÃO
+                // 4. LOCALIZAÇÃO (Padronizada com Organização)
                 _section('Localização', Icons.location_on_outlined, [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: KicksterInput(
-                          label: 'Cidade',
-                          controller: _city,
-                          hintText: 'Ex: São Paulo',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: KicksterInput(
-                          label: 'Estado (UF)',
-                          controller: _state,
-                          hintText: 'Ex: SP',
-                        ),
-                      ),
-                    ],
+                  _countryDropdown(),
+                  const SizedBox(height: 12),
+                  if (_country == 'BR')
+                    _stateDropdown()
+                  else
+                    KicksterInput(
+                      label: 'Estado (opcional)',
+                      controller: _state,
+                    ),
+                  const SizedBox(height: 12),
+                  KicksterInput(
+                    label: 'Cidade (opcional)',
+                    controller: _city,
+                    hintText: 'Ex: São Paulo',
                   ),
                 ]),
 
@@ -444,71 +448,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                   quaternaryColorController: _quaternaryColor,
                   onDirty: _markDirty,
                 ),
-                const SizedBox(height: 20),
-
-                // 6. FILIAÇÃO A ORGANIZAÇÕES
-                _section(
-                  'Filiação a Organizações',
-                  Icons.account_balance_outlined,
-                  [
-                    const Text(
-                      'Selecione as organizações (ligas, federações ou confederações) às quais esta agremiação é filiada:',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    orgsAsync.when(
-                      data: (orgs) {
-                        if (orgs.isEmpty) {
-                          return const Text(
-                            'Nenhuma organização cadastrada na plataforma.',
-                            style: TextStyle(color: AppColors.textSecondary),
-                          );
-                        }
-                        return Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: orgs.map((org) {
-                            final isAffiliated = _selectedOrgs.contains(org.id);
-                            return FilterChip(
-                              selected: isAffiliated,
-                              avatar: Icon(
-                                organizationTypeIcon(org.organizationType),
-                                size: 16,
-                                color: isAffiliated
-                                    ? Colors.white
-                                    : AppColors.textSecondary,
-                              ),
-                              label: Text(
-                                org.tradeName.isNotEmpty
-                                    ? org.tradeName
-                                    : org.legalName,
-                              ),
-                              onSelected: (val) {
-                                setState(() {
-                                  if (val) {
-                                    _selectedOrgs.add(org.id);
-                                  } else {
-                                    _selectedOrgs.remove(org.id);
-                                  }
-                                });
-                                _markDirty();
-                              },
-                            );
-                          }).toList(),
-                        );
-                      },
-                      loading: () => const AppLoading(),
-                      error: (err, _) => Text(
-                        'Erro ao carregar organizações: $err',
-                        style: const TextStyle(color: AppColors.danger),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 24),
 
                 // BOTÕES DE AÇÃO
                 Row(
@@ -605,6 +545,39 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _countryDropdown() {
+    return KicksterDropdown<String>(
+      label: 'País',
+      value: _country,
+      values: [for (final c in _countryOptionList) c.code],
+      labels: [for (final c in _countryOptionList) c.name],
+      onChanged: (value) {
+        if (value == null) return;
+        setState(() {
+          _country = value;
+          _state.clear();
+        });
+        _markDirty();
+      },
+    );
+  }
+
+  Widget _stateDropdown() {
+    return KicksterDropdown<String>(
+      label: 'Estado',
+      hint: 'Selecione o estado',
+      value: _state.text.isEmpty ? null : _state.text,
+      values: [for (final uf in brazilUfs) uf.$1],
+      labels: [for (final uf in brazilUfs) '${uf.$2} (${uf.$1})'],
+      onChanged: (value) {
+        setState(() {
+          _state.text = value ?? '';
+        });
+        _markDirty();
+      },
     );
   }
 }
