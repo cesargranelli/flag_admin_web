@@ -1,11 +1,11 @@
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flag_admin_web/src/providers/providers.dart';
+import 'components/organization_identity_section.dart';
 
 /// Formulário de criação de organização em página única (#455): todas as
 /// seções (dados básicos, presidente, contato, localização, identidade)
@@ -14,15 +14,15 @@ import 'package:flag_admin_web/src/providers/providers.dart';
 ///
 /// V250: organizações não são editáveis após a criação — este formulário
 /// apenas cria. Alterações de cadastro não são suportadas.
-class OrganizationFormScreen extends ConsumerStatefulWidget {
-  const OrganizationFormScreen({super.key});
+class OrganizationCreateScreen extends ConsumerStatefulWidget {
+  const OrganizationCreateScreen({super.key});
 
   @override
-  ConsumerState<OrganizationFormScreen> createState() =>
-      _OrganizationFormScreenState();
+  ConsumerState<OrganizationCreateScreen> createState() =>
+      _OrganizationCreateScreenState();
 }
 
-class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen> {
+class _OrganizationCreateScreenState extends ConsumerState<OrganizationCreateScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _tradeName;
@@ -267,30 +267,23 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
                   const SizedBox(height: 12),
                   _field('Cidade (opcional)', _city),
                 ]),
-                _section('Identidade', Icons.palette_outlined, [
-                  _brandPreview(),
-                  const SizedBox(height: 16),
-                  _logoField(),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _colorField('Cor primária (opcional)', _primaryColor),
-                      const SizedBox(width: 12),
-                      _colorField('Cor secundária (opcional)', _secondaryColor),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _colorField('Cor terciária (opcional)', _tertiaryColor),
-                      const SizedBox(width: 12),
-                      _colorField('Cor quaternária (opcional)', _quaternaryColor),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _localeDropdown(),
-                ]),
-                const SizedBox(height: 8),
+                OrganizationIdentitySection(
+                  tradeNameController: _tradeName,
+                  abbreviationController: _abbreviation,
+                  logoUrlController: _logoUrl,
+                  primaryColorController: _primaryColor,
+                  secondaryColorController: _secondaryColor,
+                  tertiaryColorController: _tertiaryColor,
+                  quaternaryColorController: _quaternaryColor,
+                  localeController: _locale,
+                  localeOptions: const [
+                    ('pt-BR', 'Português (Brasil)'),
+                    ('en-US', 'English (US)'),
+                    ('es-ES', 'Español'),
+                  ],
+                  onDirty: _markDirty,
+                ),
+                const SizedBox(height: 16),
                 KicksterButton(
                   label: 'Criar organização',
                   icon: Icons.check,
@@ -548,186 +541,6 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
     );
   }
 
-  Widget _logoField() {
-    return KicksterInput(
-      label: 'URL do logo (opcional)',
-      controller: _logoUrl,
-      keyboardType: TextInputType.url,
-      hintText: 'https://exemplo.com/logo.png',
-      validator: (v) {
-        if (v == null || v.trim().isEmpty) return null;
-        final uri = Uri.tryParse(v.trim());
-        return (uri != null &&
-                (uri.scheme == 'http' || uri.scheme == 'https') &&
-                uri.host.isNotEmpty)
-            ? null
-            : 'URL inválida';
-      },
-    );
-  }
-
-  Widget _colorField(String label, TextEditingController controller) {
-    return Expanded(
-      child: KicksterInput(
-        label: label,
-        controller: controller,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[#0-9a-fA-F]')),
-          LengthLimitingTextInputFormatter(7),
-        ],
-        onChanged: (v) {
-          final t = v.toUpperCase();
-          if (t != v) {
-            controller.value = TextEditingValue(
-              text: t,
-              selection: TextSelection.collapsed(offset: t.length),
-            );
-          }
-        },
-        validator: (v) {
-          if (v == null || v.trim().isEmpty) return null;
-          return RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(v.trim())
-              ? null
-              : 'Use #RRGGBB';
-        },
-        hintText: '#FD6B22',
-        prefix: IconButton(
-          tooltip: 'Escolher cor',
-          onPressed: () => _openColorPicker(controller),
-          icon: Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: _parseHex(controller.text) ?? AppColors.primary,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.line),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _localeDropdown() {
-    return KicksterDropdown<String>(
-      label: 'Idioma',
-      value: _locale.text,
-      values: [for (final l in _localeOptions) l.code],
-      labels: [for (final l in _localeOptions) l.name],
-      onChanged: (value) {
-        if (value == null) return;
-        setState(() => _locale.text = value);
-        _markDirty();
-      },
-    );
-  }
-
-  Widget _brandPreview() {
-    final primary = _parseHex(_primaryColor.text) ?? AppColors.primary;
-    final secondary = _parseHex(_secondaryColor.text) ?? AppColors.secondary;
-    final tertiary = _parseHex(_tertiaryColor.text);
-    final quaternary = _parseHex(_quaternaryColor.text);
-    final logo = _logoUrl.text.trim();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Prévia da marca',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: primary,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              if (logo.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    logo,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Icon(
-                      organizationTypeIcon(_type),
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                )
-              else
-                Icon(organizationTypeIcon(_type),
-                    color: Colors.white, size: 40),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _tradeName.text.isEmpty
-                          ? 'Nome da organização'
-                          : _tradeName.text,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 80,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: secondary,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Paleta completa (até 4 cores) quando terciária/quaternária definidas.
-        if (tertiary != null || quaternary != null) ...[
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _previewSwatch(primary),
-              _previewSwatch(secondary),
-              if (tertiary != null) _previewSwatch(tertiary),
-              if (quaternary != null) _previewSwatch(quaternary),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _previewSwatch(Color color) {
-    return Container(
-      width: 28,
-      height: 28,
-      margin: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.textSecondary, width: 0.5),
-      ),
-    );
-  }
-
   Widget _field(
     String label,
     TextEditingController controller, {
@@ -742,16 +555,6 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
       hintText: hint,
       validator: validator,
     );
-  }
-
-  Future<void> _openColorPicker(TextEditingController controller) async {
-    final picked = await showDialog<String>(
-      context: context,
-      builder: (_) => _ColorPickerDialog(initial: controller.text),
-    );
-    if (picked != null) {
-      setState(() => controller.text = picked);
-    }
   }
 
   static const _ufs = <(String, String)>[
@@ -787,24 +590,10 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
     _Option('Austrália', 'AU'),
   ];
 
-  static const _locales = <_Option>[
-    _Option('Português (Brasil)', 'pt-BR'),
-    _Option('English (US)', 'en-US'),
-    _Option('Español', 'es-ES'),
-  ];
-
   List<_Option> get _countryOptions {
     final options = [..._countries];
     if (_country.isNotEmpty && !options.any((o) => o.code == _country)) {
       options.insert(0, _Option(_country, _country));
-    }
-    return options;
-  }
-
-  List<_Option> get _localeOptions {
-    final options = [..._locales];
-    if (!options.any((o) => o.code == _locale.text)) {
-      options.insert(0, _Option(_locale.text, _locale.text));
     }
     return options;
   }
@@ -825,139 +614,8 @@ class _OrganizationFormScreenState extends ConsumerState<OrganizationFormScreen>
   }
 }
 
-Color? _parseHex(String hex) {
-  final h = hex.trim().replaceAll('#', '');
-  if (h.length != 6) return null;
-  final value = int.tryParse(h, radix: 16);
-  if (value == null) return null;
-  return Color(0xFF000000 | value);
-}
-
 class _Option {
   const _Option(this.name, this.code);
   final String name;
   final String code;
-}
-
-class _ColorPickerDialog extends StatefulWidget {
-  const _ColorPickerDialog({this.initial});
-
-  final String? initial;
-
-  @override
-  State<_ColorPickerDialog> createState() => _ColorPickerDialogState();
-}
-
-class _ColorPickerDialogState extends State<_ColorPickerDialog> {
-  late final TextEditingController _hex;
-
-  static const _presets = <String>[
-    '#FD6B22', '#F15223', '#FF6628', '#4FBF67', '#F04C4C', '#040415',
-    '#1B1D21', '#737373', '#4C9AFF', '#7C5CFF', '#2EC4B6', '#FFD166',
-    '#EF476F', '#06D6A0', '#FFFFFF', '#000000',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    final initial = widget.initial ?? '';
-    _hex = TextEditingController(text: initial.replaceAll('#', ''));
-  }
-
-  @override
-  void dispose() {
-    _hex.dispose();
-    super.dispose();
-  }
-
-  void _apply(String hex) {
-    setState(() {
-      _hex.text = hex.replaceAll('#', '');
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final preview = _parseHex('#${_hex.text}') ?? Colors.transparent;
-    return AlertDialog(
-      title: const Text('Escolher cor'),
-      content: SizedBox(
-        width: 320,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            KicksterInput(
-              label: 'Código hex',
-              controller: _hex,
-              hintText: 'FD6B22',
-              prefix: const Text('#'),
-              suffixIcon: const Icon(Icons.circle, color: AppColors.line),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9a-fA-F]')),
-                LengthLimitingTextInputFormatter(6),
-              ],
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: preview,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.black, width: 1),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '#${_hex.text.toUpperCase()}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final hex in _presets)
-                  InkWell(
-                    onTap: () => _apply(hex),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: _parseHex(hex) ?? Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.black, width: 1),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        KicksterButton(
-          label: 'Cancelar',
-          variant: KicksterButtonVariant.text,
-          onPressed: () => Navigator.pop(context),
-        ),
-        KicksterButton(
-          label: 'Aplicar',
-          onPressed: () {
-            final hex = _hex.text.trim();
-            Navigator.pop(context, '#${hex.toUpperCase()}');
-          },
-        ),
-      ],
-    );
-  }
 }

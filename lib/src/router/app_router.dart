@@ -23,10 +23,10 @@ import '../features/games/presentation/screens/game_form_screen.dart';
 import '../features/games/presentation/screens/game_import_screen.dart';
 import '../features/games/presentation/screens/games_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
-import 'package:flag_admin_web/ui/organizations/widgets/associate_clubs_screen.dart';
-import 'package:flag_admin_web/ui/organizations/widgets/organization_detail_screen.dart';
-import 'package:flag_admin_web/ui/organizations/widgets/organization_form_screen.dart';
-import 'package:flag_admin_web/ui/organizations/widgets/organizations_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/associate_clubs_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
 import '../features/rosters/presentation/screens/roster_import_screen.dart';
 import '../features/rosters/presentation/screens/rosters_screen.dart';
 import '../features/rounds/presentation/screens/round_detail_screen.dart';
@@ -193,13 +193,13 @@ class AppRouter {
                 GoRoute(
                   path: '/organizations',
                   name: 'organizations',
-                  builder: (context, state) => const OrganizationsScreen(),
+                  builder: (context, state) => const OrganizationListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
                       name: 'organizationNew',
                       builder: (context, state) =>
-                          const OrganizationFormScreen(),
+                          const OrganizationCreateScreen(),
                     ),
                     GoRoute(
                       path: ':id',

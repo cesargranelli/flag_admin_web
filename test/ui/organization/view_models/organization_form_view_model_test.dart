@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flag_admin_web/data/repositories/organization_repository.dart';
-import 'package:flag_admin_web/ui/organizations/view_models/organization_form_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_form_view_model.dart';
 import '../../../../testing/fakes/fake_organization_service.dart';
 
 void main() {

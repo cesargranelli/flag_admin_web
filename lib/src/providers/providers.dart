@@ -12,10 +12,10 @@ import 'package:go_router/go_router.dart';
 
 import 'package:flag_admin_web/data/repositories/organization_repository.dart';
 import 'package:flag_admin_web/data/services/organization_service.dart';
-import 'package:flag_admin_web/ui/organizations/view_models/organization_view_model.dart';
-import 'package:flag_admin_web/ui/organizations/view_models/organization_detail_view_model.dart';
-import 'package:flag_admin_web/ui/organizations/view_models/organization_form_view_model.dart';
-import 'package:flag_admin_web/ui/organizations/view_models/associate_clubs_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_form_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
 
 import 'package:flag_admin_web/data/repositories/institution_repository.dart';
 import 'package:flag_admin_web/data/services/institution_service.dart';

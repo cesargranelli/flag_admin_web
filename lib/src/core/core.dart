@@ -43,6 +43,7 @@ export 'widgets/kickster_button.dart';
 export 'widgets/kickster_card.dart';
 export 'widgets/kickster_checkbox.dart';
 export 'widgets/kickster_chip.dart';
+export 'widgets/kickster_color_picker_dialog.dart';
 export 'widgets/kickster_dialog.dart';
 export 'widgets/kickster_dropdown.dart';
 export 'widgets/kickster_empty_state.dart';
