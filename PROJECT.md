@@ -1,5 +1,13 @@
 # Project: Flag Football Integrated Platform Evolution & Architectural Refactoring
 
+## Operational Guidelines & Lean Workflow
+- **No GitHub Issues via CLI**: Não criar, listar ou manipular issues via `gh issue` para evitar overhead de tokens.
+- **Direct Development on `develop`**: Desenvolvimento de tarefas e ajustes contínuos direto na branch `develop` (sem micro-branches por detalhe).
+- **Semantical Commits**: Commits atômicos e descritivos diretamente na `develop`.
+- **Release Milestone Merges**: Merge na `main` e criação de tags de release somente na finalização de módulos completos.
+- **Concise Responses**: Foco em respostas ultra-objetivas e no código relevante.
+- **Quality Gates**: `dart analyze` e `flutter test` obrigatórios localmente antes de cada commit.
+
 ## Architecture
 - **Distributed Repositories Overview**:
   - `flag_admin_web`: Flutter Web application for platform administration and sports management. Follows ADR-001 strict layer separation: Domain (`lib/domain/models/`), Data (`lib/data/services/` and `lib/data/repositories/`), Presentation (`lib/ui/<module>/view_models/` and `lib/ui/<module>/widgets/` 1:1 MVVM), and Kickster Design Kit.
