@@ -17,8 +17,10 @@ import 'package:flag_admin_web/ui/organization/view_models/organization_detail_v
 import 'package:flag_admin_web/ui/organization/view_models/organization_form_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flag_admin_web/data/repositories/institution_repository.dart';
 import 'package:flag_admin_web/data/services/institution_service.dart';
+import 'package:flag_admin_web/data/services/storage_service.dart';
 import 'package:flag_admin_web/ui/institutions/view_models/institution_view_model.dart';
 import 'package:flag_admin_web/ui/institutions/view_models/institution_detail_view_model.dart';
 import 'package:flag_admin_web/ui/institutions/view_models/institution_form_view_model.dart';
@@ -46,6 +48,16 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     service: ref.watch(authServiceProvider),
     session: ref.watch(sessionManagerProvider),
   );
+});
+
+/// Instância do Firebase Storage.
+final firebaseStorageProvider = Provider<FirebaseStorage>(
+  (ref) => FirebaseStorage.instance,
+);
+
+/// Serviço de upload e armazenamento de mídia (Firebase Storage).
+final storageServiceProvider = Provider<StorageService>((ref) {
+  return FirebaseStorageService(ref.watch(firebaseStorageProvider));
 });
 
 /// Serviço de autenticação REST legado (compatibilidade com approvals_screen).

@@ -66,3 +66,4 @@ export 'widgets/search_field.dart';
 export 'widgets/selectable_card.dart';
 export 'widgets/edit_restriction_note.dart';
 export 'widgets/kickster_breadcrumb.dart';
+export 'widgets/kickster_image_uploader.dart';
