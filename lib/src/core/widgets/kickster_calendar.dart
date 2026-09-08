@@ -27,7 +27,7 @@ const List<String> _kMonthNames = [
 /// alinhado ao padrão Kickster.
 const List<String> _kWeekdayLabels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
-/// Abre o calendário do design system em um diálogo modal.
+/// Abre o calendário Kickster em um diálogo modal.
 ///
 /// Substituto direto de `showDatePicker` nas telas do admin web.
 /// Comportamento:
@@ -35,7 +35,7 @@ const List<String> _kWeekdayLabels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 /// - Possui botões de rodapé "Cancelar" e "Selecionar" no padrão Kickster;
 /// - Duplo toque ou seleção direta confirma e fecha o diálogo;
 /// - Fechar por fora do diálogo/ESC/Cancelar retorna `null`.
-Future<DateTime?> showAppCalendarDialog(
+Future<DateTime?> showKicksterCalendarDialog(
   BuildContext context, {
   required DateTime initialDate,
   required DateTime firstDate,
@@ -51,7 +51,7 @@ Future<DateTime?> showAppCalendarDialog(
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SingleChildScrollView(
-        child: AppCalendar(
+        child: KicksterCalendar(
           initialDate: initialDate,
           firstDate: firstDate,
           lastDate: lastDate,
@@ -60,6 +60,20 @@ Future<DateTime?> showAppCalendarDialog(
     ),
   );
 }
+
+/// Alias para manter retrocompatibilidade imediata.
+Future<DateTime?> showAppCalendarDialog(
+  BuildContext context, {
+  required DateTime initialDate,
+  required DateTime firstDate,
+  required DateTime lastDate,
+}) =>
+    showKicksterCalendarDialog(
+      context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
 
 /// Calendário do design system Kickster / Flag Platform.
 ///
@@ -73,8 +87,8 @@ Future<DateTime?> showAppCalendarDialog(
 /// - Dia selecionado com círculo preenchido em `AppColors.primary` (#083879) e texto branco;
 /// - Dia de hoje com anel sutil `AppColors.primary`;
 /// - Botões de ação no rodapé: "Cancelar" e "Selecionar" no padrão KicksterButton.
-class AppCalendar extends StatefulWidget {
-  const AppCalendar({
+class KicksterCalendar extends StatefulWidget {
+  const KicksterCalendar({
     super.key,
     required this.initialDate,
     required this.firstDate,
@@ -91,10 +105,13 @@ class AppCalendar extends StatefulWidget {
   final DateTime lastDate;
 
   @override
-  State<AppCalendar> createState() => _AppCalendarState();
+  State<KicksterCalendar> createState() => _KicksterCalendarState();
 }
 
-class _AppCalendarState extends State<AppCalendar> {
+/// Alias para manter retrocompatibilidade com código existente.
+typedef AppCalendar = KicksterCalendar;
+
+class _KicksterCalendarState extends State<KicksterCalendar> {
   late DateTime _selected;
   late DateTime _displayedMonth;
 

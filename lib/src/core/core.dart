@@ -28,7 +28,7 @@ export '../utils/mutation.dart';
 export 'session/session_manager.dart';
 
 // Widgets
-export 'widgets/app_calendar.dart';
+export 'widgets/kickster_calendar.dart';
 export 'widgets/app_dropdown.dart';
 export 'widgets/app_empty_state.dart';
 export 'widgets/app_error_state.dart';
