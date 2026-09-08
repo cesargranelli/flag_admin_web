@@ -117,9 +117,9 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
         maxHeight: widget.maxHeight,
         alignment: widget.alignment,
         items: widget.items,
-        onClose: _closeMenu,
+        onDismiss: (restoreFocus) => _closeMenu(restoreFocus: restoreFocus),
         onSelect: (item) {
-          _closeMenu();
+          _closeMenu(restoreFocus: true);
           item.onTap?.call();
         },
       ),
@@ -129,11 +129,17 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
     widget.onOpenChanged?.call(true);
   }
 
-  void _closeMenu() {
+  void _closeMenu({bool restoreFocus = false}) {
     _overlayEntry?.remove();
     _overlayEntry = null;
-    // Devolve o foco ao trigger (UX de teclado após Esc/seleção).
-    _triggerFocusNode.requestFocus();
+    if (restoreFocus) {
+      // Devolve o foco ao trigger apenas em navegação por teclado (Esc/seleção).
+      _triggerFocusNode.requestFocus();
+    } else {
+      // Ao clicar fora, desfaz o foco do trigger para evitar que o card ancestral
+      // retenha estado de foco visual.
+      _triggerFocusNode.unfocus();
+    }
     if (mounted) setState(() => _menuOpen = false);
     widget.onOpenChanged?.call(false);
   }
@@ -184,7 +190,7 @@ class _KicksterMenuOverlay extends StatefulWidget {
     required this.maxHeight,
     required this.alignment,
     required this.items,
-    required this.onClose,
+    required this.onDismiss,
     required this.onSelect,
   });
 
@@ -195,7 +201,7 @@ class _KicksterMenuOverlay extends StatefulWidget {
   final double? maxHeight;
   final Alignment alignment;
   final List<KicksterMenuItem> items;
-  final VoidCallback onClose;
+  final ValueChanged<bool> onDismiss;
   final ValueChanged<KicksterMenuItem> onSelect;
 
   @override
@@ -254,7 +260,7 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
     }
     final key = event.logicalKey;
     if (key == LogicalKeyboardKey.escape) {
-      widget.onClose();
+      widget.onDismiss(true);
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.arrowDown) {
@@ -290,11 +296,11 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
     return SizedBox.expand(
       child: Stack(
         children: [
-          // Tocar fora fecha.
+          // Tocar fora fecha sem devolver foco ao trigger.
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: widget.onClose,
+              onTap: () => widget.onDismiss(false),
             ),
           ),
           // Menu posicionado abaixo do anchor acompanhando o scroll com LayerLink.

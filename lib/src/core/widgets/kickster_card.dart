@@ -59,6 +59,13 @@ class KicksterCard extends StatelessWidget {
         ),
         child: InkWell(
           onTap: onTap,
+          focusColor: Colors.transparent,
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.focused)) {
+              return Colors.transparent;
+            }
+            return null; // Mantém hover e pressed padrão
+          }),
           child: hasDetails ? _buildRowLayout() : _buildTileLayout(),
         ),
       ),

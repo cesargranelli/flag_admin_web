@@ -23,6 +23,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
     final compAsync = ref.watch(competitionRepositoryProvider);
     final user = ref.watch(authControllerProvider.select((a) => a.state.user));
     final canWrite = user != null;
+    final organizationsAsync = ref.watch(organizationsProvider);
 
     return FutureBuilder<Competition>(
       future: competition != null
@@ -56,6 +57,12 @@ class CompetitionDetailScreen extends ConsumerWidget {
             ),
           );
         }
+
+        final orgs = organizationsAsync.valueOrNull;
+        final matchedOrg = orgs?.where((o) => o.id == comp.organizationId).firstOrNull;
+        final orgName = (comp.organizationName != null && comp.organizationName!.trim().isNotEmpty)
+            ? comp.organizationName!
+            : (matchedOrg?.tradeName ?? matchedOrg?.legalName);
 
         return AppScreen(
           title: comp.displayName,
@@ -110,10 +117,10 @@ class CompetitionDetailScreen extends ConsumerWidget {
                               color: AppColors.textPrimary,
                             ),
                         ),
-                        if (comp.organizationName != null) ...[
+                        if (orgName != null && orgName.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(
-                            'Organização Promotora: ',
+                            'Organização Promotora: $orgName',
                             style: const TextStyle(
                               fontSize: 14,
                               color: AppColors.textSecondary,
