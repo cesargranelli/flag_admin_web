@@ -10,6 +10,10 @@ class Team {
   /// Id da agremiação/clube a qual a equipe pertence.
   final String? organizationId;
 
+  /// Id da agremiação / instituição dona do time.
+  final String? clubId;
+  final String? clubName;
+
   /// Id opcional da competição (para compatibilidade com endpoints legados).
   final String? competitionId;
   final String? divisionId;
@@ -31,6 +35,8 @@ class Team {
   const Team({
     required this.id,
     this.organizationId,
+    this.clubId,
+    this.clubName,
     this.competitionId,
     this.divisionId,
     required this.name,
@@ -48,6 +54,8 @@ class Team {
   factory Team.fromJson(Map<String, dynamic> json) => Team(
         id: json['id'] as String,
         organizationId: json['organizationId'] as String?,
+        clubId: json['clubId'] as String?,
+        clubName: json['clubName'] as String?,
         competitionId: json['competitionId'] as String?,
         divisionId: json['divisionId'] as String?,
         name: (json['name'] as String?) ?? '',
@@ -71,6 +79,8 @@ class Team {
   Map<String, dynamic> toJson() => {
         'id': id,
         if (organizationId != null) 'organizationId': organizationId,
+        if (clubId != null) 'clubId': clubId,
+        if (clubName != null) 'clubName': clubName,
         if (competitionId != null) 'competitionId': competitionId,
         if (divisionId != null) 'divisionId': divisionId,
         'name': name,
