@@ -272,208 +272,233 @@ class _OrganizationAffiliatesScreenState
     OrganizationAffiliatesViewModel vm,
     List<Affiliation> affiliates,
   ) {
-    return ListView.separated(
-      itemCount: affiliates.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final affil = affiliates[index];
-
-        Color statusColor;
-        String statusLabel;
-        IconData statusIcon;
-
-        if (affil.isApproved) {
-          statusColor = AppColors.success;
-          statusLabel = 'Filiado';
-          statusIcon = Icons.check_circle_outline;
-        } else if (affil.isPending) {
-          statusColor = Colors.orange;
-          statusLabel = 'Pendente';
-          statusIcon = Icons.hourglass_top_outlined;
-        } else if (affil.isRejected) {
-          statusColor = AppColors.danger;
-          statusLabel = 'Recusado';
-          statusIcon = Icons.cancel_outlined;
-        } else {
-          statusColor = AppColors.textSecondary;
-          statusLabel = affil.status;
-          statusIcon = Icons.info_outline;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        int crossAxisCount = 1;
+        if (width >= 1180) {
+          crossAxisCount = 3;
+        } else if (width >= 720) {
+          crossAxisCount = 2;
         }
 
-        final typeLabel = affil.institutionType == 'UNIVERSITY'
-            ? 'Universidade'
-            : 'Clube';
-
-        return Card(
-          elevation: 1,
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: AppColors.line),
+        return GridView.builder(
+          itemCount: affiliates.length,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            mainAxisExtent: 110,
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                KicksterAvatar(
-                  name: affil.institutionName,
-                  imageUrl: affil.institutionLogoUrl,
-                  size: 44,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+          itemBuilder: (context, index) {
+            final affil = affiliates[index];
+
+            Color statusColor;
+            String statusLabel;
+            IconData statusIcon;
+
+            if (affil.isApproved) {
+              statusColor = AppColors.success;
+              statusLabel = 'Filiado';
+              statusIcon = Icons.check_circle_outline;
+            } else if (affil.isPending) {
+              statusColor = Colors.orange;
+              statusLabel = 'Pendente';
+              statusIcon = Icons.hourglass_top_outlined;
+            } else if (affil.isRejected) {
+              statusColor = AppColors.danger;
+              statusLabel = 'Recusado';
+              statusIcon = Icons.cancel_outlined;
+            } else {
+              statusColor = AppColors.textSecondary;
+              statusLabel = affil.status;
+              statusIcon = Icons.info_outline;
+            }
+
+            final typeLabel = affil.institutionType == 'UNIVERSITY'
+                ? 'Universidade'
+                : 'Clube';
+
+            return Card(
+              elevation: 1,
+              color: AppColors.surface,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.line),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  children: [
+                    KicksterAvatar(
+                      name: affil.institutionName,
+                      imageUrl: affil.institutionLogoUrl,
+                      size: 44,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Flexible(
-                            child: Text(
-                              affil.institutionName,
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  affil.institutionName,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  typeLabel,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Temporada ${affil.season} • ${affil.requestedBy ?? "Responsável"}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (affil.rejectionReason != null &&
+                              affil.rejectionReason!.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Motivo: ${affil.rejectionReason}',
                               style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.danger,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              typeLabel,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
+                          ],
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: statusColor.withValues(alpha: 0.3)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(statusIcon, size: 12, color: statusColor),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      statusLabel,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: statusColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Temporada ${affil.season} • Solicitado por: ${affil.requestedBy ?? "Responsável"}',
-                        style: const TextStyle(
-                          fontSize: 12,
+                    ),
+                    const SizedBox(width: 6),
+                    if (affil.isPending) ...[
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Aprovar filiação',
+                        icon: const Icon(Icons.check, size: 18, color: AppColors.success),
+                        onPressed: () async {
+                          final ok = await showKicksterConfirm(
+                            context: context,
+                            title: 'Aprovar Filiação',
+                            content:
+                                'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
+                            confirmLabel: 'Aprovar',
+                          );
+                          if (ok == true) {
+                            await vm.approveAffiliation(affil.id);
+                          }
+                        },
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Recusar filiação',
+                        icon: const Icon(Icons.close, size: 18, color: AppColors.danger),
+                        onPressed: () =>
+                            _showRejectAffiliationModal(context, vm, affil),
+                      ),
+                    ],
+                    KicksterMenuAnchor(
+                      width: 200,
+                      alignment: Alignment.topRight,
+                      trigger: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(
+                          Icons.more_vert,
+                          size: 16,
                           color: AppColors.textSecondary,
                         ),
                       ),
-                      if (affil.rejectionReason != null &&
-                          affil.rejectionReason!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'Motivo da recusa: ${affil.rejectionReason}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.danger,
+                      items: [
+                        KicksterMenuItem(
+                          child: const Row(
+                            children: [
+                              Icon(Icons.visibility_outlined,
+                                  size: 16, color: AppColors.primary),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Ver Agremiação',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ],
                           ),
+                          onTap: () =>
+                              context.push('/institutions/${affil.institutionId}'),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 14, color: statusColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        statusLabel,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (affil.isPending) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    tooltip: 'Aprovar filiação',
-                    icon: const Icon(Icons.check, color: AppColors.success),
-                    onPressed: () async {
-                      final ok = await showKicksterConfirm(
-                        context: context,
-                        title: 'Aprovar Filiação',
-                        content:
-                            'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
-                        confirmLabel: 'Aprovar',
-                      );
-                      if (ok == true) {
-                        await vm.approveAffiliation(affil.id);
-                      }
-                    },
-                  ),
-                  IconButton(
-                    tooltip: 'Recusar filiação',
-                    icon: const Icon(Icons.close, color: AppColors.danger),
-                    onPressed: () =>
-                        _showRejectAffiliationModal(context, vm, affil),
-                  ),
-                ],
-                const SizedBox(width: 4),
-                KicksterMenuAnchor(
-                  width: 220,
-                  alignment: Alignment.topRight,
-                  trigger: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceMuted,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.more_vert,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  items: [
-                    KicksterMenuItem(
-                      child: const Row(
-                        children: [
-                          Icon(Icons.visibility_outlined,
-                              size: 18, color: AppColors.primary),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Ver Detalhes do Clube',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () =>
-                          context.push('/institutions/${affil.institutionId}'),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

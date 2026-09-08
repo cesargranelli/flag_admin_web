@@ -602,117 +602,155 @@ class _InstitutionDetailScreenState
 
     showDialog(
       context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (ctx, setModalState) {
-          return AlertDialog(
-            backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Row(
-              children: [
-                Icon(Icons.account_balance_outlined, color: AppColors.primary),
-                SizedBox(width: 12),
-                Text('Solicitar Filiação'),
-              ],
-            ),
-            content: SizedBox(
-              width: 440,
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      'Selecione a Liga ou Federação à qual esta agremiação deseja solicitar filiação para a temporada:',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 16),
-                    ref.watch(openAffiliationWindowsProvider).when(
-                      data: (List<AffiliationWindow> windows) {
-                        if (windows.isEmpty) {
-                          return Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                            ),
-                            child: const Text(
-                              'Não há organizações com período de filiação aberto no momento.',
-                              style: TextStyle(fontSize: 13, color: Colors.orange),
-                            ),
-                          );
-                        }
+      builder: (dialogCtx) => Consumer(
+        builder: (context, ref, _) {
+          final windowsAsync = ref.watch(openAffiliationWindowsProvider);
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            KicksterDropdown<String>(
-                              label: 'Liga / Federação com Inscrições Abertas *',
-                              value: selectedOrgId,
-                              values: windows.map((w) => w.organizationId).toList(),
-                              labels: windows.map((w) => '${w.organizationName} (${w.season})').toList(),
-                              onChanged: (v) {
-                                setModalState(() {
-                                  selectedOrgId = v;
-                                  if (v != null) {
-                                    final win = windows.firstWhere((w) => w.organizationId == v);
-                                    seasonCtrl.text = win.season;
-                                  }
-                                });
-                              },
-                            ),
-                            const SizedBox(height: 14),
-                            KicksterInput(
-                              label: 'Temporada (Ano) *',
-                              controller: seasonCtrl,
-                              readOnly: true,
-                              hintText: 'Ex: 2026',
-                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a temporada' : null,
-                            ),
-                          ],
-                        );
-                      },
-                      loading: () => const AppLoading(message: 'Consultando períodos de inscrição...'),
-                      error: (e, _) => Text('Erro: $e', style: const TextStyle(color: AppColors.danger)),
-                    ),
+          return StatefulBuilder(
+            builder: (ctx, setModalState) {
+              final windows = windowsAsync.valueOrNull ?? [];
+              final hasWindows = windows.isNotEmpty;
+
+              return AlertDialog(
+                backgroundColor: AppColors.surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: const Row(
+                  children: [
+                    Icon(Icons.account_balance_outlined, color: AppColors.primary),
+                    SizedBox(width: 12),
+                    Text('Solicitar Filiação'),
                   ],
                 ),
-              ),
-            ),
-            actions: [
-              KicksterButton(
-                label: 'Cancelar',
-                variant: KicksterButtonVariant.text,
-                onPressed: () => Navigator.of(dialogCtx).pop(),
-              ),
-              KicksterButton(
-                label: 'Enviar Solicitação',
-                icon: Icons.send_outlined,
-                loading: vm.isRequestingAffiliation,
-                onPressed: () async {
-                  if (selectedOrgId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Selecione uma organização')),
-                    );
-                    return;
-                  }
-                  if (!formKey.currentState!.validate()) return;
+                content: SizedBox(
+                  width: 440,
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Selecione a Liga ou Federação à qual esta agremiação deseja solicitar filiação para a temporada:',
+                          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                        const SizedBox(height: 16),
+                        windowsAsync.when(
+                          data: (List<AffiliationWindow> wins) {
+                            if (wins.isEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.info_outline, size: 20, color: Colors.orange),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Não há organizações com período de filiação aberto no momento.',
+                                        style: TextStyle(fontSize: 13, color: Colors.orange, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
 
-                  final ok = await vm.requestAffiliation(
-                    organizationId: selectedOrgId!,
-                    season: seasonCtrl.text.trim(),
-                  );
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                KicksterDropdown<String>(
+                                  label: 'Liga / Federação com Inscrições Abertas *',
+                                  value: selectedOrgId,
+                                  values: wins.map((w) => w.organizationId).toList(),
+                                  labels: wins.map((w) => '${w.organizationName} (${w.season})').toList(),
+                                  onChanged: (v) {
+                                    setModalState(() {
+                                      selectedOrgId = v;
+                                      if (v != null) {
+                                        final win = wins.firstWhere((w) => w.organizationId == v);
+                                        seasonCtrl.text = win.season;
+                                      }
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 14),
+                                KicksterInput(
+                                  label: 'Temporada (Ano) *',
+                                  controller: seasonCtrl,
+                                  readOnly: true,
+                                  hintText: 'Ex: 2026',
+                                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a temporada' : null,
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Center(child: AppLoading(message: 'Consultando períodos de inscrição...')),
+                          ),
+                          error: (e, _) => Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.danger.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text('Erro ao consultar inscrições: $e',
+                                      style: const TextStyle(fontSize: 12, color: AppColors.danger)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                actions: [
+                  KicksterButton(
+                    label: 'Cancelar',
+                    variant: KicksterButtonVariant.text,
+                    onPressed: () => Navigator.of(dialogCtx).pop(),
+                  ),
+                  if (hasWindows)
+                    KicksterButton(
+                      label: 'Enviar Solicitação',
+                      icon: Icons.send_outlined,
+                      loading: vm.isRequestingAffiliation,
+                      onPressed: () async {
+                        if (selectedOrgId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Selecione uma organização')),
+                          );
+                          return;
+                        }
+                        if (!formKey.currentState!.validate()) return;
 
-                  if (ok && dialogCtx.mounted) {
-                    Navigator.of(dialogCtx).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Solicitação de filiação enviada com sucesso!')),
-                    );
-                  }
-                },
-              ),
-            ],
+                        final ok = await vm.requestAffiliation(
+                          organizationId: selectedOrgId!,
+                          season: seasonCtrl.text.trim(),
+                        );
+
+                        if (ok && dialogCtx.mounted) {
+                          Navigator.of(dialogCtx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Solicitação de filiação enviada com sucesso!')),
+                          );
+                        }
+                      },
+                    ),
+                ],
+              );
+            },
           );
         },
       ),
