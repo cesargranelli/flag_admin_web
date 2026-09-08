@@ -108,6 +108,34 @@ class OrganizationRepository {
     return res;
   }
 
+  /// Retorna as janelas de filiação cadastradas por uma organização.
+  Future<List<AffiliationWindow>> getAffiliationWindows(String organizationId) =>
+      _service.getAffiliationWindows(organizationId);
+
+  /// Retorna todas as janelas de filiação abertas no momento em qualquer organização.
+  Future<List<AffiliationWindow>> getOpenAffiliationWindows() =>
+      _service.getOpenAffiliationWindows();
+
+  /// Abre ou atualiza um período de filiação.
+  Future<AffiliationWindow> openAffiliationWindow(
+    String organizationId,
+    Map<String, dynamic> body,
+  ) async {
+    final res = await _service.openAffiliationWindow(organizationId, body);
+    clearCache();
+    return res;
+  }
+
+  /// Encerra um período de filiação para uma temporada.
+  Future<AffiliationWindow> closeAffiliationWindow(
+    String organizationId,
+    String season,
+  ) async {
+    final res = await _service.closeAffiliationWindow(organizationId, season);
+    clearCache();
+    return res;
+  }
+
   /// Limpa o cache local em memória.
   void clearCache() {
     _cache.clear();

@@ -162,6 +162,12 @@ final organizationDetailViewModelProvider =
   ),
 );
 
+/// Lista de janelas de filiação abertas no momento (para qualquer organização).
+final openAffiliationWindowsProvider =
+    FutureProvider.autoDispose<List<AffiliationWindow>>(
+  (ref) => ref.watch(organizationRepositoryProvider).getOpenAffiliationWindows(),
+);
+
 /// ViewModel dedicada para a tela de Consulta de Agremiações Filiadas (ADR-001 / MVVM 1:1).
 final organizationAffiliatesViewModelProvider =
     ChangeNotifierProvider.autoDispose.family<OrganizationAffiliatesViewModel, String>(

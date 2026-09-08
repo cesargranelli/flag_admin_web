@@ -18,7 +18,12 @@ abstract class OrganizationService {
   Future<List<Affiliation>> getAffiliations(String organizationId, {String? season, String? status});
   Future<Affiliation> approveAffiliation(String organizationId, String affiliationId);
   Future<Affiliation> rejectAffiliation(String organizationId, String affiliationId, String reason);
+  Future<List<AffiliationWindow>> getAffiliationWindows(String organizationId);
+  Future<List<AffiliationWindow>> getOpenAffiliationWindows();
+  Future<AffiliationWindow> openAffiliationWindow(String organizationId, Map<String, dynamic> body);
+  Future<AffiliationWindow> closeAffiliationWindow(String organizationId, String season);
 }
+
 
 /// Implementação padrão consumindo [ApiClient].
 class ApiOrganizationService implements OrganizationService {
@@ -97,6 +102,42 @@ class ApiOrganizationService implements OrganizationService {
         '/api/v1/organizations/$organizationId/affiliations/$affiliationId/reject',
         {'reason': reason},
         Affiliation.fromJson,
+      );
+
+  @override
+  Future<List<AffiliationWindow>> getAffiliationWindows(String organizationId) =>
+      _client.getList(
+        '/api/v1/organizations/$organizationId/affiliation-windows',
+        AffiliationWindow.fromJson,
+      );
+
+  @override
+  Future<List<AffiliationWindow>> getOpenAffiliationWindows() =>
+      _client.getList(
+        '/api/v1/affiliation-windows/open',
+        AffiliationWindow.fromJson,
+      );
+
+  @override
+  Future<AffiliationWindow> openAffiliationWindow(
+    String organizationId,
+    Map<String, dynamic> body,
+  ) =>
+      _client.post(
+        '/api/v1/organizations/$organizationId/affiliation-windows',
+        body,
+        AffiliationWindow.fromJson,
+      );
+
+  @override
+  Future<AffiliationWindow> closeAffiliationWindow(
+    String organizationId,
+    String season,
+  ) =>
+      _client.post(
+        '/api/v1/organizations/$organizationId/affiliation-windows/$season/close',
+        <String, dynamic>{},
+        AffiliationWindow.fromJson,
       );
 }
 

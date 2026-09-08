@@ -40,3 +40,4 @@ export 'models/team_roster.dart';
 export 'models/user.dart';
 export 'models/venue.dart';
 export 'package:flag_admin_web/domain/models/institution.dart';
+export 'package:flag_admin_web/domain/models/affiliation_window.dart';

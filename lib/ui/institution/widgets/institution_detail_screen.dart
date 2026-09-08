@@ -604,8 +604,6 @@ class _InstitutionDetailScreenState
       context: context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setModalState) {
-          final orgsAsync = ref.watch(organizationsProvider);
-
           return AlertDialog(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -629,27 +627,54 @@ class _InstitutionDetailScreenState
                       style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 16),
-                    orgsAsync.when(
-                      data: (orgs) {
-                        return KicksterDropdown<String>(
-                          label: 'Organização (Liga / Federação) *',
-                          value: selectedOrgId,
-                          values: orgs.map((o) => o.id).toList(),
-                          labels: orgs
-                              .map((o) => o.tradeName.isNotEmpty ? o.tradeName : o.legalName)
-                              .toList(),
-                          onChanged: (v) => setModalState(() => selectedOrgId = v),
+                    ref.watch(openAffiliationWindowsProvider).when(
+                      data: (List<AffiliationWindow> windows) {
+                        if (windows.isEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                            ),
+                            child: const Text(
+                              'Não há organizações com período de filiação aberto no momento.',
+                              style: TextStyle(fontSize: 13, color: Colors.orange),
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            KicksterDropdown<String>(
+                              label: 'Liga / Federação com Inscrições Abertas *',
+                              value: selectedOrgId,
+                              values: windows.map((w) => w.organizationId).toList(),
+                              labels: windows.map((w) => '${w.organizationName} (${w.season})').toList(),
+                              onChanged: (v) {
+                                setModalState(() {
+                                  selectedOrgId = v;
+                                  if (v != null) {
+                                    final win = windows.firstWhere((w) => w.organizationId == v);
+                                    seasonCtrl.text = win.season;
+                                  }
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 14),
+                            KicksterInput(
+                              label: 'Temporada (Ano) *',
+                              controller: seasonCtrl,
+                              readOnly: true,
+                              hintText: 'Ex: 2026',
+                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a temporada' : null,
+                            ),
+                          ],
                         );
                       },
-                      loading: () => const AppLoading(message: 'Carregando organizações...'),
+                      loading: () => const AppLoading(message: 'Consultando períodos de inscrição...'),
                       error: (e, _) => Text('Erro: $e', style: const TextStyle(color: AppColors.danger)),
-                    ),
-                    const SizedBox(height: 14),
-                    KicksterInput(
-                      label: 'Temporada (Ano) *',
-                      controller: seasonCtrl,
-                      hintText: 'Ex: 2026',
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a temporada' : null,
                     ),
                   ],
                 ),

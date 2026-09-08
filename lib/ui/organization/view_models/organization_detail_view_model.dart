@@ -14,6 +14,9 @@ class OrganizationDetailViewModel extends ChangeNotifier {
   List<Affiliation> _affiliations = [];
   List<Affiliation> get affiliations => _affiliations;
 
+  List<AffiliationWindow> _windows = [];
+  List<AffiliationWindow> get windows => _windows;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -23,6 +26,9 @@ class OrganizationDetailViewModel extends ChangeNotifier {
   bool _isReviewingAffiliation = false;
   bool get isReviewingAffiliation => _isReviewingAffiliation;
 
+  bool _isSavingWindow = false;
+  bool get isSavingWindow => _isSavingWindow;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -31,6 +37,14 @@ class OrganizationDetailViewModel extends ChangeNotifier {
 
   String _selectedSeason = '2026';
   String get selectedSeason => _selectedSeason;
+
+  AffiliationWindow? get currentWindow {
+    try {
+      return _windows.firstWhere((w) => w.season == _selectedSeason);
+    } catch (_) {
+      return null;
+    }
+  }
 
   OrganizationDetailViewModel({
     required OrganizationRepository repository,
@@ -89,6 +103,68 @@ class OrganizationDetailViewModel extends ChangeNotifier {
       _affiliationsErrorMessage = e.toString();
     } finally {
       _isLoadingAffiliations = false;
+      notifyListeners();
+    }
+
+    await loadWindows();
+  }
+
+  /// Carrega as janelas cadastradas da organização.
+  Future<void> loadWindows() async {
+    try {
+      _windows = await _repository.getAffiliationWindows(organizationId);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Abre ou atualiza um período de inscrições de filiação.
+  Future<bool> openAffiliationWindow({
+    required String season,
+    required String title,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? instructions,
+  }) async {
+    _isSavingWindow = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.openAffiliationWindow(organizationId, {
+        'season': season,
+        'title': title,
+        'startDate': startDate.toIso8601String().split('T').first,
+        'endDate': endDate.toIso8601String().split('T').first,
+        'instructions': instructions,
+      });
+      await loadWindows();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isSavingWindow = false;
+      notifyListeners();
+    }
+  }
+
+  /// Encerra as inscrições da temporada selecionada.
+  Future<bool> closeAffiliationWindow(String season) async {
+    _isSavingWindow = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.closeAffiliationWindow(organizationId, season);
+      await loadWindows();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isSavingWindow = false;
       notifyListeners();
     }
   }

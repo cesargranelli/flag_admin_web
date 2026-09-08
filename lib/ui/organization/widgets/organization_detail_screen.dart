@@ -554,6 +554,89 @@ class _OrganizationDetailScreenState
             const Divider(color: AppColors.line),
             const SizedBox(height: 16),
 
+            // 1.1 Status e Controle do Período de Inscrições da Temporada
+            Builder(builder: (ctx) {
+              final win = vm.currentWindow;
+              final isOpen = win?.isOpen ?? false;
+
+              return Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: isOpen
+                      ? AppColors.success.withValues(alpha: 0.06)
+                      : AppColors.surfaceMuted.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isOpen
+                        ? AppColors.success.withValues(alpha: 0.25)
+                        : AppColors.line,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isOpen ? Icons.event_available : Icons.event_busy,
+                      size: 20,
+                      color: isOpen ? AppColors.success : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isOpen
+                                ? 'Inscrições Abertas (Temporada ${vm.selectedSeason})'
+                                : 'Inscrições Encerradas / Fechadas',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isOpen ? AppColors.success : AppColors.textPrimary,
+                            ),
+                          ),
+                          if (win != null && isOpen) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Prazo: até ${win.endDate.day.toString().padLeft(2, "0")}/${win.endDate.month.toString().padLeft(2, "0")}/${win.endDate.year}',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (isOpen)
+                      KicksterButton(
+                        label: 'Encerrar Inscrições',
+                        variant: KicksterButtonVariant.outline,
+                        loading: vm.isSavingWindow,
+                        onPressed: () async {
+                          final ok = await showKicksterConfirm(
+                            context: context,
+                            title: 'Encerrar Inscrições',
+                            content: 'Deseja encerrar o período de filiações para a temporada ${vm.selectedSeason}?',
+                            confirmLabel: 'Encerrar',
+                            danger: true,
+                          );
+                          if (ok == true) {
+                            await vm.closeAffiliationWindow(vm.selectedSeason);
+                          }
+                        },
+                      )
+                    else
+                      KicksterButton(
+                        label: 'Abrir Período',
+                        icon: Icons.add,
+                        variant: KicksterButtonVariant.outline,
+                        onPressed: () => _showOpenWindowModal(context, vm),
+                      ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 16),
+            const Divider(color: AppColors.line),
+            const SizedBox(height: 16),
+
             // 2. Inbox de Triagem Imediata de Solicitações Pendentes
             if (vm.isLoadingAffiliations)
               const Center(child: AppLoading(message: 'Carregando filiações...'))
@@ -667,6 +750,219 @@ class _OrganizationDetailScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showOpenWindowModal(
+    BuildContext context,
+    OrganizationDetailViewModel vm,
+  ) {
+    final seasonCtrl = TextEditingController(text: vm.selectedSeason);
+    final titleCtrl = TextEditingController(text: 'Filiações ${vm.selectedSeason}');
+    final instructionsCtrl = TextEditingController();
+    DateTime startDate = DateTime.now();
+    DateTime endDate = DateTime(DateTime.now().year, 12, 31);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          String formatDate(DateTime d) =>
+              '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Abrir Período de Inscrição de Filiações'),
+            content: SizedBox(
+              width: 480,
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Defina o prazo durante o qual clubes e universidades poderão solicitar filiação à organização.',
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: KicksterInput(
+                            label: 'Temporada (Ano) *',
+                            controller: seasonCtrl,
+                            hintText: 'Ex: 2026',
+                            validator: (v) =>
+                                (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 3,
+                          child: KicksterInput(
+                            label: 'Título do Período *',
+                            controller: titleCtrl,
+                            hintText: 'Ex: Filiações 2026',
+                            validator: (v) =>
+                                (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Data de Início *',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: startDate,
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2035),
+                                  );
+                                  if (picked != null) {
+                                    setModalState(() => startDate = picked);
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    border: Border.all(color: AppColors.line),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        formatDate(startDate),
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      const Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Data de Encerramento *',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: endDate.isAfter(startDate) ? endDate : startDate,
+                                    firstDate: startDate,
+                                    lastDate: DateTime(2035),
+                                  );
+                                  if (picked != null) {
+                                    setModalState(() => endDate = picked);
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    border: Border.all(color: AppColors.line),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        formatDate(endDate),
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      const Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    KicksterInput(
+                      label: 'Instruções e Requisitos (Opcional)',
+                      controller: instructionsCtrl,
+                      maxLines: 3,
+                      hintText: 'Ex: Anexar ata de posse da diretoria e comprovante de taxa.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              KicksterButton(
+                label: 'Cancelar',
+                variant: KicksterButtonVariant.text,
+                onPressed: () => Navigator.of(dialogCtx).pop(),
+              ),
+              KicksterButton(
+                label: 'Abrir Inscrições',
+                variant: KicksterButtonVariant.primary,
+                loading: vm.isSavingWindow,
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+                  if (endDate.isBefore(startDate)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('A data de encerramento não pode ser anterior ao início.')),
+                    );
+                    return;
+                  }
+                  final ok = await vm.openAffiliationWindow(
+                    season: seasonCtrl.text.trim(),
+                    title: titleCtrl.text.trim(),
+                    startDate: startDate,
+                    endDate: endDate,
+                    instructions: instructionsCtrl.text.trim().isEmpty ? null : instructionsCtrl.text.trim(),
+                  );
+                  if (ok && dialogCtx.mounted) {
+                    Navigator.of(dialogCtx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Período de inscrições aberto com sucesso!')),
+                    );
+                  }
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
   }
