@@ -8,7 +8,7 @@ import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 
 /// Tela de Detalhes da Competição (ADR-001 / Kickster Design System).
-class CompetitionDetailScreen extends ConsumerWidget {
+class CompetitionDetailScreen extends ConsumerStatefulWidget {
   const CompetitionDetailScreen({
     super.key,
     required this.id,
@@ -19,44 +19,58 @@ class CompetitionDetailScreen extends ConsumerWidget {
   final Competition? competition;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final compAsync = ref.watch(competitionRepositoryProvider);
+  ConsumerState<CompetitionDetailScreen> createState() =>
+      _CompetitionDetailScreenState();
+}
+
+class _CompetitionDetailScreenState
+    extends ConsumerState<CompetitionDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(competitionDetailViewModelProvider(widget.id))
+          .load(forceRefresh: true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = ref.watch(competitionDetailViewModelProvider(widget.id));
+    final comp = vm.competition ?? widget.competition;
     final user = ref.watch(authControllerProvider.select((a) => a.state.user));
     final canWrite = user != null;
     final organizationsAsync = ref.watch(organizationsProvider);
 
-    return FutureBuilder<Competition>(
-      future: competition != null
-          ? Future.value(competition!)
-          : compAsync.getCompetition(id),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            competition == null) {
-          return const AppScreen(
-            title: 'Competição',
-            body: AppLoading(message: 'Carregando detalhes...'),
-          );
-        }
+    if (vm.isLoading && comp == null) {
+      return const AppScreen(
+        title: 'Competição',
+        body: AppLoading(message: 'Carregando detalhes...'),
+      );
+    }
 
-        final comp = snapshot.data ?? competition;
-        if (comp == null) {
-          return AppScreen(
-            title: 'Competição',
-            body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Competição não encontrada.'),
-                  const SizedBox(height: 12),
-                  KicksterButton(
-                    label: 'Voltar',
-                    onPressed: () => context.pop(),
-                  ),
-                ],
+    if (comp == null) {
+      return AppScreen(
+        title: 'Competição',
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                vm.errorMessage ?? 'Competição não encontrada.',
+                style: const TextStyle(color: AppColors.danger),
               ),
-            ),
-          );
-        }
+              const SizedBox(height: 12),
+              KicksterButton(
+                label: 'Voltar',
+                onPressed: () => context.pop(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
         final orgs = organizationsAsync.valueOrNull;
         final matchedOrg = orgs?.where((o) => o.id == comp.organizationId).firstOrNull;
@@ -90,6 +104,11 @@ class CompetitionDetailScreen extends ConsumerWidget {
                               '/competitions/${comp.id}/edit',
                               extra: comp,
                             );
+                            if (context.mounted) {
+                              ref
+                                  .read(competitionDetailViewModelProvider(widget.id))
+                                  .load(forceRefresh: true);
+                            }
                           },
                         ),
                     ],
@@ -306,10 +325,8 @@ class CompetitionDetailScreen extends ConsumerWidget {
               ],
             ),
           ),
-          ),
-        );
-      },
-    );
+        ),
+      );
   }
 
   Widget _buildInfoItem({

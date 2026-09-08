@@ -15,7 +15,6 @@ import 'package:flag_admin_web/data/repositories/organization_repository.dart';
 import 'package:flag_admin_web/data/services/organization_service.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
-import 'package:flag_admin_web/ui/organization/view_models/organization_form_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_create_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_edit_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
@@ -32,6 +31,7 @@ import 'package:flag_admin_web/ui/institution/view_models/institution_edit_view_
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/data/services/competition_service.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_list_view_model.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_detail_view_model.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_create_view_model.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_edit_view_model.dart';
 import 'package:flag_admin_web/data/services/competition_team_service.dart';
@@ -160,13 +160,7 @@ final organizationDetailViewModelProvider =
   ),
 );
 
-/// ViewModel do formulário de organização (legado).
-final organizationFormViewModelProvider =
-    ChangeNotifierProvider.autoDispose<OrganizationFormViewModel>(
-  (ref) => OrganizationFormViewModel(
-    repository: ref.watch(organizationRepositoryProvider),
-  ),
-);
+
 
 /// ViewModel dedicada para a tela de Criação de Organização (ADR-001 / MVVM 1:1).
 final organizationCreateViewModelProvider =
@@ -254,6 +248,15 @@ final competitionListViewModelProvider =
     ChangeNotifierProvider<CompetitionListViewModel>(
   (ref) => CompetitionListViewModel(
     repository: ref.watch(competitionRepositoryProvider),
+  ),
+);
+
+/// ViewModel de detalhes de competição (1:1 com CompetitionDetailScreen).
+final competitionDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<CompetitionDetailViewModel, String>(
+  (ref, id) => CompetitionDetailViewModel(
+    repository: ref.watch(competitionRepositoryProvider),
+    competitionId: id,
   ),
 );
 
