@@ -54,114 +54,127 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
       ],
       body: vm.isLoading
           ? const AppLoading(message: 'Carregando dados da competição...')
-          : Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (vm.errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.danger.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.danger),
+          : AppLayout.form(
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (vm.errorMessage != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.danger.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.danger),
+                          ),
+                          child: Text(
+                            vm.errorMessage!,
+                            style: const TextStyle(color: AppColors.danger),
+                          ),
                         ),
-                        child: Text(
-                          vm.errorMessage!,
-                          style: const TextStyle(color: AppColors.danger),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 16),
+                      ],
 
-                    // Seção 1: Identificação & Organização
-                    _buildSectionCard(
-                      title: 'Identificação & Organização',
-                      icon: Icons.emoji_events_outlined,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          organizationsAsync.when(
-                            loading: () => KicksterDropdown<String>(
-                              label: 'Organização Promotora',
-                              hint: 'Carregando organizações...',
-                              items: const [],
-                              onChanged: null,
+                      // Seção 1: Identificação & Organização
+                      _buildSectionCard(
+                        title: 'Identificação & Organização',
+                        icon: Icons.emoji_events_outlined,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            organizationsAsync.when(
+                              loading: () => KicksterDropdown<String>(
+                                label: '',
+                                hint: 'Carregando organizações...',
+                                items: const [],
+                                onChanged: null,
+                              ),
+                              error: (err, stack) => const Text(
+                                'Erro ao carregar organizações',
+                                style: TextStyle(color: AppColors.danger),
+                              ),
+                              data: (orgs) => KicksterDropdown<String>(
+                                label: '',
+                                value: vm.selectedOrganizationId,
+                                hint: 'Selecione a Organização Promotora',
+                                items: orgs
+                                    .map((o) => DropdownMenuItem(
+                                          value: o.id,
+                                          child: Text(o.tradeName.isNotEmpty
+                                              ? o.tradeName
+                                              : o.legalName),
+                                        ))
+                                    .toList(),
+                                onChanged: vm.setOrganization,
+                                validator: (v) => v == null || v.isEmpty
+                                    ? 'Selecione a organização'
+                                    : null,
+                              ),
                             ),
-                            error: (err, stack) => const Text(
-                              'Erro ao carregar organizações',
-                              style: TextStyle(color: AppColors.danger),
-                            ),
-                            data: (orgs) => KicksterDropdown<String>(
-                              label: 'Organização Promotora',
-                              value: vm.selectedOrganizationId,
-                              hint: 'Selecione a Organização Promotora',
-                              items: orgs
-                                  .map((o) => DropdownMenuItem(
-                                        value: o.id,
-                                        child: Text(o.tradeName.isNotEmpty
-                                            ? o.tradeName
-                                            : o.legalName),
-                                      ))
-                                  .toList(),
-                              onChanged: vm.setOrganization,
-                              validator: (v) => v == null || v.isEmpty
-                                  ? 'Selecione a organização'
+                            const SizedBox(height: 16),
+                            KicksterInput(
+                              label: 'Nome da Competição / Torneio',
+                              controller: vm.nameController,
+                              hintText: 'Ex: Copa Brasil, Campeonato Nacional',
+                              validator: (v) => v == null || v.trim().isEmpty
+                                  ? 'Informe o nome da competição'
                                   : null,
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          KicksterInput(
-                            label: 'Nome da Competição / Torneio',
-                            controller: vm.nameController,
-                            validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Informe o nome da competição'
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: KicksterInput(
-                                  label: 'Temporada (ex: 2026, 2026.1)',
-                                  controller: vm.seasonController,
-                                  validator: (v) => v == null || v.trim().isEmpty
-                                      ? 'Informe a temporada'
-                                      : null,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                flex: 1,
-                                child: KicksterDropdown<CompetitionStatus>(
-                                  label: 'Status da Competição',
-                                  value: vm.status,
-                                  hint: 'Status da Competição',
-                                  items: CompetitionStatus.values
-                                      .map((st) => DropdownMenuItem(
-                                            value: st,
-                                            child: Text(st.label),
-                                          ))
-                                      .toList(),
-                                  onChanged: (st) {
-                                    if (st != null) vm.setStatus(st);
-                                  },
+                            if (vm.displayNamePreview.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Identificação completa: ${vm.displayNamePreview}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 16),
-                          KicksterInput(
-                            label: 'Descrição e Regulamento Geral (Opcional)',
-                            controller: vm.descriptionController,
-                            maxLines: 3,
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: KicksterInput(
+                                    label: 'Temporada (ex: 2026, 2026.1)',
+                                    controller: vm.seasonController,
+                                    validator: (v) => v == null || v.trim().isEmpty
+                                        ? 'Informe a temporada'
+                                        : null,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  flex: 1,
+                                  child: KicksterDropdown<CompetitionStatus>(
+                                    label: '',
+                                    value: vm.status,
+                                    hint: 'Status da Competição',
+                                    items: CompetitionStatus.values
+                                        .map((st) => DropdownMenuItem(
+                                              value: st,
+                                              child: Text(st.label),
+                                            ))
+                                        .toList(),
+                                    onChanged: (st) {
+                                      if (st != null) vm.setStatus(st);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            KicksterInput(
+                              label: 'Descrição e Regulamento Geral (Opcional)',
+                              controller: vm.descriptionController,
+                              maxLines: 3,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
 
                     const SizedBox(height: 16),
 
@@ -377,6 +390,7 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                   ],
                 ),
               ),
+            ),
             ),
     );
   }

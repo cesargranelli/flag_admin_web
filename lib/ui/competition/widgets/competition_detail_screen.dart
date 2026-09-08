@@ -58,61 +58,62 @@ class CompetitionDetailScreen extends ConsumerWidget {
         }
 
         return AppScreen(
-          title: comp.name,
+          title: comp.displayName,
           breadcrumb: [
             const BreadcrumbItem(AppStrings.home, route: '/'),
             const BreadcrumbItem('Competições', route: '/competitions'),
-            BreadcrumbItem(comp.name),
+            BreadcrumbItem(comp.displayName),
           ],
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header com Ações
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatusChip(comp.status),
-                    if (canWrite)
-                      Row(
-                        children: [
-                          KicksterButton(
-                            label: 'Editar',
-                            icon: Icons.edit_outlined,
-                            variant: KicksterButtonVariant.outline,
-                            onPressed: () async {
-                              await context.push(
-                                '/competitions//edit',
-                                extra: comp,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Card de Informações Gerais
-                Card(
-                  elevation: 0,
-                  color: AppColors.surface,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: AppColors.line, width: 1),
+          body: AppLayout.detail(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header com Ações
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildStatusChip(comp.status),
+                      if (canWrite)
+                        Row(
+                          children: [
+                            KicksterButton(
+                              label: 'Editar',
+                              icon: Icons.edit_outlined,
+                              variant: KicksterButtonVariant.outline,
+                              onPressed: () async {
+                                await context.push(
+                                  '/competitions/${comp.id}/edit',
+                                  extra: comp,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          comp.name,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
+                  const SizedBox(height: 16),
+
+                  // Card de Informações Gerais
+                  Card(
+                    elevation: 0,
+                    color: AppColors.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: AppColors.line, width: 1),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            comp.displayName,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                         ),
                         if (comp.organizationName != null) ...[
                           const SizedBox(height: 6),
@@ -201,7 +202,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
                         subtitle: 'Homologação e elenco de agremiações',
                         onTap: () {
                           // Navegar para módulo de equipes/inscrições com contexto da competição
-                          context.push('/teams?competitionId=');
+                          context.push('/teams?competitionId=${comp.id}');
                         },
                       ),
                     ),
@@ -212,7 +213,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
                         title: 'Tabela & Confrontos',
                         subtitle: 'Rodadas, praças e datas de jogos',
                         onTap: () {
-                          context.push('/rounds?competitionId=');
+                          context.push('/rounds?competitionId=${comp.id}');
                         },
                       ),
                     ),
@@ -220,6 +221,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
           ),
         );
       },

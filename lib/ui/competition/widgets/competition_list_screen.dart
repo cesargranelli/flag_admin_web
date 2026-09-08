@@ -162,7 +162,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
               values: [null, ...vm.availableSeasons],
               labels: [
                 'Todas temporadas',
-                ...vm.availableSeasons.map((s) => 'Temporada '),
+                ...vm.availableSeasons.map((s) => 'Temporada $s'),
               ],
               onChanged: vm.setSeasonFilter,
             ),
@@ -263,17 +263,23 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
     final subtitle = [
       if (comp.organizationName != null && comp.organizationName!.isNotEmpty)
         comp.organizationName!,
-      'Temporada ',
+      'Temporada ${comp.season}',
       if (comp.modality != null) comp.modality!.label,
+      if (comp.gender != null && comp.gender!.isNotEmpty)
+        (comp.gender == 'male'
+            ? 'Masculino'
+            : comp.gender == 'female'
+                ? 'Feminino'
+                : 'Misto'),
     ].join(' • ');
 
     return KicksterCard(
       icon: Icons.emoji_events_outlined,
-      title: comp.name,
+      title: comp.displayName,
       subtitle: subtitle,
       onTap: () async {
         await context.push(
-          '/competitions/',
+          '/competitions/${comp.id}',
           extra: comp,
         );
         if (context.mounted) {
@@ -296,7 +302,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
           const SizedBox(width: 8),
           if (canWrite)
             KicksterMenuAnchor(
-              triggerLabel: 'Ações de ',
+              triggerLabel: 'Ações de ${comp.name}',
               alignment: Alignment.topRight,
               width: 180,
               trigger: Container(
@@ -330,7 +336,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                   ),
                   onTap: () async {
                     await context.push(
-                      '/competitions//edit',
+                      '/competitions/${comp.id}/edit',
                       extra: comp,
                     );
                     if (context.mounted) {
@@ -360,7 +366,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                         context: context,
                         title: 'Desativar competição',
                         content:
-                            'Deseja desativar ""? Ela ficará oculta para os demais usuários.',
+                            'Deseja desativar "${comp.name}"? Ela ficará oculta para os demais usuários.',
                         confirmLabel: 'Desativar',
                         danger: true,
                       );

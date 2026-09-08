@@ -26,10 +26,10 @@ enum TournamentFormat {
         TournamentFormat.groupsAndPlayoffs => 'GROUPS_AND_PLAYOFFS',
       };
 
-  /// Rótulo amigável em português.
+  /// Rótulo amigável em português (exclusivo futebol americano).
   String get label => switch (this) {
         TournamentFormat.roundRobin => 'Pontos Corridos',
-        TournamentFormat.playoffs => 'Mata-Mata (Playoffs)',
-        TournamentFormat.groupsAndPlayoffs => 'Grupos + Mata-Mata',
+        TournamentFormat.playoffs => 'Playoffs',
+        TournamentFormat.groupsAndPlayoffs => 'Grupos + Playoffs',
       };
 }

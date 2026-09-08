@@ -118,6 +118,25 @@ class Competition {
       createdBy: createdBy ?? this.createdBy,
     );
   }
+
+  /// Nome de exibição concatenado com características da competição:
+  /// Nome do campeonato + modalidade + gênero.
+  String get displayName {
+    final parts = <String>[name];
+    final details = <String>[
+      if (modality != null) modality!.label,
+      if (gender != null && gender!.isNotEmpty)
+        (gender == 'male'
+            ? 'Masculino'
+            : gender == 'female'
+                ? 'Feminino'
+                : 'Misto'),
+    ];
+    if (details.isNotEmpty) {
+      parts.add(details.join(' - '));
+    }
+    return parts.join(' • ');
+  }
 }
 
 DateTime? _tryParseDate(Object? value) =>

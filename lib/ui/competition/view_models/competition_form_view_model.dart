@@ -12,7 +12,9 @@ class CompetitionFormViewModel extends ChangeNotifier {
   final CompetitionRepository _repository;
 
   CompetitionFormViewModel({required CompetitionRepository repository})
-      : _repository = repository;
+      : _repository = repository {
+    nameController.addListener(notifyListeners);
+  }
 
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -26,6 +28,21 @@ class CompetitionFormViewModel extends ChangeNotifier {
   Gender? selectedGender = Gender.male;
   AgeGroup? selectedAgeGroup = AgeGroup.adult;
   CompetitionStatus status = CompetitionStatus.draft;
+
+  /// Exibição concatenada: Nome do campeonato + características (modalidade + gênero)
+  String get displayNamePreview {
+    final baseName = nameController.text.trim();
+    if (baseName.isEmpty) return '';
+    final parts = <String>[baseName];
+    final details = <String>[
+      if (selectedModality != null) selectedModality!.label,
+      if (selectedGender != null) selectedGender!.label,
+    ];
+    if (details.isNotEmpty) {
+      parts.add(details.join(' - '));
+    }
+    return parts.join(' • ');
+  }
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
