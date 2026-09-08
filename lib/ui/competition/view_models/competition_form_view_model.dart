@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
+import 'package:flag_admin_web/domain/models/grouping_config.dart';
 import 'package:flag_admin_web/src/domain/enums/age_group.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';
@@ -27,6 +28,33 @@ class CompetitionFormViewModel extends ChangeNotifier {
   String? organizationName;
   TournamentFormat tournamentFormat = TournamentFormat.roundRobin;
   GroupingType groupingType = GroupingType.none;
+
+  /// Lista reativa de grupos customizados pelo usuário
+  List<CompetitionGroupConfig> groups = [
+    const CompetitionGroupConfig(id: 'grp_1', name: 'Grupo A'),
+    const CompetitionGroupConfig(id: 'grp_2', name: 'Grupo B'),
+  ];
+
+  /// Lista reativa de conferências com suas respectivas divisões
+  List<CompetitionConferenceConfig> conferences = [
+    const CompetitionConferenceConfig(
+      id: 'conf_1',
+      name: 'Conferência Americana',
+      divisions: [
+        CompetitionDivisionConfig(id: 'div_1_1', name: 'Leste'),
+        CompetitionDivisionConfig(id: 'div_1_2', name: 'Oeste'),
+      ],
+    ),
+    const CompetitionConferenceConfig(
+      id: 'conf_2',
+      name: 'Conferência Nacional',
+      divisions: [
+        CompetitionDivisionConfig(id: 'div_2_1', name: 'Leste'),
+        CompetitionDivisionConfig(id: 'div_2_2', name: 'Oeste'),
+      ],
+    ),
+  ];
+
   Modality? selectedModality = Modality.flag5x5;
   Gender? selectedGender = Gender.male;
   AgeGroup? selectedAgeGroup = AgeGroup.adult;
@@ -98,6 +126,14 @@ class CompetitionFormViewModel extends ChangeNotifier {
     selectedAgeGroup =
         comp.ageGroup != null ? AgeGroup.tryFromJson(comp.ageGroup!) : null;
     groupingType = comp.groupingType ?? GroupingType.none;
+    if (comp.groupingConfig != null) {
+      if (comp.groupingConfig!.groups.isNotEmpty) {
+        groups = List.from(comp.groupingConfig!.groups);
+      }
+      if (comp.groupingConfig!.conferences.isNotEmpty) {
+        conferences = List.from(comp.groupingConfig!.conferences);
+      }
+    }
     status = comp.status;
     notifyListeners();
   }
@@ -115,6 +151,95 @@ class CompetitionFormViewModel extends ChangeNotifier {
   void setGroupingType(GroupingType type) {
     groupingType = type;
     notifyListeners();
+  }
+
+  // --- MÉTODOS DE MANIPULAÇÃO DE GRUPOS ---
+  void addGroup() {
+    final nextLetter = String.fromCharCode(65 + groups.length); // A, B, C, D...
+    final newId = 'grp_${DateTime.now().millisecondsSinceEpoch}';
+    groups.add(CompetitionGroupConfig(id: newId, name: 'Grupo $nextLetter'));
+    notifyListeners();
+  }
+
+  void updateGroupName(int index, String newName) {
+    if (index >= 0 && index < groups.length) {
+      groups[index] = CompetitionGroupConfig(id: groups[index].id, name: newName);
+      notifyListeners();
+    }
+  }
+
+  void removeGroup(int index) {
+    if (groups.length > 2) {
+      groups.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  // --- MÉTODOS DE MANIPULAÇÃO DE CONFERÊNCIAS E DIVISÕES ---
+  void addConference() {
+    final newId = 'conf_${DateTime.now().millisecondsSinceEpoch}';
+    final count = conferences.length + 1;
+    conferences.add(
+      CompetitionConferenceConfig(
+        id: newId,
+        name: 'Conferência $count',
+        divisions: [],
+      ),
+    );
+    notifyListeners();
+  }
+
+  void updateConferenceName(int index, String newName) {
+    if (index >= 0 && index < conferences.length) {
+      conferences[index] = conferences[index].copyWith(name: newName);
+      notifyListeners();
+    }
+  }
+
+  void removeConference(int index) {
+    if (conferences.length > 1) {
+      conferences.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  void addDivision(int conferenceIndex) {
+    if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
+      final conf = conferences[conferenceIndex];
+      final divCount = conf.divisions.length + 1;
+      final newDivId = 'div_${DateTime.now().millisecondsSinceEpoch}';
+      final updatedDivs = List<CompetitionDivisionConfig>.from(conf.divisions)
+        ..add(CompetitionDivisionConfig(id: newDivId, name: 'Divisão $divCount'));
+      conferences[conferenceIndex] = conf.copyWith(divisions: updatedDivs);
+      notifyListeners();
+    }
+  }
+
+  void updateDivisionName(int conferenceIndex, int divisionIndex, String newName) {
+    if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
+      final conf = conferences[conferenceIndex];
+      if (divisionIndex >= 0 && divisionIndex < conf.divisions.length) {
+        final updatedDivs = List<CompetitionDivisionConfig>.from(conf.divisions);
+        updatedDivs[divisionIndex] = CompetitionDivisionConfig(
+          id: updatedDivs[divisionIndex].id,
+          name: newName,
+        );
+        conferences[conferenceIndex] = conf.copyWith(divisions: updatedDivs);
+        notifyListeners();
+      }
+    }
+  }
+
+  void removeDivision(int conferenceIndex, int divisionIndex) {
+    if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
+      final conf = conferences[conferenceIndex];
+      if (divisionIndex >= 0 && divisionIndex < conf.divisions.length) {
+        final updatedDivs = List<CompetitionDivisionConfig>.from(conf.divisions)
+          ..removeAt(divisionIndex);
+        conferences[conferenceIndex] = conf.copyWith(divisions: updatedDivs);
+        notifyListeners();
+      }
+    }
   }
 
   void setModality(Modality modality) {
@@ -165,6 +290,12 @@ class CompetitionFormViewModel extends ChangeNotifier {
       'season': seasonController.text.trim().isEmpty ? '2026' : seasonController.text.trim(),
       'tournamentFormat': tournamentFormat.toJson(),
       'groupingType': groupingType.toJson(),
+      'groupingConfig': GroupingConfig(
+        groups: groupingType == GroupingType.groups ? groups : const [],
+        conferences: groupingType == GroupingType.conferences
+            ? conferences
+            : const [],
+      ).toJson(),
       'status': status.toJson(),
       'modality': selectedModality!.toJson(),
       if (descriptionController.text.trim().isNotEmpty)

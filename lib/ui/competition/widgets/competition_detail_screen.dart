@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 
 /// Tela de Detalhes da Competição (ADR-001 / Kickster Design System).
@@ -179,6 +180,80 @@ class CompetitionDetailScreen extends ConsumerWidget {
                               color: AppColors.textSecondary,
                             ),
                           ),
+                        ],
+                        if (comp.groupingConfig != null &&
+                            (comp.groupingConfig!.groups.isNotEmpty ||
+                                comp.groupingConfig!.conferences.isNotEmpty)) ...[
+                          const Divider(height: 32),
+                          Text(
+                            comp.groupingType == GroupingType.groups
+                                ? 'Grupos Definidos:'
+                                : 'Conferências & Divisões:',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (comp.groupingType == GroupingType.groups)
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: comp.groupingConfig!.groups.map((g) {
+                                return Chip(
+                                  backgroundColor: AppColors.surfaceMuted,
+                                  avatar: const Icon(Icons.grid_view_outlined,
+                                      size: 16, color: AppColors.primary),
+                                  label: Text(
+                                    g.name,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  side: const BorderSide(color: AppColors.line),
+                                );
+                              }).toList(),
+                            )
+                          else if (comp.groupingType == GroupingType.conferences)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children:
+                                  comp.groupingConfig!.conferences.map((c) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.account_tree_outlined,
+                                          size: 16, color: AppColors.primary),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        c.name,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      if (c.divisions.isNotEmpty) ...[
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '(${c.divisions.map((d) => d.name).join(', ')})',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                         ],
                       ],
                     ),

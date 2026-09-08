@@ -1,3 +1,4 @@
+import 'package:flag_admin_web/domain/models/grouping_config.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/domain/enums/modality.dart';
@@ -19,6 +20,7 @@ class Competition {
   final String? gender;
   final String? ageGroup;
   final GroupingType? groupingType;
+  final GroupingConfig? groupingConfig;
   final String? createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -38,6 +40,7 @@ class Competition {
     this.gender,
     this.ageGroup,
     this.groupingType,
+    this.groupingConfig,
     this.createdBy,
     this.createdAt,
     this.updatedAt,
@@ -63,6 +66,9 @@ class Competition {
         gender: json['gender'] as String?,
         ageGroup: json['ageGroup'] as String?,
         groupingType: GroupingType.tryFromJson(json['groupingType'] as String?),
+        groupingConfig: json['groupingConfig'] != null
+            ? GroupingConfig.fromJson(json['groupingConfig'] as Map<String, dynamic>)
+            : null,
         createdBy: json['createdBy'] as String?,
         createdAt: _tryParseDate(json['createdAt']),
         updatedAt: _tryParseDate(json['updatedAt']),
@@ -82,6 +88,8 @@ class Competition {
         if (modality != null) 'modality': modality!.toJson(),
         if (gender != null) 'gender': gender,
         if (ageGroup != null) 'ageGroup': ageGroup,
+        if (groupingType != null) 'groupingType': groupingType!.toJson(),
+        if (groupingConfig != null) 'groupingConfig': groupingConfig!.toJson(),
         if (createdBy != null) 'createdBy': createdBy,
       };
 
@@ -99,6 +107,8 @@ class Competition {
     Modality? modality,
     String? gender,
     String? ageGroup,
+    GroupingType? groupingType,
+    GroupingConfig? groupingConfig,
     String? createdBy,
   }) {
     return Competition(
@@ -115,6 +125,8 @@ class Competition {
       modality: modality ?? this.modality,
       gender: gender ?? this.gender,
       ageGroup: ageGroup ?? this.ageGroup,
+      groupingType: groupingType ?? this.groupingType,
+      groupingConfig: groupingConfig ?? this.groupingConfig,
       createdBy: createdBy ?? this.createdBy,
     );
   }
