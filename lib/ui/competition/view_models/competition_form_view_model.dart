@@ -24,6 +24,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
   final endDateController = TextEditingController();
 
   String? selectedOrganizationId;
+  String? organizationName;
   TournamentFormat tournamentFormat = TournamentFormat.roundRobin;
   GroupingType groupingType = GroupingType.none;
   Modality? selectedModality = Modality.flag5x5;
@@ -89,6 +90,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     endDateController.text =
         comp.endDate != null ? comp.endDate!.toIso8601String().split('T').first : '';
     selectedOrganizationId = comp.organizationId;
+    organizationName = comp.organizationName;
     tournamentFormat = comp.tournamentFormat;
     selectedModality = comp.modality;
     selectedGender =

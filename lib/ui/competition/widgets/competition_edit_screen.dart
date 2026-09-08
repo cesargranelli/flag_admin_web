@@ -85,34 +85,69 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            organizationsAsync.when(
-                              loading: () => KicksterDropdown<String>(
-                                label: '',
-                                hint: 'Carregando organizações...',
-                                items: const [],
-                                onChanged: null,
-                              ),
-                              error: (err, stack) => const Text(
-                                'Erro ao carregar organizações',
-                                style: TextStyle(color: AppColors.danger),
-                              ),
-                              data: (orgs) => KicksterDropdown<String>(
-                                label: '',
-                                value: vm.selectedOrganizationId,
-                                hint: 'Selecione a Organização Promotora',
-                                items: orgs
-                                    .map((o) => DropdownMenuItem(
-                                          value: o.id,
-                                          child: Text(o.tradeName.isNotEmpty
-                                              ? o.tradeName
-                                              : o.legalName),
-                                        ))
-                                    .toList(),
-                                onChanged: vm.setOrganization,
-                                validator: (v) => v == null || v.isEmpty
-                                    ? 'Selecione a organização'
-                                    : null,
-                              ),
+                            // Organização Promotora (Não editável na edição)
+                            Builder(
+                              builder: (context) {
+                                final orgs = organizationsAsync.valueOrNull;
+                                final matchedOrg = orgs
+                                    ?.where((o) => o.id == vm.selectedOrganizationId)
+                                    .firstOrNull;
+                                final orgName = vm.organizationName ??
+                                    matchedOrg?.tradeName ??
+                                    matchedOrg?.legalName;
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceMuted,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.line),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.business_outlined,
+                                        size: 20,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Organização Promotora',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              orgName ??
+                                                  'Organização não informada',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.lock_outline,
+                                        size: 16,
+                                        color: AppColors.disabled,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 16),
                             KicksterInput(
@@ -195,28 +230,23 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isWide = constraints.maxWidth >= 600;
-                              final cardWidth = isWide
-                                  ? (constraints.maxWidth - 24) / 3
-                                  : constraints.maxWidth;
-                              return Wrap(
-                                spacing: 12,
-                                runSpacing: 12,
-                                children: TournamentFormat.values.map((fmt) {
-                                  return SizedBox(
-                                    width: cardWidth,
-                                    child: SelectableCard(
-                                      label: fmt.label,
-                                      selected: vm.tournamentFormat == fmt,
-                                      icon: Icons.emoji_events_outlined,
-                                      onTap: () => vm.setTournamentFormat(fmt),
-                                    ),
-                                  );
-                                }).toList(),
+                          Row(
+                            children: TournamentFormat.values.map((fmt) {
+                              return Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    right: fmt != TournamentFormat.values.last ? 12 : 0,
+                                  ),
+                                  child: SelectableCard(
+                                    label: fmt.label,
+                                    selected: vm.tournamentFormat == fmt,
+                                    icon: Icons.emoji_events_outlined,
+                                    minHeight: 90,
+                                    onTap: () => vm.setTournamentFormat(fmt),
+                                  ),
+                                ),
                               );
-                            },
+                            }).toList(),
                           ),
                           const SizedBox(height: 16),
                           const Text(

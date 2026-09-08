@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
-import 'package:flag_admin_web/src/domain/enums/user_role.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 
 /// Tela de Detalhes da Competição (ADR-001 / Kickster Design System).
@@ -22,7 +21,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final compAsync = ref.watch(competitionRepositoryProvider);
     final user = ref.watch(authControllerProvider.select((a) => a.state.user));
-    final canWrite = user?.role == UserRole.admin;
+    final canWrite = user != null;
 
     return FutureBuilder<Competition>(
       future: competition != null
@@ -69,26 +68,21 @@ class CompetitionDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header com Ações
+                  // Ações superiores
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildStatusChip(comp.status),
+                      const Spacer(),
                       if (canWrite)
-                        Row(
-                          children: [
-                            KicksterButton(
-                              label: 'Editar',
-                              icon: Icons.edit_outlined,
-                              variant: KicksterButtonVariant.outline,
-                              onPressed: () async {
-                                await context.push(
-                                  '/competitions/${comp.id}/edit',
-                                  extra: comp,
-                                );
-                              },
-                            ),
-                          ],
+                        KicksterButton(
+                          label: 'Editar',
+                          icon: Icons.edit_outlined,
+                          onPressed: () async {
+                            await context.push(
+                              '/competitions/${comp.id}/edit',
+                              extra: comp,
+                            );
+                          },
                         ),
                     ],
                   ),

@@ -183,28 +183,23 @@ class _CompetitionCreateScreenState
                       ),
                     ),
                     const SizedBox(height: 12),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isWide = constraints.maxWidth >= 600;
-                        final cardWidth = isWide
-                            ? (constraints.maxWidth - 24) / 3
-                            : constraints.maxWidth;
-                        return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: TournamentFormat.values.map((fmt) {
-                            return SizedBox(
-                              width: cardWidth,
-                              child: SelectableCard(
-                                label: fmt.label,
-                                selected: vm.tournamentFormat == fmt,
-                                icon: Icons.emoji_events_outlined,
-                                onTap: () => vm.setTournamentFormat(fmt),
-                              ),
-                            );
-                          }).toList(),
+                    Row(
+                      children: TournamentFormat.values.map((fmt) {
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: fmt != TournamentFormat.values.last ? 12 : 0,
+                            ),
+                            child: SelectableCard(
+                              label: fmt.label,
+                              selected: vm.tournamentFormat == fmt,
+                              icon: Icons.emoji_events_outlined,
+                              minHeight: 90,
+                              onTap: () => vm.setTournamentFormat(fmt),
+                            ),
+                          ),
                         );
-                      },
+                      }).toList(),
                     ),
                     const SizedBox(height: 16),
                     const Text(
