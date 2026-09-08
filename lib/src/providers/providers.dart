@@ -25,6 +25,11 @@ import 'package:flag_admin_web/ui/institution/view_models/institution_view_model
 import 'package:flag_admin_web/ui/institution/view_models/institution_detail_view_model.dart';
 import 'package:flag_admin_web/ui/institution/view_models/institution_form_view_model.dart';
 
+import 'package:flag_admin_web/data/repositories/competition_repository.dart';
+import 'package:flag_admin_web/data/services/competition_service.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_list_view_model.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_form_view_model.dart';
+
 import '../router/app_router.dart';
 
 /// Gerenciador de sessão do Admin Web (persiste dados de sessão Firebase/JWT).
@@ -184,6 +189,34 @@ final institutionFormViewModelProvider =
     ChangeNotifierProvider.autoDispose<InstitutionFormViewModel>(
   (ref) => InstitutionFormViewModel(
     repository: ref.watch(institutionRepositoryProvider),
+  ),
+);
+
+/// Serviço de competições (REST).
+final competitionServiceProvider = Provider<CompetitionService>(
+  (ref) => ApiCompetitionService(ref.watch(apiClientProvider)),
+);
+
+/// Repository de competições (Single Source of Truth, Caching).
+final competitionRepositoryProvider = Provider<CompetitionRepository>(
+  (ref) => CompetitionRepository(
+    service: ref.watch(competitionServiceProvider),
+  ),
+);
+
+/// ViewModel de listagem de competições.
+final competitionListViewModelProvider =
+    ChangeNotifierProvider<CompetitionListViewModel>(
+  (ref) => CompetitionListViewModel(
+    repository: ref.watch(competitionRepositoryProvider),
+  ),
+);
+
+/// ViewModel do formulário de competição.
+final competitionFormViewModelProvider =
+    ChangeNotifierProvider.autoDispose<CompetitionFormViewModel>(
+  (ref) => CompetitionFormViewModel(
+    repository: ref.watch(competitionRepositoryProvider),
   ),
 );
 

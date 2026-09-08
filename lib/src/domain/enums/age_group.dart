@@ -22,6 +22,15 @@ enum AgeGroup {
         _ => throw FormatException('Faixa etária desconhecida: $value'),
       };
 
+  static AgeGroup? tryFromJson(String? value) {
+    if (value == null) return null;
+    try {
+      return fromJson(value.toUpperCase());
+    } catch (_) {
+      return null;
+    }
+  }
+
   String toJson() => switch (this) {
         AgeGroup.sub11 => 'SUB11',
         AgeGroup.sub13 => 'SUB13',

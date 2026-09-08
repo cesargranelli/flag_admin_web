@@ -10,6 +10,15 @@ enum Gender {
         _ => throw FormatException('Gênero desconhecido: $value'),
       };
 
+  static Gender? tryFromJson(String? value) {
+    if (value == null) return null;
+    try {
+      return fromJson(value.toUpperCase());
+    } catch (_) {
+      return null;
+    }
+  }
+
   String toJson() => switch (this) {
         Gender.male => 'MALE',
         Gender.female => 'FEMALE',

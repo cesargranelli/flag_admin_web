@@ -13,10 +13,9 @@ import 'package:flag_admin_web/data/repositories/auth_controller.dart';
 import 'package:flag_admin_web/ui/auth/widgets/forgot_password_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/login_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/signup_screen.dart';
-import '../features/competitions/presentation/screens/competition_create_screen.dart';
-import '../features/competitions/presentation/screens/competition_detail_screen.dart';
-import '../features/competitions/presentation/screens/competition_edit_screen.dart';
-import '../features/competitions/presentation/screens/competitions_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_list_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_form_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.dart';
 import '../features/competitions/presentation/screens/groupings_screen.dart';
 import '../features/games/presentation/screens/game_detail_screen.dart';
 import '../features/games/presentation/screens/game_form_screen.dart';
@@ -238,13 +237,13 @@ class AppRouter {
                 GoRoute(
                   path: '/competitions',
                   name: 'competitions',
-                  builder: (context, state) => const CompetitionsScreen(),
+                  builder: (context, state) => const CompetitionListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
                       name: 'competitionNew',
                       builder: (context, state) =>
-                          const CompetitionCreateScreen(),
+                          const CompetitionFormScreen(),
                     ),
                     GoRoute(
                       path: ':id',
@@ -254,7 +253,7 @@ class AppRouter {
                             ? state.extra as Competition
                             : null;
                         return CompetitionDetailScreen(
-                          competitionId: state.pathParameters['id'],
+                          id: state.pathParameters['id']!,
                           competition: competition,
                         );
                       },
@@ -266,8 +265,8 @@ class AppRouter {
                             final competition = state.extra is Competition
                                 ? state.extra as Competition
                                 : null;
-                            return CompetitionEditScreen(
-                              competitionId: state.pathParameters['id'],
+                            return CompetitionFormScreen(
+                              id: state.pathParameters['id'],
                               competition: competition,
                             );
                           },

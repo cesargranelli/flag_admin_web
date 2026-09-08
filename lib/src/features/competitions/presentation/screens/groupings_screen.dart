@@ -488,19 +488,16 @@ class _GroupingsBodyState extends ConsumerState<_GroupingsBody> {
   Widget _statusChip(CompetitionStatus status) {
     final color = switch (status) {
       CompetitionStatus.draft => AppColors.textSecondary,
+      CompetitionStatus.registrationOpen => AppColors.success,
+      CompetitionStatus.ongoing => AppColors.warning,
       CompetitionStatus.published => AppColors.success,
       CompetitionStatus.finished => AppColors.danger,
-      CompetitionStatus.disabled => AppColors.textSecondary,
+      _ => AppColors.textSecondary,
     };
     return KicksterBadge(label: _statusLabel(status), color: color);
   }
 
-  String _statusLabel(CompetitionStatus status) => switch (status) {
-    CompetitionStatus.draft => 'Rascunho',
-    CompetitionStatus.published => 'Publicado',
-    CompetitionStatus.finished => 'Encerrado',
-    CompetitionStatus.disabled => 'Desativado',
-  };
+  String _statusLabel(CompetitionStatus status) => status.label;
 
   /// Rótulo de contadores do cabeçalho ("X conferências · Y divisões").
   String _countersLabel(

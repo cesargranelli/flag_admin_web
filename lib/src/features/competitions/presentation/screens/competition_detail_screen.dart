@@ -565,19 +565,16 @@ class _CompetitionDetailScreenState
   Widget _statusChip(CompetitionStatus status) {
     final color = switch (status) {
       CompetitionStatus.draft => AppColors.textSecondary,
+      CompetitionStatus.registrationOpen => AppColors.success,
+      CompetitionStatus.ongoing => AppColors.warning,
       CompetitionStatus.published => AppColors.success,
       CompetitionStatus.finished => AppColors.danger,
-      CompetitionStatus.disabled => AppColors.textSecondary,
+      _ => AppColors.textSecondary,
     };
     return KicksterBadge(label: _statusLabel(status), color: color);
   }
 
-  String _statusLabel(CompetitionStatus status) => switch (status) {
-    CompetitionStatus.draft => 'Rascunho',
-    CompetitionStatus.published => 'Publicado',
-    CompetitionStatus.finished => 'Encerrado',
-    CompetitionStatus.disabled => 'Desativado',
-  };
+  String _statusLabel(CompetitionStatus status) => status.label;
 
   // M12 #473: usa os labels do DOMAIN (Gender/AgeGroup.fromJson) em vez de
   // switches sobre strings — sem drift quando o domain mudar. Fallback

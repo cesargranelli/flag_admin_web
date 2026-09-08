@@ -409,10 +409,5 @@ class _CompetitionEditScreenState
     );
   }
 
-  String _statusLabel(CompetitionStatus status) => switch (status) {
-        CompetitionStatus.draft => 'Rascunho',
-        CompetitionStatus.published => 'Publicado',
-        CompetitionStatus.finished => 'Encerrado',
-        CompetitionStatus.disabled => 'Desativado',
-      };
+  String _statusLabel(CompetitionStatus status) => status.label;
 }

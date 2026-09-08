@@ -16,6 +16,7 @@ export 'enums/modality.dart';
 export 'enums/organization_status.dart';
 export 'enums/organization_type.dart';
 export 'enums/round_type.dart';
+export 'enums/tournament_format.dart';
 export 'enums/user_role.dart';
 
 // Models
@@ -23,7 +24,7 @@ export 'models/athlete.dart';
 export 'models/athlete_batch.dart';
 export 'models/category.dart';
 export 'models/check_in.dart';
-export 'models/competition.dart';
+export 'package:flag_admin_web/domain/models/competition.dart';
 export 'models/conference.dart';
 export 'models/division.dart';
 export 'models/game.dart';

@@ -1,60 +1,34 @@
-import '../enums/competition_status.dart';
-import '../enums/grouping_type.dart';
-import '../enums/modality.dart';
-import '../enums/tournament_format.dart';
+import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/src/domain/enums/modality.dart';
+import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
 
-/// Competição do Flag Platform.
-///
-/// Aceita os dois shapes retornados pela API:
-/// - resumo (`GET /api/v1/competitions`): id, name, organizationName, status, season, modality, gender, ageGroup;
-/// - completo (`GET /api/v1/competitions/{id}`): id, organizationId, name,
-///   description, startDate, endDate, status, season, tournamentFormat, createdBy, createdAt, updatedAt.
+/// Competição / Torneio esportivo (Domain Model - ADR-001).
 class Competition {
-  /// Identificador UUID da competição.
   final String id;
-
   final String name;
-
   final CompetitionStatus status;
-
   final String? organizationId;
-
-  /// Presente no shape de resumo (`GET /api/v1/competitions`).
   final String? organizationName;
-
   final String? description;
-
   final DateTime? startDate;
-
   final DateTime? endDate;
-
-  /// Temporada da competição (ex: '2026', '2026/1').
   final String season;
-
-  /// Formato de disputa do torneio.
-  final TournamentFormat? tournamentFormat;
-
-  /// Atributos da competição (adicionados na V24).
+  final TournamentFormat tournamentFormat;
   final Modality? modality;
-
   final String? gender;
-
   final String? ageGroup;
-
-  /// Rótulo do agrupamento da estrutura — Divisões | Grupos (#308).
-  /// Nulo em registros legados (tratado como Divisões).
   final GroupingType? groupingType;
-
-  /// UUID do usuário criador da competição (base da regra de edição
-  /// restrita ao criador ou ADMIN). Nulo em registros legados.
   final String? createdBy;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Competition({
     required this.id,
     required this.name,
     required this.status,
     this.season = '2026',
-    this.tournamentFormat,
+    this.tournamentFormat = TournamentFormat.roundRobin,
     this.organizationId,
     this.organizationName,
     this.description,
@@ -65,6 +39,8 @@ class Competition {
     this.ageGroup,
     this.groupingType,
     this.createdBy,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Competition.fromJson(Map<String, dynamic> json) => Competition(
@@ -73,7 +49,9 @@ class Competition {
         status: CompetitionStatus.fromJson(json['status'] as String),
         season: (json['season'] as String?) ?? '2026',
         tournamentFormat: TournamentFormat.tryFromJson(
-            json['tournamentFormat'] as String? ?? json['format'] as String?),
+                json['tournamentFormat'] as String? ??
+                    json['format'] as String?) ??
+            TournamentFormat.roundRobin,
         organizationId: json['organizationId'] as String?,
         organizationName: json['organizationName'] as String?,
         description: json['description'] as String?,
@@ -84,9 +62,10 @@ class Competition {
             : Modality.fromJson(json['modality'] as String),
         gender: json['gender'] as String?,
         ageGroup: json['ageGroup'] as String?,
-        groupingType: GroupingType.tryFromJson(
-            json['groupingType'] as String?),
+        groupingType: GroupingType.tryFromJson(json['groupingType'] as String?),
         createdBy: json['createdBy'] as String?,
+        createdAt: _tryParseDate(json['createdAt']),
+        updatedAt: _tryParseDate(json['updatedAt']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -94,8 +73,7 @@ class Competition {
         'name': name,
         'status': status.toJson(),
         'season': season,
-        if (tournamentFormat != null)
-          'tournamentFormat': tournamentFormat!.toJson(),
+        'tournamentFormat': tournamentFormat.toJson(),
         if (organizationId != null) 'organizationId': organizationId,
         if (organizationName != null) 'organizationName': organizationName,
         if (description != null) 'description': description,
@@ -104,9 +82,42 @@ class Competition {
         if (modality != null) 'modality': modality!.toJson(),
         if (gender != null) 'gender': gender,
         if (ageGroup != null) 'ageGroup': ageGroup,
-        if (groupingType != null) 'groupingType': groupingType!.toJson(),
         if (createdBy != null) 'createdBy': createdBy,
       };
+
+  Competition copyWith({
+    String? id,
+    String? name,
+    CompetitionStatus? status,
+    String? season,
+    TournamentFormat? tournamentFormat,
+    String? organizationId,
+    String? organizationName,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+    Modality? modality,
+    String? gender,
+    String? ageGroup,
+    String? createdBy,
+  }) {
+    return Competition(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      status: status ?? this.status,
+      season: season ?? this.season,
+      tournamentFormat: tournamentFormat ?? this.tournamentFormat,
+      organizationId: organizationId ?? this.organizationId,
+      organizationName: organizationName ?? this.organizationName,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      modality: modality ?? this.modality,
+      gender: gender ?? this.gender,
+      ageGroup: ageGroup ?? this.ageGroup,
+      createdBy: createdBy ?? this.createdBy,
+    );
+  }
 }
 
 DateTime? _tryParseDate(Object? value) =>
