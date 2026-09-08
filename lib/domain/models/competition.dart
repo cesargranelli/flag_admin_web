@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/domain/models/grouping_config.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/src/domain/enums/gender.dart';
 import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
@@ -138,11 +139,7 @@ class Competition {
     final details = <String>[
       if (modality != null) modality!.label,
       if (gender != null && gender!.isNotEmpty)
-        (gender == 'male'
-            ? 'Masculino'
-            : gender == 'female'
-                ? 'Feminino'
-                : 'Misto'),
+        (Gender.tryFromJson(gender)?.label ?? gender!),
     ];
     if (details.isNotEmpty) {
       parts.add(details.join(' - '));

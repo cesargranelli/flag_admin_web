@@ -77,4 +77,39 @@ class TeamApi {
 
   /// Remove a inscrição do clube na competição (desassociar).
   Future<void> delete(String id) => _client.delete('/api/v1/teams/$id');
+
+  /// Lista os times esportivos pertencentes a uma agremiação/organização.
+  Future<List<Team>> listByOrganization(String organizationId) =>
+      _client.getList(
+        '/api/v1/organizations/$organizationId/teams',
+        Team.fromJson,
+      );
+
+  /// Cria um time dentro de uma agremiação/organização.
+  Future<Team> createForOrganization({
+    required String organizationId,
+    required String name,
+    String? shortName,
+    String? sportName,
+    String? logoUrl,
+  }) =>
+      _client.post(
+        '/api/v1/organizations/$organizationId/teams',
+        {
+          'name': name,
+          if (shortName != null && shortName.isNotEmpty) 'shortName': shortName,
+          if (sportName != null && sportName.isNotEmpty) 'sportName': sportName,
+          if (logoUrl != null && logoUrl.isNotEmpty) 'logoUrl': logoUrl,
+        },
+        Team.fromJson,
+      );
+
+  /// Desativação lógica de um time.
+  Future<void> deactivate(String id) =>
+      _client.post('/api/v1/teams/$id/deactivate', {}, (json) => json);
+
+  /// Reativação de um time.
+  Future<void> reactivate(String id) =>
+      _client.post('/api/v1/teams/$id/reactivate', {}, (json) => json);
 }
+

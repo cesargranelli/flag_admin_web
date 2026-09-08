@@ -29,6 +29,10 @@ import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/data/services/competition_service.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_list_view_model.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_form_view_model.dart';
+import 'package:flag_admin_web/data/services/competition_team_service.dart';
+import 'package:flag_admin_web/data/services/api_competition_team_service.dart';
+import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_teams_view_model.dart';
 
 import '../router/app_router.dart';
 
@@ -37,9 +41,11 @@ final sessionManagerProvider = Provider<SessionManager>(
   (ref) => SessionManager(),
 );
 
-/// Cliente HTTP da API REST com o Firebase ID Token injetado.
+/// Cliente HTTP da API REST com o JWT do backend e Firebase ID Token injetados.
 final apiClientProvider = Provider<ApiClient>(
-  (ref) => ApiClient(),
+  (ref) => ApiClient(
+    sessionManager: ref.watch(sessionManagerProvider),
+  ),
 );
 
 /// Serviço de autenticação Firebase e REST (ADR-001).
@@ -219,6 +225,50 @@ final competitionFormViewModelProvider =
     repository: ref.watch(competitionRepositoryProvider),
   ),
 );
+
+/// Serviço de inscrições de times (REST).
+final competitionTeamServiceProvider = Provider<CompetitionTeamService>(
+  (ref) => ApiCompetitionTeamService(ref.watch(apiClientProvider)),
+);
+
+/// Repositório de inscrições de times (Cache TTL 30s).
+final competitionTeamRepositoryProvider = Provider<CompetitionTeamRepository>(
+  (ref) => CompetitionTeamRepository(
+    service: ref.watch(competitionTeamServiceProvider),
+  ),
+);
+
+/// Parâmetro para o ViewModel de times de competição
+class CompetitionTeamsParam {
+  final String competitionId;
+  final Competition? competition;
+
+  const CompetitionTeamsParam({
+    required this.competitionId,
+    this.competition,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompetitionTeamsParam &&
+          runtimeType == other.runtimeType &&
+          competitionId == other.competitionId;
+
+  @override
+  int get hashCode => competitionId.hashCode;
+}
+
+/// ViewModel de equipes de uma competição.
+final competitionTeamsViewModelProvider = ChangeNotifierProvider.autoDispose
+    .family<CompetitionTeamsViewModel, CompetitionTeamsParam>(
+  (ref, param) => CompetitionTeamsViewModel(
+    repository: ref.watch(competitionTeamRepositoryProvider),
+    competitionId: param.competitionId,
+    competition: param.competition,
+  ),
+);
+
 
 
 /// Listagem de organizações da tela de gestão.

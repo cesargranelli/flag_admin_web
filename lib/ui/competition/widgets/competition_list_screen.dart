@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/src/domain/enums/gender.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import '../view_models/competition_list_view_model.dart';
 
@@ -266,11 +267,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
       'Temporada ${comp.season}',
       if (comp.modality != null) comp.modality!.label,
       if (comp.gender != null && comp.gender!.isNotEmpty)
-        (comp.gender == 'male'
-            ? 'Masculino'
-            : comp.gender == 'female'
-                ? 'Feminino'
-                : 'Misto'),
+        (Gender.tryFromJson(comp.gender)?.label ?? comp.gender!),
     ].join(' • ');
 
     return KicksterCard(
@@ -304,7 +301,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
             KicksterMenuAnchor(
               triggerLabel: 'Ações de ${comp.name}',
               alignment: Alignment.topRight,
-              width: 180,
+              width: 220,
               trigger: Container(
                 width: 36,
                 height: 36,
@@ -324,12 +321,15 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     children: [
                       Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
                       SizedBox(width: 10),
-                      Text(
-                        'Editar',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
+                      Expanded(
+                        child: Text(
+                          'Editar',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -344,6 +344,35 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     }
                   },
                 ),
+                KicksterMenuItem(
+                  child: const Row(
+                    children: [
+                      Icon(Icons.groups_outlined,
+                          size: 18, color: AppColors.primary),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Inscrições de Equipes',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    await context.push(
+                      '/competitions/${comp.id}/teams',
+                      extra: comp,
+                    );
+                    if (context.mounted) {
+                      vm.load(forceRefresh: true);
+                    }
+                  },
+                ),
                 if (!isDisabled)
                   KicksterMenuItem(
                     child: const Row(
@@ -351,12 +380,15 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                         Icon(Icons.visibility_off_outlined,
                             size: 18, color: AppColors.warning),
                         SizedBox(width: 10),
-                        Text(
-                          'Desativar',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
+                        Expanded(
+                          child: Text(
+                            'Desativar',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -382,12 +414,15 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                         Icon(Icons.visibility_outlined,
                             size: 18, color: AppColors.success),
                         SizedBox(width: 10),
-                        Text(
-                          'Reativar',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
+                        Expanded(
+                          child: Text(
+                            'Reativar',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],

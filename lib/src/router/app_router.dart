@@ -17,13 +17,13 @@ import 'package:flag_admin_web/ui/competition/widgets/competition_list_screen.da
 import 'package:flag_admin_web/ui/competition/widgets/competition_create_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_edit_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_teams_screen.dart';
 import '../features/competitions/presentation/screens/groupings_screen.dart';
 import '../features/games/presentation/screens/game_detail_screen.dart';
 import '../features/games/presentation/screens/game_form_screen.dart';
 import '../features/games/presentation/screens/game_import_screen.dart';
 import '../features/games/presentation/screens/games_screen.dart';
-import '../features/home/presentation/screens/home_screen.dart';
-import 'package:flag_admin_web/ui/organization/widgets/associate_clubs_screen.dart';
+import 'package:flag_admin_web/ui/home/widgets/home_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
@@ -32,11 +32,7 @@ import '../features/rosters/presentation/screens/rosters_screen.dart';
 import '../features/rounds/presentation/screens/round_detail_screen.dart';
 import '../features/rounds/presentation/screens/round_form_screen.dart';
 import '../features/rounds/presentation/screens/rounds_screen.dart';
-import '../features/teams/presentation/screens/team_create_screen.dart';
-import '../features/teams/presentation/screens/team_detail_screen.dart';
-import '../features/teams/presentation/screens/team_edit_screen.dart';
 import '../features/teams/presentation/screens/team_roster_screen.dart';
-import '../features/teams/presentation/screens/teams_screen.dart';
 import '../features/users/presentation/screens/user_form_screen.dart';
 import '../features/users/presentation/screens/users_screen.dart';
 import '../features/venues/presentation/screens/venue_detail_screen.dart';
@@ -183,7 +179,7 @@ class AppRouter {
                 GoRoute(
                   path: '/',
                   name: 'home',
-                  builder: (context, state) => const AdminHomeScreen(),
+                  builder: (context, state) => const HomeScreen(),
                 ),
               ],
             ),
@@ -268,6 +264,19 @@ class AppRouter {
                                 : null;
                             return CompetitionEditScreen(
                               id: state.pathParameters['id']!,
+                              competition: competition,
+                            );
+                          },
+                        ),
+                        GoRoute(
+                          path: 'teams',
+                          name: 'competitionTeams',
+                          builder: (context, state) {
+                            final competition = state.extra is Competition
+                                ? state.extra as Competition
+                                : null;
+                            return CompetitionTeamsScreen(
+                              competitionId: state.pathParameters['id']!,
                               competition: competition,
                             );
                           },
@@ -421,80 +430,6 @@ class AppRouter {
                 ),
               ],
             ),
-            // Branch Times.
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/teams',
-                  name: 'teams',
-                  builder: (context, state) => TeamsScreen(
-                      lockedCompetitionId: state.extra is String
-                          ? state.extra as String
-                          : null),
-                  routes: [
-                    GoRoute(
-                      path: 'associate',
-                      name: 'teamAssociate',
-                      builder: (context, state) => AssociateClubsScreen(
-                        lockedCompetitionId: state.extra is String
-                            ? state.extra as String
-                            : null,
-                      ),
-                    ),
-                    GoRoute(
-                      path: 'new',
-                      name: 'teamNew',
-                      builder: (context, state) => TeamCreateScreen(
-                        competitionId: state.extra is String
-                            ? state.extra as String
-                            : null,
-                      ),
-                    ),
-                    GoRoute(
-                      path: ':id',
-                      name: 'teamDetail',
-                      builder: (context, state) {
-                        final team = state.extra is Team
-                            ? state.extra as Team
-                            : null;
-                        return TeamDetailScreen(
-                          teamId: state.pathParameters['id'],
-                          team: team,
-                        );
-                      },
-                      routes: [
-                        GoRoute(
-                          path: 'edit',
-                          name: 'teamEdit',
-                          builder: (context, state) {
-                            final team = state.extra is Team
-                                ? state.extra as Team
-                                : null;
-                            return TeamEditScreen(
-                              teamId: state.pathParameters['id'],
-                              team: team,
-                            );
-                          },
-                        ),
-                        GoRoute(
-                          path: 'roster',
-                          name: 'teamRoster',
-                          builder: (context, state) {
-                            final team = state.extra is Team
-                                ? state.extra as Team
-                                : null;
-                            return TeamRosterScreen(
-                              team: team,
-                              teamId: state.pathParameters['id'],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
             // Branch Atletas.
             StatefulShellBranch(
               routes: [
@@ -563,6 +498,18 @@ class AppRouter {
                       ),
                     ),
                   ],
+                ),
+                GoRoute(
+                  path: '/teams/:id/roster',
+                  name: 'teamRoster',
+                  builder: (context, state) {
+                    final team =
+                        state.extra is Team ? state.extra as Team : null;
+                    return TeamRosterScreen(
+                      team: team,
+                      teamId: state.pathParameters['id'],
+                    );
+                  },
                 ),
               ],
             ),

@@ -108,7 +108,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
 
     final breadcrumb = [
       const BreadcrumbItem(AppStrings.home, route: '/'),
-      const BreadcrumbItem(AppStrings.teams, route: '/teams'),
+      const BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
       if (teamName != null) BreadcrumbItem(teamName),
       const BreadcrumbItem('Elenco'),
     ];

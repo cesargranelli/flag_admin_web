@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/api_client.dart';
 import 'package:flag_admin_web/domain/models/institution.dart';
+import 'package:flag_admin_web/domain/models/team.dart';
 
 /// Serviço REST de agremiações (camada Services - ADR-001).
 abstract class InstitutionService {
@@ -11,6 +12,11 @@ abstract class InstitutionService {
   Future<Institution> updateInstitution(String id, Map<String, dynamic> body);
   Future<void> deleteInstitution(String id);
   Future<void> updateOrganizations(String id, List<String> orgIds);
+  Future<List<Team>> getTeams(String institutionId);
+  Future<Team> createTeam(String institutionId, Map<String, dynamic> body);
+  Future<void> deleteTeam(String teamId);
+  Future<void> deactivateTeam(String teamId);
+  Future<void> reactivateTeam(String teamId);
 }
 
 /// Implementação padrão consumindo [ApiClient].
@@ -46,4 +52,32 @@ class ApiInstitutionService implements InstitutionService {
         {'organizationIds': orgIds},
         (json) => json,
       );
+
+  @override
+  Future<List<Team>> getTeams(String institutionId) =>
+      _client.getList(
+        '/api/v1/institutions/$institutionId/teams',
+        Team.fromJson,
+      );
+
+  @override
+  Future<Team> createTeam(String institutionId, Map<String, dynamic> body) =>
+      _client.post(
+        '/api/v1/institutions/$institutionId/teams',
+        body,
+        Team.fromJson,
+      );
+
+  @override
+  Future<void> deleteTeam(String teamId) =>
+      _client.delete('/api/v1/teams/$teamId');
+
+  @override
+  Future<void> deactivateTeam(String teamId) =>
+      _client.post('/api/v1/teams/$teamId/deactivate', {}, (json) => json);
+
+  @override
+  Future<void> reactivateTeam(String teamId) =>
+      _client.post('/api/v1/teams/$teamId/reactivate', {}, (json) => json);
 }
+

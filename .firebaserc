@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "flag-platform"
-  }
+  },
+  "targets": {
+    "flag-platform": {
+      "storage": {
+        "myrules": [
+          "flag-platform"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

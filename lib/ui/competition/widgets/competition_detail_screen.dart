@@ -283,8 +283,10 @@ class CompetitionDetailScreen extends ConsumerWidget {
                         title: 'Equipes Inscritas',
                         subtitle: 'Homologação e elenco de agremiações',
                         onTap: () {
-                          // Navegar para módulo de equipes/inscrições com contexto da competição
-                          context.push('/teams?competitionId=${comp.id}');
+                          context.push(
+                            '/competitions/${comp.id}/teams',
+                            extra: comp,
+                          );
                         },
                       ),
                     ),

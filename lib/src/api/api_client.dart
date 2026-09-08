@@ -12,9 +12,12 @@ import 'repository_exception.dart';
 class ApiClient {
   final Dio dio;
 
+  final SessionManager? _sessionManager;
+
   ApiClient({
     Dio? dio,
-  }) : dio = dio ??
+    SessionManager? sessionManager,
+  })  : dio = dio ??
             Dio(
               BaseOptions(
                 baseUrl: AppConfig.apiBaseUrl,
@@ -22,26 +25,35 @@ class ApiClient {
                 receiveTimeout: const Duration(seconds: 15),
                 headers: {'Accept': 'application/json'},
               ),
-            );
+            ),
+        _sessionManager = sessionManager;
 
   ApiClient get public => this;
 
-  /// Retorna os headers HTTP, incluindo o Firebase ID Token quando disponível.
-  ///
-  /// Usa Firebase Auth ID Token (Bearer) em vez do JWT custom anterior.
-  /// O token é obtido do [FirebaseAuth.currentUser] e renovado automaticamente
-  /// pelo SDK Firebase.
+  /// Retorna os headers HTTP, priorizando o token JWT nativo do backend
+  /// salvo na sessão, ou alternativamente o Firebase ID Token.
   Future<Map<String, dynamic>> _headers() async {
-    String? idToken;
+    String? token;
+
+    // 1. Tenta recuperar o token nativo do backend persistido na sessão
     try {
-      idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      token = await _sessionManager?.getToken();
     } catch (_) {
-      // Firebase não disponível (ex: em testes)
+      // Ignora erro de leitura local
+    }
+
+    // 2. Se não houver token nativo, tenta o Firebase ID Token
+    if (token == null || token.isEmpty) {
+      try {
+        token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      } catch (_) {
+        // Firebase não disponível (ex: em testes)
+      }
     }
 
     return {
       'Content-Type': 'application/json',
-      if (idToken != null) 'Authorization': 'Bearer $idToken',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
   }
 

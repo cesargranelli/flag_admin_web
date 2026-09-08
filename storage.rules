@@ -26,6 +26,14 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*');
     }
 
+    // ===== Uploads e Leitura de Logos de Equipes (Teams) =====
+    match /teams/logos/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
     // Demais caminhos: leitura pública liberada para assets/mídias; escrita negada ao cliente (Admin SDK)
     match /{allPaths=**} {
       allow read: if true;

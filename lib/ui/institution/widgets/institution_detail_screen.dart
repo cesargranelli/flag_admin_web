@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/domain/models/institution.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/ui/institution/view_models/institution_detail_view_model.dart';
 
 /// Tela de detalhes de agremiação com Hero Card Esportivo Kickster (ADR-001 / MVVM).
 class InstitutionDetailScreen extends ConsumerStatefulWidget {
@@ -101,7 +102,7 @@ class _InstitutionDetailScreenState
 
     Widget body;
     if (inst != null) {
-      body = _buildDetail(context, inst, orgsAsync);
+      body = _buildDetail(context, vm, inst, orgsAsync);
     } else if (vm.isLoading) {
       body = const AppLoading(message: 'Carregando agremiação...');
     } else if (vm.errorMessage != null) {
@@ -122,6 +123,7 @@ class _InstitutionDetailScreenState
 
   Widget _buildDetail(
     BuildContext context,
+    InstitutionDetailViewModel vm,
     Institution inst,
     AsyncValue<List<dynamic>> orgsAsync,
   ) {
@@ -189,6 +191,13 @@ class _InstitutionDetailScreenState
             icon: Icons.account_balance_outlined,
             child: _filiacoesCard(inst, orgsAsync),
           ),
+
+          // Seção 6: Equipes Esportivas (ao final)
+          _section(
+            title: 'Equipes Esportivas',
+            icon: Icons.sports_football_outlined,
+            child: _teamsSection(context, vm),
+          ),
         ],
       ),
     );
@@ -198,11 +207,12 @@ class _InstitutionDetailScreenState
     required String title,
     required IconData icon,
     required Widget child,
+    Widget? action,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        KicksterSectionTitle(title: title, icon: icon),
+        KicksterSectionTitle(title: title, icon: icon, action: action),
         const SizedBox(height: 12),
         child,
         const SizedBox(height: 20),
@@ -540,4 +550,501 @@ class _InstitutionDetailScreenState
       ),
     );
   }
+
+  Widget _teamsSection(BuildContext context, InstitutionDetailViewModel vm) {
+    if (vm.isLoadingTeams) {
+      return const AppLoading(message: 'Carregando equipes esportivas...');
+    }
+
+    if (vm.teamsErrorMessage != null && vm.teams.isEmpty) {
+      return AppErrorState(
+        message: 'Não foi possível carregar as equipes',
+        onRetry: () => vm.loadTeams(forceRefresh: true),
+      );
+    }
+
+    final teams = vm.teams;
+
+    return Card(
+      elevation: 1,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Cabeçalho interno do Card seguindo o padrão Kickster de competições
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Equipes Cadastradas (${teams.length})',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                KicksterButton(
+                  label: 'Nova Equipe',
+                  icon: Icons.add,
+                  variant: KicksterButtonVariant.outline,
+                  onPressed: () => _showCreateTeamModal(context, vm),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            if (teams.isEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.line.withValues(alpha: 0.8),
+                  ),
+                ),
+                child: const Column(
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 40,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'Nenhuma equipe cadastrada nesta agremiação.',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Cadastre as diferentes equipes ou formações deste clube utilizando o botão acima.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final columns = constraints.maxWidth >= 700 ? 2 : 1;
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: teams.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columns,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      mainAxisExtent: 100,
+                    ),
+                    itemBuilder: (context, index) {
+                      final team = teams[index];
+                      return _teamCard(context, vm, team);
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _teamCard(
+    BuildContext context,
+    InstitutionDetailViewModel vm,
+    Team team,
+  ) {
+    final isInactive = team.status == 'INACTIVE';
+    final subtitleParts = <String>[];
+    if (team.shortName?.isNotEmpty == true) {
+      subtitleParts.add('Sigla: ${team.shortName!}');
+    }
+    if (team.sportName?.isNotEmpty == true) {
+      subtitleParts.add(team.sportName!);
+    } else {
+      subtitleParts.add('Modalidade não definida');
+    }
+    final subtitle = subtitleParts.join(' · ');
+
+    return KicksterCard(
+      icon: Icons.shield_outlined,
+      title: team.name,
+      subtitle: subtitle,
+      imageUrl: team.logoUrl,
+      onTap: () {},
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isInactive)
+            const Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: KicksterStatusChip(
+                status: KicksterStatusChipType.failed,
+                label: 'Inativo',
+              ),
+            ),
+          KicksterMenuAnchor(
+            width: 190,
+            alignment: Alignment.topRight,
+            trigger: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.more_vert,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            items: [
+              if (!isInactive)
+                KicksterMenuItem(
+                  child: const Row(
+                    children: [
+                      Icon(Icons.block_outlined,
+                          size: 18, color: AppColors.danger),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Desativar Equipe',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.danger,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    final ok = await showKicksterConfirm(
+                      context: context,
+                      title: 'Desativar Equipe',
+                      content: 'Deseja desativar a equipe "${team.name}"?',
+                      confirmLabel: 'Desativar',
+                      danger: true,
+                    );
+                    if (ok == true) {
+                      await vm.deactivateTeam(team.id);
+                    }
+                  },
+                )
+              else
+                KicksterMenuItem(
+                  child: const Row(
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          size: 18, color: AppColors.success),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Reativar Equipe',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    await vm.reactivateTeam(team.id);
+                  },
+                ),
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.delete_outline,
+                        size: 18, color: AppColors.danger),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Excluir Equipe',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.danger,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () async {
+                  final ok = await showKicksterConfirm(
+                    context: context,
+                    title: 'Excluir Equipe',
+                    content:
+                        'Tem certeza que deseja excluir a equipe "${team.name}"? Esta ação não pode ser desfeita.',
+                    confirmLabel: 'Excluir',
+                    danger: true,
+                  );
+                  if (ok == true) {
+                    await vm.deleteTeam(team.id);
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateTeamModal(
+    BuildContext context,
+    InstitutionDetailViewModel vm,
+  ) {
+    final formKey = GlobalKey<FormState>();
+    final nameCtrl = TextEditingController();
+    final shortNameCtrl = TextEditingController();
+    final logoUrlCtrl = TextEditingController();
+
+    // Valores padrão para a seleção interativa
+    Modality selectedModality = Modality.flag5x5;
+    Gender selectedGender = Gender.male;
+    AgeGroup selectedAgeGroup = AgeGroup.adult;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          final storageService = ref.read(storageServiceProvider);
+
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.sports_football_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Nova Equipe Esportiva',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: 520,
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // 1. Identificação Básica: Nome e Sigla na mesma linha
+                      const Text(
+                        'Identificação da Equipe',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: KicksterInput(
+                              label: 'Nome da Equipe *',
+                              hintText: 'Ex.: Spartans Black, Spartans Feminino',
+                              controller: nameCtrl,
+                              maxLength: 100,
+                              validator: (v) =>
+                                  (v == null || v.trim().isEmpty) ? 'Informe o nome da equipe' : null,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 1,
+                            child: KicksterInput(
+                              label: 'Sigla',
+                              hintText: 'SPA-BLK',
+                              controller: shortNameCtrl,
+                              maxLength: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 2. Logotipo da Equipe (Padrão KicksterImageUploader)
+                      KicksterImageUploader(
+                        label: 'Escudo / Logotipo da Equipe (Opcional)',
+                        controller: logoUrlCtrl,
+                        helperText: 'PNG, JPG ou WebP (máx. 5MB)',
+                        uploadFunction: ({required bytes, required filename, onProgress}) =>
+                            storageService.uploadTeamLogo(
+                          bytes: bytes,
+                          filename: filename,
+                          onProgress: onProgress,
+                        ),
+                        onUploaded: (url) => setModalState(() {}),
+                        onRemoved: () => setModalState(() {}),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 3. Modalidade Esportiva Oficial (SelectableChip)
+                      const Text(
+                        'Modalidade Esportiva',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: Modality.values.map((m) {
+                          final isSel = selectedModality == m;
+                          return SelectableChip(
+                            label: m.label,
+                            selected: isSel,
+                            onTap: () => setModalState(() => selectedModality = m),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 4. Gênero (SelectableChip)
+                      const Text(
+                        'Gênero da Equipe',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: Gender.values.map((g) {
+                          final isSel = selectedGender == g;
+                          return SelectableChip(
+                            label: g.label,
+                            selected: isSel,
+                            onTap: () => setModalState(() => selectedGender = g),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 5. Categoria / Faixa Etária (SelectableChip)
+                      const Text(
+                        'Categoria / Faixa Etária',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          AgeGroup.adult,
+                          AgeGroup.sub20,
+                          AgeGroup.sub17,
+                          AgeGroup.sub15,
+                          AgeGroup.master,
+                          AgeGroup.open,
+                        ].map((cat) {
+                          final isSel = selectedAgeGroup == cat;
+                          return SelectableChip(
+                            label: cat.label,
+                            selected: isSel,
+                            onTap: () => setModalState(() => selectedAgeGroup = cat),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              KicksterButton(
+                label: 'Cancelar',
+                variant: KicksterButtonVariant.text,
+                onPressed: () => Navigator.of(dialogCtx).pop(),
+              ),
+              KicksterButton(
+                label: 'Cadastrar Equipe',
+                icon: Icons.check,
+                loading: vm.isSavingTeam,
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+
+                  final computedSportName =
+                      '${selectedModality.label} ${selectedGender.label} (${selectedAgeGroup.label})';
+
+                  final success = await vm.createTeam(
+                    name: nameCtrl.text.trim(),
+                    shortName: shortNameCtrl.text.trim().isEmpty
+                        ? null
+                        : shortNameCtrl.text.trim(),
+                    sportName: computedSportName,
+                    logoUrl: logoUrlCtrl.text.trim().isEmpty
+                        ? null
+                        : logoUrlCtrl.text.trim(),
+                  );
+
+                  if (success && dialogCtx.mounted) {
+                    Navigator.of(dialogCtx).pop();
+                  }
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
+

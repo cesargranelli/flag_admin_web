@@ -1,4 +1,5 @@
 import 'package:flag_admin_web/domain/models/institution.dart';
+import 'package:flag_admin_web/domain/models/team.dart';
 import '../services/institution_service.dart';
 
 /// Repository de agremiações (camada Repositories - ADR-001).
@@ -13,6 +14,9 @@ class InstitutionRepository {
   List<Institution>? _cache;
   DateTime? _lastFetch;
   static const Duration _cacheTtl = Duration(seconds: 30);
+
+  final Map<String, List<Team>> _teamsCache = {};
+  final Map<String, DateTime> _teamsLastFetch = {};
 
   /// Retorna a lista de agremiações com suporte a cache em memória com TTL de 30s.
   Future<List<Institution>> getInstitutions({bool forceRefresh = false}) async {
@@ -67,9 +71,71 @@ class InstitutionRepository {
     clearCache();
   }
 
+  /// Busca as equipes esportivas da agremiação com cache TTL 30s.
+  Future<List<Team>> getTeams(String institutionId, {bool forceRefresh = false}) async {
+    final cached = _teamsCache[institutionId];
+    final lastFetch = _teamsLastFetch[institutionId];
+    final isCacheValid = cached != null &&
+        lastFetch != null &&
+        DateTime.now().difference(lastFetch) < _cacheTtl;
+
+    if (!forceRefresh && isCacheValid) {
+      return cached;
+    }
+
+    final data = await _service.getTeams(institutionId);
+    _teamsCache[institutionId] = List<Team>.unmodifiable(data);
+    _teamsLastFetch[institutionId] = DateTime.now();
+    return _teamsCache[institutionId]!;
+  }
+
+  /// Cria uma nova equipe na agremiação e invalida o cache de times.
+  Future<Team> createTeam({
+    required String institutionId,
+    required String name,
+    String? shortName,
+    String? sportName,
+    String? logoUrl,
+  }) async {
+    final body = {
+      'name': name,
+      if (shortName != null && shortName.isNotEmpty) 'shortName': shortName,
+      if (sportName != null && sportName.isNotEmpty) 'sportName': sportName,
+      if (logoUrl != null && logoUrl.isNotEmpty) 'logoUrl': logoUrl,
+    };
+    final created = await _service.createTeam(institutionId, body);
+    _teamsCache.remove(institutionId);
+    _teamsLastFetch.remove(institutionId);
+    return created;
+  }
+
+  /// Exclui um time e invalida o cache.
+  Future<void> deleteTeam(String institutionId, String teamId) async {
+    await _service.deleteTeam(teamId);
+    _teamsCache.remove(institutionId);
+    _teamsLastFetch.remove(institutionId);
+  }
+
+  /// Desativa um time logicamente.
+  Future<void> deactivateTeam(String institutionId, String teamId) async {
+    await _service.deactivateTeam(teamId);
+    _teamsCache.remove(institutionId);
+    _teamsLastFetch.remove(institutionId);
+  }
+
+  /// Reativa um time desativado logicamente.
+  Future<void> reactivateTeam(String institutionId, String teamId) async {
+    await _service.reactivateTeam(teamId);
+    _teamsCache.remove(institutionId);
+    _teamsLastFetch.remove(institutionId);
+  }
+
   /// Limpa o cache local.
   void clearCache() {
     _cache = null;
     _lastFetch = null;
+    _teamsCache.clear();
+    _teamsLastFetch.clear();
   }
 }
+

@@ -35,7 +35,7 @@ export 'models/roster_entry.dart';
 export 'models/round.dart';
 export 'models/score_event.dart';
 export 'models/standing.dart';
-export 'models/team.dart';
+export 'package:flag_admin_web/domain/models/team.dart';
 export 'models/team_roster.dart';
 export 'models/user.dart';
 export 'models/venue.dart';

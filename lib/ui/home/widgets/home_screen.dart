@@ -1,18 +1,13 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
 
-import '../../../../providers/providers.dart';
-
-/// Tela inicial do Admin Web — estrutura visual Kickster.
-///
-/// Layout:
-/// - Header pessoal (via AppScreen): avatar + nome + greeting + bell
-/// - Seção "Módulos": título 16px w600 + grid de KicksterCards
-class AdminHomeScreen extends ConsumerWidget {
-  const AdminHomeScreen({super.key});
+/// Tela inicial do Admin Web — estrutura visual Kickster (ADR-001 / MVVM).
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,45 +16,44 @@ class AdminHomeScreen extends ConsumerWidget {
         UserRole.admin;
 
     final modules = <_Module>[
-      _Module(
+      const _Module(
         Icons.business_outlined,
         AppStrings.organizations,
         '/organizations',
       ),
-      _Module(
-        Icons.groups_outlined,
+      const _Module(
+        Icons.shield_outlined,
         AppStrings.institutions,
         '/institutions',
       ),
-      _Module(
-        Icons.shield_outlined,
-        AppStrings.teams,
-        '/teams',
-      ),
-      _Module(
-        Icons.groups_outlined,
-        AppStrings.rosters,
-        '/rosters',
-      ),
-      _Module(
-        Icons.person_outline,
-        AppStrings.athletes,
-        '/athletes',
-      ),
-      _Module(
+      const _Module(
         Icons.emoji_events_outlined,
         AppStrings.competitions,
         '/competitions',
       ),
-      _Module(
+      const _Module(
+        Icons.groups_outlined,
+        AppStrings.rosters,
+        '/rosters',
+      ),
+      const _Module(
+        Icons.person_outline,
+        AppStrings.athletes,
+        '/athletes',
+      ),
+      const _Module(
         Icons.stadium_outlined,
         AppStrings.venues,
         '/venues',
       ),
       if (isAdmin)
-        _Module(Icons.fact_check_outlined, AppStrings.approvals, '/approvals'),
+        const _Module(
+          Icons.fact_check_outlined,
+          AppStrings.approvals,
+          '/approvals',
+        ),
       if (isAdmin)
-        _Module(
+        const _Module(
           Icons.manage_accounts_outlined,
           AppStrings.users,
           '/users',
@@ -71,7 +65,6 @@ class AdminHomeScreen extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Seção "Módulos"
           _SectionHeader(title: AppStrings.modules),
           const SizedBox(height: 12),
           LayoutBuilder(
@@ -101,9 +94,6 @@ class AdminHomeScreen extends ConsumerWidget {
   }
 }
 
-// ── Section header ──────────────────────────────────────────────────────────
-
-/// Título de seção Kickster (Figma: "Live Matches" 16px w600 + "See All").
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title});
 
@@ -126,8 +116,6 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
-
-// ── Module data ─────────────────────────────────────────────────────────────
 
 class _Module {
   final IconData icon;

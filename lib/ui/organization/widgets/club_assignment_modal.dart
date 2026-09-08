@@ -73,7 +73,7 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
       action: () => ref.read(teamApiProvider).update(
             team.id,
             organizationId: organizationId,
-            competitionId: team.competitionId,
+            competitionId: widget.competitionId,
             divisionId: removing ? null : widget.division.id,
             name: team.name,
             shortName: team.shortName,

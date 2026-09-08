@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/domain/models/login_response.dart';
 import 'package:flag_admin_web/src/domain/models/user.dart';
 
 /// Exceção de serviço de autenticação com mensagem amigável em português.
@@ -38,6 +39,11 @@ abstract class AuthService {
   Future<User> registerBackend({
     required String name,
     required String email,
+  });
+
+  Future<LoginResponse> loginBackend({
+    required String email,
+    required String password,
   });
 
   Future<User> getMe();
@@ -145,6 +151,18 @@ class ApiAuthService implements AuthService {
       '/api/v1/auth/register',
       {'name': name, 'email': email},
       User.fromJson,
+    );
+  }
+
+  @override
+  Future<LoginResponse> loginBackend({
+    required String email,
+    required String password,
+  }) {
+    return _client.post(
+      '/api/v1/auth/login',
+      {'email': email, 'password': password},
+      LoginResponse.fromJson,
     );
   }
 

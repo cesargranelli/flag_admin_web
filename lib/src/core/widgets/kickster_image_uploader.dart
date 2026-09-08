@@ -163,9 +163,11 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
       if (!mounted) return;
       setState(() {
         _isUploading = false;
-        _errorMessage = e is StorageServiceException
-            ? e.message
-            : 'Falha ao enviar imagem. Verifique a conexão e tente novamente.';
+        if (e is StorageServiceException) {
+          _errorMessage = e.message;
+        } else {
+          _errorMessage = 'Falha no upload: $e';
+        }
       });
     }
   }
@@ -188,8 +190,11 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Text(
               widget.label,
@@ -293,6 +298,7 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
             const SizedBox(height: 12),
             const Text(
               'Clique para selecionar o logotipo',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -302,6 +308,7 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
             const SizedBox(height: 4),
             const Text(
               'O arquivo será salvo com segurança no Firebase Storage',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textSecondary,
@@ -321,29 +328,28 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Enviando para o Firebase Storage...',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
               ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Enviando para o Firebase Storage...',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
               Text(
                 '$percent%',
                 style: const TextStyle(
@@ -370,12 +376,13 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
   }
 
   Widget _buildPreviewState(String imageUrl) {
-    return Row(
-      children: [
-        // Miniatura da Imagem ampliada para 80x80
-        Container(
-          width: 80,
-          height: 80,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 420;
+
+        final imagePreview = Container(
+          width: 72,
+          height: 72,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
@@ -397,45 +404,9 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
               child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
             ),
           ),
-        ),
-        const SizedBox(width: 16),
+        );
 
-        // Informacoes e Acoes
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(Icons.check_circle, size: 16, color: AppColors.success),
-                  SizedBox(width: 6),
-                  Text(
-                    'Logo salvo no Firebase Storage',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                imageUrl,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-
-        // Botoes de Acao
-        Row(
+        final actionButtons = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             KicksterButton(
@@ -451,8 +422,81 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
               onPressed: _handleRemove,
             ),
           ],
-        ),
-      ],
+        );
+
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  imagePreview,
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                            SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Logo salvo com sucesso',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              actionButtons,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            imagePreview,
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Logo salvo no Firebase Storage',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            actionButtons,
+          ],
+        );
+      },
     );
   }
 }

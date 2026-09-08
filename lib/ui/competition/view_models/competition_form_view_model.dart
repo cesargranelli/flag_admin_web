@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/grouping_config.dart';
+import 'package:flag_admin_web/src/api/repository_exception.dart';
 import 'package:flag_admin_web/src/domain/enums/age_group.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';
@@ -84,7 +85,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
   /// Inicializa o formulário para edição ou novo registro.
   Future<void> init({String? id, Competition? initialData}) async {
     competitionId = id;
-    if (initialData != null) {
+    if (initialData != null && initialData.organizationId != null && initialData.organizationId!.isNotEmpty) {
       _populate(initialData);
       return;
     }
@@ -310,8 +311,17 @@ class CompetitionFormViewModel extends ChangeNotifier {
           ? await _repository.updateCompetition(competitionId!, body)
           : await _repository.createCompetition(body);
       return result;
+    } on RepositoryException catch (e) {
+      if (e.statusCode == 403) {
+        _errorMessage = 'Acesso não autorizado (403): você não possui permissão para gerenciar esta competição.';
+      } else if (e.statusCode == 401) {
+        _errorMessage = 'Sessão expirada (401). Faça login novamente.';
+      } else {
+        _errorMessage = e.message.isNotEmpty ? e.message : 'Erro ao salvar a competição (${e.statusCode}).';
+      }
+      return null;
     } catch (e) {
-      _errorMessage = 'Erro ao salvar a competição. Verifique os dados.';
+      _errorMessage = 'Erro ao salvar a competição: $e';
       return null;
     } finally {
       _isSaving = false;

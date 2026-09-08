@@ -22,13 +22,13 @@ class ApiCompetitionService implements CompetitionService {
   @override
   Future<List<Competition>> getCompetitions({bool includeDisabled = false}) =>
       _client.getList(
-        '/api/v1/competitions?includeDisabled=',
+        '/api/v1/competitions?includeDisabled=$includeDisabled',
         Competition.fromJson,
       );
 
   @override
   Future<Competition> getCompetition(String id) =>
-      _client.getOne('/api/v1/competitions/', Competition.fromJson);
+      _client.getOne('/api/v1/competitions/$id', Competition.fromJson);
 
   @override
   Future<Competition> createCompetition(Map<String, dynamic> body) =>
@@ -36,14 +36,14 @@ class ApiCompetitionService implements CompetitionService {
 
   @override
   Future<Competition> updateCompetition(String id, Map<String, dynamic> body) =>
-      _client.put('/api/v1/competitions/', body, Competition.fromJson);
+      _client.put('/api/v1/competitions/$id', body, Competition.fromJson);
 
   @override
   Future<void> deactivateCompetition(String id) =>
-      _client.delete('/api/v1/competitions/');
+      _client.delete('/api/v1/competitions/$id');
 
   @override
   Future<void> reactivateCompetition(String id) =>
-      _client.post('/api/v1/competitions//reactivate', <String, dynamic>{},
+      _client.post('/api/v1/competitions/$id/reactivate', <String, dynamic>{},
           (json) => json);
 }

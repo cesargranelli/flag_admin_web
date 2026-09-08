@@ -49,22 +49,47 @@ class AuthRepository {
     }
   }
 
-  /// Autentica com e-mail e senha via Firebase Auth e sincroniza perfil com backend.
+  /// Autentica com e-mail e senha via Firebase Auth e sincroniza perfil/token com backend.
   Future<AuthUser> login({
     required String email,
     required String password,
     bool keepConnected = false,
   }) async {
+    // 1. Autentica no Firebase Auth (necessário para Firebase Storage e regras cliente)
     final credential = await _service.signInWithEmailPassword(
       email: email,
       password: password,
     );
 
-    final token = await credential.user?.getIdToken(true);
-    final user = await _service.getMe();
+    // 2. Autentica no backend REST para obter o token JWT do Spring Boot
+    String? backendToken;
+    User? backendUser;
+    try {
+      final backendResponse = await _service.loginBackend(
+        email: email,
+        password: password,
+      );
+      backendToken = backendResponse.token;
+      backendUser = backendResponse.user;
+    } catch (_) {
+      // Se falhar a chamada direta (ex: usuário recém criado ou formato de senha),
+      // tenta recuperar perfil via getMe()
+    }
 
-    final authUser = AuthUser.fromUser(user, token: token);
+    final user = backendUser ?? await _service.getMe();
+    final effectiveToken = backendToken ?? await credential.user?.getIdToken(true);
+
+    final authUser = AuthUser.fromUser(user, token: effectiveToken);
     _currentUser = authUser;
+
+    // Salva o JWT nativo do backend para que o ApiClient utilize em todas as requisições
+    if (backendToken != null) {
+      await _session.saveSession(
+        token: backendToken,
+        roles: [user.role.toJson()],
+        userName: user.name,
+      );
+    }
 
     await _session.saveFirebaseSession(
       firebaseUid: credential.user!.uid,

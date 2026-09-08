@@ -31,6 +31,14 @@ abstract class StorageService {
     void Function(double progress)? onProgress,
   });
 
+  /// Faz o upload de um logotipo de equipe esportiva e retorna a URL de download pública HTTPS.
+  Future<String> uploadTeamLogo({
+    required Uint8List bytes,
+    required String filename,
+    String? mimeType,
+    void Function(double progress)? onProgress,
+  });
+
   /// Tenta remover um arquivo previamente enviado através de sua URL pública.
   Future<void> deleteFileByUrl(String url);
 }
@@ -93,6 +101,48 @@ class FirebaseStorageService implements StorageService {
     try {
       final sanitizedName = filename.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
       final path = 'organizations/logos/${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
+      final ref = _storage.ref().child(path);
+
+      final determinedMime = mimeType ?? _guessMimeType(filename);
+      final metadata = SettableMetadata(
+        contentType: determinedMime,
+        cacheControl: 'public, max-age=31536000',
+      );
+
+      final uploadTask = ref.putData(bytes, metadata);
+
+      if (onProgress != null) {
+        uploadTask.snapshotEvents.listen((snapshot) {
+          final total = snapshot.totalBytes;
+          if (total > 0) {
+            final progress = snapshot.bytesTransferred / total;
+            onProgress(progress);
+          }
+        });
+      }
+
+      final snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } on FirebaseException catch (e) {
+      throw StorageServiceException(
+        e.message ?? 'Falha ao realizar upload para o Firebase Storage.',
+        e,
+      );
+    } catch (e) {
+      throw StorageServiceException('Erro inesperado no upload da imagem: $e', e);
+    }
+  }
+
+  @override
+  Future<String> uploadTeamLogo({
+    required Uint8List bytes,
+    required String filename,
+    String? mimeType,
+    void Function(double progress)? onProgress,
+  }) async {
+    try {
+      final sanitizedName = filename.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+      final path = 'teams/logos/${DateTime.now().millisecondsSinceEpoch}_$sanitizedName';
       final ref = _storage.ref().child(path);
 
       final determinedMime = mimeType ?? _guessMimeType(filename);
