@@ -1,4 +1,5 @@
 import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/domain/models/institution.dart';
 import 'package:flag_admin_web/domain/models/team.dart';
 
@@ -12,6 +13,8 @@ abstract class InstitutionService {
   Future<Institution> updateInstitution(String id, Map<String, dynamic> body);
   Future<void> deleteInstitution(String id);
   Future<void> updateOrganizations(String id, List<String> orgIds);
+  Future<List<Affiliation>> getAffiliations(String institutionId);
+  Future<Affiliation> requestAffiliation(String institutionId, String organizationId, String season);
   Future<List<Team>> getTeams(String institutionId);
   Future<Team> createTeam(String institutionId, Map<String, dynamic> body);
   Future<void> deleteTeam(String teamId);
@@ -51,6 +54,25 @@ class ApiInstitutionService implements InstitutionService {
         '/api/v1/institutions/$id/organizations',
         {'organizationIds': orgIds},
         (json) => json,
+      );
+
+  @override
+  Future<List<Affiliation>> getAffiliations(String institutionId) =>
+      _client.getList(
+        '/api/v1/institutions/$institutionId/affiliations',
+        Affiliation.fromJson,
+      );
+
+  @override
+  Future<Affiliation> requestAffiliation(
+    String institutionId,
+    String organizationId,
+    String season,
+  ) =>
+      _client.post(
+        '/api/v1/institutions/$institutionId/affiliations',
+        {'organizationId': organizationId, 'season': season},
+        Affiliation.fromJson,
       );
 
   @override

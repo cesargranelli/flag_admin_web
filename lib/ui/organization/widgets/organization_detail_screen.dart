@@ -3,6 +3,7 @@ import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
 
 import 'package:flag_admin_web/src/providers/providers.dart';
 
@@ -56,7 +57,7 @@ class _OrganizationDetailScreenState
 
     Widget body;
     if (org != null) {
-      body = _buildDetail(context, org);
+      body = _buildDetail(context, org, vm);
     } else if (vm.isLoading) {
       body = const AppLoading(
         message: 'Carregando organização...',
@@ -78,7 +79,11 @@ class _OrganizationDetailScreenState
   }
 
   /// Página única: seções empilhadas, scroll do body (#455).
-  Widget _buildDetail(BuildContext context, Organization org) {
+  Widget _buildDetail(
+    BuildContext context,
+    Organization org,
+    OrganizationDetailViewModel vm,
+  ) {
     return AppLayout.detail(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,9 +134,9 @@ class _OrganizationDetailScreenState
             child: _localizacaoCard(org),
           ),
           _section(
-            title: 'Agremiações Filiadas',
+            title: 'Agremiações Filiadas & Pedidos de Filiação',
             icon: Icons.shield_outlined,
-            child: _agremiacoesFiliadasCard(context, org),
+            child: _agremiacoesFiliadasCard(context, org, vm),
           ),
         ],
       ),
@@ -467,77 +472,257 @@ class _OrganizationDetailScreenState
     );
   }
 
-  /// Seção 5 — Agremiações Filiadas (Clubes e Universidades filiados a esta organização).
-  Widget _agremiacoesFiliadasCard(BuildContext context, Organization org) {
-    final institutionsAsync = ref.watch(institutionsProvider);
-
-    return institutionsAsync.when(
-      data: (institutions) {
-        final affiliated = institutions
-            .where((inst) => inst.organizations.contains(org.id))
-            .toList();
-
-        if (affiliated.isEmpty) {
-          return Card(
-            elevation: 1,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: AppColors.line, width: 1),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(20),
-              child: Text(
-                'Nenhuma agremiação filiada a esta organização até o momento.',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
-          );
-        }
-
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 600;
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isWide ? 2 : 1,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                mainAxisExtent: 96,
-              ),
-              itemCount: affiliated.length,
-              itemBuilder: (context, index) {
-                final inst = affiliated[index];
-                final subtitle = [
-                  inst.type.label,
-                  if (inst.abbreviation != null && inst.abbreviation!.isNotEmpty)
-                    inst.abbreviation!,
-                  if (inst.city != null && inst.city!.isNotEmpty)
-                    inst.city!,
-                ].join(' • ');
-
-                return KicksterCard(
-                  imageUrl: inst.logoUrl,
-                  icon: institutionTypeIcon(inst.type),
-                  title: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
-                  subtitle: subtitle,
-                  onTap: () => context.push(
-                    '/institutions/${inst.id}',
-                    extra: inst,
+  /// Seção 5 — Agremiações Filiadas & Pedidos de Filiação (ADR-001 / MVVM).
+  Widget _agremiacoesFiliadasCard(
+    BuildContext context,
+    Organization org,
+    OrganizationDetailViewModel vm,
+  ) {
+    return Card(
+      elevation: 1,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Filtro de Temporada
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Temporada de Filiação:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
-                );
-              },
-            );
-          },
-        );
-      },
-      loading: () => const AppLoading(message: 'Carregando agremiações filiadas...'),
-      error: (err, _) => Text(
-        'Erro ao carregar agremiações filiadas: $err',
-        style: const TextStyle(color: AppColors.danger),
+                ),
+                SizedBox(
+                  width: 120,
+                  child: KicksterDropdown<String>(
+                    label: '',
+                    value: vm.selectedSeason,
+                    values: const ['2026', '2025', '2024'],
+                    labels: const ['2026', '2025', '2024'],
+                    onChanged: (v) {
+                      if (v != null) vm.setSelectedSeason(v);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(color: AppColors.line),
+            const SizedBox(height: 16),
+
+            if (vm.isLoadingAffiliations)
+              const Center(child: AppLoading(message: 'Carregando filiações...'))
+            else if (vm.affiliations.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'Nenhum pedido de filiação ou agremiação filiada nesta temporada.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: vm.affiliations.length,
+                separatorBuilder: (_, _) => const Divider(color: AppColors.line, height: 24),
+                itemBuilder: (context, index) {
+                  final affil = vm.affiliations[index];
+
+                  Color statusColor;
+                  String statusLabel;
+                  IconData statusIcon;
+
+                  if (affil.isApproved) {
+                    statusColor = AppColors.success;
+                    statusLabel = 'Filiado';
+                    statusIcon = Icons.check_circle_outline;
+                  } else if (affil.isPending) {
+                    statusColor = Colors.orange;
+                    statusLabel = 'Pendente';
+                    statusIcon = Icons.hourglass_top_outlined;
+                  } else if (affil.isRejected) {
+                    statusColor = AppColors.danger;
+                    statusLabel = 'Recusado';
+                    statusIcon = Icons.cancel_outlined;
+                  } else {
+                    statusColor = AppColors.textSecondary;
+                    statusLabel = affil.status;
+                    statusIcon = Icons.info_outline;
+                  }
+
+                  return Row(
+                    children: [
+                      KicksterAvatar(
+                        name: affil.institutionName,
+                        imageUrl: affil.institutionLogoUrl,
+                        size: 40,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              affil.institutionName,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Tipo: ${affil.institutionType ?? "Clube"} • Solicitado por: ${affil.requestedBy ?? "Responsável"}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            if (affil.rejectionReason != null && affil.rejectionReason!.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Motivo da recusa: ${affil.rejectionReason}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.danger,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(statusIcon, size: 14, color: statusColor),
+                            const SizedBox(width: 6),
+                            Text(
+                              statusLabel,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (affil.isPending) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          tooltip: 'Aprovar filiação',
+                          icon: const Icon(Icons.check, color: AppColors.success),
+                          onPressed: () async {
+                            final ok = await showKicksterConfirm(
+                              context: context,
+                              title: 'Aprovar Filiação',
+                              content: 'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
+                              confirmLabel: 'Aprovar',
+                            );
+                            if (ok == true) {
+                              await vm.approveAffiliation(affil.id);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          tooltip: 'Recusar filiação',
+                          icon: const Icon(Icons.close, color: AppColors.danger),
+                          onPressed: () => _showRejectAffiliationModal(context, vm, affil),
+                        ),
+                      ],
+                    ],
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
-}
+
+  void _showRejectAffiliationModal(
+    BuildContext context,
+    OrganizationDetailViewModel vm,
+    dynamic affil,
+  ) {
+    final reasonCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Recusar Filiação: ${affil.institutionName}'),
+        content: SizedBox(
+          width: 440,
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Informe o motivo da recusa para que a agremiação possa corrigir eventuais pendências:',
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 14),
+                KicksterInput(
+                  label: 'Motivo da Recusa *',
+                  controller: reasonCtrl,
+                  maxLines: 3,
+                  hintText: 'Ex.: Estatuto desatualizado ou anuidade pendente',
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a justificativa' : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          KicksterButton(
+            label: 'Cancelar',
+            variant: KicksterButtonVariant.text,
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+          ),
+          KicksterButton(
+            label: 'Confirmar Recusa',
+            variant: KicksterButtonVariant.outline,
+            loading: vm.isReviewingAffiliation,
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              final ok = await vm.rejectAffiliation(affil.id, reasonCtrl.text.trim());
+              if (ok && dialogCtx.mounted) {
+                Navigator.of(dialogCtx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Filiação recusada.')),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}

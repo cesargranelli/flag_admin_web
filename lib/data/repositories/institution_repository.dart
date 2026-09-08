@@ -1,3 +1,4 @@
+import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/domain/models/institution.dart';
 import 'package:flag_admin_web/domain/models/team.dart';
 import '../services/institution_service.dart';
@@ -128,6 +129,25 @@ class InstitutionRepository {
     await _service.reactivateTeam(teamId);
     _teamsCache.remove(institutionId);
     _teamsLastFetch.remove(institutionId);
+  }
+
+  /// Retorna as filiações da agremiação.
+  Future<List<Affiliation>> getAffiliations(
+    String institutionId, {
+    bool forceRefresh = false,
+  }) async {
+    return _service.getAffiliations(institutionId);
+  }
+
+  /// Solicita nova filiação a uma organização.
+  Future<Affiliation> requestAffiliation(
+    String institutionId,
+    String organizationId,
+    String season,
+  ) async {
+    final created = await _service.requestAffiliation(institutionId, organizationId, season);
+    clearCache();
+    return created;
   }
 
   /// Limpa o cache local.

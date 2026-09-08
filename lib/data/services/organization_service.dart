@@ -1,3 +1,4 @@
+import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/src/api/api_client.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 
@@ -14,6 +15,9 @@ abstract class OrganizationService {
   Future<Organization> updateOrganization(String id, Map<String, dynamic> body);
   Future<void> deleteOrganization(String id);
   Future<void> reactivateOrganization(String id);
+  Future<List<Affiliation>> getAffiliations(String organizationId, {String? season, String? status});
+  Future<Affiliation> approveAffiliation(String organizationId, String affiliationId);
+  Future<Affiliation> rejectAffiliation(String organizationId, String affiliationId, String reason);
 }
 
 /// Implementação padrão consumindo [ApiClient].
@@ -58,4 +62,41 @@ class ApiOrganizationService implements OrganizationService {
         <String, dynamic>{},
         (json) => json,
       );
+
+  @override
+  Future<List<Affiliation>> getAffiliations(
+    String organizationId, {
+    String? season,
+    String? status,
+  }) {
+    final params = <String>[];
+    if (season != null) params.add('season=$season');
+    if (status != null) params.add('status=$status');
+    final qs = params.isEmpty ? '' : '?${params.join('&')}';
+    return _client.getList(
+      '/api/v1/organizations/$organizationId/affiliations$qs',
+      Affiliation.fromJson,
+    );
+  }
+
+  @override
+  Future<Affiliation> approveAffiliation(String organizationId, String affiliationId) =>
+      _client.post(
+        '/api/v1/organizations/$organizationId/affiliations/$affiliationId/approve',
+        <String, dynamic>{},
+        Affiliation.fromJson,
+      );
+
+  @override
+  Future<Affiliation> rejectAffiliation(
+    String organizationId,
+    String affiliationId,
+    String reason,
+  ) =>
+      _client.post(
+        '/api/v1/organizations/$organizationId/affiliations/$affiliationId/reject',
+        {'reason': reason},
+        Affiliation.fromJson,
+      );
 }
+

@@ -1,3 +1,4 @@
+import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 import '../services/organization_service.dart';
 
@@ -79,6 +80,32 @@ class OrganizationRepository {
   Future<void> reactivateOrganization(String id) async {
     await _service.reactivateOrganization(id);
     clearCache();
+  }
+
+  /// Retorna os pedidos de filiação recebidos pela organização.
+  Future<List<Affiliation>> getAffiliations(
+    String organizationId, {
+    String? season,
+    String? status,
+  }) =>
+      _service.getAffiliations(organizationId, season: season, status: status);
+
+  /// Aprova um pedido de filiação de uma agremiação.
+  Future<Affiliation> approveAffiliation(String organizationId, String affiliationId) async {
+    final res = await _service.approveAffiliation(organizationId, affiliationId);
+    clearCache();
+    return res;
+  }
+
+  /// Rejeita um pedido de filiação de uma agremiação.
+  Future<Affiliation> rejectAffiliation(
+    String organizationId,
+    String affiliationId,
+    String reason,
+  ) async {
+    final res = await _service.rejectAffiliation(organizationId, affiliationId, reason);
+    clearCache();
+    return res;
   }
 
   /// Limpa o cache local em memória.
