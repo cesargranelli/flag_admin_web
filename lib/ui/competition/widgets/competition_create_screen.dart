@@ -24,16 +24,8 @@ class _CompetitionCreateScreenState
   final _formKey = GlobalKey<FormState>();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(competitionFormViewModelProvider).init();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final vm = ref.watch(competitionFormViewModelProvider);
+    final vm = ref.watch(competitionCreateViewModelProvider);
     final organizationsAsync = ref.watch(organizationsProvider);
 
     return AppScreen(
@@ -362,7 +354,7 @@ class _CompetitionCreateScreenState
                         ? null
                         : () async {
                             if (!_formKey.currentState!.validate()) return;
-                            final result = await vm.save();
+                            final result = await vm.create();
                             if (result != null && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

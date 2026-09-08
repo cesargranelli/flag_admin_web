@@ -7,6 +7,7 @@ import 'package:flag_admin_web/data/services/auth_service.dart';
 import 'package:flag_admin_web/ui/auth/view_models/forgot_password_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/login_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/signup_view_model.dart';
+import 'package:flag_admin_web/ui/home/view_models/home_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +16,8 @@ import 'package:flag_admin_web/data/services/organization_service.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_form_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_create_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_edit_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -23,12 +26,14 @@ import 'package:flag_admin_web/data/services/institution_service.dart';
 import 'package:flag_admin_web/data/services/storage_service.dart';
 import 'package:flag_admin_web/ui/institution/view_models/institution_view_model.dart';
 import 'package:flag_admin_web/ui/institution/view_models/institution_detail_view_model.dart';
-import 'package:flag_admin_web/ui/institution/view_models/institution_form_view_model.dart';
+import 'package:flag_admin_web/ui/institution/view_models/institution_create_view_model.dart';
+import 'package:flag_admin_web/ui/institution/view_models/institution_edit_view_model.dart';
 
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/data/services/competition_service.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_list_view_model.dart';
-import 'package:flag_admin_web/ui/competition/view_models/competition_form_view_model.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_create_view_model.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_edit_view_model.dart';
 import 'package:flag_admin_web/data/services/competition_team_service.dart';
 import 'package:flag_admin_web/data/services/api_competition_team_service.dart';
 import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
@@ -111,6 +116,14 @@ final forgotPasswordViewModelProvider =
   );
 });
 
+/// ViewModel para a tela Inicial / Home (ADR-001 / MVVM 1:1).
+final homeViewModelProvider =
+    ChangeNotifierProvider.autoDispose<HomeViewModel>((ref) {
+  return HomeViewModel(
+    authRepository: ref.watch(authRepositoryProvider),
+  );
+});
+
 /// Router com proteção de rotas.
 final routerProvider = Provider<GoRouter>((ref) {
   final auth = ref.read(authControllerProvider);
@@ -147,11 +160,28 @@ final organizationDetailViewModelProvider =
   ),
 );
 
-/// ViewModel do formulário de organização.
+/// ViewModel do formulário de organização (legado).
 final organizationFormViewModelProvider =
     ChangeNotifierProvider.autoDispose<OrganizationFormViewModel>(
   (ref) => OrganizationFormViewModel(
     repository: ref.watch(organizationRepositoryProvider),
+  ),
+);
+
+/// ViewModel dedicada para a tela de Criação de Organização (ADR-001 / MVVM 1:1).
+final organizationCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<OrganizationCreateViewModel>(
+  (ref) => OrganizationCreateViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+  ),
+);
+
+/// ViewModel dedicada para a tela de Edição de Organização (ADR-001 / MVVM 1:1).
+final organizationEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<OrganizationEditViewModel, String>(
+  (ref, id) => OrganizationEditViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+    organizationId: id,
   ),
 );
 
@@ -190,11 +220,20 @@ final institutionDetailViewModelProvider =
   ),
 );
 
-/// ViewModel do formulário de agremiação.
-final institutionFormViewModelProvider =
-    ChangeNotifierProvider.autoDispose<InstitutionFormViewModel>(
-  (ref) => InstitutionFormViewModel(
+/// ViewModel dedicada ao CADASTRO de agremiação (1:1 com InstitutionCreateScreen).
+final institutionCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<InstitutionCreateViewModel>(
+  (ref) => InstitutionCreateViewModel(
     repository: ref.watch(institutionRepositoryProvider),
+  ),
+);
+
+/// ViewModel dedicada à EDIÇÃO de agremiação (1:1 com InstitutionEditScreen).
+final institutionEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<InstitutionEditViewModel, String>(
+  (ref, id) => InstitutionEditViewModel(
+    repository: ref.watch(institutionRepositoryProvider),
+    institutionId: id,
   ),
 );
 
@@ -218,11 +257,20 @@ final competitionListViewModelProvider =
   ),
 );
 
-/// ViewModel do formulário de competição.
-final competitionFormViewModelProvider =
-    ChangeNotifierProvider.autoDispose<CompetitionFormViewModel>(
-  (ref) => CompetitionFormViewModel(
+/// ViewModel dedicada ao CADASTRO de competição (1:1 com CompetitionCreateScreen).
+final competitionCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<CompetitionCreateViewModel>(
+  (ref) => CompetitionCreateViewModel(
     repository: ref.watch(competitionRepositoryProvider),
+  ),
+);
+
+/// ViewModel dedicada à EDIÇÃO de competição (1:1 com CompetitionEditScreen).
+final competitionEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<CompetitionEditViewModel, String>(
+  (ref, id) => CompetitionEditViewModel(
+    repository: ref.watch(competitionRepositoryProvider),
+    competitionId: id,
   ),
 );
 

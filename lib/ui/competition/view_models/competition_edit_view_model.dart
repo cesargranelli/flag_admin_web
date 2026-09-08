@@ -10,13 +10,24 @@ import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
 
-/// ViewModel para o formulário de cadastro/edição de Competições (ADR-001 / MVVM).
-class CompetitionFormViewModel extends ChangeNotifier {
-  final CompetitionRepository _repository;
+import 'competition_grouping_state.dart';
 
-  CompetitionFormViewModel({required CompetitionRepository repository})
-      : _repository = repository {
+/// ViewModel dedicada exclusivamente à EDIÇÃO de Competição existente (ADR-001 / MVVM 1:1).
+///
+/// Responsabilidade única: carregar a entidade existente pelo ID e salvar as alterações.
+class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGroupingState {
+  final CompetitionRepository _repository;
+  final String competitionId;
+
+  CompetitionEditViewModel({
+    required CompetitionRepository repository,
+    required this.competitionId,
+    Competition? initialData,
+  })  : _repository = repository {
     nameController.addListener(notifyListeners);
+    if (initialData != null && initialData.organizationId != null && initialData.organizationId!.isNotEmpty) {
+      _populate(initialData);
+    }
   }
 
   final nameController = TextEditingController();
@@ -28,15 +39,18 @@ class CompetitionFormViewModel extends ChangeNotifier {
   String? selectedOrganizationId;
   String? organizationName;
   TournamentFormat tournamentFormat = TournamentFormat.roundRobin;
+  @override
   GroupingType groupingType = GroupingType.none;
 
   /// Lista reativa de grupos customizados pelo usuário
+  @override
   List<CompetitionGroupConfig> groups = [
     const CompetitionGroupConfig(id: 'grp_1', name: 'Grupo A'),
     const CompetitionGroupConfig(id: 'grp_2', name: 'Grupo B'),
   ];
 
   /// Lista reativa de conferências com suas respectivas divisões
+  @override
   List<CompetitionConferenceConfig> conferences = [
     const CompetitionConferenceConfig(
       id: 'conf_1',
@@ -79,28 +93,21 @@ class CompetitionFormViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  String? competitionId;
-  bool get isEditing => competitionId != null;
+  /// Inicializa e busca os dados da competição pelo ID.
+  Future<void> load({bool forceRefresh = false}) async {
+    if (selectedOrganizationId != null && !forceRefresh) return;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
-  /// Inicializa o formulário para edição ou novo registro.
-  Future<void> init({String? id, Competition? initialData}) async {
-    competitionId = id;
-    if (initialData != null && initialData.organizationId != null && initialData.organizationId!.isNotEmpty) {
-      _populate(initialData);
-      return;
-    }
-    if (id != null) {
-      _isLoading = true;
+    try {
+      final comp = await _repository.getCompetition(competitionId);
+      _populate(comp);
+    } catch (e) {
+      _errorMessage = 'Não foi possível carregar a competição.';
+    } finally {
+      _isLoading = false;
       notifyListeners();
-      try {
-        final comp = await _repository.getCompetition(id);
-        _populate(comp);
-      } catch (e) {
-        _errorMessage = 'Não foi possível carregar a competição.';
-      } finally {
-        _isLoading = false;
-        notifyListeners();
-      }
     }
   }
 
@@ -143,19 +150,22 @@ class CompetitionFormViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void setGroupingType(GroupingType type) {
     groupingType = type;
     notifyListeners();
   }
 
   // --- MÉTODOS DE MANIPULAÇÃO DE GRUPOS ---
+  @override
   void addGroup() {
-    final nextLetter = String.fromCharCode(65 + groups.length); // A, B, C, D...
+    final nextLetter = String.fromCharCode(65 + groups.length);
     final newId = 'grp_${DateTime.now().millisecondsSinceEpoch}';
     groups.add(CompetitionGroupConfig(id: newId, name: 'Grupo $nextLetter'));
     notifyListeners();
   }
 
+  @override
   void updateGroupName(int index, String newName) {
     if (index >= 0 && index < groups.length) {
       groups[index] = CompetitionGroupConfig(id: groups[index].id, name: newName);
@@ -163,6 +173,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     }
   }
 
+  @override
   void removeGroup(int index) {
     if (groups.length > 2) {
       groups.removeAt(index);
@@ -171,6 +182,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
   }
 
   // --- MÉTODOS DE MANIPULAÇÃO DE CONFERÊNCIAS E DIVISÕES ---
+  @override
   void addConference() {
     final newId = 'conf_${DateTime.now().millisecondsSinceEpoch}';
     final count = conferences.length + 1;
@@ -184,6 +196,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void updateConferenceName(int index, String newName) {
     if (index >= 0 && index < conferences.length) {
       conferences[index] = conferences[index].copyWith(name: newName);
@@ -191,6 +204,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     }
   }
 
+  @override
   void removeConference(int index) {
     if (conferences.length > 1) {
       conferences.removeAt(index);
@@ -198,6 +212,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     }
   }
 
+  @override
   void addDivision(int conferenceIndex, [String? initialName]) {
     if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
       final conf = conferences[conferenceIndex];
@@ -213,6 +228,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     }
   }
 
+  @override
   void updateDivisionName(int conferenceIndex, int divisionIndex, String newName) {
     if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
       final conf = conferences[conferenceIndex];
@@ -228,6 +244,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     }
   }
 
+  @override
   void removeDivision(int conferenceIndex, int divisionIndex) {
     if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
       final conf = conferences[conferenceIndex];
@@ -260,8 +277,8 @@ class CompetitionFormViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Salva ou atualiza a competição.
-  Future<Competition?> save() async {
+  /// Salva as alterações da competição.
+  Future<Competition?> update() async {
     if (nameController.text.trim().isEmpty) {
       _errorMessage = 'Informe o nome da competição.';
       notifyListeners();
@@ -307,9 +324,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
     };
 
     try {
-      final result = isEditing
-          ? await _repository.updateCompetition(competitionId!, body)
-          : await _repository.createCompetition(body);
+      final result = await _repository.updateCompetition(competitionId, body);
       return result;
     } on RepositoryException catch (e) {
       if (e.statusCode == 403) {
@@ -317,11 +332,11 @@ class CompetitionFormViewModel extends ChangeNotifier {
       } else if (e.statusCode == 401) {
         _errorMessage = 'Sessão expirada (401). Faça login novamente.';
       } else {
-        _errorMessage = e.message.isNotEmpty ? e.message : 'Erro ao salvar a competição (${e.statusCode}).';
+        _errorMessage = e.message.isNotEmpty ? e.message : 'Erro ao salvar a competição ().';
       }
       return null;
     } catch (e) {
-      _errorMessage = 'Erro ao salvar a competição: $e';
+      _errorMessage = 'Erro ao salvar a competição: ';
       return null;
     } finally {
       _isSaving = false;

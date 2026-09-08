@@ -26,6 +26,7 @@ import '../features/games/presentation/screens/games_screen.dart';
 import 'package:flag_admin_web/ui/home/widgets/home_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_edit_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
 import '../features/rosters/presentation/screens/roster_import_screen.dart';
 import '../features/rosters/presentation/screens/rosters_screen.dart';
@@ -39,7 +40,8 @@ import '../features/venues/presentation/screens/venue_detail_screen.dart';
 import '../features/venues/presentation/screens/venue_form_screen.dart';
 import '../features/venues/presentation/screens/venues_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.dart';
-import 'package:flag_admin_web/ui/institution/widgets/institution_form_screen.dart';
+import 'package:flag_admin_web/ui/institution/widgets/institution_create_screen.dart';
+import 'package:flag_admin_web/ui/institution/widgets/institution_edit_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_list_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
@@ -217,8 +219,8 @@ class AppRouter {
                         final org = state.extra is Organization
                             ? state.extra as Organization
                             : null;
-                        return OrganizationCreateScreen(
-                          id: state.pathParameters['id'],
+                        return OrganizationEditScreen(
+                          id: state.pathParameters['id']!,
                           organization: org,
                         );
                       },
@@ -534,7 +536,7 @@ class AppRouter {
                       path: 'new',
                       name: 'institutionNew',
                       builder: (context, state) =>
-                          const InstitutionFormScreen(),
+                          const InstitutionCreateScreen(),
                     ),
                     GoRoute(
                       path: ':id',
@@ -556,8 +558,8 @@ class AppRouter {
                         final inst = state.extra is Institution
                             ? state.extra as Institution
                             : null;
-                        return InstitutionFormScreen(
-                          id: state.pathParameters['id'],
+                        return InstitutionEditScreen(
+                          id: state.pathParameters['id']!,
                           institution: inst,
                         );
                       },

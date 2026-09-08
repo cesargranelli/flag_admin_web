@@ -6,23 +6,19 @@ import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import 'components/institution_identity_section.dart';
 
-/// Formulário de criação e edição de agremiação (camada Views - ADR-001 / MVVM / Kickster).
-class InstitutionFormScreen extends ConsumerStatefulWidget {
-  final String? id;
-  final Institution? institution;
-
-  const InstitutionFormScreen({
-    super.key,
-    this.id,
-    this.institution,
-  });
+/// Tela dedicada EXCLUSIVAMENTE ao CADASTRO de nova agremiação (ADR-001 / MVVM 1:1).
+///
+/// Responsabilidade única: cadastrar uma nova entidade (sem ID, sem busca inicial).
+class InstitutionCreateScreen extends ConsumerStatefulWidget {
+  const InstitutionCreateScreen({super.key});
 
   @override
-  ConsumerState<InstitutionFormScreen> createState() =>
-      _InstitutionFormScreenState();
+  ConsumerState<InstitutionCreateScreen> createState() =>
+      _InstitutionCreateScreenState();
 }
 
-class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
+class _InstitutionCreateScreenState
+    extends ConsumerState<InstitutionCreateScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _tradeName;
@@ -46,7 +42,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
   InstitutionType _type = InstitutionType.club;
   DocumentType? _documentType = DocumentType.cnpj;
   String _country = 'BR';
-  List<String> _selectedOrgs = [];
+  final List<String> _selectedOrgs = [];
 
   bool _hasChanges = false;
   bool _saved = false;
@@ -63,70 +59,23 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
   @override
   void initState() {
     super.initState();
-    final inst = widget.institution;
-
-    _tradeName = TextEditingController(text: inst?.tradeName ?? inst?.name ?? '');
-    _legalName = TextEditingController(text: inst?.legalName ?? inst?.name ?? '');
-    _abbreviation = TextEditingController(text: inst?.abbreviation ?? '');
-    _document = TextEditingController(text: inst?.document ?? '');
-    _presidentName = TextEditingController(text: inst?.presidentName ?? '');
-    _presidentCpf = TextEditingController(text: inst?.presidentCpf ?? '');
-    _email = TextEditingController(text: inst?.email ?? '');
-    _phone = TextEditingController(text: inst?.phone ?? '');
-    _website = TextEditingController(text: inst?.website ?? '');
-    _instagram = TextEditingController(text: inst?.instagram ?? '');
-    _state = TextEditingController(text: inst?.state ?? '');
-    _city = TextEditingController(text: inst?.city ?? '');
-    _logoUrl = TextEditingController(text: inst?.logoUrl ?? '');
-    _primaryColor = TextEditingController(
-      text: inst?.primaryColor ?? (inst != null && inst.colors.isNotEmpty ? inst.colors[0] : '#FD6B22'),
-    );
-    _secondaryColor = TextEditingController(
-      text: inst?.secondaryColor ?? (inst != null && inst.colors.length > 1 ? inst.colors[1] : '#1E293B'),
-    );
-    _tertiaryColor = TextEditingController(
-      text: inst?.tertiaryColor ?? (inst != null && inst.colors.length > 2 ? inst.colors[2] : ''),
-    );
-    _quaternaryColor = TextEditingController(
-      text: inst?.quaternaryColor ?? (inst != null && inst.colors.length > 3 ? inst.colors[3] : ''),
-    );
-
-    if (inst != null) {
-      _type = inst.type;
-      _documentType = inst.documentType ?? DocumentType.cnpj;
-      _country = inst.country.isNotEmpty ? inst.country : 'BR';
-      _selectedOrgs = List.from(inst.organizations);
-    } else if (widget.id != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final fetched =
-            await ref.read(institutionRepositoryProvider).getInstitution(widget.id!);
-        if (mounted) {
-          setState(() {
-            _tradeName.text = fetched.tradeName.isNotEmpty ? fetched.tradeName : fetched.name;
-            _legalName.text = fetched.legalName.isNotEmpty ? fetched.legalName : fetched.name;
-            _abbreviation.text = fetched.abbreviation ?? '';
-            _document.text = fetched.document ?? '';
-            _presidentName.text = fetched.presidentName ?? '';
-            _presidentCpf.text = fetched.presidentCpf ?? '';
-            _email.text = fetched.email ?? '';
-            _phone.text = fetched.phone ?? '';
-            _website.text = fetched.website ?? '';
-            _instagram.text = fetched.instagram ?? '';
-            _state.text = fetched.state ?? '';
-            _city.text = fetched.city ?? '';
-            _logoUrl.text = fetched.logoUrl ?? '';
-            _primaryColor.text = fetched.primaryColor ?? (fetched.colors.isNotEmpty ? fetched.colors[0] : '#FD6B22');
-            _secondaryColor.text = fetched.secondaryColor ?? (fetched.colors.length > 1 ? fetched.colors[1] : '#1E293B');
-            _tertiaryColor.text = fetched.tertiaryColor ?? (fetched.colors.length > 2 ? fetched.colors[2] : '');
-            _quaternaryColor.text = fetched.quaternaryColor ?? (fetched.colors.length > 3 ? fetched.colors[3] : '');
-            _type = fetched.type;
-            _documentType = fetched.documentType ?? DocumentType.cnpj;
-            _country = fetched.country.isNotEmpty ? fetched.country : 'BR';
-            _selectedOrgs = List.from(fetched.organizations);
-          });
-        }
-      });
-    }
+    _tradeName = TextEditingController();
+    _legalName = TextEditingController();
+    _abbreviation = TextEditingController();
+    _document = TextEditingController();
+    _presidentName = TextEditingController();
+    _presidentCpf = TextEditingController();
+    _email = TextEditingController();
+    _phone = TextEditingController();
+    _website = TextEditingController();
+    _instagram = TextEditingController();
+    _state = TextEditingController();
+    _city = TextEditingController();
+    _logoUrl = TextEditingController();
+    _primaryColor = TextEditingController(text: '#FD6B22');
+    _secondaryColor = TextEditingController(text: '#1E293B');
+    _tertiaryColor = TextEditingController();
+    _quaternaryColor = TextEditingController();
 
     _tradeName.addListener(_markDirty);
     _legalName.addListener(_markDirty);
@@ -177,7 +126,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _errorMessage = null);
 
-    final formVm = ref.read(institutionFormViewModelProvider);
+    final createVm = ref.read(institutionCreateViewModelProvider);
 
     final colors = <String>[];
     if (_primaryColor.text.trim().isNotEmpty) colors.add(_primaryColor.text.trim());
@@ -185,8 +134,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
     if (_tertiaryColor.text.trim().isNotEmpty) colors.add(_tertiaryColor.text.trim());
     if (_quaternaryColor.text.trim().isNotEmpty) colors.add(_quaternaryColor.text.trim());
 
-    final success = await formVm.save(
-      id: widget.id,
+    final success = await createVm.create(
       name: _tradeName.text.trim(),
       tradeName: _tradeName.text.trim(),
       legalName: _legalName.text.trim(),
@@ -218,17 +166,14 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
       _saved = true;
       ref.invalidate(institutionsProvider);
       ref.read(institutionViewModelProvider).load(forceRefresh: true);
-      if (widget.id != null) {
-        ref.invalidate(institutionProvider(widget.id!));
-      }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Agremiação salva com sucesso!')),
+        const SnackBar(content: Text('Agremiação cadastrada com sucesso!')),
       );
       context.go('/institutions');
     } else {
       setState(() {
         _errorMessage =
-            formVm.errorMessage ?? 'Não foi possível salvar a agremiação.';
+            createVm.errorMessage ?? 'Não foi possível cadastrar a agremiação.';
       });
     }
   }
@@ -236,9 +181,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isSubmitting =
-        ref.watch(institutionFormViewModelProvider).isSubmitting;
-    final isEditing = widget.id != null;
-    final title = isEditing ? 'Editar Agremiação' : 'Nova Agremiação';
+        ref.watch(institutionCreateViewModelProvider).isSubmitting;
 
     return PopScope(
       canPop: !_hasChanges || isSubmitting || _saved,
@@ -246,11 +189,11 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
         if (!didPop && context.canPop()) context.pop();
       },
       child: AppScreen(
-        title: title,
-        breadcrumb: [
-          const BreadcrumbItem(AppStrings.home, route: '/'),
-          const BreadcrumbItem(AppStrings.institutions, route: '/institutions'),
-          BreadcrumbItem(isEditing ? 'Editar' : 'Nova'),
+        title: 'Nova Agremiação',
+        breadcrumb: const [
+          BreadcrumbItem(AppStrings.home, route: '/'),
+          BreadcrumbItem(AppStrings.institutions, route: '/institutions'),
+          BreadcrumbItem('Nova'),
         ],
         body: AppLayout.form(
           child: Form(
@@ -418,7 +361,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                   ),
                 ]),
 
-                // 4. LOCALIZAÇÃO (Padronizada com Organização)
+                // 4. LOCALIZAÇÃO
                 _section('Localização', Icons.location_on_outlined, [
                   _countryDropdown(),
                   const SizedBox(height: 12),
@@ -461,9 +404,7 @@ class _InstitutionFormScreenState extends ConsumerState<InstitutionFormScreen> {
                     ),
                     const SizedBox(width: 16),
                     KicksterButton(
-                      label: isSubmitting
-                          ? 'Salvando...'
-                          : (isEditing ? 'Salvar alterações' : 'Criar agremiação'),
+                      label: isSubmitting ? 'Cadastrando...' : 'Criar agremiação',
                       icon: Icons.check,
                       loading: isSubmitting,
                       onPressed: isSubmitting ? null : _save,

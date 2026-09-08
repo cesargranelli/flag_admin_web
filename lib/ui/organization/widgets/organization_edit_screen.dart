@@ -7,19 +7,26 @@ import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import 'components/organization_identity_section.dart';
 
-/// Tela dedicada EXCLUSIVAMENTE ao CADASTRO de nova Organização (ADR-001 / MVVM 1:1).
+/// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de Organização existente (ADR-001 / MVVM 1:1).
 ///
-/// Responsabilidade única: cadastrar uma nova entidade (sem parâmetros de ID, sem busca inicial).
-class OrganizationCreateScreen extends ConsumerStatefulWidget {
-  const OrganizationCreateScreen({super.key});
+/// Responsabilidade única: carregar a entidade existente pelo ID e salvar as alterações.
+class OrganizationEditScreen extends ConsumerStatefulWidget {
+  final String id;
+  final Organization? organization;
+
+  const OrganizationEditScreen({
+    super.key,
+    required this.id,
+    this.organization,
+  });
 
   @override
-  ConsumerState<OrganizationCreateScreen> createState() =>
-      _OrganizationCreateScreenState();
+  ConsumerState<OrganizationEditScreen> createState() =>
+      _OrganizationEditScreenState();
 }
 
-class _OrganizationCreateScreenState
-    extends ConsumerState<OrganizationCreateScreen> {
+class _OrganizationEditScreenState
+    extends ConsumerState<OrganizationEditScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _tradeName;
@@ -45,7 +52,7 @@ class _OrganizationCreateScreenState
   final _timezone = 'America/Sao_Paulo';
 
   OrganizationType? _type;
-  final DocumentType _documentType = DocumentType.cnpj;
+  DocumentType? _documentType = DocumentType.cnpj;
   bool _saved = false;
   bool _hasChanges = false;
   String? _errorMessage;
@@ -53,24 +60,62 @@ class _OrganizationCreateScreenState
   @override
   void initState() {
     super.initState();
-    _tradeName = TextEditingController();
-    _legalName = TextEditingController();
-    _abbreviation = TextEditingController();
-    _document = TextEditingController();
-    _presidentName = TextEditingController();
-    _presidentCpf = TextEditingController();
-    _email = TextEditingController();
-    _phone = TextEditingController();
-    _website = TextEditingController();
-    _instagram = TextEditingController();
-    _state = TextEditingController();
-    _city = TextEditingController();
-    _logoUrl = TextEditingController();
-    _primaryColor = TextEditingController(text: '#FD6B22');
-    _secondaryColor = TextEditingController(text: '#1E293B');
-    _tertiaryColor = TextEditingController();
-    _quaternaryColor = TextEditingController();
-    _locale = TextEditingController(text: 'pt-BR');
+    final org = widget.organization;
+
+    _tradeName = TextEditingController(text: org?.tradeName ?? '');
+    _legalName = TextEditingController(text: org?.legalName ?? '');
+    _abbreviation = TextEditingController(text: org?.abbreviation ?? '');
+    _document = TextEditingController(text: org?.document ?? '');
+    _presidentName = TextEditingController(text: org?.presidentName ?? '');
+    _presidentCpf = TextEditingController(text: org?.presidentCpf ?? '');
+    _email = TextEditingController(text: org?.email ?? '');
+    _phone = TextEditingController(text: org?.phone ?? '');
+    _website = TextEditingController(text: org?.website ?? '');
+    _instagram = TextEditingController(text: org?.instagram ?? '');
+    _state = TextEditingController(text: org?.state ?? '');
+    _city = TextEditingController(text: org?.city ?? '');
+    _logoUrl = TextEditingController(text: org?.logoUrl ?? '');
+    _primaryColor =
+        TextEditingController(text: org?.primaryColor ?? '#FD6B22');
+    _secondaryColor =
+        TextEditingController(text: org?.secondaryColor ?? '#1E293B');
+    _tertiaryColor = TextEditingController(text: org?.tertiaryColor ?? '');
+    _quaternaryColor = TextEditingController(text: org?.quaternaryColor ?? '');
+    _locale = TextEditingController(text: org?.locale ?? 'pt-BR');
+    _country = org?.country.isNotEmpty == true ? org!.country : 'BR';
+    _type = org?.organizationType;
+    _documentType = org?.documentType ?? DocumentType.cnpj;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final vm = ref.read(organizationEditViewModelProvider(widget.id));
+      await vm.load();
+      if (mounted && vm.organization != null) {
+        final fetched = vm.organization!;
+        setState(() {
+          _tradeName.text = fetched.tradeName;
+          _legalName.text = fetched.legalName;
+          _abbreviation.text = fetched.abbreviation ?? '';
+          _document.text = fetched.document ?? '';
+          _presidentName.text = fetched.presidentName ?? '';
+          _presidentCpf.text = fetched.presidentCpf ?? '';
+          _email.text = fetched.email ?? '';
+          _phone.text = fetched.phone ?? '';
+          _website.text = fetched.website ?? '';
+          _instagram.text = fetched.instagram ?? '';
+          _state.text = fetched.state ?? '';
+          _city.text = fetched.city ?? '';
+          _logoUrl.text = fetched.logoUrl ?? '';
+          _primaryColor.text = fetched.primaryColor ?? '#FD6B22';
+          _secondaryColor.text = fetched.secondaryColor ?? '#1E293B';
+          _tertiaryColor.text = fetched.tertiaryColor ?? '';
+          _quaternaryColor.text = fetched.quaternaryColor ?? '';
+          _locale.text = fetched.locale;
+          _country = fetched.country.isNotEmpty ? fetched.country : 'BR';
+          _type = fetched.organizationType;
+          _documentType = fetched.documentType ?? DocumentType.cnpj;
+        });
+      }
+    });
 
     for (final controller in [
       _tradeName,
@@ -136,7 +181,7 @@ class _OrganizationCreateScreenState
         'organizationType': _type!.toJson(),
         if (_document.text.trim().isNotEmpty)
           'document': _document.text.trim().replaceAll(RegExp(r'\D'), ''),
-        'documentType': _documentType.toJson(),
+        if (_documentType != null) 'documentType': _documentType!.toJson(),
         if (_presidentName.text.trim().isNotEmpty)
           'presidentName': _presidentName.text.trim(),
         if (_presidentCpf.text.trim().isNotEmpty)
@@ -167,25 +212,26 @@ class _OrganizationCreateScreenState
 
     setState(() => _errorMessage = null);
 
-    final vm = ref.read(organizationCreateViewModelProvider);
+    final vm = ref.read(organizationEditViewModelProvider(widget.id));
     final body = _buildBody();
-    final success = await vm.createOrganization(body);
+    final success = await vm.updateOrganization(body);
     if (!mounted) return;
 
-    if (success && vm.createdOrganization != null) {
+    if (success && vm.updatedOrganization != null) {
       _saved = true;
       ref.invalidate(organizationsProvider);
+      ref.invalidate(organizationProvider(widget.id));
       ref.read(organizationViewModelProvider).load(forceRefresh: true);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Organização cadastrada com sucesso'),
+          content: Text('Organização atualizada com sucesso'),
         ),
       );
-      context.go('/organizations/${vm.createdOrganization!.id}');
+      context.go('/organizations/${widget.id}');
     } else {
       setState(() {
         _errorMessage =
-            vm.errorMessage ?? 'Não foi possível cadastrar a organização.';
+            vm.errorMessage ?? 'Não foi possível atualizar a organização.';
       });
     }
   }
@@ -194,13 +240,13 @@ class _OrganizationCreateScreenState
     if (context.canPop()) {
       context.pop();
     } else {
-      context.go('/organizations');
+      context.go('/organizations/${widget.id}');
     }
   }
 
   Future<void> _handleBack() async {
     final isSubmitting =
-        ref.read(organizationCreateViewModelProvider).isSubmitting;
+        ref.read(organizationEditViewModelProvider(widget.id)).isSubmitting;
     if (_hasChanges && !isSubmitting && !_saved) {
       final discard = await showKicksterConfirm(
         context: context,
@@ -220,8 +266,8 @@ class _OrganizationCreateScreenState
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting =
-        ref.watch(organizationCreateViewModelProvider).isSubmitting;
+    final vm = ref.watch(organizationEditViewModelProvider(widget.id));
+    final isSubmitting = vm.isSubmitting;
 
     return PopScope(
       canPop: !_hasChanges || isSubmitting || _saved,
@@ -229,114 +275,119 @@ class _OrganizationCreateScreenState
         if (!didPop) _handleBack();
       },
       child: AppScreen(
-        title: 'Nova organização',
-        breadcrumb: const [
-          BreadcrumbItem(AppStrings.home, route: '/'),
-          BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
-          BreadcrumbItem('Novo'),
+        title: 'Editar organização',
+        breadcrumb: [
+          const BreadcrumbItem(AppStrings.home, route: '/'),
+          const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
+          BreadcrumbItem(widget.organization?.tradeName ?? 'Editar'),
         ],
-        body: AppLayout.form(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_errorMessage != null) _errorBanner(_errorMessage!),
-                _section('Dados básicos', Icons.business_outlined, [
-                  _field('Nome fantasia', _tradeName,
-                      hint: 'Informe o nome fantasia',
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Informe o nome fantasia'
-                          : null),
-                  const SizedBox(height: 12),
-                  _field('Razão social', _legalName,
-                      hint: 'Informe a razão social',
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Informe a razão social'
-                          : null),
-                  const SizedBox(height: 12),
-                  _field('Sigla (opcional)', _abbreviation),
-                  const SizedBox(height: 12),
-                  _typeDropdown(),
-                  const SizedBox(height: 12),
-                  _documentField(),
-                ]),
-                _section('Presidente', Icons.person_outline, [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        body: vm.isLoading
+            ? const AppLoading(message: 'Carregando dados da organização...')
+            : AppLayout.form(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        flex: 2,
-                        child: _field('Nome do presidente', _presidentName,
-                            hint: 'Informe o nome do presidente',
+                      if (_errorMessage != null) _errorBanner(_errorMessage!),
+                      _section('Dados básicos', Icons.business_outlined, [
+                        _field('Nome fantasia', _tradeName,
+                            hint: 'Informe o nome fantasia',
                             validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Informe o nome do presidente'
+                                ? 'Informe o nome fantasia'
                                 : null),
+                        const SizedBox(height: 12),
+                        _field('Razão social', _legalName,
+                            hint: 'Informe a razão social',
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Informe a razão social'
+                                : null),
+                        const SizedBox(height: 12),
+                        _field('Sigla (opcional)', _abbreviation),
+                        const SizedBox(height: 12),
+                        _typeDropdown(),
+                        const SizedBox(height: 12),
+                        _documentField(),
+                      ]),
+                      _section('Presidente', Icons.person_outline, [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: _field('Nome do presidente', _presidentName,
+                                  hint: 'Informe o nome do presidente',
+                                  validator: (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                          ? 'Informe o nome do presidente'
+                                          : null),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 1,
+                              child: _presidentCpfField(),
+                            ),
+                          ],
+                        ),
+                      ]),
+                      _section('Contato', Icons.contact_mail_outlined, [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _emailField()),
+                            const SizedBox(width: 12),
+                            Expanded(child: _phoneField()),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _websiteField()),
+                            const SizedBox(width: 12),
+                            Expanded(child: _instagramField()),
+                          ],
+                        ),
+                      ]),
+                      _section('Localização', Icons.location_on_outlined, [
+                        _countryDropdown(),
+                        const SizedBox(height: 12),
+                        if (_country == 'BR')
+                          _stateDropdown()
+                        else
+                          _field('Estado (opcional)', _state),
+                        const SizedBox(height: 12),
+                        _field('Cidade (opcional)', _city),
+                      ]),
+                      OrganizationIdentitySection(
+                        tradeNameController: _tradeName,
+                        abbreviationController: _abbreviation,
+                        logoUrlController: _logoUrl,
+                        primaryColorController: _primaryColor,
+                        secondaryColorController: _secondaryColor,
+                        tertiaryColorController: _tertiaryColor,
+                        quaternaryColorController: _quaternaryColor,
+                        localeController: _locale,
+                        localeOptions: const [
+                          ('pt-BR', 'Português (Brasil)'),
+                          ('en-US', 'English (US)'),
+                          ('es-ES', 'Español'),
+                        ],
+                        onDirty: _markDirty,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: _presidentCpfField(),
+                      const SizedBox(height: 16),
+                      KicksterButton(
+                        label: isSubmitting
+                            ? 'Salvando alterações...'
+                            : 'Salvar alterações',
+                        icon: Icons.check,
+                        loading: isSubmitting,
+                        onPressed: isSubmitting ? null : _save,
                       ),
                     ],
                   ),
-                ]),
-                _section('Contato', Icons.contact_mail_outlined, [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _emailField()),
-                      const SizedBox(width: 12),
-                      Expanded(child: _phoneField()),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _websiteField()),
-                      const SizedBox(width: 12),
-                      Expanded(child: _instagramField()),
-                    ],
-                  ),
-                ]),
-                _section('Localização', Icons.location_on_outlined, [
-                  _countryDropdown(),
-                  const SizedBox(height: 12),
-                  if (_country == 'BR')
-                    _stateDropdown()
-                  else
-                    _field('Estado (opcional)', _state),
-                  const SizedBox(height: 12),
-                  _field('Cidade (opcional)', _city),
-                ]),
-                OrganizationIdentitySection(
-                  tradeNameController: _tradeName,
-                  abbreviationController: _abbreviation,
-                  logoUrlController: _logoUrl,
-                  primaryColorController: _primaryColor,
-                  secondaryColorController: _secondaryColor,
-                  tertiaryColorController: _tertiaryColor,
-                  quaternaryColorController: _quaternaryColor,
-                  localeController: _locale,
-                  localeOptions: const [
-                    ('pt-BR', 'Português (Brasil)'),
-                    ('en-US', 'English (US)'),
-                    ('es-ES', 'Español'),
-                  ],
-                  onDirty: _markDirty,
                 ),
-                const SizedBox(height: 16),
-                KicksterButton(
-                  label: isSubmitting ? 'Cadastrando...' : 'Criar organização',
-                  icon: Icons.check,
-                  loading: isSubmitting,
-                  onPressed: isSubmitting ? null : _save,
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }

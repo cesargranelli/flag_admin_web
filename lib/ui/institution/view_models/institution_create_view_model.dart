@@ -1,10 +1,12 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/institution_repository.dart';
 import 'package:flag_admin_web/domain/models/institution.dart';
 import 'package:flag_admin_web/domain/models/organization.dart';
 
-/// ViewModel da tela de Formulário de Agremiação (ADR-001 / MVVM).
-class InstitutionFormViewModel extends ChangeNotifier {
+/// ViewModel dedicada exclusivamente ao CADASTRO de nova Agremiação (ADR-001 / MVVM 1:1).
+///
+/// Responsabilidade única: cadastrar uma nova entidade (sem ID, sem carregamento inicial).
+class InstitutionCreateViewModel extends ChangeNotifier {
   final InstitutionRepository _repository;
 
   bool _isSubmitting = false;
@@ -13,15 +15,14 @@ class InstitutionFormViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  Institution? _savedInstitution;
-  Institution? get savedInstitution => _savedInstitution;
+  Institution? _createdInstitution;
+  Institution? get createdInstitution => _createdInstitution;
 
-  InstitutionFormViewModel({required InstitutionRepository repository})
+  InstitutionCreateViewModel({required InstitutionRepository repository})
       : _repository = repository;
 
-  /// Cria ou atualiza a agremiação com dados cadastrais completos e 4 cores.
-  Future<bool> save({
-    String? id,
+  /// Cria a agremiação com dados cadastrais completos.
+  Future<bool> create({
     required String name,
     String? legalName,
     String? tradeName,
@@ -95,18 +96,7 @@ class InstitutionFormViewModel extends ChangeNotifier {
         'organizationIds': organizationIds,
       };
 
-      Institution institution;
-      if (id == null) {
-        institution = await _repository.createInstitution(body);
-      } else {
-        institution = await _repository.updateInstitution(id, body);
-      }
-
-      if (organizationIds.isNotEmpty) {
-        await _repository.updateOrganizations(institution.id, organizationIds);
-      }
-
-      _savedInstitution = institution;
+      _createdInstitution = await _repository.createInstitution(body);
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -121,7 +111,7 @@ class InstitutionFormViewModel extends ChangeNotifier {
   void reset() {
     _isSubmitting = false;
     _errorMessage = null;
-    _savedInstitution = null;
+    _createdInstitution = null;
     notifyListeners();
   }
 }

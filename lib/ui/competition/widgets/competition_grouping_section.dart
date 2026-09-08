@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
-import '../view_models/competition_form_view_model.dart';
+import '../view_models/competition_grouping_state.dart';
 
 /// Seção visual e interativa de Agrupamento de Times (Design System Kickster).
 ///
@@ -10,7 +10,7 @@ import '../view_models/competition_form_view_model.dart';
 /// 2. Fase de Grupos (com criação/edição/exclusão de grupos)
 /// 3. Conferências & Divisões (com conferências customizadas e divisões subordinadas em chips)
 class CompetitionGroupingSection extends StatelessWidget {
-  final CompetitionFormViewModel vm;
+  final CompetitionGroupingState vm;
 
   const CompetitionGroupingSection({
     super.key,

@@ -34,16 +34,13 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(competitionFormViewModelProvider).init(
-            id: widget.id,
-            initialData: widget.competition,
-          );
+      ref.read(competitionEditViewModelProvider(widget.id)).load();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = ref.watch(competitionFormViewModelProvider);
+    final vm = ref.watch(competitionEditViewModelProvider(widget.id));
     final organizationsAsync = ref.watch(organizationsProvider);
 
     return AppScreen(
@@ -409,7 +406,7 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                               ? null
                               : () async {
                                   if (!_formKey.currentState!.validate()) return;
-                                  final result = await vm.save();
+                                  final result = await vm.update();
                                   if (result != null && context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
