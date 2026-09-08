@@ -10,23 +10,23 @@ import 'package:flag_admin_web/src/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 
-/// Formulário unificado de Cadastro e Edição de Competição (ADR-001 / Kickster Design System).
-class CompetitionFormScreen extends ConsumerStatefulWidget {
-  const CompetitionFormScreen({
+/// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de competição existente (ADR-001 / Kickster Design System).
+class CompetitionEditScreen extends ConsumerStatefulWidget {
+  final String id;
+  final Competition? competition;
+
+  const CompetitionEditScreen({
     super.key,
-    this.id,
+    required this.id,
     this.competition,
   });
 
-  final String? id;
-  final Competition? competition;
-
   @override
-  ConsumerState<CompetitionFormScreen> createState() =>
-      _CompetitionFormScreenState();
+  ConsumerState<CompetitionEditScreen> createState() =>
+      _CompetitionEditScreenState();
 }
 
-class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
+class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -44,14 +44,13 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
   Widget build(BuildContext context) {
     final vm = ref.watch(competitionFormViewModelProvider);
     final organizationsAsync = ref.watch(organizationsProvider);
-    final isEditing = vm.isEditing;
 
     return AppScreen(
-      title: isEditing ? 'Editar Competição' : 'Nova Competição',
+      title: 'Editar Competição',
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem('Competições', route: '/competitions'),
-        BreadcrumbItem(isEditing ? 'Editar' : 'Novo'),
+        BreadcrumbItem(widget.competition?.name ?? 'Editar'),
       ],
       body: vm.isLoading
           ? const AppLoading(message: 'Carregando dados da competição...')
@@ -166,7 +165,7 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Seção 2: Formato de Disputa & Classificação
+                    // Seção 2: Formato de Disputa
                     _buildSectionCard(
                       title: 'Formato de Disputa',
                       icon: Icons.account_tree_outlined,
@@ -177,40 +176,33 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
                             'Selecione o formato de disputa do torneio:',
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: TournamentFormat.values.map((fmt) {
-                              final isSelected = vm.tournamentFormat == fmt;
-                              return ChoiceChip(
-                                label: Text(fmt.label),
-                                selected: isSelected,
-                                onSelected: (_) => vm.setTournamentFormat(fmt),
-                                selectedColor:
-                                    AppColors.primary.withValues(alpha: 0.15),
-                                labelStyle: TextStyle(
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? AppColors.primary
-                                        : AppColors.line,
-                                  ),
-                                ),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isWide = constraints.maxWidth >= 600;
+                              final cardWidth = isWide
+                                  ? (constraints.maxWidth - 24) / 3
+                                  : constraints.maxWidth;
+                              return Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                children: TournamentFormat.values.map((fmt) {
+                                  return SizedBox(
+                                    width: cardWidth,
+                                    child: SelectableCard(
+                                      label: fmt.label,
+                                      selected: vm.tournamentFormat == fmt,
+                                      icon: Icons.emoji_events_outlined,
+                                      onTap: () => vm.setTournamentFormat(fmt),
+                                    ),
+                                  );
+                                }).toList(),
                               );
-                            }).toList(),
+                            },
                           ),
                         ],
                       ),
@@ -226,46 +218,40 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Modalidade (Futebol Americano):',
+                            'Modalidade de Futebol Americano:',
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: Modality.values.map((m) {
-                              final isSelected = vm.selectedModality == m;
-                              return ChoiceChip(
-                                label: Text(m.label),
-                                selected: isSelected,
-                                onSelected: (_) => vm.setModality(m),
-                                selectedColor:
-                                    AppColors.primary.withValues(alpha: 0.15),
-                                labelStyle: TextStyle(
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? AppColors.primary
-                                        : AppColors.line,
-                                  ),
-                                ),
+                          const SizedBox(height: 12),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isWide = constraints.maxWidth >= 600;
+                              final cardWidth = isWide
+                                  ? (constraints.maxWidth - 36) / 4
+                                  : (constraints.maxWidth - 12) / 2;
+                              return Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                children: Modality.values.map((m) {
+                                  return SizedBox(
+                                    width: cardWidth,
+                                    child: SelectableCard(
+                                      label: m.label,
+                                      selected: vm.selectedModality == m,
+                                      icon: Icons.sports_football_outlined,
+                                      onTap: () => vm.setModality(m),
+                                    ),
+                                  );
+                                }).toList(),
                               );
-                            }).toList(),
+                            },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
                                 child: Column(
@@ -275,24 +261,21 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
                                       'Gênero:',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w600,
                                         color: AppColors.textPrimary,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    KicksterDropdown<Gender>(
-                                      label: 'Gênero',
-                                      value: vm.selectedGender,
-                                      hint: 'Gênero',
-                                      items: Gender.values
-                                          .map((g) => DropdownMenuItem(
-                                                value: g,
-                                                child: Text(g.label),
-                                              ))
-                                          .toList(),
-                                      onChanged: (g) {
-                                        if (g != null) vm.setGender(g);
-                                      },
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: Gender.values.map((g) {
+                                        return SelectableChip(
+                                          label: g.label,
+                                          selected: vm.selectedGender == g,
+                                          onTap: () => vm.setGender(g),
+                                        );
+                                      }).toList(),
                                     ),
                                   ],
                                 ),
@@ -306,24 +289,21 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
                                       'Faixa Etária / Categoria:',
                                       style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w600,
                                         color: AppColors.textPrimary,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    KicksterDropdown<AgeGroup>(
-                                      label: 'Faixa Etária',
-                                      value: vm.selectedAgeGroup,
-                                      hint: 'Faixa Etária',
-                                      items: AgeGroup.values
-                                          .map((ag) => DropdownMenuItem(
-                                                value: ag,
-                                                child: Text(ag.label),
-                                              ))
-                                          .toList(),
-                                      onChanged: (ag) {
-                                        if (ag != null) vm.setAgeGroup(ag);
-                                      },
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: AgeGroup.values.map((ag) {
+                                        return SelectableChip(
+                                          label: ag.label,
+                                          selected: vm.selectedAgeGroup == ag,
+                                          onTap: () => vm.setAgeGroup(ag),
+                                        );
+                                      }).toList(),
                                     ),
                                   ],
                                 ),
@@ -336,9 +316,9 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Seção 4: Período da Competição
+                    // Seção 4: Datas
                     _buildSectionCard(
-                      title: 'Datas da Temporada',
+                      title: 'Datas da Temporada (Opcional)',
                       icon: Icons.date_range_outlined,
                       child: Row(
                         children: [
@@ -374,7 +354,7 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
                         ),
                         const SizedBox(width: 12),
                         KicksterButton(
-                          label: isEditing ? 'Salvar Alterações' : 'Criar Competição',
+                          label: 'Salvar Alterações',
                           icon: Icons.check,
                           onPressed: vm.isSaving
                               ? null
@@ -383,10 +363,8 @@ class _CompetitionFormScreenState extends ConsumerState<CompetitionFormScreen> {
                                   final result = await vm.save();
                                   if (result != null && context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(isEditing
-                                            ? 'Competição atualizada com sucesso!'
-                                            : 'Competição criada com sucesso!'),
+                                      const SnackBar(
+                                        content: Text('Competição atualizada com sucesso!'),
                                       ),
                                     );
                                     context.pop();

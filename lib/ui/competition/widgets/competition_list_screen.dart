@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
-import 'package:flag_admin_web/src/domain/enums/user_role.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import '../view_models/competition_list_view_model.dart';
 
@@ -38,7 +37,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
   Widget build(BuildContext context) {
     final vm = ref.watch(competitionListViewModelProvider);
     final user = ref.watch(authControllerProvider.select((a) => a.state.user));
-    final canWrite = user?.role == UserRole.admin;
+    final canWrite = user != null; // Qualquer gestor autenticado com permissão pode criar
 
     return AppScreen(
       title: 'Competições',
@@ -50,6 +49,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Barra de ações superior padronizada com Organizações e Agremiações
           Row(
             children: [
               const Spacer(),
@@ -116,143 +116,79 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
     );
   }
 
-  /// Barra de pesquisa e filtros no padrão Kickster.
+  /// Barra de pesquisa e filtro estilo Dropdown padronizada com Organização e Agremiação.
   Widget _buildFilters(BuildContext context, CompetitionListViewModel vm) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.fieldBorderLight),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.search,
-                      size: 20,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: vm.setSearchQuery,
-                        decoration: const InputDecoration(
-                          hintText: 'Buscar por nome do torneio ou organização...',
-                          hintStyle: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ),
-                    if (_searchController.text.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          size: 18,
-                          color: AppColors.textSecondary,
-                        ),
-                        onPressed: () {
-                          _searchController.clear();
-                          vm.setSearchQuery('');
-                        },
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Tooltip(
-              message: 'Exibir desativados',
-              child: IconButton(
-                isSelected: vm.showDisabled,
-                selectedIcon: const Icon(Icons.visibility),
-                icon: const Icon(Icons.visibility_off_outlined),
-                onPressed: vm.toggleShowDisabled,
-              ),
-            ),
-          ],
+        Expanded(
+          child: KicksterSearchField(
+            controller: _searchController,
+            hint: 'Buscar por nome ou organização...',
+            onChanged: vm.setSearchQuery,
+          ),
         ),
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              // Filtro por Temporada
-              if (vm.availableSeasons.isNotEmpty) ...[
-                _buildFilterChip(
-                  label: 'Todas Temporadas',
-                  isSelected: vm.seasonFilter == null,
-                  onSelected: () => vm.setSeasonFilter(null),
-                ),
-                for (final s in vm.availableSeasons)
-                  _buildFilterChip(
-                    label: 'Temporada ',
-                    isSelected: vm.seasonFilter == s,
-                    onSelected: () => vm.setSeasonFilter(s),
-                  ),
-                const SizedBox(width: 12),
-              ],
-              // Filtro por Status
-              _buildFilterChip(
-                label: 'Todos Status',
-                isSelected: vm.statusFilter == null,
-                onSelected: () => vm.setStatusFilter(null),
-              ),
-              for (final st in [
-                CompetitionStatus.registrationOpen,
-                CompetitionStatus.ongoing,
-                CompetitionStatus.draft,
-                CompetitionStatus.finished,
-              ])
-                _buildFilterChip(
-                  label: st.label,
-                  isSelected: vm.statusFilter == st,
-                  onSelected: () => vm.setStatusFilter(st),
-                ),
+        const SizedBox(width: 12),
+        // Filtro por Status via KicksterDropdown
+        SizedBox(
+          width: 220,
+          child: KicksterDropdown<CompetitionStatus?>(
+            label: '',
+            value: vm.statusFilter,
+            values: [
+              null,
+              CompetitionStatus.registrationOpen,
+              CompetitionStatus.ongoing,
+              CompetitionStatus.draft,
+              CompetitionStatus.finished,
             ],
+            labels: [
+              'Todos os status',
+              CompetitionStatus.registrationOpen.label,
+              CompetitionStatus.ongoing.label,
+              CompetitionStatus.draft.label,
+              CompetitionStatus.finished.label,
+            ],
+            onChanged: vm.setStatusFilter,
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Filtro por Temporada via KicksterDropdown
+        if (vm.availableSeasons.isNotEmpty) ...[
+          SizedBox(
+            width: 170,
+            child: KicksterDropdown<String?>(
+              label: '',
+              value: vm.seasonFilter,
+              values: [null, ...vm.availableSeasons],
+              labels: [
+                'Todas temporadas',
+                ...vm.availableSeasons.map((s) => 'Temporada '),
+              ],
+              onChanged: vm.setSeasonFilter,
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+        Tooltip(
+          message: vm.showDisabled
+              ? 'Ocultar competições desativadas'
+              : 'Exibir competições desativadas',
+          child: IconButton(
+            isSelected: vm.showDisabled,
+            selectedIcon: const Icon(Icons.visibility),
+            icon: const Icon(Icons.visibility_off_outlined),
+            onPressed: vm.toggleShowDisabled,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Atualizar lista',
+          child: IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => vm.load(forceRefresh: true),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFilterChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onSelected,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onSelected(),
-        selectedColor: AppColors.primary.withValues(alpha: 0.15),
-        labelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: isSelected ? AppColors.primary : AppColors.textPrimary,
-        ),
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected ? AppColors.primary : AppColors.line,
-          ),
-        ),
-      ),
     );
   }
 
@@ -303,7 +239,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
               crossAxisCount: isWide ? 2 : 1,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: 110,
+              mainAxisExtent: 96,
             ),
             itemCount: list.length,
             itemBuilder: (context, index) {

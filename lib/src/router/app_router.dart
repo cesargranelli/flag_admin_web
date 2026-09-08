@@ -14,7 +14,8 @@ import 'package:flag_admin_web/ui/auth/widgets/forgot_password_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/login_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/signup_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_list_screen.dart';
-import 'package:flag_admin_web/ui/competition/widgets/competition_form_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_create_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_edit_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.dart';
 import '../features/competitions/presentation/screens/groupings_screen.dart';
 import '../features/games/presentation/screens/game_detail_screen.dart';
@@ -243,7 +244,7 @@ class AppRouter {
                       path: 'new',
                       name: 'competitionNew',
                       builder: (context, state) =>
-                          const CompetitionFormScreen(),
+                          const CompetitionCreateScreen(),
                     ),
                     GoRoute(
                       path: ':id',
@@ -265,8 +266,8 @@ class AppRouter {
                             final competition = state.extra is Competition
                                 ? state.extra as Competition
                                 : null;
-                            return CompetitionFormScreen(
-                              id: state.pathParameters['id'],
+                            return CompetitionEditScreen(
+                              id: state.pathParameters['id']!,
                               competition: competition,
                             );
                           },
