@@ -27,6 +27,7 @@ import 'package:flag_admin_web/ui/home/widgets/home_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_edit_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_affiliates_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
 import '../features/rosters/presentation/screens/roster_import_screen.dart';
 import '../features/rosters/presentation/screens/rosters_screen.dart';
@@ -221,6 +222,19 @@ class AppRouter {
                             : null;
                         return OrganizationEditScreen(
                           id: state.pathParameters['id']!,
+                          organization: org,
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: ':id/affiliates',
+                      name: 'organizationAffiliates',
+                      builder: (context, state) {
+                        final org = state.extra is Organization
+                            ? state.extra as Organization
+                            : null;
+                        return OrganizationAffiliatesScreen(
+                          organizationId: state.pathParameters['id']!,
                           organization: org,
                         );
                       },

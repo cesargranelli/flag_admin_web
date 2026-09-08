@@ -17,6 +17,7 @@ import 'package:flag_admin_web/ui/organization/view_models/organization_view_mod
 import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_create_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_edit_view_model.dart';
+import 'package:flag_admin_web/ui/organization/view_models/organization_affiliates_view_model.dart';
 import 'package:flag_admin_web/ui/organization/view_models/associate_clubs_view_model.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -156,6 +157,15 @@ final organizationViewModelProvider =
 final organizationDetailViewModelProvider =
     ChangeNotifierProvider.autoDispose.family<OrganizationDetailViewModel, String>(
   (ref, id) => OrganizationDetailViewModel(
+    repository: ref.watch(organizationRepositoryProvider),
+    organizationId: id,
+  ),
+);
+
+/// ViewModel dedicada para a tela de Consulta de Agremiações Filiadas (ADR-001 / MVVM 1:1).
+final organizationAffiliatesViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<OrganizationAffiliatesViewModel, String>(
+  (ref, id) => OrganizationAffiliatesViewModel(
     repository: ref.watch(organizationRepositoryProvider),
     organizationId: id,
   ),

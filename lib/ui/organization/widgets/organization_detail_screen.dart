@@ -472,12 +472,15 @@ class _OrganizationDetailScreenState
     );
   }
 
-  /// Seção 5 — Agremiações Filiadas & Pedidos de Filiação (ADR-001 / MVVM).
+  /// Seção 5 — Cockpit de Agremiações Filiadas & Pedidos de Filiação (ADR-001 / MVVM).
   Widget _agremiacoesFiliadasCard(
     BuildContext context,
     Organization org,
     OrganizationDetailViewModel vm,
   ) {
+    final pendingAffiliations = vm.affiliations.where((a) => a.isPending).toList();
+    final approvedAffiliations = vm.affiliations.where((a) => a.isApproved).toList();
+
     return Card(
       elevation: 1,
       color: AppColors.surface,
@@ -490,16 +493,47 @@ class _OrganizationDetailScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Filtro de Temporada
+            // 1. Linha Superior: Temporada e Métricas Rápidas
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Temporada de Filiação:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                        ),
+                        child: Text(
+                          '${approvedAffiliations.length} Filiados Ativos',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (pendingAffiliations.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                          ),
+                          child: Text(
+                            '${pendingAffiliations.length} Pendentes',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 SizedBox(
@@ -520,57 +554,40 @@ class _OrganizationDetailScreenState
             const Divider(color: AppColors.line),
             const SizedBox(height: 16),
 
+            // 2. Inbox de Triagem Imediata de Solicitações Pendentes
             if (vm.isLoadingAffiliations)
               const Center(child: AppLoading(message: 'Carregando filiações...'))
-            else if (vm.affiliations.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'Nenhum pedido de filiação ou agremiação filiada nesta temporada.',
-                    style: TextStyle(color: AppColors.textSecondary),
+            else if (pendingAffiliations.isNotEmpty) ...[
+              Row(
+                children: [
+                  const Icon(Icons.hourglass_top_outlined, size: 18, color: Colors.orange),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Solicitações Aguardando Aprovação (${pendingAffiliations.length})',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              )
-            else
+                ],
+              ),
+              const SizedBox(height: 12),
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: vm.affiliations.length,
-                separatorBuilder: (_, _) => const Divider(color: AppColors.line, height: 24),
+                itemCount: pendingAffiliations.length,
+                separatorBuilder: (_, _) => const Divider(color: AppColors.line, height: 18),
                 itemBuilder: (context, index) {
-                  final affil = vm.affiliations[index];
-
-                  Color statusColor;
-                  String statusLabel;
-                  IconData statusIcon;
-
-                  if (affil.isApproved) {
-                    statusColor = AppColors.success;
-                    statusLabel = 'Filiado';
-                    statusIcon = Icons.check_circle_outline;
-                  } else if (affil.isPending) {
-                    statusColor = Colors.orange;
-                    statusLabel = 'Pendente';
-                    statusIcon = Icons.hourglass_top_outlined;
-                  } else if (affil.isRejected) {
-                    statusColor = AppColors.danger;
-                    statusLabel = 'Recusado';
-                    statusIcon = Icons.cancel_outlined;
-                  } else {
-                    statusColor = AppColors.textSecondary;
-                    statusLabel = affil.status;
-                    statusIcon = Icons.info_outline;
-                  }
-
+                  final affil = pendingAffiliations[index];
                   return Row(
                     children: [
                       KicksterAvatar(
                         name: affil.institutionName,
                         imageUrl: affil.institutionLogoUrl,
-                        size: 40,
+                        size: 38,
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -578,84 +595,76 @@ class _OrganizationDetailScreenState
                             Text(
                               affil.institutionName,
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Tipo: ${affil.institutionType ?? "Clube"} • Solicitado por: ${affil.requestedBy ?? "Responsável"}',
+                              'Tipo: ${affil.institutionType == "UNIVERSITY" ? "Universidade" : "Clube"} • Resp: ${affil.requestedBy ?? "Responsável"}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
                             ),
-                            if (affil.rejectionReason != null && affil.rejectionReason!.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                'Motivo da recusa: ${affil.rejectionReason}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.danger,
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(statusIcon, size: 14, color: statusColor),
-                            const SizedBox(width: 6),
-                            Text(
-                              statusLabel,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: statusColor,
-                              ),
-                            ),
-                          ],
-                        ),
+                      IconButton(
+                        tooltip: 'Aprovar filiação',
+                        icon: const Icon(Icons.check, color: AppColors.success),
+                        onPressed: () async {
+                          final ok = await showKicksterConfirm(
+                            context: context,
+                            title: 'Aprovar Filiação',
+                            content: 'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
+                            confirmLabel: 'Aprovar',
+                          );
+                          if (ok == true) {
+                            await vm.approveAffiliation(affil.id);
+                          }
+                        },
                       ),
-                      if (affil.isPending) ...[
-                        const SizedBox(width: 8),
-                        IconButton(
-                          tooltip: 'Aprovar filiação',
-                          icon: const Icon(Icons.check, color: AppColors.success),
-                          onPressed: () async {
-                            final ok = await showKicksterConfirm(
-                              context: context,
-                              title: 'Aprovar Filiação',
-                              content: 'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
-                              confirmLabel: 'Aprovar',
-                            );
-                            if (ok == true) {
-                              await vm.approveAffiliation(affil.id);
-                            }
-                          },
-                        ),
-                        IconButton(
-                          tooltip: 'Recusar filiação',
-                          icon: const Icon(Icons.close, color: AppColors.danger),
-                          onPressed: () => _showRejectAffiliationModal(context, vm, affil),
-                        ),
-                      ],
+                      IconButton(
+                        tooltip: 'Recusar filiação',
+                        icon: const Icon(Icons.close, color: AppColors.danger),
+                        onPressed: () => _showRejectAffiliationModal(context, vm, affil),
+                      ),
                     ],
                   );
                 },
               ),
+              const SizedBox(height: 16),
+              const Divider(color: AppColors.line),
+              const SizedBox(height: 16),
+            ] else ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
+                    SizedBox(width: 8),
+                    Text(
+                      'Nenhuma solicitação pendente no momento.',
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // 3. Botão de Acesso ao Quadro Geral de Afiliados
+            KicksterButton(
+              label: 'Ver Quadro Geral de Afiliados (${approvedAffiliations.length})',
+              icon: Icons.people_outline,
+              variant: KicksterButtonVariant.outline,
+              onPressed: () => context.push(
+                '/organizations/${org.id}/affiliates',
+                extra: org,
+              ),
+            ),
           ],
         ),
       ),
