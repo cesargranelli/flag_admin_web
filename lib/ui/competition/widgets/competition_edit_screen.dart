@@ -6,6 +6,7 @@ import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/age_group.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';
+import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
@@ -215,6 +216,30 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                                   );
                                 }).toList(),
                               );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Agrupamento dos Times (Opcional):',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          KicksterDropdown<GroupingType>(
+                            label: '',
+                            value: vm.groupingType,
+                            hint: 'Selecione o agrupamento',
+                            items: GroupingType.values
+                                .map((gt) => DropdownMenuItem(
+                                      value: gt,
+                                      child: Text(gt.label),
+                                    ))
+                                .toList(),
+                            onChanged: (gt) {
+                              if (gt != null) vm.setGroupingType(gt);
                             },
                           ),
                         ],

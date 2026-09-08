@@ -4,6 +4,7 @@ import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/src/domain/enums/age_group.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';
+import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
 
@@ -24,6 +25,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
 
   String? selectedOrganizationId;
   TournamentFormat tournamentFormat = TournamentFormat.roundRobin;
+  GroupingType groupingType = GroupingType.none;
   Modality? selectedModality = Modality.flag5x5;
   Gender? selectedGender = Gender.male;
   AgeGroup? selectedAgeGroup = AgeGroup.adult;
@@ -93,6 +95,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
         comp.gender != null ? Gender.tryFromJson(comp.gender!) : null;
     selectedAgeGroup =
         comp.ageGroup != null ? AgeGroup.tryFromJson(comp.ageGroup!) : null;
+    groupingType = comp.groupingType ?? GroupingType.none;
     status = comp.status;
     notifyListeners();
   }
@@ -104,6 +107,11 @@ class CompetitionFormViewModel extends ChangeNotifier {
 
   void setTournamentFormat(TournamentFormat format) {
     tournamentFormat = format;
+    notifyListeners();
+  }
+
+  void setGroupingType(GroupingType type) {
+    groupingType = type;
     notifyListeners();
   }
 
@@ -154,6 +162,7 @@ class CompetitionFormViewModel extends ChangeNotifier {
       'organizationId': selectedOrganizationId,
       'season': seasonController.text.trim().isEmpty ? '2026' : seasonController.text.trim(),
       'tournamentFormat': tournamentFormat.toJson(),
+      'groupingType': groupingType.toJson(),
       'status': status.toJson(),
       'modality': selectedModality!.toJson(),
       if (descriptionController.text.trim().isNotEmpty)

@@ -140,6 +140,12 @@ class CompetitionDetailScreen extends ConsumerWidget {
                               label: 'Formato',
                               value: comp.tournamentFormat.label,
                             ),
+                            if (comp.groupingType != null)
+                              _buildInfoItem(
+                                icon: Icons.grid_view_outlined,
+                                label: 'Agrupamento',
+                                value: comp.groupingType!.label,
+                              ),
                             if (comp.modality != null)
                               _buildInfoItem(
                                 icon: Icons.sports_football_outlined,
