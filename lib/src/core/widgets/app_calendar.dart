@@ -3,44 +3,38 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import 'kickster_button.dart';
 
 /// Tamanho do alvo de toque mínimo (tokens.md: "Alvos de toque: mín. 48px").
-const double _kTouchTarget = 48;
+const double _kTouchTarget = 40;
 
-/// Diâmetro do círculo do dia selecionado/hoje (spec Figma).
-const double _kDayCircleSize = 38;
+/// Diâmetro do círculo do dia selecionado/hoje (spec Figma Kickster).
+const double _kDayCircleSize = 36;
 
-/// Largura-alvo do calendário dentro do diálogo (~360–400px, issue #256).
-const double _kCalendarWidth = 380;
+/// Largura-alvo do calendário dentro do diálogo (~340–380px, spec Kickster).
+const double _kCalendarWidth = 360;
 
-/// Raio do container (spec Figma: border-radius 32px).
-const double _kContainerRadius = 32;
+/// Raio do container (padrão Kickster: border-radius 16px).
+const double _kContainerRadius = 16;
 
-/// Sombra da spec Figma (`0px 2px 4px rgba(156,156,156,0.25)`).
-///
-/// O design system não define token de cor de sombra; valor extraído
-/// diretamente da especificação do Figma (issue #256).
-const Color _kShadowColor = Color(0x409C9C9C);
-
-/// Meses em pt-BR. Lista fixa (em vez de `intl`) para não depender de
-/// inicialização de dados de locale no runtime do componente compartilhado.
+/// Meses em pt-BR (com primeira letra maiúscula para exibição no header).
 const List<String> _kMonthNames = [
-  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
 /// Rótulos dos dias da semana em pt-BR, domingo primeiro (D S T Q Q S S),
-/// mesmo padrão do `showDatePicker` com locale pt-BR.
+/// alinhado ao padrão Kickster.
 const List<String> _kWeekdayLabels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
 /// Abre o calendário do design system em um diálogo modal.
 ///
-/// Substituto direto de `showDatePicker` nas telas do admin web (issue #256).
+/// Substituto direto de `showDatePicker` nas telas do admin web.
 /// Comportamento:
-/// - tocar em um dia válido seleciona-o e fecha o diálogo retornando a data
-///   (à meia-noite local);
-/// - fechar por fora do diálogo/ESC retorna `null` (cancelamento);
-/// - `initialDate` é ajustado (clamp) para dentro de [firstDate..lastDate].
+/// - Permite navegar e selecionar uma data;
+/// - Possui botões de rodapé "Cancelar" e "Selecionar" no padrão Kickster;
+/// - Duplo toque ou seleção direta confirma e fecha o diálogo;
+/// - Fechar por fora do diálogo/ESC/Cancelar retorna `null`.
 Future<DateTime?> showAppCalendarDialog(
   BuildContext context, {
   required DateTime initialDate,
@@ -54,6 +48,7 @@ Future<DateTime?> showAppCalendarDialog(
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     builder: (dialogContext) => Dialog(
       backgroundColor: Colors.transparent,
+      elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SingleChildScrollView(
         child: AppCalendar(
@@ -66,21 +61,18 @@ Future<DateTime?> showAppCalendarDialog(
   );
 }
 
-/// Calendário do design system Flag Platform (issue #256 — spec Figma).
+/// Calendário do design system Kickster / Flag Platform.
 ///
 /// Especificação implementada:
-/// - Container branco (`AppColors.surface`) com raio 32 e sombra sutil;
-/// - Header "Mês de Ano" em pt-BR (ex.: "Agosto de 2026"), bold 32px com
-///   letter-spacing negativo, `AppColors.textPrimary`, reduzindo
-///   automaticamente (FittedBox) quando o nome do mês é longo;
-/// - Botões ‹ › circulares, fundo branco, sombra da spec, alvo de toque 48px
-///   e tooltips "Mês anterior"/"Próximo mês";
-/// - Rótulos D S T Q Q S S (domingo primeiro) bold 12px em
-///   `AppColors.accent`;
-/// - Dias medium 14px em `AppColors.textPrimary`; dias de outros meses ou
-///   fora do intervalo permitido com opacity 0.3 e não interativos;
-/// - Dia selecionado: círculo preenchido `AppColors.primary` com texto
-///   branco; hoje (não selecionado): contorno sutil.
+/// - Container branco (`AppColors.surface`) com raio 16, borda suave (`AppColors.line`)
+///   e elevação/sombra sutil Kickster;
+/// - Header com título refinado em H5/H6 (`16px`, w700, `AppColors.textPrimary`),
+///   exibindo "Mês de AAAA", com setas de navegação circulares sutis;
+/// - Rótulos D S T Q Q S S em `AppColors.grayLabel` (12px, w600);
+/// - Dias em 14px w500 em `AppColors.textPrimary`;
+/// - Dia selecionado com círculo preenchido em `AppColors.primary` (#083879) e texto branco;
+/// - Dia de hoje com anel sutil `AppColors.primary`;
+/// - Botões de ação no rodapé: "Cancelar" e "Selecionar" no padrão KicksterButton.
 class AppCalendar extends StatefulWidget {
   const AppCalendar({
     super.key,
@@ -142,28 +134,34 @@ class _AppCalendarState extends State<AppCalendar> {
     });
   }
 
-  void _select(DateTime date) => Navigator.of(context).pop(_midnight(date));
+  void _onDayTap(DateTime date) {
+    setState(() {
+      _selected = _midnight(date);
+    });
+  }
+
+  void _confirmSelection() => Navigator.of(context).pop(_selected);
 
   @override
   Widget build(BuildContext context) {
-    // Responsivo (Flutter Web): ocupa até 380px; em janelas estreitas,
-    // encolhe até um mínimo usável sem estourar a viewport.
+    // Responsivo: adapta-se à largura da viewport mantendo o teto ideal de 360px
     final double width = math.max(
-      304.0,
+      296.0,
       math.min(_kCalendarWidth, MediaQuery.sizeOf(context).width - 32),
     );
 
     return Container(
       width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(_kContainerRadius),
-        boxShadow: const [
+        border: Border.all(color: AppColors.line),
+        boxShadow: [
           BoxShadow(
-            color: _kShadowColor,
-            offset: Offset(0, 8),
-            blurRadius: 24,
+            color: AppColors.black.withValues(alpha: 0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 16,
           ),
         ],
       ),
@@ -171,12 +169,17 @@ class _AppCalendarState extends State<AppCalendar> {
         type: MaterialType.transparency,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildWeekdayRow(),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             ..._buildWeekRows(),
+            const SizedBox(height: 16),
+            const Divider(color: AppColors.line, height: 1),
+            const SizedBox(height: 12),
+            _buildActions(),
           ],
         ),
       ),
@@ -185,32 +188,28 @@ class _AppCalendarState extends State<AppCalendar> {
 
   Widget _buildHeader() {
     final title =
-        '${_kMonthNames[_displayedMonth.month - 1]} de ${_displayedMonth.year}';
+        '${_kMonthNames[_displayedMonth.month - 1]} ${_displayedMonth.year}';
     return Row(
       children: [
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 16,
+              height: 24 / 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
         _NavButton(
           icon: Icons.chevron_left,
           tooltip: 'Mês anterior',
           onPressed: _canGoToPreviousMonth ? _goToPreviousMonth : null,
         ),
-        Expanded(
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                title,
-                maxLines: 1,
-                style: const TextStyle(
-                  fontSize: 32,
-                  height: 1.2,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1.6,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ),
-        ),
+        const SizedBox(width: 6),
         _NavButton(
           icon: Icons.chevron_right,
           tooltip: 'Próximo mês',
@@ -232,10 +231,9 @@ class _AppCalendarState extends State<AppCalendar> {
                   label,
                   style: const TextStyle(
                     fontSize: 12,
-                    height: 17 / 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.3,
-                    color: AppColors.accent,
+                    height: 18 / 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.grayLabel,
                   ),
                 ),
               ),
@@ -278,6 +276,25 @@ class _AppCalendarState extends State<AppCalendar> {
     ];
   }
 
+  Widget _buildActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        KicksterButton(
+          label: 'Cancelar',
+          variant: KicksterButtonVariant.text,
+          onPressed: () => Navigator.of(context).pop(null),
+        ),
+        const SizedBox(width: 8),
+        KicksterButton(
+          label: 'Selecionar',
+          variant: KicksterButtonVariant.primary,
+          onPressed: _confirmSelection,
+        ),
+      ],
+    );
+  }
+
   Widget _buildDayCell(DateTime date) {
     final bool inMonth =
         date.month == _displayedMonth.month && date.year == _displayedMonth.year;
@@ -299,7 +316,8 @@ class _AppCalendarState extends State<AppCalendar> {
             border: isSelected || !isToday
                 ? null
                 : Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.5),
+                    color: AppColors.primary,
+                    width: 1.5,
                   ),
           ),
           child: Text(
@@ -307,7 +325,7 @@ class _AppCalendarState extends State<AppCalendar> {
             style: TextStyle(
               fontSize: 14,
               height: 18 / 14,
-              fontWeight: FontWeight.w500,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               color: isSelected ? Colors.white : AppColors.textPrimary,
             ),
           ),
@@ -316,8 +334,8 @@ class _AppCalendarState extends State<AppCalendar> {
     );
 
     if (!inMonth || !enabled) {
-      // Dias de outros meses ou fora do intervalo: decorativos (opacity 0.3).
-      cell = Opacity(opacity: 0.3, child: ExcludeSemantics(child: cell));
+      // Dias de outros meses ou fora do intervalo: decorativos (opacity 0.25).
+      cell = Opacity(opacity: 0.25, child: ExcludeSemantics(child: cell));
     } else {
       cell = Semantics(
         button: true,
@@ -329,9 +347,13 @@ class _AppCalendarState extends State<AppCalendar> {
     }
 
     return InkWell(
-      // Dias de outros meses são decorativos: navegação de mês somente
-      // pelos botões ‹ › do header.
-      onTap: enabled && inMonth ? () => _select(date) : null,
+      onTap: enabled && inMonth ? () => _onDayTap(date) : null,
+      onDoubleTap: enabled && inMonth
+          ? () {
+              _onDayTap(date);
+              _confirmSelection();
+            }
+          : null,
       customBorder: const CircleBorder(),
       child: cell,
     );
@@ -358,34 +380,19 @@ class _NavButton extends StatelessWidget {
       child: Opacity(
         opacity: enabled ? 1 : 0.3,
         child: SizedBox(
-          width: _kTouchTarget,
-          height: _kTouchTarget,
-          child: Center(
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: _kShadowColor,
-                    offset: Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: Material(
-                color: AppColors.surface,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onPressed,
-                  child: Icon(
-                    icon,
-                    size: 24,
-                    color: AppColors.textPrimary,
-                  ),
+          width: 36,
+          height: 36,
+          child: Material(
+            color: AppColors.surfaceMuted,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onPressed,
+              child: Center(
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
