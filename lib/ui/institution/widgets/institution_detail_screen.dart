@@ -687,7 +687,7 @@ class _InstitutionDetailScreenState
       title: team.name,
       subtitle: subtitle,
       imageUrl: team.logoUrl,
-      onTap: () {},
+      onTap: () => context.push('/teams/${team.id}/roster', extra: team),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -715,6 +715,28 @@ class _InstitutionDetailScreenState
               ),
             ),
             items: [
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.groups_outlined,
+                        size: 18, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Gerenciar Elenco',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () =>
+                    context.push('/teams/${team.id}/roster', extra: team),
+              ),
               if (!isInactive)
                 KicksterMenuItem(
                   child: const Row(

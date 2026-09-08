@@ -38,6 +38,7 @@ import 'package:flag_admin_web/data/services/competition_team_service.dart';
 import 'package:flag_admin_web/data/services/api_competition_team_service.dart';
 import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_teams_view_model.dart';
+import 'package:flag_admin_web/ui/team/view_models/team_roster_view_model.dart';
 
 import '../router/app_router.dart';
 
@@ -479,6 +480,17 @@ final selectedTeamProvider = StateProvider<String?>((ref) => null);
 /// Elenco de um time.
 final rosterProvider = FutureProvider.autoDispose.family<List<RosterEntry>, String>(
   (ref, teamId) => ref.watch(rosterApiProvider).listByTeam(teamId),
+);
+
+/// ViewModel da tela de Gestao de Elenco (ADR-001 / MVVM).
+///
+/// Usa family por teamId para que cada time tenha sua propria instancia.
+final teamRosterViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<TeamRosterViewModel, String>(
+  (ref, teamId) => TeamRosterViewModel(
+    rosterApi: ref.read(rosterApiProvider),
+    teamId: teamId,
+  ),
 );
 
 /// Lista de usuários (somente ADMIN).

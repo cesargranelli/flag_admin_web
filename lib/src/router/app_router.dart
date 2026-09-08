@@ -33,7 +33,7 @@ import '../features/rosters/presentation/screens/rosters_screen.dart';
 import '../features/rounds/presentation/screens/round_detail_screen.dart';
 import '../features/rounds/presentation/screens/round_form_screen.dart';
 import '../features/rounds/presentation/screens/rounds_screen.dart';
-import '../features/teams/presentation/screens/team_roster_screen.dart';
+import 'package:flag_admin_web/ui/team/widgets/team_roster_screen.dart';
 import '../features/users/presentation/screens/user_form_screen.dart';
 import '../features/users/presentation/screens/users_screen.dart';
 import '../features/venues/presentation/screens/venue_detail_screen.dart';
@@ -508,8 +508,8 @@ class AppRouter {
                     final team =
                         state.extra is Team ? state.extra as Team : null;
                     return TeamRosterScreen(
+                      teamId: state.pathParameters['id'] ?? '',
                       team: team,
-                      teamId: state.pathParameters['id'],
                     );
                   },
                 ),
