@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
+import 'package:flag_admin_web/domain/models/team.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
 import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_teams_view_model.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Tela de Gestão e Homologação de Equipes em Competições (ADR-001 / Kickster DS).
 class CompetitionTeamsScreen extends ConsumerStatefulWidget {
@@ -385,6 +387,38 @@ class _CompetitionTeamsScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
+                      Icon(Icons.groups_outlined,
+                          size: 18, color: AppColors.primary),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Elenco na Competição',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    context.push(
+                      '/teams/${ct.teamId}/roster',
+                      extra: Team(
+                        id: ct.teamId,
+                        name: ct.teamName,
+                        shortName: ct.teamShortName,
+                        logoUrl: ct.teamLogoUrl,
+                        organizationId: ct.organizationId ?? '',
+                      ),
+                    );
+                  },
+                ),
+                KicksterMenuItem(
+                  child: const Row(
+                    children: [
                       Icon(Icons.tune_outlined,
                           size: 18, color: AppColors.primary),
                       SizedBox(width: 10),
@@ -606,6 +640,53 @@ class _CompetitionTeamsScreenState
                     label: 'Seed / Chaveamento (Opcional)',
                     hintText: 'Ex: 1, 2, 3...',
                     keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.line),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.groups_outlined,
+                          size: 24,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Vincular Elenco Base',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'A equipe manterá o plantel ativo pronto para convocação nos jogos.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.check_circle,
+                          size: 20,
+                          color: AppColors.success,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
