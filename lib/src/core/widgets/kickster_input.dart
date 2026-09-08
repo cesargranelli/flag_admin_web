@@ -17,7 +17,8 @@ class KicksterInput extends StatelessWidget {
   const KicksterInput({
     super.key,
     required this.label,
-    required this.controller,
+    this.controller,
+    this.initialValue,
     this.obscureText = false,
     this.validator,
     this.keyboardType,
@@ -37,10 +38,14 @@ class KicksterInput extends StatelessWidget {
     this.inputFormatters,
     this.textCapitalization,
     this.prefix,
-  });
+  }) : assert(
+          controller == null || initialValue == null,
+          'Não forneça controller e initialValue simultaneamente.',
+        );
 
   final String label;
-  final TextEditingController controller;
+  final TextEditingController? controller;
+  final String? initialValue;
   final bool autofocus;
   final bool obscureText;
   final String? Function(String?)? validator;
@@ -83,6 +88,7 @@ class KicksterInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      initialValue: initialValue,
       autofocus: autofocus,
       obscureText: obscureText,
       validator: validator,

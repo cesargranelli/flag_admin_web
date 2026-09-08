@@ -170,44 +170,30 @@ class CompetitionGroupingSection extends StatelessWidget {
             final canRemove = vm.groups.length > 2;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.line),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.grid_view_outlined,
-                        size: 18, color: AppColors.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: group.name,
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: 'Nome do Grupo',
-                        ),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        onChanged: (val) => vm.updateGroupName(index, val.trim()),
-                      ),
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: KicksterInput(
+                      key: ValueKey('group_${group.id}'),
+                      label: 'Grupo ${index + 1}',
+                      initialValue: group.name,
+                      hintText: 'Ex: Grupo A, Grupo B',
+                      prefixIcon: Icons.grid_view_outlined,
+                      onChanged: (val) => vm.updateGroupName(index, val.trim()),
                     ),
-                    if (canRemove)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline,
-                            size: 18, color: AppColors.danger),
-                        tooltip: 'Remover ${group.name}',
-                        onPressed: () => vm.removeGroup(index),
-                      ),
+                  ),
+                  if (canRemove) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline,
+                          size: 20, color: AppColors.danger),
+                      tooltip: 'Remover ${group.name}',
+                      onPressed: () => vm.removeGroup(index),
+                    ),
                   ],
-                ),
+                ],
               ),
             );
           }),
@@ -262,99 +248,84 @@ class CompetitionGroupingSection extends StatelessWidget {
             final canRemoveConf = vm.conferences.length > 1;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: 16),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.line),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Nome da Conferência e Remoção
+                    // Nome da Conferência no padrão KicksterInput e Remoção
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(Icons.account_tree_outlined,
-                            size: 20, color: AppColors.primary),
-                        const SizedBox(width: 10),
                         Expanded(
-                          child: TextFormField(
+                          child: KicksterInput(
+                            key: ValueKey('conf_${conf.id}'),
+                            label: 'Nome da Conferência ${confIndex + 1}',
                             initialValue: conf.name,
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              border: InputBorder.none,
-                              hintText: 'Nome da Conferência',
-                            ),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
+                            hintText: 'Ex: Conferência Leste, Americana',
+                            prefixIcon: Icons.account_tree_outlined,
                             onChanged: (val) =>
                                 vm.updateConferenceName(confIndex, val.trim()),
                           ),
                         ),
-                        if (canRemoveConf)
+                        if (canRemoveConf) ...[
+                          const SizedBox(width: 8),
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
-                                size: 18, color: AppColors.danger),
+                                size: 20, color: AppColors.danger),
                             tooltip: 'Remover Conferência',
                             onPressed: () => vm.removeConference(confIndex),
                           ),
+                        ],
                       ],
                     ),
 
-                    const Divider(height: 16),
+                    const Divider(height: 24),
 
-                    // Divisões da Conferência (Chips Interativos)
+                    // Divisões da Conferência
                     Row(
                       children: [
-                        const Text(
-                          'Divisões (Opcional):',
-                          style: TextStyle(
-                            fontSize: 12,
+                        Text(
+                          'Divisões (${conf.divisions.length}):',
+                          style: const TextStyle(
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const Spacer(),
-                        InkWell(
-                          onTap: () => vm.addDivision(confIndex),
-                          borderRadius: BorderRadius.circular(6),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.add,
-                                    size: 14, color: AppColors.primary),
-                                SizedBox(width: 4),
-                                Text(
-                                  '+ Nova Divisão',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        KicksterButton(
+                          label: 'Nova Divisão',
+                          icon: Icons.add,
+                          variant: KicksterButtonVariant.text,
+                          onPressed: () =>
+                              _showAddDivisionDialog(context, confIndex),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
 
                     if (conf.divisions.isEmpty)
-                      const Text(
-                        'Sem divisões associadas. Todos os times competirão na conferência diretamente.',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.textSecondary,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.line),
+                        ),
+                        child: const Text(
+                          'Sem divisões associadas. Todos os times competirão diretamente nesta conferência.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       )
                     else
@@ -366,37 +337,60 @@ class CompetitionGroupingSection extends StatelessWidget {
                           final div = divEntry.value;
 
                           return Container(
-                            padding: const EdgeInsets.only(
-                                left: 10, right: 4, top: 2, bottom: 2),
                             decoration: BoxDecoration(
                               color: AppColors.surfaceMuted,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.line),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.fieldBorder),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  div.name,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () => _showEditDivisionDialog(
+                                context,
+                                confIndex,
+                                divIndex,
+                                div.name,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 12,
+                                  right: 6,
+                                  top: 6,
+                                  bottom: 6,
                                 ),
-                                const SizedBox(width: 4),
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () =>
-                                      vm.removeDivision(confIndex, divIndex),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: Icon(Icons.close,
-                                        size: 14,
-                                        color: AppColors.textSecondary),
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.edit_outlined,
+                                      size: 14,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      div.name,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    InkWell(
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: () => vm.removeDivision(
+                                          confIndex, divIndex),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(2),
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 16,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           );
                         }).toList(),
@@ -406,6 +400,127 @@ class CompetitionGroupingSection extends StatelessWidget {
               ),
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  /// Diálogo no padrão Kickster para adicionar divisão nomeada
+  void _showAddDivisionDialog(BuildContext context, int conferenceIndex) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Adicionar Divisão',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Informe o nome da divisão que pertencerá a esta conferência:',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              KicksterInput(
+                label: 'Nome da Divisão',
+                controller: controller,
+                autofocus: true,
+                hintText: 'Ex: Norte, Sul, Cerrado, Capital',
+                prefixIcon: Icons.category_outlined,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          KicksterButton(
+            label: 'Cancelar',
+            variant: KicksterButtonVariant.text,
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+          ),
+          KicksterButton(
+            label: 'Adicionar',
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                vm.addDivision(conferenceIndex, name);
+              }
+              Navigator.of(dialogCtx).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Diálogo no padrão Kickster para editar o nome de uma divisão existente
+  void _showEditDivisionDialog(
+    BuildContext context,
+    int conferenceIndex,
+    int divisionIndex,
+    String currentName,
+  ) {
+    final controller = TextEditingController(text: currentName);
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Editar Divisão',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Altere o nome da divisão selecionada:',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              KicksterInput(
+                label: 'Nome da Divisão',
+                controller: controller,
+                autofocus: true,
+                hintText: 'Ex: Leste, Oeste, Norte, Sul',
+                prefixIcon: Icons.category_outlined,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          KicksterButton(
+            label: 'Cancelar',
+            variant: KicksterButtonVariant.text,
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+          ),
+          KicksterButton(
+            label: 'Salvar',
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                vm.updateDivisionName(conferenceIndex, divisionIndex, name);
+              }
+              Navigator.of(dialogCtx).pop();
+            },
+          ),
         ],
       ),
     );

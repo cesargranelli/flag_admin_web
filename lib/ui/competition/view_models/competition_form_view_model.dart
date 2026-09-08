@@ -40,18 +40,12 @@ class CompetitionFormViewModel extends ChangeNotifier {
     const CompetitionConferenceConfig(
       id: 'conf_1',
       name: 'Conferência Americana',
-      divisions: [
-        CompetitionDivisionConfig(id: 'div_1_1', name: 'Leste'),
-        CompetitionDivisionConfig(id: 'div_1_2', name: 'Oeste'),
-      ],
+      divisions: [],
     ),
     const CompetitionConferenceConfig(
       id: 'conf_2',
       name: 'Conferência Nacional',
-      divisions: [
-        CompetitionDivisionConfig(id: 'div_2_1', name: 'Leste'),
-        CompetitionDivisionConfig(id: 'div_2_2', name: 'Oeste'),
-      ],
+      divisions: [],
     ),
   ];
 
@@ -203,13 +197,16 @@ class CompetitionFormViewModel extends ChangeNotifier {
     }
   }
 
-  void addDivision(int conferenceIndex) {
+  void addDivision(int conferenceIndex, [String? initialName]) {
     if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
       final conf = conferences[conferenceIndex];
       final divCount = conf.divisions.length + 1;
       final newDivId = 'div_${DateTime.now().millisecondsSinceEpoch}';
+      final name = (initialName != null && initialName.trim().isNotEmpty)
+          ? initialName.trim()
+          : 'Divisão $divCount';
       final updatedDivs = List<CompetitionDivisionConfig>.from(conf.divisions)
-        ..add(CompetitionDivisionConfig(id: newDivId, name: 'Divisão $divCount'));
+        ..add(CompetitionDivisionConfig(id: newDivId, name: name));
       conferences[conferenceIndex] = conf.copyWith(divisions: updatedDivs);
       notifyListeners();
     }
