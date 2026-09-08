@@ -249,7 +249,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
     );
   }
 
-  /// Lista em 2 colunas responsivas no padrão de Organizações.
+  /// Lista em colunas responsivas no padrão Kickster (1, 2 ou 3 colunas).
   Widget _buildList(
     BuildContext context,
     InstitutionViewModel vm,
@@ -258,14 +258,21 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
     final list = vm.filteredInstitutions;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 600;
+        final width = constraints.maxWidth;
+        int crossAxisCount = 1;
+        if (width >= 1200) {
+          crossAxisCount = 3;
+        } else if (width >= 720) {
+          crossAxisCount = 2;
+        }
+
         return RefreshIndicator(
           onRefresh: () => vm.load(forceRefresh: true),
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: 4),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isWide ? 2 : 1,
+              crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               mainAxisExtent: 96,

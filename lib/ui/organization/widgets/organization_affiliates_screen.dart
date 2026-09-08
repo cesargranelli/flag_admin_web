@@ -276,7 +276,7 @@ class _OrganizationAffiliatesScreenState
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         int crossAxisCount = 1;
-        if (width >= 1180) {
+        if (width >= 1200) {
           crossAxisCount = 3;
         } else if (width >= 720) {
           crossAxisCount = 2;

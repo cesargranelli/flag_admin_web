@@ -261,7 +261,7 @@ class _OrganizationListScreenState
     );
   }
 
-  /// Lista em 2 colunas responsivas com o mesmo padrão de Agremiações.
+  /// Lista em colunas responsivas com o padrão Kickster (1, 2 ou 3 colunas).
   Widget _buildList(
     BuildContext context,
     OrganizationViewModel vm,
@@ -270,14 +270,21 @@ class _OrganizationListScreenState
     final list = vm.filteredOrganizations;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 600;
+        final width = constraints.maxWidth;
+        int crossAxisCount = 1;
+        if (width >= 1200) {
+          crossAxisCount = 3;
+        } else if (width >= 720) {
+          crossAxisCount = 2;
+        }
+
         return RefreshIndicator(
           onRefresh: () => vm.load(forceRefresh: true),
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: 4),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isWide ? 2 : 1,
+              crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               mainAxisExtent: 96,
