@@ -318,16 +318,51 @@ class _CompetitionCreateScreenState
                   children: [
                     Expanded(
                       child: KicksterInput(
-                        label: 'Data de Início (AAAA-MM-DD)',
+                        label: 'Data de Início',
                         controller: vm.startDateController,
+                        hintText: 'AAAA-MM-DD',
+                        readOnly: true,
+                        onTap: () async {
+                          final parsed = DateTime.tryParse(vm.startDateController.text);
+                          final initial = parsed ?? DateTime.now();
+                          final picked = await showAppCalendarDialog(
+                            context,
+                            initialDate: initial,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2035),
+                          );
+                          if (picked != null) {
+                            vm.startDateController.text =
+                                '${picked.year}-${picked.month.toString().padLeft(2, "0")}-${picked.day.toString().padLeft(2, "0")}';
+                          }
+                        },
                         suffixIcon: const Icon(Icons.calendar_today, size: 18),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: KicksterInput(
-                        label: 'Data de Término (AAAA-MM-DD)',
+                        label: 'Data de Término',
                         controller: vm.endDateController,
+                        hintText: 'AAAA-MM-DD',
+                        readOnly: true,
+                        onTap: () async {
+                          final startParsed = DateTime.tryParse(vm.startDateController.text);
+                          final parsed = DateTime.tryParse(vm.endDateController.text);
+                          final first = startParsed ?? DateTime(2020);
+                          var initial = parsed ?? (startParsed ?? DateTime.now());
+                          if (initial.isBefore(first)) initial = first;
+                          final picked = await showAppCalendarDialog(
+                            context,
+                            initialDate: initial,
+                            firstDate: first,
+                            lastDate: DateTime(2035),
+                          );
+                          if (picked != null) {
+                            vm.endDateController.text =
+                                '${picked.year}-${picked.month.toString().padLeft(2, "0")}-${picked.day.toString().padLeft(2, "0")}';
+                          }
+                        },
                         suffixIcon: const Icon(Icons.calendar_today, size: 18),
                       ),
                     ),

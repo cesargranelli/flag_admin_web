@@ -830,10 +830,10 @@ class _OrganizationDetailScreenState
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              InkWell(
+                                InkWell(
                                 onTap: () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
+                                  final picked = await showAppCalendarDialog(
+                                    context,
                                     initialDate: startDate,
                                     firstDate: DateTime(2020),
                                     lastDate: DateTime(2035),
@@ -881,8 +881,8 @@ class _OrganizationDetailScreenState
                               const SizedBox(height: 6),
                               InkWell(
                                 onTap: () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
+                                  final picked = await showAppCalendarDialog(
+                                    context,
                                     initialDate: endDate.isAfter(startDate) ? endDate : startDate,
                                     firstDate: startDate,
                                     lastDate: DateTime(2035),
