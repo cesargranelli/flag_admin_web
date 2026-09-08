@@ -111,9 +111,17 @@ class KicksterCalendar extends StatefulWidget {
 /// Alias para manter retrocompatibilidade com código existente.
 typedef AppCalendar = KicksterCalendar;
 
+enum _CalendarViewMode {
+  days,
+  months,
+  years,
+}
+
 class _KicksterCalendarState extends State<KicksterCalendar> {
   late DateTime _selected;
   late DateTime _displayedMonth;
+  _CalendarViewMode _viewMode = _CalendarViewMode.days;
+  late int _yearPageStart;
 
   static DateTime _midnight(DateTime date) =>
       DateTime(date.year, date.month, date.day);
@@ -129,6 +137,7 @@ class _KicksterCalendarState extends State<KicksterCalendar> {
     }
     _selected = selected;
     _displayedMonth = DateTime(selected.year, selected.month);
+    _yearPageStart = (_displayedMonth.year ~/ 12) * 12;
   }
 
   bool get _canGoToPreviousMonth => _displayedMonth.isAfter(
@@ -139,15 +148,31 @@ class _KicksterCalendarState extends State<KicksterCalendar> {
     DateTime(widget.lastDate.year, widget.lastDate.month),
   );
 
-  void _goToPreviousMonth() {
+  bool get _canGoToPreviousYearPage =>
+      _yearPageStart > widget.firstDate.year;
+
+  bool get _canGoToNextYearPage =>
+      _yearPageStart + 11 < widget.lastDate.year;
+
+  void _goToPrevious() {
     setState(() {
-      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+      if (_viewMode == _CalendarViewMode.days) {
+        _displayedMonth =
+            DateTime(_displayedMonth.year, _displayedMonth.month - 1);
+      } else if (_viewMode == _CalendarViewMode.years) {
+        _yearPageStart -= 12;
+      }
     });
   }
 
-  void _goToNextMonth() {
+  void _goToNext() {
     setState(() {
-      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+      if (_viewMode == _CalendarViewMode.days) {
+        _displayedMonth =
+            DateTime(_displayedMonth.year, _displayedMonth.month + 1);
+      } else if (_viewMode == _CalendarViewMode.years) {
+        _yearPageStart += 12;
+      }
     });
   }
 
@@ -161,9 +186,8 @@ class _KicksterCalendarState extends State<KicksterCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    // Responsivo: adapta-se à largura da viewport mantendo o teto ideal de 360px
     final double width = math.max(
-      296.0,
+      320.0,
       math.min(_kCalendarWidth, MediaQuery.sizeOf(context).width - 32),
     );
 
@@ -190,9 +214,15 @@ class _KicksterCalendarState extends State<KicksterCalendar> {
           children: [
             _buildHeader(),
             const SizedBox(height: 16),
-            _buildWeekdayRow(),
-            const SizedBox(height: 8),
-            ..._buildWeekRows(),
+            if (_viewMode == _CalendarViewMode.days) ...[
+              _buildWeekdayRow(),
+              const SizedBox(height: 8),
+              ..._buildWeekRows(),
+            ] else if (_viewMode == _CalendarViewMode.months) ...[
+              _buildMonthsGrid(),
+            ] else ...[
+              _buildYearsGrid(),
+            ],
             const SizedBox(height: 16),
             const Divider(color: AppColors.line, height: 1),
             const SizedBox(height: 12),
@@ -204,35 +234,270 @@ class _KicksterCalendarState extends State<KicksterCalendar> {
   }
 
   Widget _buildHeader() {
-    final title =
-        '${_kMonthNames[_displayedMonth.month - 1]} ${_displayedMonth.year}';
+    final monthName = _kMonthNames[_displayedMonth.month - 1];
+    final yearStr = '${_displayedMonth.year}';
+
+    bool canGoPrev = false;
+    bool canGoNext = false;
+    String prevTooltip = 'Anterior';
+    String nextTooltip = 'Próximo';
+
+    if (_viewMode == _CalendarViewMode.days) {
+      canGoPrev = _canGoToPreviousMonth;
+      canGoNext = _canGoToNextMonth;
+      prevTooltip = 'Mês anterior';
+      nextTooltip = 'Próximo mês';
+    } else if (_viewMode == _CalendarViewMode.years) {
+      canGoPrev = _canGoToPreviousYearPage;
+      canGoNext = _canGoToNextYearPage;
+      prevTooltip = 'Anos anteriores';
+      nextTooltip = 'Próximos anos';
+    }
+
     return Row(
       children: [
         Expanded(
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 24 / 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Botão Seletor de Mês
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _viewMode = _viewMode == _CalendarViewMode.months
+                        ? _CalendarViewMode.days
+                        : _CalendarViewMode.months;
+                  });
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        monthName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 24 / 16,
+                          fontWeight: FontWeight.w700,
+                          color: _viewMode == _CalendarViewMode.months
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        _viewMode == _CalendarViewMode.months
+                            ? Icons.arrow_drop_up
+                            : Icons.arrow_drop_down,
+                        size: 20,
+                        color: _viewMode == _CalendarViewMode.months
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              // Botão Seletor de Ano
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    if (_viewMode == _CalendarViewMode.years) {
+                      _viewMode = _CalendarViewMode.days;
+                    } else {
+                      _yearPageStart = (_displayedMonth.year ~/ 12) * 12;
+                      _viewMode = _CalendarViewMode.years;
+                    }
+                  });
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        yearStr,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 24 / 16,
+                          fontWeight: FontWeight.w700,
+                          color: _viewMode == _CalendarViewMode.years
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        _viewMode == _CalendarViewMode.years
+                            ? Icons.arrow_drop_up
+                            : Icons.arrow_drop_down,
+                        size: 20,
+                        color: _viewMode == _CalendarViewMode.years
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        _NavButton(
-          icon: Icons.chevron_left,
-          tooltip: 'Mês anterior',
-          onPressed: _canGoToPreviousMonth ? _goToPreviousMonth : null,
-        ),
-        const SizedBox(width: 6),
-        _NavButton(
-          icon: Icons.chevron_right,
-          tooltip: 'Próximo mês',
-          onPressed: _canGoToNextMonth ? _goToNextMonth : null,
-        ),
+        if (_viewMode != _CalendarViewMode.months) ...[
+          _NavButton(
+            icon: Icons.chevron_left,
+            tooltip: prevTooltip,
+            onPressed: canGoPrev ? _goToPrevious : null,
+          ),
+          const SizedBox(width: 6),
+          _NavButton(
+            icon: Icons.chevron_right,
+            tooltip: nextTooltip,
+            onPressed: canGoNext ? _goToNext : null,
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildMonthsGrid() {
+    return SizedBox(
+      height: 240,
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 2.1,
+        ),
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          final monthNum = index + 1;
+          final isCurrentMonth = monthNum == _displayedMonth.month;
+          final isSelectedMonth = monthNum == _selected.month &&
+              _displayedMonth.year == _selected.year;
+          final monthDate = DateTime(_displayedMonth.year, monthNum, 1);
+          final endOfMonth = DateTime(_displayedMonth.year, monthNum + 1, 0);
+
+          final enabled = !endOfMonth.isBefore(widget.firstDate) &&
+              !monthDate.isAfter(widget.lastDate);
+
+          return Material(
+            color: isSelectedMonth
+                ? AppColors.primary
+                : isCurrentMonth
+                    ? AppColors.surfaceMuted
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: enabled
+                  ? () {
+                      setState(() {
+                        _displayedMonth =
+                            DateTime(_displayedMonth.year, monthNum);
+                        _viewMode = _CalendarViewMode.days;
+                      });
+                    }
+                  : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: isCurrentMonth && !isSelectedMonth
+                      ? Border.all(color: AppColors.line)
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _kMonthNames[index].substring(0, 3),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelectedMonth || isCurrentMonth
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    color: !enabled
+                        ? AppColors.disabled
+                        : isSelectedMonth
+                            ? Colors.white
+                            : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildYearsGrid() {
+    return SizedBox(
+      height: 240,
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 2.1,
+        ),
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          final year = _yearPageStart + index;
+          final isCurrentYear = year == _displayedMonth.year;
+          final isSelectedYear = year == _selected.year;
+          final enabled =
+              year >= widget.firstDate.year && year <= widget.lastDate.year;
+
+          return Material(
+            color: isSelectedYear
+                ? AppColors.primary
+                : isCurrentYear
+                    ? AppColors.surfaceMuted
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: enabled
+                  ? () {
+                      setState(() {
+                        _displayedMonth = DateTime(year, _displayedMonth.month);
+                        _viewMode = _CalendarViewMode.months;
+                      });
+                    }
+                  : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: isCurrentYear && !isSelectedYear
+                      ? Border.all(color: AppColors.line)
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$year',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelectedYear || isCurrentYear
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                    color: !enabled
+                        ? AppColors.disabled
+                        : isSelectedYear
+                            ? Colors.white
+                            : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
