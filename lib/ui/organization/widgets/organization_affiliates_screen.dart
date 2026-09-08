@@ -74,6 +74,7 @@ class _OrganizationAffiliatesScreenState
 
     return AppScreen(
       title: 'Agremiações Filiadas',
+      scrollable: false,
       breadcrumb: breadcrumb,
       body: body,
     );
