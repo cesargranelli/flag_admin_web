@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import 'package:flag_admin_web/ui/institution/view_models/institution_detail_view_model.dart';
 
@@ -993,6 +994,27 @@ class _InstitutionDetailScreenState
                 onTap: () =>
                     context.push('/teams/${team.id}/roster', extra: team),
               ),
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.emoji_events_outlined,
+                        size: 18, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Inscrever em Competição',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () => _showEnrollTeamInCompetitionModal(context, team),
+              ),
               if (!isInactive)
                 KicksterMenuItem(
                   child: const Row(
@@ -1324,5 +1346,231 @@ class _InstitutionDetailScreenState
       ),
     );
   }
-}
 
+  /// Exibe o modal para inscrever uma equipe esportiva em uma competição.
+  ///
+  /// A inscrição é criada com status [CompetitionTeamStatus.pending] e
+  /// aguarda homologação da organização promotora da competição.
+  void _showEnrollTeamInCompetitionModal(
+    BuildContext context,
+    Team team,
+  ) {
+    Competition? selectedCompetition;
+    bool isEnrolling = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Inscrever em Competição',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        team.name,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: 520,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Descrição do fluxo de homologação
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.2)),
+                      ),
+                      child: const Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.info_outline,
+                              size: 16, color: AppColors.primary),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'A solicitação ficará pendente até a organização promotora homologar a inscrição.',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.primary,
+                                  height: 1.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Lista de competições disponíveis
+                    FutureBuilder<List<Competition>>(
+                      future: ref
+                          .read(competitionRepositoryProvider)
+                          .getCompetitions(),
+                      builder: (ctx, snap) {
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: AppLoading(
+                                  message: 'Carregando competições...'),
+                            ),
+                          );
+                        }
+                        if (snap.hasError) {
+                          return Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.danger.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color:
+                                      AppColors.danger.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error_outline,
+                                    size: 16, color: AppColors.danger),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Erro ao carregar competições: ${snap.error}',
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.danger),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        final competitions = snap.data ?? [];
+                        if (competitions.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Text(
+                              'Nenhuma competição disponível no momento.',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary),
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        }
+
+                        return KicksterDropdown<Competition?>(
+                          label: 'Selecione a Competição *',
+                          value: selectedCompetition,
+                          values: [null, ...competitions],
+                          labels: [
+                            'Escolher competição...',
+                            ...competitions.map((c) =>
+                                '${c.name} (${c.season}) – ${c.organizationName ?? ""}'),
+                          ],
+                          onChanged: (val) => setModalState(
+                              () => selectedCompetition = val),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              KicksterButton(
+                label: 'Cancelar',
+                variant: KicksterButtonVariant.text,
+                onPressed: () => Navigator.of(dialogCtx).pop(),
+              ),
+              KicksterButton(
+                label: 'Enviar Solicitação',
+                icon: Icons.send_outlined,
+                loading: isEnrolling,
+                onPressed: selectedCompetition == null
+                    ? null
+                    : () async {
+                        setModalState(() => isEnrolling = true);
+                        try {
+                          await ref
+                              .read(competitionTeamRepositoryProvider)
+                              .enrollTeam(
+                                competitionId: selectedCompetition!.id,
+                                teamId: team.id,
+                                status: CompetitionTeamStatus.pending,
+                              );
+                          if (dialogCtx.mounted) {
+                            Navigator.of(dialogCtx).pop();
+                          }
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Solicitação de inscrição enviada! Aguardando homologação da organização.',
+                                ),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          setModalState(() => isEnrolling = false);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erro ao enviar inscrição: $e'),
+                                backgroundColor: AppColors.danger,
+                              ),
+                            );
+                          }
+                        }
+                      },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
