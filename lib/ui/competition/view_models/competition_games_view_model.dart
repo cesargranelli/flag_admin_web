@@ -7,7 +7,9 @@ import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
+import 'package:flag_admin_web/domain/models/team.dart';
 import 'package:flag_admin_web/domain/models/venue.dart';
+import 'package:flag_admin_web/src/api/api_client.dart';
 
 /// ViewModel da tela de Tabelamento e Agendamento de Jogos da Competição.
 class CompetitionGamesViewModel extends ChangeNotifier {
@@ -15,6 +17,7 @@ class CompetitionGamesViewModel extends ChangeNotifier {
   final RoundRepository _roundRepo;
   final CompetitionTeamRepository _teamRepo;
   final VenueRepository _venueRepo;
+  final ApiClient _client;
   final String competitionId;
   final Competition? competition;
 
@@ -23,12 +26,14 @@ class CompetitionGamesViewModel extends ChangeNotifier {
     required RoundRepository roundRepo,
     required CompetitionTeamRepository teamRepo,
     required VenueRepository venueRepo,
+    required ApiClient client,
     required this.competitionId,
     this.competition,
   })  : _gameRepo = gameRepo,
         _roundRepo = roundRepo,
         _teamRepo = teamRepo,
-        _venueRepo = venueRepo;
+        _venueRepo = venueRepo,
+        _client = client;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -108,13 +113,33 @@ class CompetitionGamesViewModel extends ChangeNotifier {
         _gameRepo.getGamesByCompetition(competitionId, forceRefresh: forceRefresh),
         _teamRepo.getTeamsByCompetition(competitionId, forceRefresh: forceRefresh),
         _venueRepo.getVenues(forceRefresh: forceRefresh),
+        _client.getList('/api/v1/teams', Team.fromJson).catchError((_) => <Team>[]),
       ]);
 
       _rounds = (results[0] as List<Round>).toList()
         ..sort((a, b) => a.number.compareTo(b.number));
       _games = results[1] as List<Game>;
-      _teams = results[2] as List<CompetitionTeam>;
+      final rawTeams = results[2] as List<CompetitionTeam>;
       _venues = results[3] as List<Venue>;
+      final allTeams = results[4] as List<Team>;
+
+      final teamClubMap = <String, String>{};
+      for (final t in allTeams) {
+        if (t.clubName != null && t.clubName!.trim().isNotEmpty) {
+          teamClubMap[t.id] = t.clubName!.trim();
+        }
+      }
+
+      _teams = rawTeams.map((ct) {
+        if (ct.clubName != null && ct.clubName!.trim().isNotEmpty) {
+          return ct;
+        }
+        final club = teamClubMap[ct.teamId];
+        if (club != null) {
+          return ct.copyWith(clubName: club);
+        }
+        return ct;
+      }).toList();
     } catch (e) {
       _errorMessage = 'Erro ao carregar dados do tabelamento: ${e.toString()}';
     } finally {

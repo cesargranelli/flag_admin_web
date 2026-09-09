@@ -10,6 +10,8 @@ class CompetitionTeam {
   final String? teamLogoUrl;
   final String? organizationId;
   final String? organizationName;
+  final String? clubId;
+  final String? clubName;
   final CompetitionTeamStatus status;
   final String? groupName;
   final String? conferenceName;
@@ -27,6 +29,8 @@ class CompetitionTeam {
     this.teamLogoUrl,
     this.organizationId,
     this.organizationName,
+    this.clubId,
+    this.clubName,
     this.status = CompetitionTeamStatus.pending,
     this.groupName,
     this.conferenceName,
@@ -45,6 +49,8 @@ class CompetitionTeam {
         teamLogoUrl: json['teamLogoUrl'] as String?,
         organizationId: json['organizationId'] as String?,
         organizationName: json['organizationName'] as String?,
+        clubId: json['clubId'] as String?,
+        clubName: json['clubName'] as String?,
         status: json['status'] != null
             ? CompetitionTeamStatus.fromJson(json['status'] as String)
             : CompetitionTeamStatus.pending,
@@ -60,6 +66,53 @@ class CompetitionTeam {
             : null,
       );
 
+  /// Retorna o nome da agremiação/clube mantenedor com fallback amigável.
+  String get resolvedInstitutionName {
+    if (clubName != null && clubName!.trim().isNotEmpty) {
+      return clubName!.trim();
+    }
+    return 'Não vinculada';
+  }
+
+  CompetitionTeam copyWith({
+    String? id,
+    String? competitionId,
+    String? teamId,
+    String? teamName,
+    String? teamShortName,
+    String? teamLogoUrl,
+    String? organizationId,
+    String? organizationName,
+    String? clubId,
+    String? clubName,
+    CompetitionTeamStatus? status,
+    String? groupName,
+    String? conferenceName,
+    String? divisionName,
+    int? seedNumber,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) =>
+      CompetitionTeam(
+        id: id ?? this.id,
+        competitionId: competitionId ?? this.competitionId,
+        teamId: teamId ?? this.teamId,
+        teamName: teamName ?? this.teamName,
+        teamShortName: teamShortName ?? this.teamShortName,
+        teamLogoUrl: teamLogoUrl ?? this.teamLogoUrl,
+        organizationId: organizationId ?? this.organizationId,
+        organizationName: organizationName ?? this.organizationName,
+        clubId: clubId ?? this.clubId,
+        clubName: clubName ?? this.clubName,
+        status: status ?? this.status,
+        groupName: groupName ?? this.groupName,
+        conferenceName: conferenceName ?? this.conferenceName,
+        divisionName: divisionName ?? this.divisionName,
+        seedNumber: seedNumber ?? this.seedNumber,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'competitionId': competitionId,
@@ -69,6 +122,8 @@ class CompetitionTeam {
         'teamLogoUrl': teamLogoUrl,
         'organizationId': organizationId,
         'organizationName': organizationName,
+        if (clubId != null) 'clubId': clubId,
+        if (clubName != null) 'clubName': clubName,
         'status': status.toJson(),
         'groupName': groupName,
         'conferenceName': conferenceName,

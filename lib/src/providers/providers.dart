@@ -412,6 +412,7 @@ final competitionGamesViewModelProvider = ChangeNotifierProvider.autoDispose
     roundRepo: ref.watch(roundRepositoryProvider),
     teamRepo: ref.watch(competitionTeamRepositoryProvider),
     venueRepo: ref.watch(venueRepositoryProvider),
+    client: ref.watch(apiClientProvider),
     competitionId: param.competitionId,
     competition: param.competition,
   ),

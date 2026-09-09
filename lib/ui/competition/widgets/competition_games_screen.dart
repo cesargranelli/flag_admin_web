@@ -870,7 +870,7 @@ class _CompetitionGamesScreenState
                                             ),
                                           ),
                                           Text(
-                                            selectedHomeTeam?.organizationName ??
+                                            selectedHomeTeam?.resolvedInstitutionName ??
                                                 'Não vinculada',
                                             style: const TextStyle(
                                               fontSize: 12,
@@ -940,7 +940,7 @@ class _CompetitionGamesScreenState
                                             ),
                                           ),
                                           Text(
-                                            selectedAwayTeam?.organizationName ??
+                                            selectedAwayTeam?.resolvedInstitutionName ??
                                                 'Não vinculada',
                                             style: const TextStyle(
                                               fontSize: 12,
