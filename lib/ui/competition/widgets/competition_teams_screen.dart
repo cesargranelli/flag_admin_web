@@ -525,8 +525,6 @@ class _CompetitionTeamsScreenState
     String? selectedGroup;
     String? selectedConference;
     String? selectedDivision;
-    final seedController = TextEditingController();
-
     final comp = widget.competition;
     final isGroups = comp?.groupingType == GroupingType.groups;
     final isConferences = comp?.groupingType == GroupingType.conferences;
@@ -635,13 +633,6 @@ class _CompetitionTeamsScreenState
                       }),
                     ],
                   ],
-                  KicksterInput(
-                    controller: seedController,
-                    label: 'Seed / Chaveamento (Opcional)',
-                    hintText: 'Ex: 1, 2, 3...',
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -704,13 +695,19 @@ class _CompetitionTeamsScreenState
                   ? null
                   : () async {
                       Navigator.of(dialogCtx).pop();
-                      final seed = int.tryParse(seedController.text.trim());
+                      // Atribui seed automático sequencial baseado na ordem de inscrição
+                      final maxSeed = vm.teams.fold<int>(
+                        0,
+                        (max, t) => (t.seedNumber ?? 0) > max ? t.seedNumber! : max,
+                      );
+                      final autoSeed = maxSeed > 0 ? maxSeed + 1 : vm.teams.length + 1;
+
                       await vm.enrollTeam(
                         teamId: selectedTeamId!,
                         groupName: selectedGroup,
                         conferenceName: selectedConference,
                         divisionName: selectedDivision,
-                        seedNumber: seed,
+                        seedNumber: autoSeed,
                       );
                     },
             ),
