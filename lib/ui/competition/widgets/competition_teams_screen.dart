@@ -572,13 +572,31 @@ class _CompetitionTeamsScreenState
                     value: selectedTeamId,
                     values: availableTeams.map((t) => t['id'] as String?).toList(),
                     labels: availableTeams.map((t) {
-                      final org = t['organizationName'] != null
-                          ? ' (${t['organizationName']})'
-                          : '';
-                      return '${t['name'] ?? ''}$org';
+                      final club = (t['clubName'] as String?)?.trim();
+                      final clubSuffix = (club != null && club.isNotEmpty) ? ' ($club)' : '';
+                      return '${t['name'] ?? ''}$clubSuffix';
                     }).toList(),
                     onChanged: (val) => setModalState(() => selectedTeamId = val),
                   ),
+                  if (selectedTeamId != null) ...[
+                    Builder(builder: (_) {
+                      final selTeam = availableTeams
+                          .where((t) => t['id'] == selectedTeamId)
+                          .firstOrNull;
+                      final club = (selTeam?['clubName'] as String?)?.trim() ?? 'Não vinculada';
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Agremiação: $club',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
                   const SizedBox(height: 16),
                   if (isGroups || configGroups.isNotEmpty) ...[
                     KicksterDropdown<String?>(
