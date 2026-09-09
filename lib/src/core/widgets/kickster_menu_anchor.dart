@@ -319,9 +319,11 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
         ? -(effectiveMaxHeight.clamp(48.0, spaceAbove - 8)) - 8
         : widget.anchorHeight + 8;
 
+    final double minH = 48.0;
+    final double maxH = effectiveMaxHeight < minH ? minH : effectiveMaxHeight;
     final double allowedHeight = openUpwards
-        ? (spaceAbove - 16).clamp(100.0, effectiveMaxHeight)
-        : (spaceBelow - 16).clamp(100.0, effectiveMaxHeight);
+        ? (spaceAbove - 16).clamp(minH, maxH)
+        : (spaceBelow - 16).clamp(minH, maxH);
 
     return SizedBox.expand(
       child: Stack(

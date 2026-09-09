@@ -306,6 +306,9 @@ class _CompetitionGamesScreenState
     final awayName = game.awayTeamName ?? 'Visitante';
     final venueName = game.venueName ?? 'Local a definir';
 
+    final homeTeam = vm.teams.where((t) => t.teamId == game.homeTeamId).firstOrNull;
+    final awayTeam = vm.teams.where((t) => t.teamId == game.awayTeamId).firstOrNull;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -431,15 +434,11 @@ class _CompetitionGamesScreenState
           Row(
             children: [
               Expanded(
-                child: Text(
-                  homeName,
-                  textAlign: TextAlign.right,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+                child: _buildTeamCardSide(
+                  teamName: homeName,
+                  logoUrl: homeTeam?.teamLogoUrl,
+                  shortName: homeTeam?.teamShortName,
+                  isHome: true,
                 ),
               ),
               Container(
@@ -465,15 +464,11 @@ class _CompetitionGamesScreenState
                 ),
               ),
               Expanded(
-                child: Text(
-                  awayName,
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+                child: _buildTeamCardSide(
+                  teamName: awayName,
+                  logoUrl: awayTeam?.teamLogoUrl,
+                  shortName: awayTeam?.teamShortName,
+                  isHome: false,
                 ),
               ),
             ],
@@ -501,6 +496,45 @@ class _CompetitionGamesScreenState
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTeamCardSide({
+    required String teamName,
+    required String? logoUrl,
+    required String? shortName,
+    required bool isHome,
+  }) {
+    final avatarWidget = KicksterAvatar(
+      imageUrl: (logoUrl != null && logoUrl.trim().isNotEmpty) ? logoUrl : null,
+      name: (shortName != null && shortName.trim().isNotEmpty) ? shortName : teamName,
+      size: 26,
+    );
+
+    return Row(
+      mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        if (!isHome) ...[
+          avatarWidget,
+          const SizedBox(width: 8),
+        ],
+        Flexible(
+          child: Text(
+            teamName,
+            textAlign: isHome ? TextAlign.right : TextAlign.left,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        if (isHome) ...[
+          const SizedBox(width: 8),
+          avatarWidget,
+        ],
+      ],
     );
   }
 
