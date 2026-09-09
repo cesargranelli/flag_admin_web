@@ -18,6 +18,7 @@ import 'package:flag_admin_web/ui/competition/widgets/competition_create_screen.
 import 'package:flag_admin_web/ui/competition/widgets/competition_edit_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_teams_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_games_screen.dart';
 import '../features/competitions/presentation/screens/groupings_screen.dart';
 import '../features/games/presentation/screens/game_detail_screen.dart';
 import '../features/games/presentation/screens/game_form_screen.dart';
@@ -292,6 +293,19 @@ class AppRouter {
                                 ? state.extra as Competition
                                 : null;
                             return CompetitionTeamsScreen(
+                              competitionId: state.pathParameters['id']!,
+                              competition: competition,
+                            );
+                          },
+                        ),
+                        GoRoute(
+                          path: 'games',
+                          name: 'competitionGames',
+                          builder: (context, state) {
+                            final competition = state.extra is Competition
+                                ? state.extra as Competition
+                                : null;
+                            return CompetitionGamesScreen(
                               competitionId: state.pathParameters['id']!,
                               competition: competition,
                             );

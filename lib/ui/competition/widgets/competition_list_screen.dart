@@ -380,6 +380,35 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     }
                   },
                 ),
+                KicksterMenuItem(
+                  child: const Row(
+                    children: [
+                      Icon(Icons.sports_football_outlined,
+                          size: 18, color: AppColors.primary),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Tabelamento & Jogos',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    await context.push(
+                      '/competitions/${comp.id}/games',
+                      extra: comp,
+                    );
+                    if (context.mounted) {
+                      vm.load(forceRefresh: true);
+                    }
+                  },
+                ),
                 if (!isDisabled)
                   KicksterMenuItem(
                     child: const Row(

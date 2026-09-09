@@ -40,6 +40,16 @@ import 'package:flag_admin_web/data/services/api_competition_team_service.dart';
 import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_teams_view_model.dart';
 import 'package:flag_admin_web/ui/team/view_models/team_roster_view_model.dart';
+import 'package:flag_admin_web/data/services/round_service.dart';
+import 'package:flag_admin_web/data/services/api_round_service.dart';
+import 'package:flag_admin_web/data/repositories/round_repository.dart';
+import 'package:flag_admin_web/data/services/game_service.dart';
+import 'package:flag_admin_web/data/services/api_game_service.dart';
+import 'package:flag_admin_web/data/repositories/game_repository.dart';
+import 'package:flag_admin_web/data/services/venue_service.dart';
+import 'package:flag_admin_web/data/services/api_venue_service.dart';
+import 'package:flag_admin_web/data/repositories/venue_repository.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_games_view_model.dart';
 
 import '../router/app_router.dart';
 
@@ -332,6 +342,76 @@ final competitionTeamsViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<CompetitionTeamsViewModel, CompetitionTeamsParam>(
   (ref, param) => CompetitionTeamsViewModel(
     repository: ref.watch(competitionTeamRepositoryProvider),
+    competitionId: param.competitionId,
+    competition: param.competition,
+  ),
+);
+
+/// Serviço de rodadas (REST).
+final roundServiceProvider = Provider<RoundService>(
+  (ref) => ApiRoundService(ref.watch(apiClientProvider)),
+);
+
+/// Repositório de rodadas (Cache TTL 30s).
+final roundRepositoryProvider = Provider<RoundRepository>(
+  (ref) => RoundRepository(
+    service: ref.watch(roundServiceProvider),
+  ),
+);
+
+/// Serviço de jogos (REST).
+final gameServiceProvider = Provider<GameService>(
+  (ref) => ApiGameService(ref.watch(apiClientProvider)),
+);
+
+/// Repositório de jogos (Cache TTL 30s).
+final gameRepositoryProvider = Provider<GameRepository>(
+  (ref) => GameRepository(
+    service: ref.watch(gameServiceProvider),
+  ),
+);
+
+/// Serviço de praças esportivas / venues (REST).
+final venueServiceProvider = Provider<VenueService>(
+  (ref) => ApiVenueService(ref.watch(apiClientProvider)),
+);
+
+/// Repositório de praças esportivas (Cache TTL 60s).
+final venueRepositoryProvider = Provider<VenueRepository>(
+  (ref) => VenueRepository(
+    service: ref.watch(venueServiceProvider),
+  ),
+);
+
+/// Parâmetro para o ViewModel de jogos da competição
+class CompetitionGamesParam {
+  final String competitionId;
+  final Competition? competition;
+
+  const CompetitionGamesParam({
+    required this.competitionId,
+    this.competition,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompetitionGamesParam &&
+          runtimeType == other.runtimeType &&
+          competitionId == other.competitionId;
+
+  @override
+  int get hashCode => competitionId.hashCode;
+}
+
+/// ViewModel de jogos/tabelamento de uma competição.
+final competitionGamesViewModelProvider = ChangeNotifierProvider.autoDispose
+    .family<CompetitionGamesViewModel, CompetitionGamesParam>(
+  (ref, param) => CompetitionGamesViewModel(
+    gameRepo: ref.watch(gameRepositoryProvider),
+    roundRepo: ref.watch(roundRepositoryProvider),
+    teamRepo: ref.watch(competitionTeamRepositoryProvider),
+    venueRepo: ref.watch(venueRepositoryProvider),
     competitionId: param.competitionId,
     competition: param.competition,
   ),

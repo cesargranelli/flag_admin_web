@@ -316,7 +316,10 @@ class _CompetitionDetailScreenState
                         title: 'Tabela & Confrontos',
                         subtitle: 'Rodadas, praças e datas de jogos',
                         onTap: () {
-                          context.push('/rounds?competitionId=${comp.id}');
+                          context.push(
+                            '/competitions/${comp.id}/games',
+                            extra: comp,
+                          );
                         },
                       ),
                     ),
