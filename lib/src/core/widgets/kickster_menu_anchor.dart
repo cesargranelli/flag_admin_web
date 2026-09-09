@@ -107,12 +107,14 @@ class _KicksterMenuAnchorState extends State<KicksterMenuAnchor> {
     final renderBox = triggerContext.findRenderObject();
     if (renderBox is! RenderBox || !renderBox.hasSize) return;
     final size = renderBox.size;
+    final anchorTop = renderBox.localToGlobal(Offset.zero).dy;
 
     _overlayEntry = OverlayEntry(
       builder: (context) => _KicksterMenuOverlay(
         layerLink: _layerLink,
         anchorWidth: size.width,
         anchorHeight: size.height,
+        anchorTop: anchorTop,
         width: widget.width,
         maxHeight: widget.maxHeight,
         alignment: widget.alignment,
@@ -186,6 +188,7 @@ class _KicksterMenuOverlay extends StatefulWidget {
     required this.layerLink,
     required this.anchorWidth,
     required this.anchorHeight,
+    required this.anchorTop,
     required this.width,
     required this.maxHeight,
     required this.alignment,
@@ -197,6 +200,7 @@ class _KicksterMenuOverlay extends StatefulWidget {
   final LayerLink layerLink;
   final double anchorWidth;
   final double anchorHeight;
+  final double anchorTop;
   final double? width;
   final double? maxHeight;
   final Alignment alignment;
@@ -286,12 +290,38 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final viewInsetsBottom = mediaQuery.viewInsets.bottom;
+    final availableScreenBottom = screenHeight - viewInsetsBottom;
+
     final width = widget.width ?? widget.anchorWidth.clamp(200, 300);
     final dx = widget.alignment == Alignment.topRight ||
             widget.alignment == Alignment.centerRight ||
             widget.alignment == Alignment.bottomRight
         ? widget.anchorWidth - width
         : 0.0;
+
+    // Altura estimada do menu
+    final estimatedItemCount = widget.items.length;
+    final naturalHeight = estimatedItemCount * 48.0 + (estimatedItemCount - 1) * 1.0 + 2.0;
+    final effectiveMaxHeight = widget.maxHeight ?? naturalHeight;
+
+    // Espaço disponível abaixo do anchor
+    final spaceBelow = availableScreenBottom - (widget.anchorTop + widget.anchorHeight + 8);
+    // Espaço disponível acima do anchor
+    final spaceAbove = widget.anchorTop - 8;
+
+    // Se não couber embaixo mas couber melhor em cima, abre para cima
+    final bool openUpwards = spaceBelow < 180 && spaceAbove > spaceBelow;
+
+    final double dy = openUpwards
+        ? -(effectiveMaxHeight.clamp(48.0, spaceAbove - 8)) - 8
+        : widget.anchorHeight + 8;
+
+    final double allowedHeight = openUpwards
+        ? (spaceAbove - 16).clamp(100.0, effectiveMaxHeight)
+        : (spaceBelow - 16).clamp(100.0, effectiveMaxHeight);
 
     return SizedBox.expand(
       child: Stack(
@@ -303,12 +333,12 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
               onTap: () => widget.onDismiss(false),
             ),
           ),
-          // Menu posicionado abaixo do anchor acompanhando o scroll com LayerLink.
+          // Menu posicionado abaixo (ou acima) do anchor acompanhando o scroll com LayerLink.
           Positioned(
             child: CompositedTransformFollower(
               link: widget.layerLink,
               showWhenUnlinked: false,
-              offset: Offset(dx, widget.anchorHeight + 8),
+              offset: Offset(dx, dy),
               child: SizedBox(
                 width: width,
                 child: FocusScope(
@@ -319,6 +349,7 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
                     type: MaterialType.transparency,
                     elevation: 0,
                     child: _withMaxHeight(
+                      allowedHeight,
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors.surface,
@@ -360,14 +391,11 @@ class _KicksterMenuOverlayState extends State<_KicksterMenuOverlay> {
     );
   }
 
-  /// Aplica [KicksterMenuAnchor.maxHeight] ao menu: limita a altura e rola
-  /// o conteúdo internamente quando ele excede. Sem `maxHeight` (nulo),
-  /// devolve o child intacto.
-  Widget _withMaxHeight(Widget child) {
-    final maxHeight = widget.maxHeight;
-    if (maxHeight == null) return child;
+  /// Aplica a restrição de altura máxima calculada dinamicamente com base
+  /// no espaço visível da tela ou em [KicksterMenuAnchor.maxHeight].
+  Widget _withMaxHeight(double allowedMaxHeight, Widget child) {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
+      constraints: BoxConstraints(maxHeight: allowedMaxHeight),
       child: SingleChildScrollView(child: child),
     );
   }
