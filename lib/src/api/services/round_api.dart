@@ -21,7 +21,8 @@ class RoundApi {
     required int number,
     required String name,
     required RoundType type,
-  }) => _client.post('/api/v1/competitions/$competitionId/rounds', {
+  }) => _client.post('/api/v1/rounds', {
+    'competitionId': competitionId,
     'number': number,
     'name': name,
     'type': type.toJson(),
