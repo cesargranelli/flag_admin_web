@@ -92,6 +92,12 @@ class ApiCompetitionTeamService implements CompetitionTeamService {
       _client.delete('/api/v1/competitions/$competitionId/teams/$teamId');
 
   @override
+  Future<List<CompetitionTeam>> listByTeam(String teamId) => _client.getList(
+        '/api/v1/teams/$teamId/competitions',
+        CompetitionTeam.fromJson,
+      );
+
+  @override
   Future<List<Map<String, dynamic>>> listAllPlatformTeams() => _client.getList(
         '/api/v1/teams',
         (json) => Map<String, dynamic>.from(json),

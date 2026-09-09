@@ -40,6 +40,9 @@ abstract class CompetitionTeamService {
     required String teamId,
   });
 
+  /// Lista todas as competições nas quais um time está inscrito
+  Future<List<CompetitionTeam>> listByTeam(String teamId);
+
   /// Lista todos os times cadastrados no sistema (para seleção na inscrição)
   Future<List<Map<String, dynamic>>> listAllPlatformTeams();
 }

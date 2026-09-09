@@ -112,6 +112,9 @@ class CompetitionTeamRepository {
     clearCache(competitionId);
   }
 
+  Future<List<CompetitionTeam>> getCompetitionsByTeam(String teamId) =>
+      _service.listByTeam(teamId);
+
   Future<List<Map<String, dynamic>>> listAllPlatformTeams() =>
       _service.listAllPlatformTeams();
 
