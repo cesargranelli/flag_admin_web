@@ -680,6 +680,13 @@ class _CompetitionGamesScreenState
       context: context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setModalState) {
+          final compName = widget.competition?.displayName ?? 'Competição';
+          final orgName = widget.competition?.organizationName ?? '';
+          final selectedHomeTeam =
+              vm.teams.where((t) => t.teamId == selectedHomeTeamId).firstOrNull;
+          final selectedAwayTeam =
+              vm.teams.where((t) => t.teamId == selectedAwayTeamId).firstOrNull;
+
           return AlertDialog(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -698,6 +705,102 @@ class _CompetitionGamesScreenState
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Dados fixos (Campeonato e Organização Promotora)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.line),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Campeonato',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.emoji_events_outlined,
+                                      size: 14,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        compName,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (orgName.isNotEmpty) ...[
+                            Container(
+                              width: 1,
+                              height: 30,
+                              color: AppColors.line,
+                              margin: const EdgeInsets.symmetric(horizontal: 10),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Organização',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.business_outlined,
+                                        size: 14,
+                                        color: AppColors.primary,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          orgName,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     KicksterDropdown<String>(
                       label: 'Rodada / Fase',
                       value: selectedRoundId,
@@ -709,55 +812,150 @@ class _CompetitionGamesScreenState
                     ),
                     const SizedBox(height: 16),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: KicksterDropdown<String>(
-                            label: 'Equipe Mandante',
-                            value: selectedHomeTeamId,
-                            values: vm.teams.map((t) => t.teamId).toList(),
-                            labels: vm.teams.map((t) {
-                              final org = (t.organizationName != null && t.organizationName!.isNotEmpty)
-                                  ? ' (${t.organizationName})'
-                                  : '';
-                              return '${t.teamName}$org';
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setModalState(() {
-                                  selectedHomeTeamId = val;
-                                  if (selectedAwayTeamId == val) {
-                                    final other = vm.teams.firstWhere(
-                                      (t) => t.teamId != val,
-                                      orElse: () => vm.teams.first,
-                                    );
-                                    selectedAwayTeamId = other.teamId;
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              KicksterDropdown<String>(
+                                label: 'Equipe Mandante',
+                                value: selectedHomeTeamId,
+                                values: vm.teams.map((t) => t.teamId).toList(),
+                                labels: vm.teams.map((t) => t.teamName).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setModalState(() {
+                                      selectedHomeTeamId = val;
+                                      if (selectedAwayTeamId == val) {
+                                        final other = vm.teams.firstWhere(
+                                          (t) => t.teamId != val,
+                                          orElse: () => vm.teams.first,
+                                        );
+                                        selectedAwayTeamId = other.teamId;
+                                      }
+                                    });
                                   }
-                                });
-                              }
-                            },
+                                },
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppColors.line),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.shield_outlined,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Agremiação / Clube',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                          Text(
+                                            selectedHomeTeam?.organizationName ??
+                                                'Não vinculada',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: KicksterDropdown<String>(
-                            label: 'Equipe Visitante',
-                            value: selectedAwayTeamId,
-                            values: vm.teams
-                                .where((t) => t.teamId != selectedHomeTeamId)
-                                .map((t) => t.teamId)
-                                .toList(),
-                            labels: vm.teams
-                                .where((t) => t.teamId != selectedHomeTeamId)
-                                .map((t) {
-                                  final org = (t.organizationName != null && t.organizationName!.isNotEmpty)
-                                      ? ' (${t.organizationName})'
-                                      : '';
-                                  return '${t.teamName}$org';
-                                })
-                                .toList(),
-                            onChanged: (val) {
-                              if (val != null) setModalState(() => selectedAwayTeamId = val);
-                            },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              KicksterDropdown<String>(
+                                label: 'Equipe Visitante',
+                                value: selectedAwayTeamId,
+                                values: vm.teams
+                                    .where((t) => t.teamId != selectedHomeTeamId)
+                                    .map((t) => t.teamId)
+                                    .toList(),
+                                labels: vm.teams
+                                    .where((t) => t.teamId != selectedHomeTeamId)
+                                    .map((t) => t.teamName)
+                                    .toList(),
+                                onChanged: (val) {
+                                  if (val != null) setModalState(() => selectedAwayTeamId = val);
+                                },
+                              ),
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppColors.line),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.shield_outlined,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Agremiação / Clube',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                          Text(
+                                            selectedAwayTeam?.organizationName ??
+                                                'Não vinculada',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
