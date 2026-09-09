@@ -278,7 +278,7 @@ class _CompetitionGamesScreenState
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: 130,
+              mainAxisExtent: 142,
             ),
             itemCount: list.length,
             itemBuilder: (context, index) {
@@ -505,10 +505,22 @@ class _CompetitionGamesScreenState
     required String? shortName,
     required bool isHome,
   }) {
-    final avatarWidget = KicksterAvatar(
-      imageUrl: (logoUrl != null && logoUrl.trim().isNotEmpty) ? logoUrl : null,
-      name: (shortName != null && shortName.trim().isNotEmpty) ? shortName : teamName,
-      size: 26,
+    final avatarWidget = Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: KicksterAvatar(
+        imageUrl: (logoUrl != null && logoUrl.trim().isNotEmpty) ? logoUrl : null,
+        name: (shortName != null && shortName.trim().isNotEmpty) ? shortName : teamName,
+        size: 44,
+      ),
     );
 
     return Row(
@@ -516,7 +528,7 @@ class _CompetitionGamesScreenState
       children: [
         if (!isHome) ...[
           avatarWidget,
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
         ],
         Flexible(
           child: Text(
@@ -531,7 +543,7 @@ class _CompetitionGamesScreenState
           ),
         ),
         if (isHome) ...[
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           avatarWidget,
         ],
       ],
