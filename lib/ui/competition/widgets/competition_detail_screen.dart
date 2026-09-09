@@ -300,7 +300,7 @@ class _CompetitionDetailScreenState
                       child: KicksterCard(
                         icon: Icons.groups_outlined,
                         title: 'Equipes Inscritas',
-                        subtitle: 'Homologação e elenco de agremiações',
+                        subtitle: 'Homologação e elencos das equipes esportivas',
                         onTap: () {
                           context.push(
                             '/competitions/${comp.id}/teams',
@@ -314,7 +314,7 @@ class _CompetitionDetailScreenState
                       child: KicksterCard(
                         icon: Icons.calendar_month_outlined,
                         title: 'Tabela & Confrontos',
-                        subtitle: 'Rodadas, praças e datas de jogos',
+                        subtitle: 'Rodadas e confrontos das equipes esportivas',
                         onTap: () {
                           context.push(
                             '/competitions/${comp.id}/games',

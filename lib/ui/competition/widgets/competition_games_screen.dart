@@ -647,7 +647,7 @@ class _CompetitionGamesScreenState
     if (vm.teams.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Inscreva pelo menos 2 equipes na competição para agendar confrontos.'),
+          content: Text('Inscreva pelo menos 2 equipes esportivas na competição para agendar confrontos.'),
         ),
       );
       return;
@@ -712,10 +712,15 @@ class _CompetitionGamesScreenState
                       children: [
                         Expanded(
                           child: KicksterDropdown<String>(
-                            label: 'Mandante',
+                            label: 'Equipe Mandante',
                             value: selectedHomeTeamId,
                             values: vm.teams.map((t) => t.teamId).toList(),
-                            labels: vm.teams.map((t) => t.teamName).toList(),
+                            labels: vm.teams.map((t) {
+                              final org = (t.organizationName != null && t.organizationName!.isNotEmpty)
+                                  ? ' (${t.organizationName})'
+                                  : '';
+                              return '${t.teamName}$org';
+                            }).toList(),
                             onChanged: (val) {
                               if (val != null) {
                                 setModalState(() {
@@ -735,7 +740,7 @@ class _CompetitionGamesScreenState
                         const SizedBox(width: 12),
                         Expanded(
                           child: KicksterDropdown<String>(
-                            label: 'Visitante',
+                            label: 'Equipe Visitante',
                             value: selectedAwayTeamId,
                             values: vm.teams
                                 .where((t) => t.teamId != selectedHomeTeamId)
@@ -743,7 +748,12 @@ class _CompetitionGamesScreenState
                                 .toList(),
                             labels: vm.teams
                                 .where((t) => t.teamId != selectedHomeTeamId)
-                                .map((t) => t.teamName)
+                                .map((t) {
+                                  final org = (t.organizationName != null && t.organizationName!.isNotEmpty)
+                                      ? ' (${t.organizationName})'
+                                      : '';
+                                  return '${t.teamName}$org';
+                                })
                                 .toList(),
                             onChanged: (val) {
                               if (val != null) setModalState(() => selectedAwayTeamId = val);
@@ -898,7 +908,7 @@ class _CompetitionGamesScreenState
                   if (selectedHomeTeamId == selectedAwayTeamId) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Mandante e visitante não podem ser o mesmo time.'),
+                        content: Text('A equipe mandante e a equipe visitante não podem ser a mesma equipe esportiva.'),
                       ),
                     );
                     return;
