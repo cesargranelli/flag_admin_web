@@ -20,8 +20,8 @@ export 'enums/tournament_format.dart';
 export 'enums/user_role.dart';
 
 // Models
-export 'models/athlete.dart';
-export 'models/athlete_batch.dart';
+export 'package:flag_admin_web/domain/models/person.dart';
+export 'package:flag_admin_web/domain/models/person_batch.dart';
 export 'models/category.dart';
 export 'models/check_in.dart';
 export 'package:flag_admin_web/domain/models/competition.dart';
@@ -30,8 +30,8 @@ export 'models/division.dart';
 export 'models/game.dart';
 export 'models/game_batch.dart';
 export 'package:flag_admin_web/domain/models/organization.dart';
-export 'models/roster_batch.dart';
-export 'models/roster_entry.dart';
+export 'package:flag_admin_web/domain/models/roster_batch.dart';
+export 'package:flag_admin_web/domain/models/roster_entry.dart';
 export 'models/round.dart';
 export 'models/score_event.dart';
 export 'models/standing.dart';

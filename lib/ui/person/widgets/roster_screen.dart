@@ -1,47 +1,42 @@
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
-import 'package:flag_admin_web/ui/team/view_models/team_roster_view_model.dart';
+import 'package:flag_admin_web/ui/person/view_models/roster_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Tela de Gestao de Elenco de um time (ADR-001 / MVVM).
+/// Elenco de um clube (time) numa competicao.
 ///
-/// Exibe todos os atletas cadastrados na plataforma e permite
-/// incluir ou remover atletas do elenco-base do time.
-class TeamRosterScreen extends ConsumerStatefulWidget {
-  const TeamRosterScreen({
-    super.key,
-    required this.teamId,
-    this.team,
-  });
+/// A tela combina o [RosterViewModel] (pessoas + elenco do time) e permite
+/// incluir e remover pessoas do elenco.
+class RosterScreen extends ConsumerStatefulWidget {
+  const RosterScreen({super.key, this.team, this.teamId});
 
-  /// Id do time (extraido da rota `/teams/:id/roster`).
-  final String teamId;
-
-  /// Time passado via `state.extra` — usado apenas para o breadcrumb/titulo.
-  final Team? team;
+  final dynamic team;
+  final String? teamId;
 
   @override
-  ConsumerState<TeamRosterScreen> createState() => _TeamRosterScreenState();
+  ConsumerState<RosterScreen> createState() => _RosterScreenState();
 }
 
-class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
+class _RosterScreenState extends ConsumerState<RosterScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _query = '';
-  late TeamRosterViewModel _vm;
+  late RosterViewModel _vm;
 
   @override
   void initState() {
     super.initState();
-    _vm = TeamRosterViewModel(
-      rosterApi: ref.read(rosterApiProvider),
-      teamId: widget.teamId,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _vm.loadRoster();
-    });
+    final teamId = widget.team?.id ?? widget.teamId;
+    if (teamId != null) {
+      _vm = RosterViewModel(
+        rosterRepository: ref.read(rosterRepositoryProvider),
+        personRepository: ref.read(personRepositoryProvider),
+        teamId: teamId,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _vm.load(forceRefresh: true);
+      });
+    }
   }
 
   @override
@@ -50,16 +45,15 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     super.dispose();
   }
 
-  /// Solicita apelido/numero antes de adicionar ao elenco.
-  Future<void> _addAthlete(Athlete athlete) async {
+  Future<void> _addPerson(dynamic person) async {
     final details = await showDialog<({String? nickname, int? number})>(
       context: context,
-      builder: (_) => _RosterDetailsDialog(athleteName: athlete.name),
+      builder: (_) => _RosterDetailsDialog(personName: person.name),
     );
     if (details == null || !mounted) return;
 
-    final ok = await _vm.addAthlete(
-      athlete: athlete,
+    final ok = await _vm.addPerson(
+      person: person,
       nickname: details.nickname,
       number: details.number,
     );
@@ -67,18 +61,17 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     if (!mounted) return;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${athlete.name} adicionado ao elenco.')),
+        SnackBar(content: Text('${person.name} adicionado ao elenco.')),
       );
     } else if (_vm.mutationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nao foi possivel adicionar o atleta.')),
+        const SnackBar(content: Text('Nao foi possivel adicionar a pessoa.')),
       );
     }
   }
 
-  /// Remove um atleta do elenco com confirmacao.
-  Future<void> _removeAthlete(RosterEntry entry) async {
-    final ok = await _vm.removeAthlete(entry);
+  Future<void> _removePerson(dynamic entry) async {
+    final ok = await _vm.removePerson(entry);
     if (!mounted) return;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -86,19 +79,20 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
       );
     } else if (_vm.mutationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nao foi possivel remover o atleta.')),
+        const SnackBar(content: Text('Nao foi possivel remover a pessoa.')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final teamId = widget.team?.id ?? widget.teamId;
     final teamName = widget.team?.name;
     final title = teamName ?? 'Elenco';
 
     final breadcrumb = [
       const BreadcrumbItem(AppStrings.home, route: '/'),
-      const BreadcrumbItem(AppStrings.institutions, route: '/institutions'),
+      const BreadcrumbItem(AppStrings.rosters, route: '/rosters'),
       if (teamName != null) BreadcrumbItem(teamName),
       const BreadcrumbItem('Elenco'),
     ];
@@ -107,96 +101,84 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
       title: title,
       scrollable: false,
       breadcrumb: breadcrumb,
-      body: ListenableBuilder(
-        listenable: _vm,
-        builder: (context, _) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Barra de acoes superior
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-              child: Row(
+      body: teamId == null
+          ? const AppEmptyState(
+              message: 'Time nao identificado',
+              icon: Icons.groups_outlined,
+            )
+          : ListenableBuilder(
+              listenable: _vm,
+              builder: (context, _) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Spacer(),
-                  IconButton(
-                    tooltip: 'Importar CSV',
-                    icon: const Icon(Icons.upload_file),
-                    onPressed: () =>
-                        context.push('/rosters/import', extra: widget.teamId),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Importar CSV',
+                        icon: const Icon(Icons.upload_file),
+                        onPressed: () =>
+                            context.push('/rosters/import', extra: teamId),
+                      ),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        tooltip: 'Recarregar elenco',
+                        icon: const Icon(Icons.refresh),
+                        onPressed: () => _vm.load(forceRefresh: true),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    tooltip: 'Recarregar elenco',
-                    icon: const Icon(Icons.refresh),
-                    onPressed: _vm.loadRoster,
-                  ),
+                  const SizedBox(height: 16),
+                  Expanded(child: _buildBody(context)),
                 ],
               ),
             ),
-            // Corpo principal
-            Expanded(
-              child: _buildBody(context),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    final athletesAsync = ref.watch(athletesProvider);
-
-    if (_vm.isLoadingRoster || athletesAsync.isLoading) {
-      return const AppLoading(message: 'Carregando atletas...');
+    if (_vm.isLoadingRoster || _vm.isLoadingPersons) {
+      return const AppLoading(message: 'Carregando pessoas...');
     }
 
     if (_vm.rosterError != null) {
       return AppErrorState(
         message: 'Nao foi possivel carregar o elenco',
-        onRetry: _vm.loadRoster,
+        onRetry: () => _vm.load(forceRefresh: true),
       );
     }
 
-    if (athletesAsync.hasError) {
+    if (_vm.personsError != null) {
       return AppErrorState(
-        message: 'Nao foi possivel carregar os atletas',
-        onRetry: () => ref.invalidate(athletesProvider),
+        message: 'Nao foi possivel carregar as pessoas',
+        onRetry: () => _vm.load(forceRefresh: true),
       );
     }
 
-    final athletes = athletesAsync.value ?? const <Athlete>[];
+    final persons = _vm.persons;
     final roster = _vm.roster;
     final inRosterIds = {for (final e in roster) e.athleteId};
     final entryByAthleteId = {for (final e in roster) e.athleteId: e};
 
-    final normalizedQuery = _query.trim().toLowerCase();
-    final filtered = athletes
-        .where(
-          (a) =>
-              normalizedQuery.isEmpty ||
-              a.name.toLowerCase().contains(normalizedQuery),
-        )
-        .toList();
+    final filtered = _vm.filteredPersons;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Barra de busca
         AppLayout.content(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: KicksterSearchField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _query = value),
-              hint: 'Buscar atleta por nome',
+              onChanged: (value) => _vm.setSearchQuery(value),
+              hint: 'Buscar pessoa por nome',
             ),
           ),
         ),
         const SizedBox(height: 8),
-        // Lista de atletas
         Expanded(
           child: _buildList(
-            athletes: athletes,
+            persons: persons,
             filtered: filtered,
             inRosterIds: inRosterIds,
             entryByAthleteId: entryByAthleteId,
@@ -207,33 +189,32 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
   }
 
   Widget _buildList({
-    required List<Athlete> athletes,
-    required List<Athlete> filtered,
+    required List<dynamic> persons,
+    required List<dynamic> filtered,
     required Set<String> inRosterIds,
-    required Map<String, RosterEntry> entryByAthleteId,
+    required Map<String, dynamic> entryByAthleteId,
   }) {
-    if (athletes.isEmpty) {
+    if (persons.isEmpty) {
       return KicksterEmptyState(
         icon: Icons.person_outline,
-        message: 'Nenhum atleta cadastrado',
-        description:
-            'Cadastre atletas na plataforma para incluí-los no elenco.',
+        message: 'Nenhuma pessoa cadastrada',
+        description: 'Cadastre pessoas na plataforma para inclui-las no elenco.',
         action: KicksterButton(
-          label: 'Cadastrar atleta',
+          label: 'Cadastrar pessoa',
           icon: Icons.add,
-          onPressed: () => context.go('/athletes/new'),
+          onPressed: () => context.go('/persons/new'),
         ),
       );
     }
     if (filtered.isEmpty) {
       return const AppEmptyState(
-        message: 'Nenhum atleta encontrado',
+        message: 'Nenhuma pessoa encontrada',
         icon: Icons.search_off,
       );
     }
 
-    final allInRoster = athletes.every((a) => inRosterIds.contains(a.id));
-    final showAllNote = allInRoster && _query.trim().isEmpty;
+    final allInRoster = persons.every((a) => inRosterIds.contains(a.id));
+    final showAllNote = allInRoster && _vm.searchQuery.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -242,7 +223,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text(
-              'Todos os atletas já estão no elenco',
+              'Todas as pessoas ja estao no elenco',
               style: const TextStyle(
                 fontSize: 13,
                 color: AppColors.textSecondary,
@@ -256,13 +237,13 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
               itemCount: filtered.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final athlete = filtered[index];
-                final inRoster = inRosterIds.contains(athlete.id);
-                return _athleteCard(
+                final person = filtered[index];
+                final inRoster = inRosterIds.contains(person.id);
+                return _personCard(
                   context,
-                  athlete,
+                  person,
                   inRoster: inRoster,
-                  entry: inRoster ? entryByAthleteId[athlete.id] : null,
+                  entry: inRoster ? entryByAthleteId[person.id] : null,
                 );
               },
             ),
@@ -272,28 +253,24 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
     );
   }
 
-  Widget _athleteCard(
+  Widget _personCard(
     BuildContext context,
-    Athlete athlete, {
+    dynamic person, {
     required bool inRoster,
-    required RosterEntry? entry,
+    required dynamic entry,
   }) {
-    final rosterNickname = inRoster && entry != null
-        ? (entry.nickname ?? entry.athleteNickname)
-        : null;
-    final displayNickname = rosterNickname ?? athlete.nickname;
-    final displayNumber =
-        inRoster && entry != null ? entry.number : athlete.number;
-    final position = athlete.positionsLabel;
+    final displayNickname = inRoster && entry != null ? entry.nickname : null;
+    final displayNumber = inRoster && entry != null ? entry.number : null;
+    final roleLabel = person.roleLabel;
     final subtitle = [
       if (displayNumber != null) '#$displayNumber',
       if (displayNickname != null && displayNickname.isNotEmpty)
         displayNickname,
-      if (position.isNotEmpty) position,
-    ].join(' · ');
+      if (roleLabel.isNotEmpty) roleLabel,
+    ].join(' ');
 
-    final adding = _vm.addingAthleteIds.contains(athlete.id);
-    final removing = _vm.removingAthleteIds.contains(athlete.id);
+    final adding = _vm.addingAthleteIds.contains(person.id);
+    final removing = _vm.removingAthleteIds.contains(person.id);
 
     return Card(
       elevation: 1,
@@ -309,8 +286,8 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
         child: Row(
           children: [
             KicksterAvatar(
-              name: athlete.name,
-              imageUrl: athlete.photoUrl,
+              name: person.name,
+              imageUrl: person.photoUrl,
               size: 48,
             ),
             const SizedBox(width: 12),
@@ -320,7 +297,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    athlete.name,
+                    person.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -359,10 +336,10 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
                 children: [
                   const _InRosterBadge(),
                   IconButton(
-                    tooltip: 'Remover atleta',
+                    tooltip: 'Remover pessoa',
                     icon: const Icon(Icons.person_remove_outlined),
                     onPressed:
-                        entry == null ? null : () => _removeAthlete(entry),
+                        entry == null ? null : () => _removePerson(entry),
                   ),
                 ],
               )
@@ -370,7 +347,7 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
               KicksterButton(
                 label: 'Incluir',
                 variant: KicksterButtonVariant.outline,
-                onPressed: () => _addAthlete(athlete),
+                onPressed: () => _addPerson(person),
               ),
           ],
         ),
@@ -379,7 +356,6 @@ class _TeamRosterScreenState extends ConsumerState<TeamRosterScreen> {
   }
 }
 
-/// Badge visual de atleta ja inscrito no elenco.
 class _InRosterBadge extends StatelessWidget {
   const _InRosterBadge();
 
@@ -393,13 +369,10 @@ class _InRosterBadge extends StatelessWidget {
   }
 }
 
-/// Dialogo para coletar apelido e numero da camisa ao incluir no elenco.
-///
-/// Retorna um record com os valores preenchidos, ou `null` ao cancelar.
 class _RosterDetailsDialog extends StatefulWidget {
-  const _RosterDetailsDialog({required this.athleteName});
+  const _RosterDetailsDialog({required this.personName});
 
-  final String athleteName;
+  final String personName;
 
   @override
   State<_RosterDetailsDialog> createState() => _RosterDetailsDialogState();
@@ -439,7 +412,7 @@ class _RosterDetailsDialogState extends State<_RosterDetailsDialog> {
     return AlertDialog(
       backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text('Incluir ${widget.athleteName}'),
+      title: Text('Incluir ${widget.personName}'),
       content: Form(
         key: _formKey,
         child: Column(

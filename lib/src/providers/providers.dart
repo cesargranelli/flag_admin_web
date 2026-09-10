@@ -31,6 +31,7 @@ import 'package:flag_admin_web/ui/institution/view_models/institution_edit_view_
 
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/data/services/competition_service.dart';
+import 'package:flag_admin_web/domain/models/enrollment_window.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_list_view_model.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_detail_view_model.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_create_view_model.dart';
@@ -39,7 +40,6 @@ import 'package:flag_admin_web/data/services/competition_team_service.dart';
 import 'package:flag_admin_web/data/services/api_competition_team_service.dart';
 import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_teams_view_model.dart';
-import 'package:flag_admin_web/ui/team/view_models/team_roster_view_model.dart';
 import 'package:flag_admin_web/data/services/round_service.dart';
 import 'package:flag_admin_web/data/services/api_round_service.dart';
 import 'package:flag_admin_web/data/repositories/round_repository.dart';
@@ -50,6 +50,16 @@ import 'package:flag_admin_web/data/services/venue_service.dart';
 import 'package:flag_admin_web/data/services/api_venue_service.dart';
 import 'package:flag_admin_web/data/repositories/venue_repository.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_games_view_model.dart';
+
+import 'package:flag_admin_web/data/services/person_service.dart';
+import 'package:flag_admin_web/data/repositories/person_repository.dart';
+import 'package:flag_admin_web/data/services/roster_service.dart';
+import 'package:flag_admin_web/data/repositories/roster_repository.dart';
+import 'package:flag_admin_web/ui/person/view_models/person_view_model.dart';
+import 'package:flag_admin_web/ui/person/view_models/person_detail_view_model.dart';
+import 'package:flag_admin_web/ui/person/view_models/person_create_view_model.dart';
+import 'package:flag_admin_web/ui/person/view_models/person_edit_view_model.dart';
+import 'package:flag_admin_web/ui/person/view_models/roster_view_model.dart';
 
 import '../router/app_router.dart';
 
@@ -285,6 +295,12 @@ final competitionDetailViewModelProvider =
     repository: ref.watch(competitionRepositoryProvider),
     competitionId: id,
   ),
+);
+
+/// Lista de janelas de inscrição de equipes abertas no momento (para qualquer competição).
+final openEnrollmentWindowsProvider =
+    FutureProvider.autoDispose<List<EnrollmentWindow>>(
+  (ref) => ref.watch(competitionRepositoryProvider).getOpenEnrollmentWindows(),
 );
 
 /// ViewModel dedicada ao CADASTRO de competição (1:1 com CompetitionCreateScreen).
@@ -551,41 +567,88 @@ final gameProvider = FutureProvider.autoDispose.family<Game, String>(
   (ref, id) => ref.watch(gameApiProvider).getById(id),
 );
 
-/// Serviço de atletas.
-final athleteApiProvider = Provider<AthleteApi>(
-  (ref) => AthleteApi(ref.watch(apiClientProvider)),
+/// Servico de pessoas (REST).
+final personServiceProvider = Provider<PersonService>(
+  (ref) => ApiPersonService(ref.watch(apiClientProvider)),
 );
 
-/// Lista de atletas.
-final athletesProvider = FutureProvider<List<Athlete>>(
-  (ref) => ref.watch(athleteApiProvider).list(),
+/// Repositorio de pessoas (Cache TTL 30s).
+final personRepositoryProvider = Provider<PersonRepository>(
+  (ref) => PersonRepository(
+    service: ref.watch(personServiceProvider),
+  ),
 );
 
-/// Detalhe de um atleta por id.
-final athleteProvider = FutureProvider.autoDispose.family<Athlete, String>(
-  (ref, id) => ref.watch(athleteApiProvider).getById(id),
+/// Lista de pessoas (compatibilidade com telas legadas).
+final personsProvider = FutureProvider<List<Person>>(
+  (ref) => ref.watch(personRepositoryProvider).getPersons(),
 );
 
-/// Serviço de elencos.
-final rosterApiProvider = Provider<RosterApi>(
-  (ref) => RosterApi(ref.watch(apiClientProvider)),
+/// Detalhe de uma pessoa por id (compatibilidade com telas legadas).
+final personProvider = FutureProvider.autoDispose.family<Person, String>(
+  (ref, id) => ref.watch(personRepositoryProvider).getPerson(id),
+);
+
+/// ViewModel de listagem de pessoas (ADR-011 / MVVM 1:1).
+final personViewModelProvider =
+    ChangeNotifierProvider<PersonViewModel>(
+  (ref) => PersonViewModel(
+    repository: ref.watch(personRepositoryProvider),
+  ),
+);
+
+/// ViewModel de detalhes de pessoa (ADR-011 / MVVM 1:1).
+final personDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<PersonDetailViewModel, String>(
+  (ref, id) => PersonDetailViewModel(
+    repository: ref.watch(personRepositoryProvider),
+    personId: id,
+  ),
+);
+
+/// ViewModel de cadastro de pessoa (ADR-011 / MVVM 1:1).
+final personCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<PersonCreateViewModel>(
+  (ref) => PersonCreateViewModel(
+    repository: ref.watch(personRepositoryProvider),
+  ),
+);
+
+/// ViewModel de edicao de pessoa (ADR-011 / MVVM 1:1).
+final personEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<PersonEditViewModel, String>(
+  (ref, id) => PersonEditViewModel(
+    repository: ref.watch(personRepositoryProvider),
+    personId: id,
+  ),
+);
+
+/// Serviço de elencos (REST).
+final rosterServiceProvider = Provider<RosterService>(
+  (ref) => ApiRosterService(ref.watch(apiClientProvider)),
+);
+
+/// Repositório de elencos (Cache TTL 30s).
+final rosterRepositoryProvider = Provider<RosterRepository>(
+  (ref) => RosterRepository(
+    service: ref.watch(rosterServiceProvider),
+  ),
 );
 
 /// Time selecionado na tela de elencos.
 final selectedTeamProvider = StateProvider<String?>((ref) => null);
 
-/// Elenco de um time.
+/// Elenco de um time (compatibilidade com telas legadas).
 final rosterProvider = FutureProvider.autoDispose.family<List<RosterEntry>, String>(
-  (ref, teamId) => ref.watch(rosterApiProvider).listByTeam(teamId),
+  (ref, teamId) => ref.watch(rosterRepositoryProvider).getRoster(teamId),
 );
 
-/// ViewModel da tela de Gestao de Elenco (ADR-001 / MVVM).
-///
-/// Usa family por teamId para que cada time tenha sua propria instancia.
-final teamRosterViewModelProvider =
-    ChangeNotifierProvider.autoDispose.family<TeamRosterViewModel, String>(
-  (ref, teamId) => TeamRosterViewModel(
-    rosterApi: ref.read(rosterApiProvider),
+/// ViewModel de elenco (ADR-011 / MVVM 1:1).
+final rosterViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<RosterViewModel, String>(
+  (ref, teamId) => RosterViewModel(
+    rosterRepository: ref.watch(rosterRepositoryProvider),
+    personRepository: ref.watch(personRepositoryProvider),
     teamId: teamId,
   ),
 );

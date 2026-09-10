@@ -3,45 +3,43 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/domain/models/person_batch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../providers/providers.dart';
-
-/// Importação em lote de atletas a partir de um arquivo CSV/TXT.
+/// Importacao em lote de pessoas a partir de um arquivo CSV/TXT.
 ///
 /// Fluxo: selecionar arquivo -> validar (dry-run) -> confirmar -> resultado.
-class AthleteImportScreen extends ConsumerStatefulWidget {
-  const AthleteImportScreen({super.key});
+class PersonImportScreen extends ConsumerStatefulWidget {
+  const PersonImportScreen({super.key});
 
   @override
-  ConsumerState<AthleteImportScreen> createState() =>
-      _AthleteImportScreenState();
+  ConsumerState<PersonImportScreen> createState() =>
+      _PersonImportScreenState();
 }
 
-class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
+class _PersonImportScreenState extends ConsumerState<PersonImportScreen> {
   static const _maxLines = 500;
 
   List<Map<String, dynamic>>? _parsed;
-  AthleteBatchResult? _validation;
-  AthleteBatchResult? _result;
+  PersonBatchResult? _validation;
+  PersonBatchResult? _result;
   bool _validating = false;
   bool _importing = false;
   String? _errorMessage;
 
   void _downloadTemplate() {
-    // Mostra o formato num dialog para o usuário copiar.
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Modelo CSV'),
         content: const Text(
-          'Use o formato abaixo (ponto-e-vírgula, UTF-8):\n\n'
-          'nome;apelido;posicao;numero;foto\n'
-          'Maria Silva;Ma;WR;10;https://...\n\n'
-          'Colunas: nome (obrigatório), apelido, posicao, numero, foto.',
+          'Use o formato abaixo (ponto-e-virgula, UTF-8):\n\n'
+          'nome;cpf;funcao;genero;cidade;foto\n'
+          'Maria Silva;000.000.000-00;athlete;F;Sao Paulo;https://...\n\n'
+          'Colunas: nome (obrigatorio), cpf, funcao (athlete/coach/manager/referee/staff), genero (M/F/O), cidade, foto.',
         ),
         actions: [
           KicksterButton(
@@ -70,29 +68,28 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     final file = result.files.single;
     final bytes = file.bytes;
     if (bytes == null) {
-      setState(() => _errorMessage = 'Não foi possível ler o arquivo.');
+      setState(() => _errorMessage = 'Nao foi possivel ler o arquivo.');
       return;
     }
     final content = utf8.decode(bytes, allowMalformed: true);
     try {
       final parsed = _parseCsv(content);
       if (parsed.isEmpty) {
-        setState(() => _errorMessage = 'Nenhuma linha válida encontrada.');
+        setState(() => _errorMessage = 'Nenhuma linha valida encontrada.');
         return;
       }
       if (parsed.length > _maxLines) {
         setState(
-          () => _errorMessage = 'Máximo de $_maxLines linhas por arquivo.',
+          () => _errorMessage = 'Maximo de $_maxLines linhas por arquivo.',
         );
         return;
       }
       setState(() => _parsed = parsed);
     } catch (_) {
-      setState(() => _errorMessage = 'Arquivo inválido. Verifique o formato.');
+      setState(() => _errorMessage = 'Arquivo invalido. Verifique o formato.');
     }
   }
 
-  /// Faz o parse do CSV, auto-detectando separador (; , ou tab) e cabeçalho.
   List<Map<String, dynamic>> _parseCsv(String content) {
     final lines = content
         .split(RegExp(r'\r?\n'))
@@ -137,15 +134,14 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
       _errorMessage = null;
     });
     try {
-      final result = await ref
-          .read(athleteApiProvider)
-          .validateBatch(_toBatchItems(parsed));
+      final repo = ref.read(personRepositoryProvider);
+      final result = await repo.validateBatch(_toBatchItems(parsed));
       if (mounted) setState(() => _validation = result);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _errorMessage = 'Não foi possível validar o arquivo.');
+        setState(() => _errorMessage = 'Nao foi possivel validar o arquivo.');
       }
     } finally {
       if (mounted) setState(() => _validating = false);
@@ -156,39 +152,13 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     return rows.map((r) {
       return {
         if (r['nome'] != null) 'name': r['nome'],
-        if (r['apelido'] != null) 'nickname': r['apelido'],
-        if (r['posicao'] != null) 'positions': _positionCodes(r['posicao']),
-        if (r['numero'] != null && int.tryParse(r['numero']) != null)
-          'number': int.parse(r['numero']),
+        if (r['cpf'] != null) 'cpf': r['cpf'],
+        if (r['funcao'] != null) 'role': r['funcao'],
+        if (r['genero'] != null) 'gender': r['genero'],
+        if (r['cidade'] != null) 'city': r['cidade'],
         if (r['foto'] != null) 'photoUrl': r['foto'],
       };
     }).toList();
-  }
-
-  /// Converte o campo "posicao" (pode ter várias posições separadas por
-  /// `,`/`;`/`/`) em uma lista de códigos, com limite de 3 e sem duplicatas.
-  List<String> _positionCodes(String? label) {
-    if (label == null || label.trim().isEmpty) return const [];
-    final codes = <String>[];
-    for (final part in label.split(RegExp(r'[,;/]'))) {
-      final code = _positionCode(part.trim());
-      if (code != null && !codes.contains(code)) {
-        codes.add(code);
-        if (codes.length >= 3) break;
-      }
-    }
-    return codes;
-  }
-
-  String? _positionCode(String? label) {
-    if (label == null || label.isEmpty) return null;
-    for (final p in AthletePosition.values) {
-      if (p.label.toLowerCase() == label.toLowerCase() ||
-          p.name == label.toLowerCase()) {
-        return p.toJson();
-      }
-    }
-    return null;
   }
 
   Future<void> _import() async {
@@ -199,16 +169,15 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
       _errorMessage = null;
     });
     try {
-      final result = await ref
-          .read(athleteApiProvider)
-          .createBatch(_toBatchItems(parsed));
-      ref.invalidate(athletesProvider);
+      final repo = ref.read(personRepositoryProvider);
+      final result = await repo.createBatch(_toBatchItems(parsed));
+      ref.invalidate(personsProvider);
       if (mounted) setState(() => _result = result);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _errorMessage = 'Não foi possível importar os atletas.');
+        setState(() => _errorMessage = 'Nao foi possivel importar as pessoas.');
       }
     } finally {
       if (mounted) setState(() => _importing = false);
@@ -221,10 +190,10 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     final validation = _validation;
 
     return AppScreen(
-      title: 'Importar atletas',
+      title: 'Importar pessoas',
       breadcrumb: const [
         BreadcrumbItem(AppStrings.home, route: '/'),
-        BreadcrumbItem(AppStrings.athletes, route: '/athletes'),
+        BreadcrumbItem('Pessoas', route: '/persons'),
         BreadcrumbItem('Importar'),
       ],
       body: AppLayout.form(
@@ -233,7 +202,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
           children: [
             if (result == null) ...[
               Text(
-                'Importe vários atletas de uma vez a partir de um arquivo CSV/TXT.',
+                'Importe varias pessoas de uma vez a partir de um arquivo CSV/TXT.',
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary,
@@ -255,7 +224,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
               const SizedBox(height: 16),
               if (_parsed != null) ...[
                 Text(
-                  '${_parsed!.length} ${_parsed!.length == 1 ? 'linha' : 'linhas'} lidas. Clique em validar para pré-visualizar.',
+                  '${_parsed!.length} ${_parsed!.length == 1 ? 'linha' : 'linhas'} lidas. Clique em validar para pre-visualizar.',
                   style: const TextStyle(fontSize: 13),
                 ),
                 const SizedBox(height: 12),
@@ -263,7 +232,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
                   const Center(child: CircularProgressIndicator())
                 else if (validation == null)
                   KicksterButton(
-                    label: 'Validar e pré-visualizar',
+                    label: 'Validar e pre-visualizar',
                     onPressed: _validate,
                   ),
               ],
@@ -276,7 +245,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
                 KicksterButton(
                   label:
                       'Importar ${validation.valid} '
-                      '${validation.valid == 1 ? 'atleta' : 'atletas'}',
+                      '${validation.valid == 1 ? 'pessoa' : 'pessoas'}',
                   onPressed: validation.valid == 0
                       ? null
                       : (_importing ? null : _import),
@@ -290,7 +259,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
               const SizedBox(height: 24),
               KicksterButton(
                 label: 'Concluir',
-                onPressed: () => context.go('/athletes'),
+                onPressed: () => context.go('/persons'),
                 icon: Icons.check,
               ),
             ],
@@ -307,17 +276,17 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     );
   }
 
-  Widget _validationSummary(AthleteBatchResult validation) {
+  Widget _validationSummary(PersonBatchResult validation) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         KicksterBadge(
-          label: '${validation.valid} válidos',
+          label: '${validation.valid} validos',
           color: AppColors.success,
         ),
         KicksterBadge(
-          label: '${validation.invalid} inválidos',
+          label: '${validation.invalid} invalidos',
           color: AppColors.danger,
         ),
         KicksterBadge(
@@ -328,7 +297,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     );
   }
 
-  Widget _resultSummary(AthleteBatchResult result) {
+  Widget _resultSummary(PersonBatchResult result) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -345,7 +314,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     );
   }
 
-  Widget _validationTable(AthleteBatchResult validation) {
+  Widget _validationTable(PersonBatchResult validation) {
     final validLines = validation.lines
         .where((l) => l.status == 'VALID')
         .toList();
@@ -353,13 +322,13 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Pré-visualização (linhas válidas)',
+          'Pre-visualizacao (linhas validas)',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         if (validLines.isEmpty)
           const Text(
-            'Nenhuma linha válida',
+            'Nenhuma linha valida',
             style: TextStyle(color: AppColors.textSecondary),
           )
         else
@@ -375,7 +344,7 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
     );
   }
 
-  Widget _resultTable(AthleteBatchResult result) {
+  Widget _resultTable(PersonBatchResult result) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -399,8 +368,8 @@ class _AthleteImportScreenState extends ConsumerState<AthleteImportScreen> {
 
   String _statusLabel(String status) => switch (status) {
     'IMPORTED' => 'Importado',
-    'VALID' => 'Válido',
-    'INVALID' => 'Inválido',
+    'VALID' => 'Valido',
+    'INVALID' => 'Invalido',
     'DUPLICATE' => 'Duplicado',
     _ => status,
   };

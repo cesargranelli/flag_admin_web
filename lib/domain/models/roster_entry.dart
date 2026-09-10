@@ -1,17 +1,13 @@
-import '../enums/athlete_position.dart';
+import 'package:flag_admin_web/src/domain/enums/athlete_position.dart';
 
 /// Entrada do elenco de um time.
 ///
 /// Shape de `GET /api/v1/teams/{teamId}/roster`.
 class RosterEntry {
   final String id;
-
-  /// Id do roster (elenco) ao qual esta entrada pertence.
   final String rosterId;
-
   final String athleteId;
   final String athleteName;
-  final String? athleteNickname;
   final String? nickname;
   final AthletePosition? position;
   final int? number;
@@ -25,7 +21,6 @@ class RosterEntry {
     required this.athleteId,
     required this.athleteName,
     required this.status,
-    this.athleteNickname,
     this.nickname,
     this.position,
     this.number,
@@ -38,7 +33,6 @@ class RosterEntry {
         rosterId: json['rosterId'] as String,
         athleteId: json['athleteId'] as String,
         athleteName: json['athleteName'] as String,
-        athleteNickname: json['athleteNickname'] as String?,
         nickname: json['nickname'] as String?,
         position: json['position'] is String
             ? AthletePosition.fromJson(json['position'] as String)

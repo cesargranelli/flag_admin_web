@@ -45,16 +45,6 @@ class HomeViewModel extends ChangeNotifier {
         route: '/competitions',
       ),
       const HomeModuleItem(
-        icon: Icons.groups_outlined,
-        title: AppStrings.rosters,
-        route: '/rosters',
-      ),
-      const HomeModuleItem(
-        icon: Icons.person_outline,
-        title: AppStrings.athletes,
-        route: '/athletes',
-      ),
-      const HomeModuleItem(
         icon: Icons.stadium_outlined,
         title: AppStrings.venues,
         route: '/venues',

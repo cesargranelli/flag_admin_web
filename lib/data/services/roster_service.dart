@@ -1,18 +1,41 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/domain/models/roster_entry.dart';
+import 'package:flag_admin_web/domain/models/roster_batch.dart';
 
-import '../api_client.dart';
+/// Serviço REST de elencos (roster) de times (camada Services - ADR-001).
+abstract class RosterService {
+  factory RosterService(ApiClient client) = ApiRosterService;
 
-/// Serviço REST de elencos (roster) de times.
-class RosterApi {
+  Future<List<RosterEntry>> listByTeam(String teamId);
+  Future<void> add({
+    required String teamId,
+    required String athleteId,
+    String? nickname,
+    int? number,
+  });
+  Future<void> remove({
+    required String teamId,
+    required String athleteId,
+  });
+  Future<RosterBatchResult> createBatch(
+    String teamId,
+    List<Map<String, dynamic>> athletes,
+  );
+}
+
+/// Implementação padrão consumindo [ApiClient].
+class ApiRosterService implements RosterService {
   final ApiClient _client;
 
-  RosterApi(this._client);
+  ApiRosterService(this._client);
 
+  @override
   Future<List<RosterEntry>> listByTeam(String teamId) => _client.getList(
         '/api/v1/teams/$teamId/roster',
         RosterEntry.fromJson,
       );
 
+  @override
   Future<void> add({
     required String teamId,
     required String athleteId,
@@ -29,13 +52,14 @@ class RosterApi {
         (json) => json,
       );
 
+  @override
   Future<void> remove({
     required String teamId,
     required String athleteId,
   }) =>
       _client.delete('/api/v1/teams/$teamId/roster/$athleteId');
 
-  /// Importa uma carga em lote de atletas no time (idempotente).
+  @override
   Future<RosterBatchResult> createBatch(
     String teamId,
     List<Map<String, dynamic>> athletes,

@@ -3,18 +3,13 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/domain/models/roster_batch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../providers/providers.dart';
-
-/// Importação em lote de atletas para o elenco de um time (CSV/TXT).
-///
-/// O time vem do contexto da tela (teamId). O CSV referencia atletas por nome;
-/// a resolução nome -> id acontece aqui, tratando homônimos sem resolução
-/// silenciosa.
+/// Importacao em lote de pessoas para o elenco de um time (CSV/TXT).
 class RosterImportScreen extends ConsumerStatefulWidget {
   const RosterImportScreen({super.key, this.teamId});
 
@@ -27,8 +22,8 @@ class RosterImportScreen extends ConsumerStatefulWidget {
 class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   static const _maxLines = 500;
 
-  List<String>? _atletaNames;
-  Map<String, String>? _resolved; // nome -> athleteId
+  List<String>? _personNames;
+  Map<String, String>? _resolved;
   RosterBatchResult? _result;
   bool _importing = false;
   String? _errorMessage;
@@ -39,12 +34,12 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Modelo CSV'),
         content: const Text(
-          'Use o formato abaixo (ponto-e-vírgula, UTF-8):\n\n'
-          'atleta;status\n'
+          'Use o formato abaixo (ponto-e-virgula, UTF-8):\n\n'
+          'pessoa;status\n'
           'Maria Silva;ativo\n'
-          'João Souza;\n\n'
-          'Coluna "atleta" (obrigatória) é o nome cadastrado. '
-          'Coluna "status" (opcional) é ativo ou inativo.',
+          'Joao Souza;\n\n'
+          'Coluna "pessoa" (obrigatoria) e o nome cadastrado. '
+          'Coluna "status" (opcional) e ativo ou inativo.',
         ),
         actions: [
           KicksterButton(
@@ -59,7 +54,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
 
   Future<void> _pickFile() async {
     setState(() {
-      _atletaNames = null;
+      _personNames = null;
       _resolved = null;
       _result = null;
       _errorMessage = null;
@@ -73,26 +68,26 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     final file = result.files.single;
     final bytes = file.bytes;
     if (bytes == null) {
-      setState(() => _errorMessage = 'Não foi possível ler o arquivo.');
+      setState(() => _errorMessage = 'Nao foi possivel ler o arquivo.');
       return;
     }
     final content = utf8.decode(bytes, allowMalformed: true);
     try {
       final names = _parseCsv(content);
       if (names.isEmpty) {
-        setState(() => _errorMessage = 'Nenhuma linha válida encontrada.');
+        setState(() => _errorMessage = 'Nenhuma linha valida encontrada.');
         return;
       }
       if (names.length > _maxLines) {
         setState(
-          () => _errorMessage = 'Máximo de $_maxLines linhas por arquivo.',
+          () => _errorMessage = 'Maximo de $_maxLines linhas por arquivo.',
         );
         return;
       }
-      setState(() => _atletaNames = names);
-      _resolveAthletes(names);
+      setState(() => _personNames = names);
+      _resolvePersons(names);
     } catch (_) {
-      setState(() => _errorMessage = 'Arquivo inválido. Verifique o formato.');
+      setState(() => _errorMessage = 'Arquivo invalido. Verifique o formato.');
     }
   }
 
@@ -105,7 +100,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     if (lines.isEmpty) return const [];
     final delimiter = _detectDelimiter(lines.first);
     final headers = _splitLine(lines.first, delimiter);
-    final nameIndex = headers.indexOf('atleta');
+    final nameIndex = headers.indexOf('pessoa');
 
     final names = <String>[];
     for (var i = 1; i < lines.length; i++) {
@@ -127,20 +122,19 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   List<String> _splitLine(String line, String delimiter) =>
       line.split(delimiter).map((s) => s.trim()).toList();
 
-  Future<void> _resolveAthletes(List<String> names) async {
+  Future<void> _resolvePersons(List<String> names) async {
     setState(() => _errorMessage = null);
-    final athletes = await ref.read(athletesProvider.future);
+    final persons = await ref.read(personsProvider.future);
     if (!mounted) return;
 
     final resolved = <String, String>{};
     for (final name in names) {
-      final matches = athletes
-          .where((a) => a.name.trim().toLowerCase() == name.toLowerCase())
+      final matches = persons
+          .where((p) => p.name.trim().toLowerCase() == name.toLowerCase())
           .toList();
       if (matches.length == 1) {
         resolved[name] = matches.first.id;
       }
-      // Homônimos: deixa sem resolução -> linha bloqueada na pré-visualização.
     }
     if (mounted) setState(() => _resolved = resolved);
   }
@@ -150,7 +144,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     if (teamId == null || teamId.isEmpty) return;
 
     final resolved = _resolved;
-    final names = _atletaNames;
+    final names = _personNames;
     if (resolved == null || names == null) return;
 
     final items = <Map<String, dynamic>>[];
@@ -163,16 +157,15 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
       _errorMessage = null;
     });
     try {
-      final result = await ref
-          .read(rosterApiProvider)
-          .createBatch(teamId, items);
+      final repo = ref.read(rosterRepositoryProvider);
+      final result = await repo.createBatch(teamId, items);
       ref.invalidate(rosterProvider(teamId));
       if (mounted) setState(() => _result = result);
     } on RepositoryException catch (e) {
       if (mounted) setState(() => _errorMessage = e.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _errorMessage = 'Não foi possível importar o elenco.');
+        setState(() => _errorMessage = 'Nao foi possivel importar o elenco.');
       }
     } finally {
       if (mounted) setState(() => _importing = false);
@@ -182,12 +175,10 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   @override
   Widget build(BuildContext context) {
     final teamId = widget.teamId;
-    final names = _atletaNames;
+    final names = _personNames;
     final resolved = _resolved;
     final result = _result;
 
-    // Deep-link direto para /rosters/import sem contexto de time: mostra
-    // estado vazio em vez de chamar a API com ID vazio (#457).
     if (teamId == null || teamId.isEmpty) {
       return AppScreen(
         title: 'Importar elenco',
@@ -199,9 +190,9 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
         body: AppLayout.form(
           child: KicksterEmptyState(
             icon: Icons.groups_outlined,
-            message: 'Time não identificado',
+            message: 'Time nao identificado',
             description:
-                'Selecione um time no módulo Elencos para importar atletas.',
+                'Selecione um time no modulo Elencos para importar pessoas.',
             action: KicksterButton(
               label: 'Ir para Elencos',
               icon: Icons.arrow_back,
@@ -225,7 +216,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
           children: [
             if (result == null) ...[
               Text(
-                'Importe vários atletas para o elenco do time a partir de um arquivo CSV/TXT.',
+                'Importe varias pessoas para o elenco do time a partir de um arquivo CSV/TXT.',
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary,
@@ -247,7 +238,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
               const SizedBox(height: 16),
               if (names != null && resolved != null) ...[
                 Text(
-                  '${names.length} ${names.length == 1 ? 'atleta' : 'atletas'} lidos.',
+                  '${names.length} ${names.length == 1 ? 'pessoa' : 'pessoas'} lidos.',
                   style: const TextStyle(fontSize: 13),
                 ),
                 const SizedBox(height: 8),
@@ -256,7 +247,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
                 KicksterButton(
                   label:
                       'Importar ${resolved.values.length} '
-                      '${resolved.values.length == 1 ? 'atleta' : 'atletas'}',
+                      '${resolved.values.length == 1 ? 'pessoa' : 'pessoas'}',
                   onPressed: (resolved.values.isEmpty || _importing)
                       ? null
                       : _import,
@@ -302,14 +293,14 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
               color: AppColors.success,
             ),
             KicksterBadge(
-              label: '${blocked.length} ambíguos/não encontrados',
+              label: '${blocked.length} ambiguos/nao encontrados',
               color: AppColors.warning,
             ),
           ],
         ),
         const SizedBox(height: 8),
         const Text(
-          'Pré-visualização',
+          'Pre-visualizacao',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 4),
@@ -319,7 +310,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
             child: Text(
               resolved.containsKey(name)
                   ? '✓ $name'
-                  : '! $name (atleta não encontrado ou ambíguo)',
+                  : '! $name (pessoa nao encontrada ou ambigua)',
               style: const TextStyle(fontSize: 13),
             ),
           ),
@@ -369,7 +360,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   String _statusLabel(String status) => switch (status) {
     'IMPORTED' => 'Importado',
     'SKIPPED' => 'Ignorado',
-    'INVALID' => 'Inválido',
+    'INVALID' => 'Invalido',
     _ => status,
   };
 }

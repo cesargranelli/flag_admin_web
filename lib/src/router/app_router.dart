@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/admin_shell.dart';
-import '../features/athletes/presentation/screens/athlete_detail_screen.dart';
-import '../features/athletes/presentation/screens/athlete_form_screen.dart';
-import '../features/athletes/presentation/screens/athlete_import_screen.dart';
-import '../features/athletes/presentation/screens/athletes_screen.dart';
 import '../features/approvals/presentation/screens/approvals_screen.dart';
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
 import 'package:flag_admin_web/ui/auth/widgets/forgot_password_screen.dart';
@@ -30,12 +26,10 @@ import 'package:flag_admin_web/ui/organization/widgets/organization_create_scree
 import 'package:flag_admin_web/ui/organization/widgets/organization_edit_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_affiliates_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
-import '../features/rosters/presentation/screens/roster_import_screen.dart';
 import '../features/rosters/presentation/screens/rosters_screen.dart';
 import '../features/rounds/presentation/screens/round_detail_screen.dart';
 import '../features/rounds/presentation/screens/round_form_screen.dart';
 import '../features/rounds/presentation/screens/rounds_screen.dart';
-import 'package:flag_admin_web/ui/team/widgets/team_roster_screen.dart';
 import '../features/users/presentation/screens/user_form_screen.dart';
 import '../features/users/presentation/screens/users_screen.dart';
 import '../features/venues/presentation/screens/venue_detail_screen.dart';
@@ -45,6 +39,13 @@ import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.
 import 'package:flag_admin_web/ui/institution/widgets/institution_create_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_edit_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_list_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_list_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_detail_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_create_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_edit_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_import_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/roster_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/roster_import_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -460,47 +461,47 @@ class AppRouter {
                 ),
               ],
             ),
-            // Branch Atletas.
+            // Branch Pessoas.
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/athletes',
-                  name: 'athletes',
-                  builder: (context, state) => const AthletesScreen(),
+                  path: '/persons',
+                  name: 'persons',
+                  builder: (context, state) => const PersonListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
-                      name: 'athleteNew',
-                      builder: (context, state) => const AthleteFormScreen(),
+                      name: 'personNew',
+                      builder: (context, state) => const PersonCreateScreen(),
                     ),
                     GoRoute(
                       path: 'import',
-                      name: 'athleteImport',
-                      builder: (context, state) => const AthleteImportScreen(),
+                      name: 'personImport',
+                       builder: (context, state) => const PersonImportScreen(),
                     ),
                     GoRoute(
                       path: ':id',
-                      name: 'athleteDetail',
+                      name: 'personDetail',
                       builder: (context, state) {
-                        final athlete = state.extra is Athlete
-                            ? state.extra as Athlete
+                        final person = state.extra is Person
+                            ? state.extra as Person
                             : null;
-                        return AthleteDetailScreen(
-                          athleteId: state.pathParameters['id'],
-                          athlete: athlete,
+                        return PersonDetailScreen(
+                          personId: state.pathParameters['id'],
+                          person: person,
                         );
                       },
                       routes: [
                         GoRoute(
                           path: 'edit',
-                          name: 'athleteEdit',
+                          name: 'personEdit',
                           builder: (context, state) {
-                            final athlete = state.extra is Athlete
-                                ? state.extra as Athlete
+                            final person = state.extra is Person
+                                ? state.extra as Person
                                 : null;
-                            return AthleteFormScreen(
-                              athleteId: state.pathParameters['id'],
-                              athlete: athlete,
+                            return PersonEditScreen(
+                              personId: state.pathParameters['id'],
+                              person: person,
                             );
                           },
                         ),
@@ -535,7 +536,7 @@ class AppRouter {
                   builder: (context, state) {
                     final team =
                         state.extra is Team ? state.extra as Team : null;
-                    return TeamRosterScreen(
+                    return RosterScreen(
                       teamId: state.pathParameters['id'] ?? '',
                       team: team,
                     );

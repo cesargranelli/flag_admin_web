@@ -359,7 +359,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Inscrições de Equipes',
+                          'Equipes Inscritas',
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 13,
