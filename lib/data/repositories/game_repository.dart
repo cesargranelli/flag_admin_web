@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/data/services/game_service.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
+import 'package:flag_admin_web/src/domain/models/game_batch.dart';
 
 /// Repositório de Jogos (ADR-001 - Cache TTL 30s).
 class GameRepository {
@@ -84,5 +85,17 @@ class GameRepository {
   void clearCache(String competitionId) {
     _cacheByComp.remove(competitionId);
     _lastFetchByComp.remove(competitionId);
+  }
+
+  /// Importação em lote de jogos.
+  Future<GameBatchResult> createBatch(
+    String roundId,
+    List<Map<String, dynamic>> items,
+  ) async {
+    final result = await _service.createBatch(roundId, items);
+    // Invalida cache de todas as competições (não sabemos qual afetou)
+    _cacheByComp.clear();
+    _lastFetchByComp.clear();
+    return result;
   }
 }

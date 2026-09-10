@@ -1,4 +1,5 @@
 import 'package:flag_admin_web/domain/models/competition.dart';
+import 'package:flag_admin_web/domain/models/enrollment_window.dart';
 import '../services/competition_service.dart';
 
 /// Repository de competições (camada Repositories - ADR-001).
@@ -69,6 +70,31 @@ class CompetitionRepository {
   Future<void> reactivateCompetition(String id) async {
     await _service.reactivateCompetition(id);
     clearCache();
+  }
+
+  /// Retorna a janela de inscrição de uma competição.
+  Future<EnrollmentWindow> getEnrollmentWindow(String competitionId) =>
+      _service.getEnrollmentWindow(competitionId);
+
+  /// Retorna todas as janelas de inscrição abertas no momento.
+  Future<List<EnrollmentWindow>> getOpenEnrollmentWindows() =>
+      _service.getOpenEnrollmentWindows();
+
+  /// Abre ou atualiza a janela de inscrição de uma competição.
+  Future<EnrollmentWindow> openEnrollmentWindow(
+    String competitionId,
+    Map<String, dynamic> body,
+  ) async {
+    final res = await _service.openEnrollmentWindow(competitionId, body);
+    clearCache();
+    return res;
+  }
+
+  /// Encerra a janela de inscrição de uma competição.
+  Future<EnrollmentWindow> closeEnrollmentWindow(String competitionId) async {
+    final res = await _service.closeEnrollmentWindow(competitionId);
+    clearCache();
+    return res;
   }
 
   /// Invalida o cache em memória.

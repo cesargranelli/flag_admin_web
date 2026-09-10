@@ -1444,11 +1444,24 @@ class _InstitutionDetailScreenState
                     ),
                     const SizedBox(height: 16),
 
-                    // Lista de competições disponíveis
+                    // Lista de competições disponíveis (apenas com janela de inscrição aberta)
                     FutureBuilder<List<Competition>>(
-                      future: ref
-                          .read(competitionRepositoryProvider)
-                          .getCompetitions(),
+                      future: Future<List<Competition>>.delayed(Duration.zero, () async {
+                        final openWindows = await ref
+                            .read(competitionRepositoryProvider)
+                            .getOpenEnrollmentWindows();
+                        final openCompetitionIds = openWindows
+                            .where((w) => w.isOpen)
+                            .map((w) => w.competitionId)
+                            .toSet();
+                        if (openCompetitionIds.isEmpty) return <Competition>[];
+                        final allCompetitions = await ref
+                            .read(competitionRepositoryProvider)
+                            .getCompetitions();
+                        return allCompetitions
+                            .where((c) => openCompetitionIds.contains(c.id))
+                            .toList();
+                      }),
                       builder: (ctx, snap) {
                         if (snap.connectionState == ConnectionState.waiting) {
                           return const Padding(
@@ -1492,7 +1505,7 @@ class _InstitutionDetailScreenState
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
                             child: Text(
-                              'Nenhuma competição disponível no momento.',
+                              'Nenhuma competição com inscrições abertas no momento.',
                               style: TextStyle(
                                   fontSize: 14,
                                   color: AppColors.textSecondary),

@@ -13,4 +13,34 @@ class ApiVenueService implements VenueService {
 
   @override
   Future<Venue> getById(String id) => _api.getById(id);
+
+  @override
+  Future<Venue> create({
+    required String organizationId,
+    required String name,
+    String? address,
+    String? mapsUrl,
+  }) =>
+      _api.create(
+        organizationId: organizationId,
+        name: name,
+        address: address,
+        mapsUrl: mapsUrl,
+      );
+
+  @override
+  Future<Venue> update(
+    String id, {
+    required String organizationId,
+    required String name,
+    String? address,
+    String? mapsUrl,
+  }) =>
+      _api.update(
+        id,
+        organizationId: organizationId,
+        name: name,
+        address: address,
+        mapsUrl: mapsUrl,
+      );
 }

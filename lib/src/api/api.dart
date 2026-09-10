@@ -12,7 +12,6 @@ export 'models/live_game_response.dart';
 export 'models/play_response.dart';
 
 // Services
-export 'services/athlete_api.dart';
 export 'services/auth_api.dart';
 export 'services/category_api.dart';
 export 'services/check_in_api.dart';
@@ -20,7 +19,6 @@ export 'services/competition_api.dart';
 export 'services/conference_api.dart';
 export 'services/division_api.dart';
 export 'services/game_api.dart';
-export 'services/roster_api.dart';
 export 'services/round_api.dart';
 export 'services/standing_api.dart';
 export 'services/team_api.dart';

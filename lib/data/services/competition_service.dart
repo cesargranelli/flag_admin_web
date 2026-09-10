@@ -1,5 +1,6 @@
 import 'package:flag_admin_web/src/api/api_client.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
+import 'package:flag_admin_web/domain/models/enrollment_window.dart';
 
 /// Serviço REST de competições (camada Services - ADR-001).
 abstract class CompetitionService {
@@ -11,6 +12,10 @@ abstract class CompetitionService {
   Future<Competition> updateCompetition(String id, Map<String, dynamic> body);
   Future<void> deactivateCompetition(String id);
   Future<void> reactivateCompetition(String id);
+  Future<EnrollmentWindow> getEnrollmentWindow(String competitionId);
+  Future<List<EnrollmentWindow>> getOpenEnrollmentWindows();
+  Future<EnrollmentWindow> openEnrollmentWindow(String competitionId, Map<String, dynamic> body);
+  Future<EnrollmentWindow> closeEnrollmentWindow(String competitionId);
 }
 
 /// Implementação padrão consumindo [ApiClient].
@@ -46,4 +51,37 @@ class ApiCompetitionService implements CompetitionService {
   Future<void> reactivateCompetition(String id) =>
       _client.post('/api/v1/competitions/$id/reactivate', <String, dynamic>{},
           (json) => json);
+
+  @override
+  Future<EnrollmentWindow> getEnrollmentWindow(String competitionId) =>
+      _client.getOne(
+        '/api/v1/competitions/$competitionId/enrollment-windows',
+        EnrollmentWindow.fromJson,
+      );
+
+  @override
+  Future<List<EnrollmentWindow>> getOpenEnrollmentWindows() =>
+      _client.getList(
+        '/api/v1/enrollment-windows/open',
+        EnrollmentWindow.fromJson,
+      );
+
+  @override
+  Future<EnrollmentWindow> openEnrollmentWindow(
+    String competitionId,
+    Map<String, dynamic> body,
+  ) =>
+      _client.post(
+        '/api/v1/competitions/$competitionId/enrollment-windows',
+        body,
+        EnrollmentWindow.fromJson,
+      );
+
+  @override
+  Future<EnrollmentWindow> closeEnrollmentWindow(String competitionId) =>
+      _client.post(
+        '/api/v1/competitions/$competitionId/enrollment-windows/close',
+        <String, dynamic>{},
+        EnrollmentWindow.fromJson,
+      );
 }

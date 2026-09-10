@@ -25,4 +25,40 @@ class VenueRepository {
     _lastFetch = DateTime.now();
     return _cached!;
   }
+
+  Future<Venue> createVenue({
+    required String organizationId,
+    required String name,
+    String? address,
+    String? mapsUrl,
+  }) async {
+    final created = await _service.create(
+      organizationId: organizationId,
+      name: name,
+      address: address,
+      mapsUrl: mapsUrl,
+    );
+    _cached = null;
+    _lastFetch = null;
+    return created;
+  }
+
+  Future<Venue> updateVenue(
+    String id, {
+    required String organizationId,
+    required String name,
+    String? address,
+    String? mapsUrl,
+  }) async {
+    final updated = await _service.update(
+      id,
+      organizationId: organizationId,
+      name: name,
+      address: address,
+      mapsUrl: mapsUrl,
+    );
+    _cached = null;
+    _lastFetch = null;
+    return updated;
+  }
 }

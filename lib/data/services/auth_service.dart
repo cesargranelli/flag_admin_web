@@ -51,6 +51,11 @@ abstract class AuthService {
   Future<List<User>> listPendingUsers();
   Future<User> approveUser(String id);
   Future<User> rejectUser(String id);
+  Future<User> createUser({
+    required String name,
+    required String email,
+    required String role,
+  });
 }
 
 /// Implementação padrão integrando Firebase Auth SDK e API REST (backend).
@@ -189,6 +194,19 @@ class ApiAuthService implements AuthService {
   @override
   Future<User> rejectUser(String id) {
     return _client.post('/api/v1/auth/users//reject', {}, User.fromJson);
+  }
+
+  @override
+  Future<User> createUser({
+    required String name,
+    required String email,
+    required String role,
+  }) {
+    return _client.post(
+      '/api/v1/auth/users',
+      {'name': name, 'email': email, 'role': role},
+      User.fromJson,
+    );
   }
 
   /// Mapeamento de erros do Firebase Auth para português amigável.

@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/admin_shell.dart';
-import '../features/athletes/presentation/screens/athlete_detail_screen.dart';
-import '../features/athletes/presentation/screens/athlete_form_screen.dart';
-import '../features/athletes/presentation/screens/athlete_import_screen.dart';
-import '../features/athletes/presentation/screens/athletes_screen.dart';
 import '../features/approvals/presentation/screens/approvals_screen.dart';
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
 import 'package:flag_admin_web/ui/auth/widgets/forgot_password_screen.dart';
@@ -20,31 +16,39 @@ import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.
 import 'package:flag_admin_web/ui/competition/widgets/competition_teams_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_games_screen.dart';
 import '../features/competitions/presentation/screens/groupings_screen.dart';
-import '../features/games/presentation/screens/game_detail_screen.dart';
-import '../features/games/presentation/screens/game_form_screen.dart';
-import '../features/games/presentation/screens/game_import_screen.dart';
-import '../features/games/presentation/screens/games_screen.dart';
+import 'package:flag_admin_web/ui/game/widgets/game_detail_screen.dart';
+import 'package:flag_admin_web/ui/game/widgets/game_create_screen.dart';
+import 'package:flag_admin_web/ui/game/widgets/game_edit_screen.dart';
+import 'package:flag_admin_web/ui/game/widgets/game_import_screen.dart';
+import 'package:flag_admin_web/ui/game/widgets/game_list_screen.dart';
 import 'package:flag_admin_web/ui/home/widgets/home_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_edit_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_affiliates_screen.dart';
 import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
-import '../features/rosters/presentation/screens/roster_import_screen.dart';
 import '../features/rosters/presentation/screens/rosters_screen.dart';
-import '../features/rounds/presentation/screens/round_detail_screen.dart';
-import '../features/rounds/presentation/screens/round_form_screen.dart';
-import '../features/rounds/presentation/screens/rounds_screen.dart';
-import 'package:flag_admin_web/ui/team/widgets/team_roster_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_detail_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_create_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_edit_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_list_screen.dart';
 import '../features/users/presentation/screens/user_form_screen.dart';
 import '../features/users/presentation/screens/users_screen.dart';
-import '../features/venues/presentation/screens/venue_detail_screen.dart';
-import '../features/venues/presentation/screens/venue_form_screen.dart';
-import '../features/venues/presentation/screens/venues_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_detail_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_create_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_edit_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_list_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_create_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_edit_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_list_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_list_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_detail_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_create_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_edit_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_import_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/roster_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/roster_import_screen.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -323,12 +327,12 @@ class AppRouter {
                 GoRoute(
                   path: '/rounds',
                   name: 'rounds',
-                  builder: (context, state) => const RoundsScreen(),
+                  builder: (context, state) => const RoundListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
                       name: 'roundNew',
-                      builder: (context, state) => RoundFormScreen(
+                      builder: (context, state) => RoundCreateScreen(
                         competitionId: state.extra is String
                             ? state.extra as String
                             : null,
@@ -354,8 +358,8 @@ class AppRouter {
                             final round = state.extra is Round
                                 ? state.extra as Round
                                 : null;
-                            return RoundFormScreen(
-                              roundId: state.pathParameters['id'],
+                            return RoundEditScreen(
+                              roundId: state.pathParameters['id']!,
                               round: round,
                             );
                           },
@@ -367,14 +371,14 @@ class AppRouter {
                 GoRoute(
                   path: '/games',
                   name: 'games',
-                  builder: (context, state) => const GamesScreen(),
+                  builder: (context, state) => const GameListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
                       name: 'gameNew',
-                      builder: (context, state) => GameFormScreen(
-                        args: state.extra is GameFormArgs
-                            ? state.extra as GameFormArgs
+                      builder: (context, state) => GameCreateScreen(
+                        args: state.extra is GameCreateArgs
+                            ? state.extra as GameCreateArgs
                             : null,
                       ),
                     ),
@@ -403,9 +407,10 @@ class AppRouter {
                         GoRoute(
                           path: 'edit',
                           name: 'gameEdit',
-                          builder: (context, state) => GameFormScreen(
-                            args: state.extra is GameFormArgs
-                                ? state.extra as GameFormArgs
+                          builder: (context, state) => GameEditScreen(
+                            gameId: state.pathParameters['id']!,
+                            args: state.extra is GameEditArgs
+                                ? state.extra as GameEditArgs
                                 : null,
                           ),
                         ),
@@ -421,12 +426,12 @@ class AppRouter {
                 GoRoute(
                   path: '/venues',
                   name: 'venues',
-                  builder: (context, state) => const VenuesScreen(),
+                  builder: (context, state) => const VenueListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
                       name: 'venueNew',
-                      builder: (context, state) => const VenueFormScreen(),
+                      builder: (context, state) => const VenueCreateScreen(),
                     ),
                     GoRoute(
                       path: ':id',
@@ -448,8 +453,8 @@ class AppRouter {
                             final venue = state.extra is Venue
                                 ? state.extra as Venue
                                 : null;
-                            return VenueFormScreen(
-                              venueId: state.pathParameters['id'],
+                            return VenueEditScreen(
+                              venueId: state.pathParameters['id']!,
                               venue: venue,
                             );
                           },
@@ -460,47 +465,47 @@ class AppRouter {
                 ),
               ],
             ),
-            // Branch Atletas.
+            // Branch Pessoas.
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/athletes',
-                  name: 'athletes',
-                  builder: (context, state) => const AthletesScreen(),
+                  path: '/persons',
+                  name: 'persons',
+                  builder: (context, state) => const PersonListScreen(),
                   routes: [
                     GoRoute(
                       path: 'new',
-                      name: 'athleteNew',
-                      builder: (context, state) => const AthleteFormScreen(),
+                      name: 'personNew',
+                      builder: (context, state) => const PersonCreateScreen(),
                     ),
                     GoRoute(
                       path: 'import',
-                      name: 'athleteImport',
-                      builder: (context, state) => const AthleteImportScreen(),
+                      name: 'personImport',
+                       builder: (context, state) => const PersonImportScreen(),
                     ),
                     GoRoute(
                       path: ':id',
-                      name: 'athleteDetail',
+                      name: 'personDetail',
                       builder: (context, state) {
-                        final athlete = state.extra is Athlete
-                            ? state.extra as Athlete
+                        final person = state.extra is Person
+                            ? state.extra as Person
                             : null;
-                        return AthleteDetailScreen(
-                          athleteId: state.pathParameters['id'],
-                          athlete: athlete,
+                        return PersonDetailScreen(
+                          personId: state.pathParameters['id'],
+                          person: person,
                         );
                       },
                       routes: [
                         GoRoute(
                           path: 'edit',
-                          name: 'athleteEdit',
+                          name: 'personEdit',
                           builder: (context, state) {
-                            final athlete = state.extra is Athlete
-                                ? state.extra as Athlete
+                            final person = state.extra is Person
+                                ? state.extra as Person
                                 : null;
-                            return AthleteFormScreen(
-                              athleteId: state.pathParameters['id'],
-                              athlete: athlete,
+                            return PersonEditScreen(
+                              personId: state.pathParameters['id'],
+                              person: person,
                             );
                           },
                         ),
@@ -535,7 +540,7 @@ class AppRouter {
                   builder: (context, state) {
                     final team =
                         state.extra is Team ? state.extra as Team : null;
-                    return TeamRosterScreen(
+                    return RosterScreen(
                       teamId: state.pathParameters['id'] ?? '',
                       team: team,
                     );
