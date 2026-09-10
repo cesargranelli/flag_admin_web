@@ -18,6 +18,7 @@ import 'package:flag_admin_web/ui/round/view_models/round_detail_view_model.dart
 import 'package:flag_admin_web/ui/round/view_models/round_edit_view_model.dart';
 import 'package:flag_admin_web/ui/round/view_models/round_list_view_model.dart';
 import 'package:flag_admin_web/ui/approval/view_models/approval_list_view_model.dart';
+import 'package:flag_admin_web/ui/competition/view_models/competition_games_view_model.dart';
 import 'package:flag_admin_web/ui/user/view_models/user_create_view_model.dart';
 import 'package:flag_admin_web/ui/user/view_models/user_list_view_model.dart';
 import 'package:flag_admin_web/ui/venue/view_models/venue_create_view_model.dart';
@@ -397,6 +398,20 @@ final competitionTeamsViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<CompetitionTeamsViewModel, CompetitionTeamsParam>(
   (ref, param) => CompetitionTeamsViewModel(
     repository: ref.watch(competitionTeamRepositoryProvider),
+    competitionId: param.competitionId,
+    competition: param.competition,
+  ),
+);
+
+/// ViewModel de tabelamento de jogos da competição.
+final competitionGamesViewModelProvider = ChangeNotifierProvider.autoDispose
+    .family<CompetitionGamesViewModel, CompetitionGamesParam>(
+  (ref, param) => CompetitionGamesViewModel(
+    gameRepo: ref.watch(gameRepositoryProvider),
+    roundRepo: ref.watch(roundRepositoryProvider),
+    teamRepo: ref.watch(competitionTeamRepositoryProvider),
+    venueRepo: ref.watch(venueRepositoryProvider),
+    client: ref.watch(apiClientProvider),
     competitionId: param.competitionId,
     competition: param.competition,
   ),
