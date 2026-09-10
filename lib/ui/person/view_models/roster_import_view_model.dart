@@ -32,10 +32,6 @@ class RosterImportViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  void _showTemplate() {
-    // This is called from the screen, not needed in VM
-  }
-
   Future<void> pickFile() async {
     // File picking is done in the screen, then parseCsv is called
   }
@@ -50,7 +46,6 @@ class RosterImportViewModel extends ChangeNotifier {
     final delimiter = _detectDelimiter(lines.first);
     final headers = _splitLine(lines.first, delimiter);
     final nameIdx = headers.indexOf('pessoa');
-    final statusIdx = headers.indexOf('status');
 
     final names = <String>[];
     for (var i = 1; i < lines.length; i++) {
