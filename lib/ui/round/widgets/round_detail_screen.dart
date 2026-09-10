@@ -1,58 +1,83 @@
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/domain/competition_permissions.dart';
+import 'package:flag_admin_web/ui/round/view_models/round_detail_view_model.dart'
+    as vm;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../features/auth/domain/competition_permissions.dart';
-import '../../../../providers/providers.dart';
-
 /// Detalhe de uma rodada: apresenta os dados e oferece a edição.
-class RoundDetailScreen extends ConsumerWidget {
+class RoundDetailScreen extends ConsumerStatefulWidget {
   const RoundDetailScreen({super.key, this.roundId, this.round});
 
   final String? roundId;
   final Round? round;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final roundFuture = round != null ? null : ref.watch(roundProvider(roundId!));
+  ConsumerState<RoundDetailScreen> createState() => _RoundDetailScreenState();
+}
 
+class _RoundDetailScreenState extends ConsumerState<RoundDetailScreen> {
+  late vm.RoundDetailViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = vm.RoundDetailViewModel(
+      repository: ref.watch(roundRepositoryProvider),
+    );
+    if (widget.roundId != null) {
+      _viewModel.load(widget.roundId!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AppScreen(
-      title: round?.name ?? 'Rodada',
+      title: widget.round?.name ?? 'Rodada',
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.rounds, route: '/rounds'),
-        if (round?.name != null) BreadcrumbItem(round!.name),
+        if (widget.round?.name != null) BreadcrumbItem(widget.round!.name),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Conteúdo
-          roundFuture == null
-              ? _buildDetail(context, ref, round!)
-              : roundFuture.when(
-                  loading: () =>
-                      const AppLoading(message: 'Carregando rodada...'),
-                  error: (error, stackTrace) => AppErrorState(
-                    message: 'Não foi possível carregar a rodada',
-                    onRetry: () => ref.invalidate(roundProvider(roundId!)),
-                  ),
-                  data: (round) => _buildDetail(context, ref, round),
-                ),
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, _) {
+              if (_viewModel.isLoading) {
+                return const AppLoading(message: 'Carregando rodada...');
+              }
+
+              if (_viewModel.errorMessage != null) {
+                return AppErrorState(
+                  message: _viewModel.errorMessage!,
+                  onRetry: () => _viewModel.load(widget.roundId!),
+                );
+              }
+
+              final round = _viewModel.round;
+              if (round == null) {
+                return const AppErrorState(
+                  message: 'Rodada não encontrada',
+                );
+              }
+
+              return _buildDetail(context, round);
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDetail(BuildContext context, WidgetRef ref, Round round) {
-    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
-    // assistir a lista completa.
+  Widget _buildDetail(BuildContext context, Round round) {
     final compAsync = ref.watch(competitionProvider(round.competitionId));
     final competitionName = compAsync.valueOrNull?.name ?? '';
-    // Issue #261: edição da rodada exige ser criador da competição ou ADMIN.
-    // Issue #305: e a competição precisa estar em DRAFT (estrutura travada
-    // após a publicação).
     final competition = compAsync.valueOrNull;
     final isDraft = competition?.status == CompetitionStatus.draft;
     final canEdit = canEditCompetition(

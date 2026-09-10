@@ -1,26 +1,36 @@
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/domain/competition_permissions.dart';
+import 'package:flag_admin_web/ui/game/view_models/game_list_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../features/auth/domain/competition_permissions.dart';
-import '../../../../providers/providers.dart';
 
 /// Gestão de jogos: lista por rodada e acesso ao detalhe.
 ///
 /// O fluxo agora é: competição → divisão → rodada → jogo.
 /// As categories foram removidas; a associação competition→round
 /// ocorre diretamente pela competition_id (migração V24).
-class GamesScreen extends ConsumerStatefulWidget {
-  const GamesScreen({super.key});
+class GameListScreen extends ConsumerStatefulWidget {
+  const GameListScreen({super.key});
 
   @override
-  ConsumerState<GamesScreen> createState() => _GamesScreenState();
+  ConsumerState<GameListScreen> createState() => _GameListScreenState();
 }
 
-class _GamesScreenState extends ConsumerState<GamesScreen> {
+class _GameListScreenState extends ConsumerState<GameListScreen> {
   final _searchController = TextEditingController();
+  late GameListViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = ref.read(gameListViewModelProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.load(forceRefresh: true);
+    });
+  }
 
   @override
   void dispose() {
@@ -34,20 +44,14 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
     final selectedRound = ref.watch(selectedRoundProvider);
 
     final compItems = competitions.valueOrNull ?? const [];
-    // P4 #461: competição efetiva = selecionada ?? primeira da lista.
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
-    // Rodadas da competição efetiva + rodada "efetiva" (B1 #457): quando
-    // nenhuma rodada foi selecionada, usa a primeira — a lista de jogos
-    // aparece sem depender de um clique no dropdown.
     final roundsAsync = effectiveComp != null
         ? ref.watch(roundsProvider(effectiveComp))
         : null;
     final roundItems = roundsAsync?.valueOrNull ?? const <Round>[];
     final effectiveRound = selectedRound ?? roundItems.firstOrNull?.id;
 
-    // Issue #261: criação/edição de jogos (incluída a importação CSV)
-    // exige ser criador da competição ou ADMIN.
     final selectedCompetitionObj = compItems
         .where((c) => c.id == effectiveComp)
         .firstOrNull;
@@ -94,7 +98,6 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                     extra: (
                       competitionId: effectiveComp,
                       roundId: effectiveRound,
-                      game: null,
                     ),
                   ),
                 ),
@@ -150,6 +153,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                 .state = value;
                             ref.read(selectedRoundProvider.notifier).state =
                                 null;
+                            _viewModel.setSelectedCompetition(value);
                           },
                         ),
                         const SizedBox(height: 12),
@@ -179,11 +183,14 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                             ),
                                           )
                                           .toList(),
-                                      onChanged: (value) => ref
-                                          .read(
-                                            selectedRoundProvider.notifier,
-                                          )
-                                          .state = value,
+                                      onChanged: (value) {
+                                        ref
+                                            .read(
+                                              selectedRoundProvider.notifier,
+                                            )
+                                            .state = value;
+                                        _viewModel.setSelectedRound(value);
+                                      },
                                     ),
                               )
                             : const LinearProgressIndicator(),
@@ -228,7 +235,6 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                             extra: (
                                               competitionId: effectiveComp,
                                               roundId: effectiveRound,
-                                              game: null,
                                             ),
                                           ),
                                         ),

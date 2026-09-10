@@ -3,11 +3,27 @@ import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
+import 'package:flag_admin_web/data/repositories/user_repository.dart';
 import 'package:flag_admin_web/data/services/auth_service.dart';
 import 'package:flag_admin_web/ui/auth/view_models/forgot_password_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/login_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/signup_view_model.dart';
+import 'package:flag_admin_web/ui/game/view_models/game_create_view_model.dart';
+import 'package:flag_admin_web/ui/game/view_models/game_detail_view_model.dart';
+import 'package:flag_admin_web/ui/game/view_models/game_edit_view_model.dart';
+import 'package:flag_admin_web/ui/game/view_models/game_list_view_model.dart';
 import 'package:flag_admin_web/ui/home/view_models/home_view_model.dart';
+import 'package:flag_admin_web/ui/round/view_models/round_create_view_model.dart';
+import 'package:flag_admin_web/ui/round/view_models/round_detail_view_model.dart';
+import 'package:flag_admin_web/ui/round/view_models/round_edit_view_model.dart';
+import 'package:flag_admin_web/ui/round/view_models/round_list_view_model.dart';
+import 'package:flag_admin_web/ui/approval/view_models/approval_list_view_model.dart';
+import 'package:flag_admin_web/ui/user/view_models/user_create_view_model.dart';
+import 'package:flag_admin_web/ui/user/view_models/user_list_view_model.dart';
+import 'package:flag_admin_web/ui/venue/view_models/venue_create_view_model.dart';
+import 'package:flag_admin_web/ui/venue/view_models/venue_detail_view_model.dart';
+import 'package:flag_admin_web/ui/venue/view_models/venue_edit_view_model.dart';
+import 'package:flag_admin_web/ui/venue/view_models/venue_list_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -49,7 +65,6 @@ import 'package:flag_admin_web/data/repositories/game_repository.dart';
 import 'package:flag_admin_web/data/services/venue_service.dart';
 import 'package:flag_admin_web/data/services/api_venue_service.dart';
 import 'package:flag_admin_web/data/repositories/venue_repository.dart';
-import 'package:flag_admin_web/ui/competition/view_models/competition_games_view_model.dart';
 
 import 'package:flag_admin_web/data/services/person_service.dart';
 import 'package:flag_admin_web/data/repositories/person_repository.dart';
@@ -60,6 +75,7 @@ import 'package:flag_admin_web/ui/person/view_models/person_detail_view_model.da
 import 'package:flag_admin_web/ui/person/view_models/person_create_view_model.dart';
 import 'package:flag_admin_web/ui/person/view_models/person_edit_view_model.dart';
 import 'package:flag_admin_web/ui/person/view_models/roster_view_model.dart';
+import 'package:flag_admin_web/ui/person/view_models/roster_import_view_model.dart';
 
 import '../router/app_router.dart';
 
@@ -87,6 +103,29 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     session: ref.watch(sessionManagerProvider),
   );
 });
+
+/// Repositório de Usuários (ADR-001 - Cache TTL 30s).
+final userRepositoryProvider = Provider<UserRepository>(
+  (ref) => UserRepository(
+    service: ref.watch(authServiceProvider),
+  ),
+);
+
+/// ViewModel para a listagem de Usuários (ADR-011 / MVVM).
+final userListViewModelProvider =
+    ChangeNotifierProvider.autoDispose<UserListViewModel>(
+  (ref) => UserListViewModel(
+    repository: ref.watch(userRepositoryProvider),
+  ),
+);
+
+/// ViewModel para a criação de um novo Usuário (ADR-011 / MVVM).
+final userCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<UserCreateViewModel>(
+  (ref) => UserCreateViewModel(
+    repository: ref.watch(userRepositoryProvider),
+  ),
+);
 
 /// Instância do Firebase Storage.
 final firebaseStorageProvider = Provider<FirebaseStorage>(
@@ -375,6 +414,38 @@ final roundRepositoryProvider = Provider<RoundRepository>(
   ),
 );
 
+/// ViewModel para a listagem de Rodadas (ADR-011 / MVVM).
+final roundListViewModelProvider =
+    ChangeNotifierProvider.autoDispose<RoundListViewModel>(
+  (ref) => RoundListViewModel(
+    repository: ref.watch(roundRepositoryProvider),
+  ),
+);
+
+/// ViewModel para o detalhe de uma Rodada (ADR-011 / MVVM).
+final roundDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<RoundDetailViewModel, String>(
+  (ref, roundId) => RoundDetailViewModel(
+    repository: ref.watch(roundRepositoryProvider),
+  ),
+);
+
+/// ViewModel para a criação de uma nova Rodada (ADR-011 / MVVM).
+final roundCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<RoundCreateViewModel>(
+  (ref) => RoundCreateViewModel(
+    repository: ref.watch(roundRepositoryProvider),
+  ),
+);
+
+/// ViewModel para a edição de uma Rodada existente (ADR-011 / MVVM).
+final roundEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<RoundEditViewModel, String>(
+  (ref, roundId) => RoundEditViewModel(
+    repository: ref.watch(roundRepositoryProvider),
+  ),
+);
+
 /// Serviço de jogos (REST).
 final gameServiceProvider = Provider<GameService>(
   (ref) => ApiGameService(ref.watch(apiClientProvider)),
@@ -399,6 +470,38 @@ final venueRepositoryProvider = Provider<VenueRepository>(
   ),
 );
 
+/// ViewModel para a listagem de Venues (ADR-011 / MVVM).
+final venueListViewModelProvider =
+    ChangeNotifierProvider.autoDispose<VenueListViewModel>(
+  (ref) => VenueListViewModel(
+    repository: ref.watch(venueRepositoryProvider),
+  ),
+);
+
+/// ViewModel para o detalhe de um Venue (ADR-011 / MVVM).
+final venueDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<VenueDetailViewModel, String>(
+  (ref, venueId) => VenueDetailViewModel(
+    repository: ref.watch(venueRepositoryProvider),
+  ),
+);
+
+/// ViewModel para a criação de um novo Venue (ADR-011 / MVVM).
+final venueCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<VenueCreateViewModel>(
+  (ref) => VenueCreateViewModel(
+    repository: ref.watch(venueRepositoryProvider),
+  ),
+);
+
+/// ViewModel para a edição de um Venue existente (ADR-011 / MVVM).
+final venueEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<VenueEditViewModel, String>(
+  (ref, venueId) => VenueEditViewModel(
+    repository: ref.watch(venueRepositoryProvider),
+  ),
+);
+
 /// Parâmetro para o ViewModel de jogos da competição
 class CompetitionGamesParam {
   final String competitionId;
@@ -420,21 +523,37 @@ class CompetitionGamesParam {
   int get hashCode => competitionId.hashCode;
 }
 
-/// ViewModel de jogos/tabelamento de uma competição.
-final competitionGamesViewModelProvider = ChangeNotifierProvider.autoDispose
-    .family<CompetitionGamesViewModel, CompetitionGamesParam>(
-  (ref, param) => CompetitionGamesViewModel(
-    gameRepo: ref.watch(gameRepositoryProvider),
-    roundRepo: ref.watch(roundRepositoryProvider),
-    teamRepo: ref.watch(competitionTeamRepositoryProvider),
-    venueRepo: ref.watch(venueRepositoryProvider),
-    client: ref.watch(apiClientProvider),
-    competitionId: param.competitionId,
-    competition: param.competition,
+/// ViewModel para a listagem de Jogos (ADR-011 / MVVM).
+final gameListViewModelProvider =
+    ChangeNotifierProvider.autoDispose<GameListViewModel>(
+  (ref) => GameListViewModel(
+    repository: ref.watch(gameRepositoryProvider),
   ),
 );
 
+/// ViewModel para o detalhe de um Jogo (ADR-011 / MVVM).
+final gameDetailViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<GameDetailViewModel, String>(
+  (ref, gameId) => GameDetailViewModel(
+    repository: ref.watch(gameRepositoryProvider),
+  ),
+);
 
+/// ViewModel para a criação de um novo Jogo (ADR-011 / MVVM).
+final gameCreateViewModelProvider =
+    ChangeNotifierProvider.autoDispose<GameCreateViewModel>(
+  (ref) => GameCreateViewModel(
+    repository: ref.watch(gameRepositoryProvider),
+  ),
+);
+
+/// ViewModel para a edição de um Jogo existente (ADR-011 / MVVM).
+final gameEditViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<GameEditViewModel, String>(
+  (ref, gameId) => GameEditViewModel(
+    repository: ref.watch(gameRepositoryProvider),
+  ),
+);
 
 /// Listagem de organizações da tela de gestão.
 ///
@@ -653,6 +772,16 @@ final rosterViewModelProvider =
   ),
 );
 
+/// ViewModel para a importação de elenco (ADR-011 / MVVM).
+final rosterImportViewModelProvider =
+    ChangeNotifierProvider.autoDispose.family<RosterImportViewModel, String>(
+  (ref, teamId) => RosterImportViewModel(
+    rosterRepository: ref.watch(rosterRepositoryProvider),
+    personRepository: ref.watch(personRepositoryProvider),
+    teamId: teamId,
+  ),
+);
+
 /// Lista de usuários (somente ADMIN).
 final usersProvider = FutureProvider<List<User>>(
   (ref) => ref.watch(authApiProvider).listUsers(),
@@ -661,6 +790,14 @@ final usersProvider = FutureProvider<List<User>>(
 /// Contas pendentes de aprovação (somente ADMIN).
 final pendingUsersProvider = FutureProvider<List<User>>(
   (ref) => ref.watch(authApiProvider).listPendingUsers(),
+);
+
+/// ViewModel para a listagem de aprovações (ADR-011 / MVVM).
+final approvalListViewModelProvider =
+    ChangeNotifierProvider.autoDispose<ApprovalListViewModel>(
+  (ref) => ApprovalListViewModel(
+    repository: ref.watch(authRepositoryProvider),
+  ),
 );
 
 /// Serviço de campos de jogo.

@@ -1,4 +1,5 @@
 import 'package:flag_admin_web/domain/models/game.dart';
+import 'package:flag_admin_web/src/domain/models/game_batch.dart';
 
 abstract class GameService {
   Future<List<Game>> listByCompetition(String competitionId);
@@ -20,4 +21,8 @@ abstract class GameService {
     required DateTime scheduledAt,
   });
   Future<Game> updateStatus(String id, GameStatus status);
+  Future<GameBatchResult> createBatch(
+    String roundId,
+    List<Map<String, dynamic>> items,
+  );
 }

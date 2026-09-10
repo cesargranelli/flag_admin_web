@@ -28,11 +28,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
     super.initState();
     final teamId = widget.team?.id ?? widget.teamId;
     if (teamId != null) {
-      _vm = RosterViewModel(
-        rosterRepository: ref.read(rosterRepositoryProvider),
-        personRepository: ref.read(personRepositoryProvider),
-        teamId: teamId,
-      );
+      _vm = ref.read(rosterViewModelProvider(teamId));
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _vm.load(forceRefresh: true);
       });

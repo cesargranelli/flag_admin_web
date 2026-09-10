@@ -4,11 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../providers/providers.dart';
 
 typedef GameImportArgs = ({String roundId, String? competitionId});
 
@@ -18,11 +17,7 @@ typedef GameImportArgs = ({String roundId, String? competitionId});
 /// por nome; a resolução nome -> id acontece aqui, tratando homônimos sem
 /// resolução silenciosa.
 class GameImportScreen extends ConsumerStatefulWidget {
-  const GameImportScreen({
-    super.key,
-    this.roundId,
-    this.competitionId,
-  });
+  const GameImportScreen({super.key, this.roundId, this.competitionId});
 
   /// Rodada de contexto; `null` quando a rota é aberta sem extra (deep-link)
   /// — nesse caso a tela mostra um estado vazio em vez de chamar a API (B5).

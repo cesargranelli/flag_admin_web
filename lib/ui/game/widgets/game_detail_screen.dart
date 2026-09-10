@@ -1,58 +1,85 @@
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/domain/competition_permissions.dart';
+import 'package:flag_admin_web/ui/game/view_models/game_detail_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../features/auth/domain/competition_permissions.dart';
-import '../../../../providers/providers.dart';
-
 /// Detalhe de um jogo: confronto, placar, status e informações.
-class GameDetailScreen extends ConsumerWidget {
+class GameDetailScreen extends ConsumerStatefulWidget {
   const GameDetailScreen({super.key, this.gameId, this.game});
 
   final String? gameId;
   final Game? game;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final gameFuture = game != null ? null : ref.watch(gameProvider(gameId!));
+  ConsumerState<GameDetailScreen> createState() => _GameDetailScreenState();
+}
 
+class _GameDetailScreenState extends ConsumerState<GameDetailScreen> {
+  late GameDetailViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = GameDetailViewModel(
+      repository: ref.watch(gameRepositoryProvider),
+    );
+    if (widget.gameId != null) {
+      _viewModel.load(widget.gameId!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AppScreen(
-      title: game?.homeTeamName ?? 'Jogo',
+      title: widget.game?.homeTeamName ?? 'Jogo',
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.games, route: '/games'),
-        if (game?.homeTeamName != null) BreadcrumbItem(game!.homeTeamName!),
+        if (widget.game?.homeTeamName != null)
+          BreadcrumbItem(widget.game!.homeTeamName!),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Conteúdo
-          gameFuture == null
-              ? _buildDetail(context, ref, game!)
-              : gameFuture.when(
-                  loading: () =>
-                      const AppLoading(message: 'Carregando jogo...'),
-                  error: (error, stackTrace) => AppErrorState(
-                    message: 'Não foi possível carregar o jogo',
-                    onRetry: () => ref.invalidate(gameProvider(gameId!)),
-                  ),
-                  data: (game) => _buildDetail(context, ref, game),
-                ),
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, _) {
+              if (_viewModel.isLoading) {
+                return const AppLoading(message: 'Carregando jogo...');
+              }
+
+              if (_viewModel.errorMessage != null) {
+                return AppErrorState(
+                  message: _viewModel.errorMessage!,
+                  onRetry: () => _viewModel.load(widget.gameId!),
+                );
+              }
+
+              final game = _viewModel.game;
+              if (game == null) {
+                return const AppErrorState(
+                  message: 'Jogo não encontrado',
+                );
+              }
+
+              return _buildDetail(context, game);
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDetail(BuildContext context, WidgetRef ref, Game game) {
-    // P3 #471: resolve a competição pelo family (autoDispose) em vez de
-    // assistir a lista completa — rebuild só quando ESTA competição muda.
+  Widget _buildDetail(BuildContext context, Game game) {
     final compAsync = game.competitionId != null
         ? ref.watch(competitionProvider(game.competitionId!))
         : null;
     final competitionName = compAsync?.valueOrNull?.name ?? '';
-    // Issue #261: edição do jogo exige ser criador da competição ou ADMIN.
     final competition = compAsync?.valueOrNull;
     final canEdit = canEditCompetition(
       ref.watch(authControllerProvider.select((a) => a.state.user)),
@@ -96,7 +123,7 @@ class GameDetailScreen extends ConsumerWidget {
                         'Placar: ${game.homeScore ?? 0} x ${game.awayScore ?? 0}',
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
+                      ),
                     const SizedBox(height: 16),
                     if (canEdit)
                       KicksterButton(

@@ -1,26 +1,36 @@
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/domain/competition_permissions.dart';
+import 'package:flag_admin_web/ui/round/view_models/round_list_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../features/auth/domain/competition_permissions.dart';
-import '../../../../providers/providers.dart';
 
 /// Gestão de rodadas: lista por competição e acesso ao detalhe.
 ///
 /// O fluxo agora é: competição → rodadas.
 /// As categories foram removidas; as rodadas associam-se diretamente
 /// ao competition_id (migração V24).
-class RoundsScreen extends ConsumerStatefulWidget {
-  const RoundsScreen({super.key});
+class RoundListScreen extends ConsumerStatefulWidget {
+  const RoundListScreen({super.key});
 
   @override
-  ConsumerState<RoundsScreen> createState() => _RoundsScreenState();
+  ConsumerState<RoundListScreen> createState() => _RoundListScreenState();
 }
 
-class _RoundsScreenState extends ConsumerState<RoundsScreen> {
+class _RoundListScreenState extends ConsumerState<RoundListScreen> {
   final _searchController = TextEditingController();
+  late RoundListViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = ref.read(roundListViewModelProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.load(forceRefresh: true);
+    });
+  }
 
   @override
   void dispose() {
@@ -33,13 +43,8 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
     final competitions = ref.watch(competitionsProvider);
 
     final compItems = competitions.valueOrNull ?? const [];
-    // P4 #461: competição efetiva = selecionada ?? primeira da lista.
     final effectiveComp = ref.watch(effectiveCompetitionProvider);
 
-    // Issue #261: criação/edição de rodadas exige ser criador da
-    // competição ou ADMIN (o backend já bloqueia as escritas).
-    // Issue #305: e apenas com a competição em DRAFT — publicado/encerrado
-    // tem a estrutura travada (somente leitura).
     final selectedCompetitionObj = compItems
         .where((c) => c.id == effectiveComp)
         .firstOrNull;
@@ -120,8 +125,7 @@ class _RoundsScreenState extends ConsumerState<RoundsScreen> {
                             ref
                                 .read(selectedCompetitionProvider.notifier)
                                 .state = value;
-                            ref.read(selectedRoundProvider.notifier).state =
-                                null;
+                            _viewModel.setSelectedCompetition(value);
                           },
                         ),
                         if (!canManage)

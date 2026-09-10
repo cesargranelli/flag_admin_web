@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_admin_web/src/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/ui/person/view_models/roster_import_view_model.dart';
 import 'package:flag_admin_web/domain/models/roster_batch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,13 +20,16 @@ class RosterImportScreen extends ConsumerStatefulWidget {
 }
 
 class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
-  static const _maxLines = 500;
+  late RosterImportViewModel _vm;
 
-  List<String>? _personNames;
-  Map<String, String>? _resolved;
-  RosterBatchResult? _result;
-  bool _importing = false;
-  String? _errorMessage;
+  @override
+  void initState() {
+    super.initState();
+    final teamId = widget.teamId;
+    if (teamId != null) {
+      _vm = ref.read(rosterImportViewModelProvider(teamId));
+    }
+  }
 
   void _showTemplate() {
     showDialog(
@@ -53,12 +56,6 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   }
 
   Future<void> _pickFile() async {
-    setState(() {
-      _personNames = null;
-      _resolved = null;
-      _result = null;
-      _errorMessage = null;
-    });
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv', 'txt'],
@@ -68,116 +65,21 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     final file = result.files.single;
     final bytes = file.bytes;
     if (bytes == null) {
-      setState(() => _errorMessage = 'Nao foi possivel ler o arquivo.');
+      _vm.setError('Não foi possível ler o arquivo.');
       return;
     }
     final content = utf8.decode(bytes, allowMalformed: true);
-    try {
-      final names = _parseCsv(content);
-      if (names.isEmpty) {
-        setState(() => _errorMessage = 'Nenhuma linha valida encontrada.');
-        return;
-      }
-      if (names.length > _maxLines) {
-        setState(
-          () => _errorMessage = 'Maximo de $_maxLines linhas por arquivo.',
-        );
-        return;
-      }
-      setState(() => _personNames = names);
-      _resolvePersons(names);
-    } catch (_) {
-      setState(() => _errorMessage = 'Arquivo invalido. Verifique o formato.');
-    }
-  }
-
-  List<String> _parseCsv(String content) {
-    final lines = content
-        .split(RegExp(r'\r?\n'))
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
-        .toList();
-    if (lines.isEmpty) return const [];
-    final delimiter = _detectDelimiter(lines.first);
-    final headers = _splitLine(lines.first, delimiter);
-    final nameIndex = headers.indexOf('pessoa');
-
-    final names = <String>[];
-    for (var i = 1; i < lines.length; i++) {
-      final values = _splitLine(lines[i], delimiter);
-      if (nameIndex >= 0 && nameIndex < values.length) {
-        final name = values[nameIndex].trim();
-        if (name.isNotEmpty) names.add(name);
-      }
-    }
-    return names;
-  }
-
-  String _detectDelimiter(String line) {
-    if (line.contains(';')) return ';';
-    if (line.contains(',')) return ',';
-    return '\t';
-  }
-
-  List<String> _splitLine(String line, String delimiter) =>
-      line.split(delimiter).map((s) => s.trim()).toList();
-
-  Future<void> _resolvePersons(List<String> names) async {
-    setState(() => _errorMessage = null);
-    final persons = await ref.read(personsProvider.future);
-    if (!mounted) return;
-
-    final resolved = <String, String>{};
-    for (final name in names) {
-      final matches = persons
-          .where((p) => p.name.trim().toLowerCase() == name.toLowerCase())
-          .toList();
-      if (matches.length == 1) {
-        resolved[name] = matches.first.id;
-      }
-    }
-    if (mounted) setState(() => _resolved = resolved);
-  }
-
-  Future<void> _import() async {
-    final teamId = widget.teamId;
-    if (teamId == null || teamId.isEmpty) return;
-
-    final resolved = _resolved;
-    final names = _personNames;
-    if (resolved == null || names == null) return;
-
-    final items = <Map<String, dynamic>>[];
-    for (final name in names) {
-      final id = resolved[name];
-      if (id != null) items.add({'athleteId': id});
-    }
-    setState(() {
-      _importing = true;
-      _errorMessage = null;
-    });
-    try {
-      final repo = ref.read(rosterRepositoryProvider);
-      final result = await repo.createBatch(teamId, items);
-      ref.invalidate(rosterProvider(teamId));
-      if (mounted) setState(() => _result = result);
-    } on RepositoryException catch (e) {
-      if (mounted) setState(() => _errorMessage = e.message);
-    } catch (_) {
-      if (mounted) {
-        setState(() => _errorMessage = 'Nao foi possivel importar o elenco.');
-      }
-    } finally {
-      if (mounted) setState(() => _importing = false);
+    final success = await _vm.parseCsv(content);
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_vm.errorMessage ?? 'Erro ao processar arquivo')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final teamId = widget.teamId;
-    final names = _personNames;
-    final resolved = _resolved;
-    final result = _result;
 
     if (teamId == null || teamId.isEmpty) {
       return AppScreen(
@@ -189,10 +91,10 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
         ],
         body: AppLayout.form(
           child: KicksterEmptyState(
-            icon: Icons.groups_outlined,
-            message: 'Time nao identificado',
+            icon: Icons.sports,
+            message: 'Time não identificado',
             description:
-                'Selecione um time no modulo Elencos para importar pessoas.',
+                'Selecione um time no módulo Elencos para importar pessoas.',
             action: KicksterButton(
               label: 'Ir para Elencos',
               icon: Icons.arrow_back,
@@ -211,111 +113,86 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
         BreadcrumbItem('Importar'),
       ],
       body: AppLayout.form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (result == null) ...[
-              Text(
-                'Importe varias pessoas para o elenco do time a partir de um arquivo CSV/TXT.',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              KicksterButton(
-                label: 'Ver modelo CSV',
-                onPressed: _showTemplate,
-                variant: KicksterButtonVariant.outline,
-                icon: Icons.download_outlined,
-              ),
-              const SizedBox(height: 12),
-              KicksterButton(
-                label: 'Selecionar arquivo',
-                onPressed: _pickFile,
-                icon: Icons.upload_file,
-              ),
-              const SizedBox(height: 16),
-              if (names != null && resolved != null) ...[
-                Text(
-                  '${names.length} ${names.length == 1 ? 'pessoa' : 'pessoas'} lidos.',
-                  style: const TextStyle(fontSize: 13),
-                ),
-                const SizedBox(height: 8),
-                _preview(resolved, names),
-                const SizedBox(height: 16),
-                KicksterButton(
-                  label:
-                      'Importar ${resolved.values.length} '
-                      '${resolved.values.length == 1 ? 'pessoa' : 'pessoas'}',
-                  onPressed: (resolved.values.isEmpty || _importing)
-                      ? null
-                      : _import,
-                  loading: _importing,
-                ),
+        child: ListenableBuilder(
+          listenable: _vm,
+          builder: (context, _) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_vm.result == null) ...[
+                  Text(
+                    'Importe várias pessoas para o elenco a partir de um arquivo CSV/TXT.',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  KicksterButton(
+                    label: 'Ver modelo CSV',
+                    onPressed: _showTemplate,
+                    variant: KicksterButtonVariant.outline,
+                    icon: Icons.download_outlined,
+                  ),
+                  const SizedBox(height: 12),
+                  KicksterButton(
+                    label: 'Selecionar arquivo',
+                    onPressed: _pickFile,
+                    icon: Icons.upload_file,
+                  ),
+                  const SizedBox(height: 16),
+                  if (_vm.personNames != null) ...[
+                    Text(
+                      '${_vm.personNames!.length} ${_vm.personNames!.length == 1 ? 'pessoa' : 'pessoas'} lidas.',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_vm.resolved != null) ...[
+                      Text(
+                        '${_vm.resolved!.length} ${_vm.resolved!.length == 1 ? 'pessoa' : 'pessoas'} resolvidas.',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    KicksterButton(
+                      label: 'Importar',
+                      onPressed: _vm.isImporting ? null : _import,
+                      loading: _vm.isImporting,
+                    ),
+                  ],
+                ] else ...[
+                  _resultSummary(_vm.result!),
+                  const SizedBox(height: 16),
+                  _resultTable(_vm.result!),
+                  const SizedBox(height: 24),
+                  KicksterButton(
+                    label: 'Concluir',
+                    onPressed: () => context.go('/rosters'),
+                    icon: Icons.check,
+                  ),
+                ],
+                if (_vm.errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _vm.errorMessage!,
+                    style: const TextStyle(color: AppColors.danger),
+                  ),
+                ],
               ],
-            ] else ...[
-              _resultSummary(result),
-              const SizedBox(height: 16),
-              _resultTable(result),
-              const SizedBox(height: 24),
-              KicksterButton(
-                label: 'Concluir',
-                onPressed: () => context.go('/rosters'),
-                icon: Icons.check,
-              ),
-            ],
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: AppColors.danger),
-              ),
-            ],
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _preview(Map<String, String> resolved, List<String> names) {
-    final valid = names.where((n) => resolved.containsKey(n)).toList();
-    final blocked = names.where((n) => !resolved.containsKey(n)).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            KicksterBadge(
-              label: '${valid.length} resolvidos',
-              color: AppColors.success,
-            ),
-            KicksterBadge(
-              label: '${blocked.length} ambiguos/nao encontrados',
-              color: AppColors.warning,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Pre-visualizacao',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 4),
-        for (final name in names.take(15))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(
-              resolved.containsKey(name)
-                  ? '✓ $name'
-                  : '! $name (pessoa nao encontrada ou ambigua)',
-              style: const TextStyle(fontSize: 13),
-            ),
-          ),
-      ],
-    );
+  Future<void> _import() async {
+    final success = await _vm.import();
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_vm.errorMessage ?? 'Não foi possível importar o elenco.')),
+      );
+    }
   }
 
   Widget _resultSummary(RosterBatchResult result) {
@@ -360,7 +237,7 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
   String _statusLabel(String status) => switch (status) {
     'IMPORTED' => 'Importado',
     'SKIPPED' => 'Ignorado',
-    'INVALID' => 'Invalido',
+    'INVALID' => 'Inválido',
     _ => status,
   };
 }

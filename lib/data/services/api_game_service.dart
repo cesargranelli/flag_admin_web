@@ -2,6 +2,7 @@ import 'package:flag_admin_web/data/services/game_service.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
 import 'package:flag_admin_web/src/api/api_client.dart';
 import 'package:flag_admin_web/src/api/services/game_api.dart';
+import 'package:flag_admin_web/src/domain/models/game_batch.dart';
 
 class ApiGameService implements GameService {
   final GameApi _api;
@@ -56,4 +57,11 @@ class ApiGameService implements GameService {
   @override
   Future<Game> updateStatus(String id, GameStatus status) =>
       _api.updateStatus(id, status);
+
+  @override
+  Future<GameBatchResult> createBatch(
+    String roundId,
+    List<Map<String, dynamic>> items,
+  ) =>
+      _api.createBatch(roundId, items);
 }
