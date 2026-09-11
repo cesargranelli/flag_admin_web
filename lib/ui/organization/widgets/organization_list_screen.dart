@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,8 +20,7 @@ class OrganizationListScreen extends ConsumerStatefulWidget {
       _OrganizationListScreenState();
 }
 
-class _OrganizationListScreenState
-    extends ConsumerState<OrganizationListScreen>
+class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
     with WidgetsBindingObserver {
   late final TextEditingController _searchController;
   String? _lastActivePath;
@@ -89,9 +88,11 @@ class _OrganizationListScreenState
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(organizationViewModelProvider);
-    final userRole =
-        ref.watch(authControllerProvider.select((a) => a.state.user?.role));
-    final canWrite = userRole == UserRole.admin ||
+    final userRole = ref.watch(
+      authControllerProvider.select((a) => a.state.user?.role),
+    );
+    final canWrite =
+        userRole == UserRole.admin ||
         userRole == UserRole.organizer ||
         userRole == UserRole.manager ||
         userRole == UserRole.adminLiga;
@@ -118,8 +119,8 @@ class _OrganizationListScreenState
                     KicksterButton(
                       label: 'Novo',
                       icon: Icons.add,
-                      onPressed: () async {
-                        await context.push('/organizations/new');
+                      onPressed: () {
+                        context.go('/organizations/new');
                         if (context.mounted) {
                           vm.load(forceRefresh: true);
                         }
@@ -129,9 +130,7 @@ class _OrganizationListScreenState
                 ),
               if (canWrite) const SizedBox(height: 16),
               // Conteúdo principal reagindo ao estado do ViewModel
-              Expanded(
-                child: _buildBody(context, vm, canWrite, isAdmin),
-              ),
+              Expanded(child: _buildBody(context, vm, canWrite, isAdmin)),
             ],
           ),
         );
@@ -196,10 +195,7 @@ class _OrganizationListScreenState
               'Todos os tipos',
               ...OrganizationType.values.map((t) => t.label),
             ],
-            icons: [
-              null,
-              ...OrganizationType.values.map(organizationTypeIcon),
-            ],
+            icons: [null, ...OrganizationType.values.map(organizationTypeIcon)],
             onChanged: vm.setTypeFilter,
           ),
         ),
@@ -238,8 +234,7 @@ class _OrganizationListScreenState
   }
 
   Widget _buildEmptyState(OrganizationViewModel vm) {
-    final hasFilters =
-        vm.searchQuery.isNotEmpty || vm.typeFilter != null;
+    final hasFilters = vm.searchQuery.isNotEmpty || vm.typeFilter != null;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -314,10 +309,7 @@ class _OrganizationListScreenState
       title: organization.tradeName,
       subtitle: organization.legalName,
       onTap: () async {
-        await context.push(
-          '/organizations/${organization.id}',
-          extra: organization,
-        );
+        context.go('/organizations/${organization.id}', extra: organization);
         if (context.mounted) {
           vm.load(forceRefresh: true);
         }
@@ -364,7 +356,11 @@ class _OrganizationListScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Text(
                         'Editar',
@@ -377,7 +373,7 @@ class _OrganizationListScreenState
                     ],
                   ),
                   onTap: () async {
-                    await context.push(
+                    context.go(
                       '/organizations/${organization.id}/edit',
                       extra: organization,
                     );
@@ -390,7 +386,11 @@ class _OrganizationListScreenState
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
+                        Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: AppColors.danger,
+                        ),
                         SizedBox(width: 10),
                         Text(
                           'Excluir',
@@ -421,8 +421,9 @@ class _OrganizationListScreenState
                                     ? 'Organização excluída com sucesso.'
                                     : 'Não foi possível excluir a organização.',
                               ),
-                              backgroundColor:
-                                  success ? AppColors.success : AppColors.danger,
+                              backgroundColor: success
+                                  ? AppColors.success
+                                  : AppColors.danger,
                             ),
                           );
                         }
@@ -433,7 +434,11 @@ class _OrganizationListScreenState
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 18,
+                          color: AppColors.success,
+                        ),
                         SizedBox(width: 10),
                         Text(
                           'Reativar',
@@ -455,8 +460,9 @@ class _OrganizationListScreenState
                                   ? 'Organização reativada.'
                                   : 'Não foi possível reativar a organização.',
                             ),
-                            backgroundColor:
-                                success ? AppColors.success : AppColors.danger,
+                            backgroundColor: success
+                                ? AppColors.success
+                                : AppColors.danger,
                           ),
                         );
                       }

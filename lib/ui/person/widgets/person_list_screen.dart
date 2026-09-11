@@ -60,7 +60,7 @@ class _PersonListScreenState extends ConsumerState<PersonListScreen> {
                 label: 'Importar',
                 icon: Icons.upload_file,
                 variant: KicksterButtonVariant.outline,
-                onPressed: () => context.push('/persons/import'),
+                onPressed: () => context.go('/persons/import'),
               ),
               const SizedBox(width: 8),
               KicksterButton(
@@ -176,7 +176,7 @@ class _PersonListScreenState extends ConsumerState<PersonListScreen> {
       icon: Icons.person_outline,
       title: person.name,
       subtitle: subtitle.isEmpty ? null : subtitle,
-      onTap: () => context.push('/persons/${person.id}', extra: person),
+      onTap: () => context.go('/persons/${person.id}', extra: person),
     );
   }
 }

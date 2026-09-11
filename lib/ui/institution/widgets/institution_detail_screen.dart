@@ -140,7 +140,7 @@ class _InstitutionDetailScreenState
                 label: 'Editar',
                 icon: Icons.edit_outlined,
                 onPressed: () async {
-                  await context.push(
+                  context.go(
                     '/institutions/${inst.id}/edit',
                     extra: inst,
                   );
@@ -944,7 +944,7 @@ class _InstitutionDetailScreenState
       title: team.name,
       subtitle: subtitle,
       imageUrl: team.logoUrl,
-      onTap: () => context.push('/teams/${team.id}/roster', extra: team),
+      onTap: () => context.go('/teams/${team.id}/roster', extra: team),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -992,7 +992,7 @@ class _InstitutionDetailScreenState
                   ],
                 ),
                 onTap: () =>
-                    context.push('/teams/${team.id}/roster', extra: team),
+                    context.go('/teams/${team.id}/roster', extra: team),
               ),
               KicksterMenuItem(
                 child: const Row(

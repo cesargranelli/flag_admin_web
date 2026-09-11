@@ -390,7 +390,7 @@ class _CompetitionTeamsScreenState
                     ],
                   ),
                   onTap: () {
-                    context.push(
+                    context.go(
                       '/teams/${ct.teamId}/roster',
                       extra: Team(
                         id: ct.teamId,

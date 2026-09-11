@@ -36,7 +36,9 @@ class _OrganizationDetailScreenState
     final id = widget.organizationId ?? widget.organization?.id;
     if (id != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(organizationDetailViewModelProvider(id)).load(forceRefresh: true);
+        ref
+            .read(organizationDetailViewModelProvider(id))
+            .load(forceRefresh: true);
       });
     }
   }
@@ -59,9 +61,7 @@ class _OrganizationDetailScreenState
     if (org != null) {
       body = _buildDetail(context, org, vm);
     } else if (vm.isLoading) {
-      body = const AppLoading(
-        message: 'Carregando organização...',
-      );
+      body = const AppLoading(message: 'Carregando organização...');
     } else if (vm.errorMessage != null) {
       body = AppErrorState(
         message: 'Não foi possível carregar a organização',
@@ -96,10 +96,7 @@ class _OrganizationDetailScreenState
                 label: 'Editar',
                 icon: Icons.edit_outlined,
                 onPressed: () async {
-                  await context.push(
-                    '/organizations/${org.id}/edit',
-                    extra: org,
-                  );
+                  context.go('/organizations/${org.id}/edit', extra: org);
                   if (context.mounted) {
                     ref
                         .read(organizationDetailViewModelProvider(org.id))
@@ -176,7 +173,9 @@ class _OrganizationDetailScreenState
   Widget _buildLogoFallback(Organization org, Color primary) {
     final initials = org.abbreviation?.isNotEmpty == true
         ? org.abbreviation!.toUpperCase()
-        : (org.tradeName.isNotEmpty ? org.tradeName.substring(0, 1).toUpperCase() : 'O');
+        : (org.tradeName.isNotEmpty
+              ? org.tradeName.substring(0, 1).toUpperCase()
+              : 'O');
     return Container(
       color: AppColors.surfaceMuted,
       child: Center(
@@ -252,7 +251,10 @@ class _OrganizationDetailScreenState
                 // Sigla Oficial no Banner
                 if (org.abbreviation != null && org.abbreviation!.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: bannerTextColor.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(12),
@@ -301,7 +303,9 @@ class _OrganizationDetailScreenState
                       ),
                       padding: const EdgeInsets.all(4),
                       child: ClipOval(
-                        child: org.logoUrl != null && org.logoUrl!.trim().isNotEmpty
+                        child:
+                            org.logoUrl != null &&
+                                org.logoUrl!.trim().isNotEmpty
                             ? Image.network(
                                 org.logoUrl!.trim(),
                                 fit: BoxFit.contain,
@@ -354,9 +358,15 @@ class _OrganizationDetailScreenState
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  backgroundColor: primary.withValues(alpha: 0.08),
-                                  side: BorderSide(color: primary.withValues(alpha: 0.2)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  backgroundColor: primary.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  side: BorderSide(
+                                    color: primary.withValues(alpha: 0.2),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
                                   visualDensity: VisualDensity.compact,
                                 ),
                               if (org.country.isNotEmpty)
@@ -478,8 +488,12 @@ class _OrganizationDetailScreenState
     Organization org,
     OrganizationDetailViewModel vm,
   ) {
-    final pendingAffiliations = vm.affiliations.where((a) => a.isPending).toList();
-    final approvedAffiliations = vm.affiliations.where((a) => a.isApproved).toList();
+    final pendingAffiliations = vm.affiliations
+        .where((a) => a.isPending)
+        .toList();
+    final approvedAffiliations = vm.affiliations
+        .where((a) => a.isApproved)
+        .toList();
 
     return Card(
       elevation: 1,
@@ -500,11 +514,16 @@ class _OrganizationDetailScreenState
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.success.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: AppColors.success.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Text(
                           '${approvedAffiliations.length} Filiados Ativos',
@@ -518,11 +537,16 @@ class _OrganizationDetailScreenState
                       const SizedBox(width: 8),
                       if (pendingAffiliations.isNotEmpty)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.orange.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.orange.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Text(
                             '${pendingAffiliations.length} Pendentes',
@@ -555,95 +579,113 @@ class _OrganizationDetailScreenState
             const SizedBox(height: 16),
 
             // 1.1 Status e Controle do Período de Inscrições da Temporada
-            Builder(builder: (ctx) {
-              final win = vm.currentWindow;
-              final isOpen = win?.isOpen ?? false;
+            Builder(
+              builder: (ctx) {
+                final win = vm.currentWindow;
+                final isOpen = win?.isOpen ?? false;
 
-              return Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: isOpen
-                      ? AppColors.success.withValues(alpha: 0.06)
-                      : AppColors.surfaceMuted.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
+                return Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
                     color: isOpen
-                        ? AppColors.success.withValues(alpha: 0.25)
-                        : AppColors.line,
+                        ? AppColors.success.withValues(alpha: 0.06)
+                        : AppColors.surfaceMuted.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isOpen
+                          ? AppColors.success.withValues(alpha: 0.25)
+                          : AppColors.line,
+                    ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isOpen ? Icons.event_available : Icons.event_busy,
-                      size: 20,
-                      color: isOpen ? AppColors.success : AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isOpen
-                                ? 'Inscrições Abertas (Temporada ${vm.selectedSeason})'
-                                : 'Inscrições Encerradas / Fechadas',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: isOpen ? AppColors.success : AppColors.textPrimary,
-                            ),
-                          ),
-                          if (win != null && isOpen) ...[
-                            const SizedBox(height: 2),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isOpen ? Icons.event_available : Icons.event_busy,
+                        size: 20,
+                        color: isOpen
+                            ? AppColors.success
+                            : AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              'Prazo: até ${win.endDate.day.toString().padLeft(2, "0")}/${win.endDate.month.toString().padLeft(2, "0")}/${win.endDate.year}',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              isOpen
+                                  ? 'Inscrições Abertas (Temporada ${vm.selectedSeason})'
+                                  : 'Inscrições Encerradas / Fechadas',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isOpen
+                                    ? AppColors.success
+                                    : AppColors.textPrimary,
+                              ),
                             ),
+                            if (win != null && isOpen) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Prazo: até ${win.endDate.day.toString().padLeft(2, "0")}/${win.endDate.month.toString().padLeft(2, "0")}/${win.endDate.year}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    if (isOpen)
-                      KicksterButton(
-                        label: 'Encerrar Inscrições',
-                        variant: KicksterButtonVariant.outline,
-                        loading: vm.isSavingWindow,
-                        onPressed: () async {
-                          final ok = await showKicksterConfirm(
-                            context: context,
-                            title: 'Encerrar Inscrições',
-                            content: 'Deseja encerrar o período de filiações para a temporada ${vm.selectedSeason}?',
-                            confirmLabel: 'Encerrar',
-                            danger: true,
-                          );
-                          if (ok == true) {
-                            await vm.closeAffiliationWindow(vm.selectedSeason);
-                          }
-                        },
-                      )
-                    else
-                      KicksterButton(
-                        label: 'Abrir Período',
-                        icon: Icons.add,
-                        variant: KicksterButtonVariant.outline,
-                        onPressed: () => _showOpenWindowModal(context, vm),
-                      ),
-                  ],
-                ),
-              );
-            }),
+                      if (isOpen)
+                        KicksterButton(
+                          label: 'Encerrar Inscrições',
+                          variant: KicksterButtonVariant.outline,
+                          loading: vm.isSavingWindow,
+                          onPressed: () async {
+                            final ok = await showKicksterConfirm(
+                              context: context,
+                              title: 'Encerrar Inscrições',
+                              content:
+                                  'Deseja encerrar o período de filiações para a temporada ${vm.selectedSeason}?',
+                              confirmLabel: 'Encerrar',
+                              danger: true,
+                            );
+                            if (ok == true) {
+                              await vm.closeAffiliationWindow(
+                                vm.selectedSeason,
+                              );
+                            }
+                          },
+                        )
+                      else
+                        KicksterButton(
+                          label: 'Abrir Período',
+                          icon: Icons.add,
+                          variant: KicksterButtonVariant.outline,
+                          onPressed: () => _showOpenWindowModal(context, vm),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 16),
             const Divider(color: AppColors.line),
             const SizedBox(height: 16),
 
             // 2. Inbox de Triagem Imediata de Solicitações Pendentes
             if (vm.isLoadingAffiliations)
-              const Center(child: AppLoading(message: 'Carregando filiações...'))
+              const Center(
+                child: AppLoading(message: 'Carregando filiações...'),
+              )
             else if (pendingAffiliations.isNotEmpty) ...[
               Row(
                 children: [
-                  const Icon(Icons.hourglass_top_outlined, size: 18, color: Colors.orange),
+                  const Icon(
+                    Icons.hourglass_top_outlined,
+                    size: 18,
+                    color: Colors.orange,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Solicitações Aguardando Aprovação (${pendingAffiliations.length})',
@@ -660,7 +702,8 @@ class _OrganizationDetailScreenState
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: pendingAffiliations.length,
-                separatorBuilder: (_, _) => const Divider(color: AppColors.line, height: 18),
+                separatorBuilder: (_, _) =>
+                    const Divider(color: AppColors.line, height: 18),
                 itemBuilder: (context, index) {
                   final affil = pendingAffiliations[index];
                   return Row(
@@ -701,7 +744,8 @@ class _OrganizationDetailScreenState
                           final ok = await showKicksterConfirm(
                             context: context,
                             title: 'Aprovar Filiação',
-                            content: 'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
+                            content:
+                                'Deseja aprovar a filiação de "${affil.institutionName}" para a temporada ${affil.season}?',
                             confirmLabel: 'Aprovar',
                           );
                           if (ok == true) {
@@ -712,7 +756,8 @@ class _OrganizationDetailScreenState
                       IconButton(
                         tooltip: 'Recusar filiação',
                         icon: const Icon(Icons.close, color: AppColors.danger),
-                        onPressed: () => _showRejectAffiliationModal(context, vm, affil),
+                        onPressed: () =>
+                            _showRejectAffiliationModal(context, vm, affil),
                       ),
                     ],
                   );
@@ -726,11 +771,18 @@ class _OrganizationDetailScreenState
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 18,
+                      color: AppColors.success,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Nenhuma solicitação pendente no momento.',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -740,7 +792,8 @@ class _OrganizationDetailScreenState
 
             // 3. Botão de Acesso ao Quadro Geral de Afiliados
             KicksterButton(
-              label: 'Ver Quadro Geral de Afiliados (${approvedAffiliations.length})',
+              label:
+                  'Ver Quadro Geral de Afiliados (${approvedAffiliations.length})',
               icon: Icons.people_outline,
               variant: KicksterButtonVariant.outline,
               onPressed: () => context.push(
@@ -759,7 +812,9 @@ class _OrganizationDetailScreenState
     OrganizationDetailViewModel vm,
   ) {
     final seasonCtrl = TextEditingController(text: vm.selectedSeason);
-    final titleCtrl = TextEditingController(text: 'Filiações ${vm.selectedSeason}');
+    final titleCtrl = TextEditingController(
+      text: 'Filiações ${vm.selectedSeason}',
+    );
     final instructionsCtrl = TextEditingController();
     DateTime startDate = DateTime.now();
     DateTime endDate = DateTime(DateTime.now().year, 12, 31);
@@ -774,7 +829,9 @@ class _OrganizationDetailScreenState
 
           return AlertDialog(
             backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: const Text('Abrir Período de Inscrição de Filiações'),
             content: SizedBox(
               width: 480,
@@ -786,7 +843,10 @@ class _OrganizationDetailScreenState
                   children: [
                     const Text(
                       'Defina o prazo durante o qual clubes e universidades poderão solicitar filiação à organização.',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -797,8 +857,9 @@ class _OrganizationDetailScreenState
                             label: 'Temporada (Ano) *',
                             controller: seasonCtrl,
                             hintText: 'Ex: 2026',
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Obrigatório'
+                                : null,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -808,8 +869,9 @@ class _OrganizationDetailScreenState
                             label: 'Título do Período *',
                             controller: titleCtrl,
                             hintText: 'Ex: Filiações 2026',
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Obrigatório'
+                                : null,
                           ),
                         ),
                       ],
@@ -830,7 +892,7 @@ class _OrganizationDetailScreenState
                                 ),
                               ),
                               const SizedBox(height: 6),
-                                InkWell(
+                              InkWell(
                                 onTap: () async {
                                   final picked = await showAppCalendarDialog(
                                     context,
@@ -844,20 +906,28 @@ class _OrganizationDetailScreenState
                                 },
                                 borderRadius: BorderRadius.circular(8),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 11,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
                                     border: Border.all(color: AppColors.line),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         formatDate(startDate),
                                         style: const TextStyle(fontSize: 13),
                                       ),
-                                      const Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        size: 16,
+                                        color: AppColors.textSecondary,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -883,7 +953,9 @@ class _OrganizationDetailScreenState
                                 onTap: () async {
                                   final picked = await showAppCalendarDialog(
                                     context,
-                                    initialDate: endDate.isAfter(startDate) ? endDate : startDate,
+                                    initialDate: endDate.isAfter(startDate)
+                                        ? endDate
+                                        : startDate,
                                     firstDate: startDate,
                                     lastDate: DateTime(2035),
                                   );
@@ -893,20 +965,28 @@ class _OrganizationDetailScreenState
                                 },
                                 borderRadius: BorderRadius.circular(8),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 11,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
                                     border: Border.all(color: AppColors.line),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         formatDate(endDate),
                                         style: const TextStyle(fontSize: 13),
                                       ),
-                                      const Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        size: 16,
+                                        color: AppColors.textSecondary,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -921,7 +1001,8 @@ class _OrganizationDetailScreenState
                       label: 'Instruções e Requisitos (Opcional)',
                       controller: instructionsCtrl,
                       maxLines: 3,
-                      hintText: 'Ex: Anexar ata de posse da diretoria e comprovante de taxa.',
+                      hintText:
+                          'Ex: Anexar ata de posse da diretoria e comprovante de taxa.',
                     ),
                   ],
                 ),
@@ -941,7 +1022,11 @@ class _OrganizationDetailScreenState
                   if (!formKey.currentState!.validate()) return;
                   if (endDate.isBefore(startDate)) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('A data de encerramento não pode ser anterior ao início.')),
+                      const SnackBar(
+                        content: Text(
+                          'A data de encerramento não pode ser anterior ao início.',
+                        ),
+                      ),
                     );
                     return;
                   }
@@ -950,12 +1035,18 @@ class _OrganizationDetailScreenState
                     title: titleCtrl.text.trim(),
                     startDate: startDate,
                     endDate: endDate,
-                    instructions: instructionsCtrl.text.trim().isEmpty ? null : instructionsCtrl.text.trim(),
+                    instructions: instructionsCtrl.text.trim().isEmpty
+                        ? null
+                        : instructionsCtrl.text.trim(),
                   );
                   if (ok && dialogCtx.mounted) {
                     Navigator.of(dialogCtx).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Período de inscrições aberto com sucesso!')),
+                      const SnackBar(
+                        content: Text(
+                          'Período de inscrições aberto com sucesso!',
+                        ),
+                      ),
                     );
                   }
                 },
@@ -991,7 +1082,10 @@ class _OrganizationDetailScreenState
               children: [
                 const Text(
                   'Informe o motivo da recusa para que a agremiação possa corrigir eventuais pendências:',
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 KicksterInput(
@@ -999,7 +1093,9 @@ class _OrganizationDetailScreenState
                   controller: reasonCtrl,
                   maxLines: 3,
                   hintText: 'Ex.: Estatuto desatualizado ou anuidade pendente',
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a justificativa' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Informe a justificativa'
+                      : null,
                 ),
               ],
             ),
@@ -1017,7 +1113,10 @@ class _OrganizationDetailScreenState
             loading: vm.isReviewingAffiliation,
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
-              final ok = await vm.rejectAffiliation(affil.id, reasonCtrl.text.trim());
+              final ok = await vm.rejectAffiliation(
+                affil.id,
+                reasonCtrl.text.trim(),
+              );
               if (ok && dialogCtx.mounted) {
                 Navigator.of(dialogCtx).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1030,4 +1129,4 @@ class _OrganizationDetailScreenState
       ),
     );
   }
-}
+}

@@ -114,7 +114,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
                         tooltip: 'Importar CSV',
                         icon: const Icon(Icons.upload_file),
                         onPressed: () =>
-                            context.push('/rosters/import', extra: teamId),
+                            context.go('/rosters/import', extra: teamId),
                       ),
                       const SizedBox(width: 4),
                       IconButton(

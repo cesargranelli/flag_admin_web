@@ -229,7 +229,7 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
         size: 22,
         color: AppColors.textSecondary,
       ),
-      onTap: () => context.push('/rounds/${round.id}', extra: round),
+      onTap: () => context.go('/rounds/${round.id}', extra: round),
     );
   }
 }

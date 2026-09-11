@@ -142,7 +142,7 @@ class _CompetitionsScreenState extends ConsumerState<CompetitionsScreen> {
               ? competition.organizationName
               : null,
       onTap: () =>
-          context.push('/competitions/${competition.id}', extra: competition),
+          context.go('/competitions/${competition.id}', extra: competition),
       // Issue #261: ações de gestão (desativar/reativar) exigem
       // ser criador da competição ou ADMIN — o backend já bloqueia.
       trailing: canEditCompetition(

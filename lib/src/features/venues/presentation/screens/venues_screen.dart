@@ -126,7 +126,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       icon: Icons.sports_soccer,
       title: venue.name,
       subtitle: subtitle.isEmpty ? null : subtitle,
-      onTap: () => context.push('/venues/${venue.id}', extra: venue),
+      onTap: () => context.go('/venues/${venue.id}', extra: venue),
     );
   }
 }

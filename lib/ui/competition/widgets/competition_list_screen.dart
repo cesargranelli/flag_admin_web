@@ -59,7 +59,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                   label: 'Nova Competição',
                   icon: Icons.add,
                   onPressed: () async {
-                    await context.push('/competitions/new');
+                    context.go('/competitions/new');
                     if (context.mounted) {
                       vm.load(forceRefresh: true);
                     }
@@ -282,7 +282,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
       title: comp.displayName,
       subtitle: subtitle,
       onTap: () async {
-        await context.push(
+        context.go(
           '/competitions/${comp.id}',
           extra: comp,
         );
@@ -342,7 +342,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     ],
                   ),
                   onTap: () async {
-                    await context.push(
+                    context.go(
                       '/competitions/${comp.id}/edit',
                       extra: comp,
                     );
@@ -371,7 +371,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     ],
                   ),
                   onTap: () async {
-                    await context.push(
+                    context.go(
                       '/competitions/${comp.id}/teams',
                       extra: comp,
                     );
@@ -400,7 +400,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     ],
                   ),
                   onTap: () async {
-                    await context.push(
+                    context.go(
                       '/competitions/${comp.id}/games',
                       extra: comp,
                     );

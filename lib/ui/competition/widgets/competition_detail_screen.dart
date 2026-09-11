@@ -104,7 +104,7 @@ class _CompetitionDetailScreenState
                           label: 'Editar',
                           icon: Icons.edit_outlined,
                           onPressed: () async {
-                            await context.push(
+                            context.go(
                               '/competitions/${comp.id}/edit',
                               extra: comp,
                             );
@@ -311,7 +311,7 @@ class _CompetitionDetailScreenState
                         title: 'Equipes Inscritas',
                         subtitle: 'Homologação e elencos das equipes esportivas',
                         onTap: () {
-                          context.push(
+                          context.go(
                             '/competitions/${comp.id}/teams',
                             extra: comp,
                           );
@@ -325,7 +325,7 @@ class _CompetitionDetailScreenState
                         title: 'Tabela & Confrontos',
                         subtitle: 'Rodadas e confrontos das equipes esportivas',
                         onTap: () {
-                          context.push(
+                          context.go(
                             '/competitions/${comp.id}/games',
                             extra: comp,
                           );

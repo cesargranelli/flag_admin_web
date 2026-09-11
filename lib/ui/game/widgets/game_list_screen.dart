@@ -79,7 +79,7 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                   label: 'Importar',
                   icon: Icons.upload_file,
                   variant: KicksterButtonVariant.outline,
-                  onPressed: () => context.push(
+                  onPressed: () => context.go(
                     '/games/import',
                     extra: (
                       roundId: effectiveRound,
@@ -245,7 +245,7 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                                       cardBuilder: (game) => _gameCard(
                                         context,
                                         game,
-                                        onTap: () => context.push(
+                                        onTap: () => context.go(
                                           '/games/${game.id}',
                                           extra: (
                                             competitionId: effectiveComp,

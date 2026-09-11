@@ -20,22 +20,24 @@ final organizationBranch = StatefulShellBranch(routes: [
           final org = s.extra is Organization ? s.extra as Organization : null;
           return OrganizationDetailScreen(organizationId: s.pathParameters['id'], organization: org);
         },
-      ),
-      GoRoute(
-        path: ':id/edit',
-        name: 'organizationEdit',
-        builder: (c, s) {
-          final org = s.extra is Organization ? s.extra as Organization : null;
-          return OrganizationEditScreen(id: s.pathParameters['id']!, organization: org);
-        },
-      ),
-      GoRoute(
-        path: ':id/affiliates',
-        name: 'organizationAffiliates',
-        builder: (c, s) {
-          final org = s.extra is Organization ? s.extra as Organization : null;
-          return OrganizationAffiliatesScreen(organizationId: s.pathParameters['id']!, organization: org);
-        },
+        routes: [
+          GoRoute(
+            path: 'edit',
+            name: 'organizationEdit',
+            builder: (c, s) {
+              final org = s.extra is Organization ? s.extra as Organization : null;
+              return OrganizationEditScreen(id: s.pathParameters['id']!, organization: org);
+            },
+          ),
+          GoRoute(
+            path: 'affiliates',
+            name: 'organizationAffiliates',
+            builder: (c, s) {
+              final org = s.extra is Organization ? s.extra as Organization : null;
+              return OrganizationAffiliatesScreen(organizationId: s.pathParameters['id']!, organization: org);
+            },
+          ),
+        ],
       ),
     ],
   ),

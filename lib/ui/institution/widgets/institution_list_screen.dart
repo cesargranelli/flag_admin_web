@@ -116,7 +116,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                       label: 'Nova Agremiação',
                       icon: Icons.add,
                       onPressed: () async {
-                        await context.push('/institutions/new');
+                        context.go('/institutions/new');
                         if (context.mounted) {
                           vm.load(forceRefresh: true);
                         }
@@ -306,7 +306,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
       title: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
       subtitle: subtitle,
       onTap: () async {
-        await context.push(
+        context.go(
           '/institutions/${inst.id}',
           extra: inst,
         );
@@ -361,7 +361,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                     ],
                   ),
                   onTap: () async {
-                    await context.push(
+                    context.go(
                       '/institutions/${inst.id}/edit',
                       extra: inst,
                     );
