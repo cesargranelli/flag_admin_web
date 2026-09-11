@@ -1,7 +1,7 @@
 import 'package:flag_admin_web/data/services/auth_service.dart';
+import 'package:flag_admin_web/data/session/session_manager.dart';
 import 'package:flag_admin_web/domain/models/auth_user.dart';
-import 'package:flag_admin_web/src/core/session/session_manager.dart';
-import 'package:flag_admin_web/src/domain/models/user.dart';
+import 'package:flag_admin_web/domain/models/user.dart';
 
 /// Repositório de Autenticação (ADR-001 / Single Source of Truth).
 class AuthRepository {
@@ -9,14 +9,16 @@ class AuthRepository {
   final SessionManager _session;
 
   AuthUser? _currentUser;
+
   AuthUser? get currentUser => _currentUser;
+
   bool get isAuthenticated => _currentUser != null;
 
   AuthRepository({
     required AuthService service,
     required SessionManager session,
-  })  : _service = service,
-        _session = session;
+  }) : _service = service,
+       _session = session;
 
   /// Restaura a sessão existente ao inicializar a aplicação.
   Future<AuthUser?> restoreSession() async {
@@ -88,20 +90,14 @@ class AuthRepository {
     required String password,
   }) async {
     // 1. Cria credencial no Firebase Auth
-    await _service.signUpWithEmailPassword(
-      email: email,
-      password: password,
-    );
+    await _service.signUpWithEmailPassword(email: email, password: password);
 
     // 2. Faz logout do Firebase imediatamente para que o endpoint de cadastro
     // não envie o token no header
     await _service.signOut();
 
     // 3. Registra dados do perfil no backend
-    await _service.registerBackend(
-      name: name,
-      email: email,
-    );
+    await _service.registerBackend(name: name, email: email);
   }
 
   /// Envia e-mail para redefinição de senha.
@@ -122,7 +118,10 @@ class AuthRepository {
 
   // Métodos de gestão de usuários (administração)
   Future<List<User>> listUsers() => _service.listUsers();
+
   Future<List<User>> listPendingUsers() => _service.listPendingUsers();
+
   Future<User> approveUser(String id) => _service.approveUser(id);
+
   Future<User> rejectUser(String id) => _service.rejectUser(id);
 }

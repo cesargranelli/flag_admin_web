@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
+import 'package:flag_admin_web/domain/enums/competition_team_status.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/institution/view_models/institution_detail_view_model.dart';
 
 /// Tela de detalhes de agremiação com Hero Card Esportivo Kickster (ADR-001 / MVVM).
@@ -29,7 +29,9 @@ class _InstitutionDetailScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(institutionDetailViewModelProvider(widget.id)).load(forceRefresh: true);
+      ref
+          .read(institutionDetailViewModelProvider(widget.id))
+          .load(forceRefresh: true);
     });
   }
 
@@ -50,8 +52,8 @@ class _InstitutionDetailScreenState
     final initials = inst.abbreviation?.isNotEmpty == true
         ? inst.abbreviation!.toUpperCase()
         : (inst.tradeName.isNotEmpty
-            ? inst.tradeName.substring(0, 1).toUpperCase()
-            : 'A');
+              ? inst.tradeName.substring(0, 1).toUpperCase()
+              : 'A');
     return Container(
       color: AppColors.surfaceMuted,
       child: Center(
@@ -94,7 +96,9 @@ class _InstitutionDetailScreenState
     final inst = vm.institution ?? widget.institution;
     final orgsAsync = ref.watch(organizationsProvider);
 
-    final instName = inst?.tradeName.isNotEmpty == true ? inst!.tradeName : inst?.name;
+    final instName = inst?.tradeName.isNotEmpty == true
+        ? inst!.tradeName
+        : inst?.name;
     final breadcrumb = [
       const BreadcrumbItem(AppStrings.home, route: '/'),
       const BreadcrumbItem(AppStrings.institutions, route: '/institutions'),
@@ -140,10 +144,7 @@ class _InstitutionDetailScreenState
                 label: 'Editar',
                 icon: Icons.edit_outlined,
                 onPressed: () async {
-                  await context.push(
-                    '/institutions/${inst.id}/edit',
-                    extra: inst,
-                  );
+                  context.go('/institutions/${inst.id}/edit', extra: inst);
                   if (context.mounted) {
                     ref
                         .read(institutionDetailViewModelProvider(widget.id))
@@ -228,15 +229,19 @@ class _InstitutionDetailScreenState
   }
 
   Widget _heroCard(Institution inst) {
-    final primary = _parseHex(inst.primaryColor) ??
+    final primary =
+        _parseHex(inst.primaryColor) ??
         (inst.colors.isNotEmpty ? _parseHex(inst.colors[0]) : null) ??
         AppColors.primary;
-    final secondary = _parseHex(inst.secondaryColor) ??
+    final secondary =
+        _parseHex(inst.secondaryColor) ??
         (inst.colors.length > 1 ? _parseHex(inst.colors[1]) : null) ??
         const Color(0xFF1E293B);
-    final tertiary = _parseHex(inst.tertiaryColor) ??
+    final tertiary =
+        _parseHex(inst.tertiaryColor) ??
         (inst.colors.length > 2 ? _parseHex(inst.colors[2]) : null);
-    final quaternary = _parseHex(inst.quaternaryColor) ??
+    final quaternary =
+        _parseHex(inst.quaternaryColor) ??
         (inst.colors.length > 3 ? _parseHex(inst.colors[3]) : null);
 
     final isLightPrimary = primary.computeLuminance() > 0.55;
@@ -291,7 +296,9 @@ class _InstitutionDetailScreenState
                 if (inst.abbreviation != null && inst.abbreviation!.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: bannerTextColor.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(12),
@@ -338,8 +345,7 @@ class _InstitutionDetailScreenState
                         ],
                       ),
                       child: ClipOval(
-                        child: inst.logoUrl != null &&
-                                inst.logoUrl!.isNotEmpty
+                        child: inst.logoUrl != null && inst.logoUrl!.isNotEmpty
                             ? Image.network(
                                 inst.logoUrl!,
                                 fit: BoxFit.cover,
@@ -355,7 +361,9 @@ class _InstitutionDetailScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
+                            inst.tradeName.isNotEmpty
+                                ? inst.tradeName
+                                : inst.name,
                             style: AppTextStyles.headline1.copyWith(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
@@ -384,8 +392,9 @@ class _InstitutionDetailScreenState
                                   color: AppColors.primary,
                                 ),
                                 label: Text(inst.type.label),
-                                backgroundColor:
-                                    AppColors.primary.withValues(alpha: 0.08),
+                                backgroundColor: AppColors.primary.withValues(
+                                  alpha: 0.08,
+                                ),
                                 side: BorderSide.none,
                                 padding: EdgeInsets.zero,
                                 labelStyle: const TextStyle(
@@ -396,7 +405,9 @@ class _InstitutionDetailScreenState
                               ),
                               Chip(
                                 label: Text(
-                                  inst.status == 'INACTIVE' ? 'Inativo' : 'Ativo',
+                                  inst.status == 'INACTIVE'
+                                      ? 'Inativo'
+                                      : 'Ativo',
                                 ),
                                 backgroundColor: inst.status == 'INACTIVE'
                                     ? AppColors.surfaceMuted
@@ -480,7 +491,9 @@ class _InstitutionDetailScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (vm.isLoadingAffiliations)
-              const Center(child: AppLoading(message: 'Carregando filiações...'))
+              const Center(
+                child: AppLoading(message: 'Carregando filiações...'),
+              )
             else if (vm.affiliations.isEmpty)
               const Text(
                 'Esta agremiação ainda não possui solicitações ou filiações ativas a organizações (ligas ou federações). Use o botão acima para solicitar.',
@@ -491,7 +504,8 @@ class _InstitutionDetailScreenState
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: vm.affiliations.length,
-                separatorBuilder: (_, _) => const Divider(color: AppColors.line, height: 24),
+                separatorBuilder: (_, _) =>
+                    const Divider(color: AppColors.line, height: 24),
                 itemBuilder: (context, index) {
                   final affil = vm.affiliations[index];
                   Color statusColor;
@@ -525,7 +539,11 @@ class _InstitutionDetailScreenState
                           color: AppColors.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.account_balance, color: AppColors.primary, size: 20),
+                        child: const Icon(
+                          Icons.account_balance,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -548,7 +566,8 @@ class _InstitutionDetailScreenState
                                 color: AppColors.textSecondary,
                               ),
                             ),
-                            if (affil.rejectionReason != null && affil.rejectionReason!.isNotEmpty) ...[
+                            if (affil.rejectionReason != null &&
+                                affil.rejectionReason!.isNotEmpty) ...[
                               const SizedBox(height: 4),
                               Text(
                                 'Motivo da recusa: ${affil.rejectionReason}',
@@ -564,11 +583,16 @@ class _InstitutionDetailScreenState
                       ),
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: statusColor.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -596,7 +620,10 @@ class _InstitutionDetailScreenState
     );
   }
 
-  void _showRequestAffiliationModal(BuildContext context, InstitutionDetailViewModel vm) {
+  void _showRequestAffiliationModal(
+    BuildContext context,
+    InstitutionDetailViewModel vm,
+  ) {
     final formKey = GlobalKey<FormState>();
     String? selectedOrgId;
     final seasonCtrl = TextEditingController(text: '2026');
@@ -614,10 +641,15 @@ class _InstitutionDetailScreenState
 
               return AlertDialog(
                 backgroundColor: AppColors.surface,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 title: const Row(
                   children: [
-                    Icon(Icons.account_balance_outlined, color: AppColors.primary),
+                    Icon(
+                      Icons.account_balance_outlined,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 12),
                     Text('Solicitar Filiação'),
                   ],
@@ -632,7 +664,10 @@ class _InstitutionDetailScreenState
                       children: [
                         const Text(
                           'Selecione a Liga ou Federação à qual esta agremiação deseja solicitar filiação para a temporada:',
-                          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         windowsAsync.when(
@@ -643,16 +678,26 @@ class _InstitutionDetailScreenState
                                 decoration: BoxDecoration(
                                   color: Colors.orange.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                                  border: Border.all(
+                                    color: Colors.orange.withValues(alpha: 0.3),
+                                  ),
                                 ),
                                 child: const Row(
                                   children: [
-                                    Icon(Icons.info_outline, size: 20, color: Colors.orange),
+                                    Icon(
+                                      Icons.info_outline,
+                                      size: 20,
+                                      color: Colors.orange,
+                                    ),
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
                                         'Não há organizações com período de filiação aberto no momento.',
-                                        style: TextStyle(fontSize: 13, color: Colors.orange, fontWeight: FontWeight.w500),
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -664,15 +709,25 @@ class _InstitutionDetailScreenState
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 KicksterDropdown<String>(
-                                  label: 'Liga / Federação com Inscrições Abertas *',
+                                  label:
+                                      'Liga / Federação com Inscrições Abertas *',
                                   value: selectedOrgId,
-                                  values: wins.map((w) => w.organizationId).toList(),
-                                  labels: wins.map((w) => '${w.organizationName} (${w.season})').toList(),
+                                  values: wins
+                                      .map((w) => w.organizationId)
+                                      .toList(),
+                                  labels: wins
+                                      .map(
+                                        (w) =>
+                                            '${w.organizationName} (${w.season})',
+                                      )
+                                      .toList(),
                                   onChanged: (v) {
                                     setModalState(() {
                                       selectedOrgId = v;
                                       if (v != null) {
-                                        final win = wins.firstWhere((w) => w.organizationId == v);
+                                        final win = wins.firstWhere(
+                                          (w) => w.organizationId == v,
+                                        );
                                         seasonCtrl.text = win.season;
                                       }
                                     });
@@ -684,29 +739,47 @@ class _InstitutionDetailScreenState
                                   controller: seasonCtrl,
                                   readOnly: true,
                                   hintText: 'Ex: 2026',
-                                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a temporada' : null,
+                                  validator: (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                      ? 'Informe a temporada'
+                                      : null,
                                 ),
                               ],
                             );
                           },
                           loading: () => const Padding(
                             padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Center(child: AppLoading(message: 'Consultando períodos de inscrição...')),
+                            child: Center(
+                              child: AppLoading(
+                                message: 'Consultando períodos de inscrição...',
+                              ),
+                            ),
                           ),
                           error: (e, _) => Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: AppColors.danger.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: AppColors.danger.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 18,
+                                  color: AppColors.danger,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text('Erro ao consultar inscrições: $e',
-                                      style: const TextStyle(fontSize: 12, color: AppColors.danger)),
+                                  child: Text(
+                                    'Erro ao consultar inscrições: $e',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.danger,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -730,7 +803,9 @@ class _InstitutionDetailScreenState
                       onPressed: () async {
                         if (selectedOrgId == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Selecione uma organização')),
+                            const SnackBar(
+                              content: Text('Selecione uma organização'),
+                            ),
                           );
                           return;
                         }
@@ -744,7 +819,11 @@ class _InstitutionDetailScreenState
                         if (ok && dialogCtx.mounted) {
                           Navigator.of(dialogCtx).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Solicitação de filiação enviada com sucesso!')),
+                            const SnackBar(
+                              content: Text(
+                                'Solicitação de filiação enviada com sucesso!',
+                              ),
+                            ),
                           );
                         }
                       },
@@ -778,7 +857,9 @@ class _InstitutionDetailScreenState
   }
 
   Widget _fieldRow(String label, String? value) {
-    final display = (value == null || value.trim().isEmpty) ? '—' : value.trim();
+    final display = (value == null || value.trim().isEmpty)
+        ? '—'
+        : value.trim();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -797,10 +878,7 @@ class _InstitutionDetailScreenState
           Expanded(
             child: Text(
               display,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
             ),
           ),
         ],
@@ -858,7 +936,10 @@ class _InstitutionDetailScreenState
 
             if (teams.isEmpty)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 32,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceMuted.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
@@ -944,7 +1025,7 @@ class _InstitutionDetailScreenState
       title: team.name,
       subtitle: subtitle,
       imageUrl: team.logoUrl,
-      onTap: () => context.push('/teams/${team.id}/roster', extra: team),
+      onTap: () => context.go('/teams/${team.id}/roster', extra: team),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -975,8 +1056,11 @@ class _InstitutionDetailScreenState
               KicksterMenuItem(
                 child: const Row(
                   children: [
-                    Icon(Icons.groups_outlined,
-                        size: 18, color: AppColors.primary),
+                    Icon(
+                      Icons.groups_outlined,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -992,13 +1076,16 @@ class _InstitutionDetailScreenState
                   ],
                 ),
                 onTap: () =>
-                    context.push('/teams/${team.id}/roster', extra: team),
+                    context.go('/teams/${team.id}/roster', extra: team),
               ),
               KicksterMenuItem(
                 child: const Row(
                   children: [
-                    Icon(Icons.emoji_events_outlined,
-                        size: 18, color: AppColors.primary),
+                    Icon(
+                      Icons.emoji_events_outlined,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -1019,8 +1106,11 @@ class _InstitutionDetailScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.block_outlined,
-                          size: 18, color: AppColors.danger),
+                      Icon(
+                        Icons.block_outlined,
+                        size: 18,
+                        color: AppColors.danger,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -1052,8 +1142,11 @@ class _InstitutionDetailScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.check_circle_outline,
-                          size: 18, color: AppColors.success),
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 18,
+                        color: AppColors.success,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -1075,8 +1168,11 @@ class _InstitutionDetailScreenState
               KicksterMenuItem(
                 child: const Row(
                   children: [
-                    Icon(Icons.delete_outline,
-                        size: 18, color: AppColors.danger),
+                    Icon(
+                      Icons.delete_outline,
+                      size: 18,
+                      color: AppColors.danger,
+                    ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -1134,7 +1230,9 @@ class _InstitutionDetailScreenState
 
           return AlertDialog(
             backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: Row(
               children: [
                 Container(
@@ -1189,11 +1287,13 @@ class _InstitutionDetailScreenState
                             flex: 3,
                             child: KicksterInput(
                               label: 'Nome da Equipe *',
-                              hintText: 'Ex.: Spartans Black, Spartans Feminino',
+                              hintText:
+                                  'Ex.: Spartans Black, Spartans Feminino',
                               controller: nameCtrl,
                               maxLength: 100,
-                              validator: (v) =>
-                                  (v == null || v.trim().isEmpty) ? 'Informe o nome da equipe' : null,
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'Informe o nome da equipe'
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -1215,12 +1315,13 @@ class _InstitutionDetailScreenState
                         label: 'Escudo / Logotipo da Equipe (Opcional)',
                         controller: logoUrlCtrl,
                         helperText: 'PNG, JPG ou WebP (máx. 5MB)',
-                        uploadFunction: ({required bytes, required filename, onProgress}) =>
-                            storageService.uploadTeamLogo(
-                          bytes: bytes,
-                          filename: filename,
-                          onProgress: onProgress,
-                        ),
+                        uploadFunction:
+                            ({required bytes, required filename, onProgress}) =>
+                                storageService.uploadTeamLogo(
+                                  bytes: bytes,
+                                  filename: filename,
+                                  onProgress: onProgress,
+                                ),
                         onUploaded: (url) => setModalState(() {}),
                         onRemoved: () => setModalState(() {}),
                       ),
@@ -1244,7 +1345,8 @@ class _InstitutionDetailScreenState
                           return SelectableChip(
                             label: m.label,
                             selected: isSel,
-                            onTap: () => setModalState(() => selectedModality = m),
+                            onTap: () =>
+                                setModalState(() => selectedModality = m),
                           );
                         }).toList(),
                       ),
@@ -1268,7 +1370,8 @@ class _InstitutionDetailScreenState
                           return SelectableChip(
                             label: g.label,
                             selected: isSel,
-                            onTap: () => setModalState(() => selectedGender = g),
+                            onTap: () =>
+                                setModalState(() => selectedGender = g),
                           );
                         }).toList(),
                       ),
@@ -1287,21 +1390,23 @@ class _InstitutionDetailScreenState
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: [
-                          AgeGroup.adult,
-                          AgeGroup.sub20,
-                          AgeGroup.sub17,
-                          AgeGroup.sub15,
-                          AgeGroup.master,
-                          AgeGroup.open,
-                        ].map((cat) {
-                          final isSel = selectedAgeGroup == cat;
-                          return SelectableChip(
-                            label: cat.label,
-                            selected: isSel,
-                            onTap: () => setModalState(() => selectedAgeGroup = cat),
-                          );
-                        }).toList(),
+                        children:
+                            [
+                              AgeGroup.adult,
+                              AgeGroup.sub20,
+                              AgeGroup.sub17,
+                              AgeGroup.sub15,
+                              AgeGroup.master,
+                              AgeGroup.open,
+                            ].map((cat) {
+                              final isSel = selectedAgeGroup == cat;
+                              return SelectableChip(
+                                label: cat.label,
+                                selected: isSel,
+                                onTap: () =>
+                                    setModalState(() => selectedAgeGroup = cat),
+                              );
+                            }).toList(),
                       ),
                     ],
                   ),
@@ -1351,10 +1456,7 @@ class _InstitutionDetailScreenState
   ///
   /// A inscrição é criada com status [CompetitionTeamStatus.pending] e
   /// aguarda homologação da organização promotora da competição.
-  void _showEnrollTeamInCompetitionModal(
-    BuildContext context,
-    Team team,
-  ) {
+  void _showEnrollTeamInCompetitionModal(BuildContext context, Team team) {
     Competition? selectedCompetition;
     bool isEnrolling = false;
 
@@ -1365,7 +1467,8 @@ class _InstitutionDetailScreenState
           return AlertDialog(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: Row(
               children: [
                 Container(
@@ -1422,21 +1525,26 @@ class _InstitutionDetailScreenState
                         color: AppColors.primary.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.2)),
+                          color: AppColors.primary.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.info_outline,
-                              size: 16, color: AppColors.primary),
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'A solicitação ficará pendente até a organização promotora homologar a inscrição.',
                               style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.primary,
-                                  height: 1.5),
+                                fontSize: 12,
+                                color: AppColors.primary,
+                                height: 1.5,
+                              ),
                             ),
                           ),
                         ],
@@ -1446,29 +1554,34 @@ class _InstitutionDetailScreenState
 
                     // Lista de competições disponíveis (apenas com janela de inscrição aberta)
                     FutureBuilder<List<Competition>>(
-                      future: Future<List<Competition>>.delayed(Duration.zero, () async {
-                        final openWindows = await ref
-                            .read(competitionRepositoryProvider)
-                            .getOpenEnrollmentWindows();
-                        final openCompetitionIds = openWindows
-                            .where((w) => w.isOpen)
-                            .map((w) => w.competitionId)
-                            .toSet();
-                        if (openCompetitionIds.isEmpty) return <Competition>[];
-                        final allCompetitions = await ref
-                            .read(competitionRepositoryProvider)
-                            .getCompetitions();
-                        return allCompetitions
-                            .where((c) => openCompetitionIds.contains(c.id))
-                            .toList();
-                      }),
+                      future: Future<List<Competition>>.delayed(
+                        Duration.zero,
+                        () async {
+                          final openWindows = await ref
+                              .read(competitionRepositoryProvider)
+                              .getOpenEnrollmentWindows();
+                          final openCompetitionIds = openWindows
+                              .where((w) => w.isOpen)
+                              .map((w) => w.competitionId)
+                              .toSet();
+                          if (openCompetitionIds.isEmpty)
+                            return <Competition>[];
+                          final allCompetitions = await ref
+                              .read(competitionRepositoryProvider)
+                              .getCompetitions();
+                          return allCompetitions
+                              .where((c) => openCompetitionIds.contains(c.id))
+                              .toList();
+                        },
+                      ),
                       builder: (ctx, snap) {
                         if (snap.connectionState == ConnectionState.waiting) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 24),
                             child: Center(
                               child: AppLoading(
-                                  message: 'Carregando competições...'),
+                                message: 'Carregando competições...',
+                              ),
                             ),
                           );
                         }
@@ -1479,20 +1592,24 @@ class _InstitutionDetailScreenState
                               color: AppColors.danger.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                  color:
-                                      AppColors.danger.withValues(alpha: 0.3)),
+                                color: AppColors.danger.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline,
-                                    size: 16, color: AppColors.danger),
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 16,
+                                  color: AppColors.danger,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Erro ao carregar competições: ${snap.error}',
                                     style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.danger),
+                                      fontSize: 12,
+                                      color: AppColors.danger,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -1507,8 +1624,9 @@ class _InstitutionDetailScreenState
                             child: Text(
                               'Nenhuma competição com inscrições abertas no momento.',
                               style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textSecondary),
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           );
@@ -1520,11 +1638,13 @@ class _InstitutionDetailScreenState
                           values: [null, ...competitions],
                           labels: [
                             'Escolher competição...',
-                            ...competitions.map((c) =>
-                                '${c.name} (${c.season}) – ${c.organizationName ?? ""}'),
+                            ...competitions.map(
+                              (c) =>
+                                  '${c.name} (${c.season}) – ${c.organizationName ?? ""}',
+                            ),
                           ],
-                          onChanged: (val) => setModalState(
-                              () => selectedCompetition = val),
+                          onChanged: (val) =>
+                              setModalState(() => selectedCompetition = val),
                         );
                       },
                     ),

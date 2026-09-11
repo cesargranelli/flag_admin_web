@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/person/view_models/roster_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,7 +114,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
                         tooltip: 'Importar CSV',
                         icon: const Icon(Icons.upload_file),
                         onPressed: () =>
-                            context.push('/rosters/import', extra: teamId),
+                            context.go('/rosters/import', extra: teamId),
                       ),
                       const SizedBox(width: 4),
                       IconButton(
@@ -194,7 +194,8 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
       return KicksterEmptyState(
         icon: Icons.person_outline,
         message: 'Nenhuma pessoa cadastrada',
-        description: 'Cadastre pessoas na plataforma para inclui-las no elenco.',
+        description:
+            'Cadastre pessoas na plataforma para inclui-las no elenco.',
         action: KicksterButton(
           label: 'Cadastrar pessoa',
           icon: Icons.add,
@@ -334,8 +335,9 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
                   IconButton(
                     tooltip: 'Remover pessoa',
                     icon: const Icon(Icons.person_remove_outlined),
-                    onPressed:
-                        entry == null ? null : () => _removePerson(entry),
+                    onPressed: entry == null
+                        ? null
+                        : () => _removePerson(entry),
                   ),
                 ],
               )
@@ -437,10 +439,7 @@ class _RosterDetailsDialogState extends State<_RosterDetailsDialog> {
           variant: KicksterButtonVariant.text,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        KicksterButton(
-          label: 'Confirmar',
-          onPressed: _submit,
-        ),
+        KicksterButton(label: 'Confirmar', onPressed: _submit),
       ],
     );
   }

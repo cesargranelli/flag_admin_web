@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
 import 'package:flag_admin_web/data/services/auth_service.dart';
-import 'package:flag_admin_web/src/api/repository_exception.dart';
-import 'package:flag_admin_web/src/core/l10n/app_strings.dart';
+import 'package:flag_admin_web/data/api/repository_exception.dart';
+import 'package:flag_admin_web/config/app_l10n.dart';
 
 /// ViewModel para a tela de Esqueci a Senha (ADR-001 / MVVM 1:1).
 class ForgotPasswordViewModel extends ChangeNotifier {
@@ -18,7 +18,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
   bool get isSent => _isSent;
 
   ForgotPasswordViewModel({required AuthRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   void clearError() {
     _errorMessage = null;

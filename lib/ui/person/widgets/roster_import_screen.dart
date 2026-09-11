@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/person/view_models/roster_import_view_model.dart';
 import 'package:flag_admin_web/domain/models/roster_batch.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +72,9 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     final success = await _vm.parseCsv(content);
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_vm.errorMessage ?? 'Erro ao processar arquivo')),
+        SnackBar(
+          content: Text(_vm.errorMessage ?? 'Erro ao processar arquivo'),
+        ),
       );
     }
   }
@@ -190,7 +192,11 @@ class _RosterImportScreenState extends ConsumerState<RosterImportScreen> {
     final success = await _vm.import();
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_vm.errorMessage ?? 'Não foi possível importar o elenco.')),
+        SnackBar(
+          content: Text(
+            _vm.errorMessage ?? 'Não foi possível importar o elenco.',
+          ),
+        ),
       );
     }
   }

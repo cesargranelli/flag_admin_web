@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_admin_web/src/api/api.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/data/api/api.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/domain/models/person_batch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,8 +16,7 @@ class PersonImportScreen extends ConsumerStatefulWidget {
   const PersonImportScreen({super.key});
 
   @override
-  ConsumerState<PersonImportScreen> createState() =>
-      _PersonImportScreenState();
+  ConsumerState<PersonImportScreen> createState() => _PersonImportScreenState();
 }
 
 class _PersonImportScreenState extends ConsumerState<PersonImportScreen> {

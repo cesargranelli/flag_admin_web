@@ -1,10 +1,10 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+﻿import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 
 /// Associação de clubes (organizações) a uma competição (issue #351).
 ///
@@ -209,9 +209,7 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
                         ),
                       ),
                       // Lista em altura finita (Expanded) → virtualização real.
-                      Expanded(
-                        child: _buildClubList(effectiveComp),
-                      ),
+                      Expanded(child: _buildClubList(effectiveComp)),
                     ],
                   ),
                 );
@@ -347,9 +345,11 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
   }) {
     final team = orgIdToTeam[club.id];
     final isAssociated = team != null;
-    final associating =
-        ref.watch(mutationProgressProvider(_associateScope)).contains(club.id);
-    final disassociating = team != null &&
+    final associating = ref
+        .watch(mutationProgressProvider(_associateScope))
+        .contains(club.id);
+    final disassociating =
+        team != null &&
         ref
             .watch(mutationProgressProvider(_disassociateScope))
             .contains(team.id);

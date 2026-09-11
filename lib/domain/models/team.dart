@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/enums/document_type.dart';
+﻿import 'package:flag_admin_web/domain/enums/document_type.dart';
 
 /// Equipe Esportiva do Flag Platform (Domain Model - ADR-001).
 ///
@@ -52,44 +52,44 @@ class Team {
   });
 
   factory Team.fromJson(Map<String, dynamic> json) => Team(
-        id: json['id'] as String,
-        organizationId: json['organizationId'] as String?,
-        clubId: json['clubId'] as String?,
-        clubName: json['clubName'] as String?,
-        competitionId: json['competitionId'] as String?,
-        divisionId: json['divisionId'] as String?,
-        name: (json['name'] as String?) ?? '',
-        shortName: json['shortName'] as String?,
-        sportName: json['sportName'] as String?,
-        athleteCount: json['athleteCount'] as int?,
-        document: json['document'] as String?,
-        documentType: json['documentType'] is String
-            ? DocumentType.fromJson(json['documentType'] as String)
-            : null,
-        logoUrl: json['logoUrl'] as String?,
-        status: json['status'] as String?,
-        createdAt: json['createdAt'] is String
-            ? DateTime.tryParse(json['createdAt'] as String)
-            : null,
-        updatedAt: json['updatedAt'] is String
-            ? DateTime.tryParse(json['updatedAt'] as String)
-            : null,
-      );
+    id: json['id'] as String,
+    organizationId: json['organizationId'] as String?,
+    clubId: json['clubId'] as String?,
+    clubName: json['clubName'] as String?,
+    competitionId: json['competitionId'] as String?,
+    divisionId: json['divisionId'] as String?,
+    name: (json['name'] as String?) ?? '',
+    shortName: json['shortName'] as String?,
+    sportName: json['sportName'] as String?,
+    athleteCount: json['athleteCount'] as int?,
+    document: json['document'] as String?,
+    documentType: json['documentType'] is String
+        ? DocumentType.fromJson(json['documentType'] as String)
+        : null,
+    logoUrl: json['logoUrl'] as String?,
+    status: json['status'] as String?,
+    createdAt: json['createdAt'] is String
+        ? DateTime.tryParse(json['createdAt'] as String)
+        : null,
+    updatedAt: json['updatedAt'] is String
+        ? DateTime.tryParse(json['updatedAt'] as String)
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        if (organizationId != null) 'organizationId': organizationId,
-        if (clubId != null) 'clubId': clubId,
-        if (clubName != null) 'clubName': clubName,
-        if (competitionId != null) 'competitionId': competitionId,
-        if (divisionId != null) 'divisionId': divisionId,
-        'name': name,
-        if (shortName != null) 'shortName': shortName,
-        if (sportName != null) 'sportName': sportName,
-        if (athleteCount != null) 'athleteCount': athleteCount,
-        if (document != null) 'document': document,
-        if (documentType != null) 'documentType': documentType!.toJson(),
-        if (logoUrl != null) 'logoUrl': logoUrl,
-        if (status != null) 'status': status,
-      };
+    'id': id,
+    if (organizationId != null) 'organizationId': organizationId,
+    if (clubId != null) 'clubId': clubId,
+    if (clubName != null) 'clubName': clubName,
+    if (competitionId != null) 'competitionId': competitionId,
+    if (divisionId != null) 'divisionId': divisionId,
+    'name': name,
+    if (shortName != null) 'shortName': shortName,
+    if (sportName != null) 'sportName': sportName,
+    if (athleteCount != null) 'athleteCount': athleteCount,
+    if (document != null) 'document': document,
+    if (documentType != null) 'documentType': documentType!.toJson(),
+    if (logoUrl != null) 'logoUrl': logoUrl,
+    if (status != null) 'status': status,
+  };
 }

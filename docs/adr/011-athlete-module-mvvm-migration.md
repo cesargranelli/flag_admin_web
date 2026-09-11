@@ -65,7 +65,7 @@ lib/
 | `lib/src/domain/models/athlete_batch.dart` | `lib/domain/models/athlete_batch.dart` | Migrar |
 | `lib/src/domain/models/roster_batch.dart` | `lib/domain/models/roster_batch.dart` | Migrar |
 | `lib/src/domain/models/team_roster.dart` | Remover (legado) | Não migrar |
-| `lib/src/domain/enums/athlete_position.dart` | `lib/src/domain/enums/athlete_position.dart` | Migrar |
+| `lib/lib/domain/enums/athlete_position.dart` | `lib/lib/domain/enums/athlete_position.dart` | Migrar |
 
 **Padrão do modelo:**
 ```dart

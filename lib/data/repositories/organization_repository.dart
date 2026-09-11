@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/domain/models/affiliation.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+﻿import 'package:flag_admin_web/domain/models/affiliation.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import '../services/organization_service.dart';
 
 /// Repository de organizações (camada Repositories).
@@ -11,7 +11,7 @@ class OrganizationRepository {
   final OrganizationService _service;
 
   OrganizationRepository({required OrganizationService service})
-      : _service = service;
+    : _service = service;
 
   // Cache em memória mapeado por flag includeDisabled
   final Map<bool, List<Organization>> _cache = {};
@@ -24,7 +24,8 @@ class OrganizationRepository {
     bool forceRefresh = false,
     bool includeDisabled = false,
   }) async {
-    final isCacheValid = _cache.containsKey(includeDisabled) &&
+    final isCacheValid =
+        _cache.containsKey(includeDisabled) &&
         _lastFetch.containsKey(includeDisabled) &&
         DateTime.now().difference(_lastFetch[includeDisabled]!) < _cacheTtl;
 
@@ -46,7 +47,10 @@ class OrganizationRepository {
 
   /// Busca organização por id. Se presente no cache e não for forceRefresh,
   /// retorna imediatamente; caso contrário, busca via service.
-  Future<Organization> getOrganization(String id, {bool forceRefresh = false}) async {
+  Future<Organization> getOrganization(
+    String id, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh) {
       for (final list in _cache.values) {
         final match = list.where((o) => o.id == id);
@@ -64,7 +68,10 @@ class OrganizationRepository {
   }
 
   /// Atualiza uma organização existente e invalida o cache.
-  Future<Organization> updateOrganization(String id, Map<String, dynamic> body) async {
+  Future<Organization> updateOrganization(
+    String id,
+    Map<String, dynamic> body,
+  ) async {
     final updated = await _service.updateOrganization(id, body);
     clearCache();
     return updated;
@@ -91,8 +98,14 @@ class OrganizationRepository {
       _service.getAffiliations(organizationId, season: season, status: status);
 
   /// Aprova um pedido de filiação de uma agremiação.
-  Future<Affiliation> approveAffiliation(String organizationId, String affiliationId) async {
-    final res = await _service.approveAffiliation(organizationId, affiliationId);
+  Future<Affiliation> approveAffiliation(
+    String organizationId,
+    String affiliationId,
+  ) async {
+    final res = await _service.approveAffiliation(
+      organizationId,
+      affiliationId,
+    );
     clearCache();
     return res;
   }
@@ -103,14 +116,19 @@ class OrganizationRepository {
     String affiliationId,
     String reason,
   ) async {
-    final res = await _service.rejectAffiliation(organizationId, affiliationId, reason);
+    final res = await _service.rejectAffiliation(
+      organizationId,
+      affiliationId,
+      reason,
+    );
     clearCache();
     return res;
   }
 
   /// Retorna as janelas de filiação cadastradas por uma organização.
-  Future<List<AffiliationWindow>> getAffiliationWindows(String organizationId) =>
-      _service.getAffiliationWindows(organizationId);
+  Future<List<AffiliationWindow>> getAffiliationWindows(
+    String organizationId,
+  ) => _service.getAffiliationWindows(organizationId);
 
   /// Retorna todas as janelas de filiação abertas no momento em qualquer organização.
   Future<List<AffiliationWindow>> getOpenAffiliationWindows() =>

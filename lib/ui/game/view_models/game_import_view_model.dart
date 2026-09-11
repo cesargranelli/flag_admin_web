@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/game_repository.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel para a importação em lote de Jogos (ADR-011 / MVVM).
 class GameImportViewModel extends ChangeNotifier {
   final GameRepository _repository;
 
   GameImportViewModel({required GameRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   List<GameImportRow>? _rows;
   List<GameImportRow>? get rows => _rows;
@@ -92,12 +92,10 @@ class GameImportViewModel extends ChangeNotifier {
       final items = <Map<String, dynamic>>[];
       for (final row in rows) {
         final homeTeam = teams
-            .where((t) =>
-                t.name.trim().toLowerCase() == row.home.toLowerCase())
+            .where((t) => t.name.trim().toLowerCase() == row.home.toLowerCase())
             .toList();
         final awayTeam = teams
-            .where((t) =>
-                t.name.trim().toLowerCase() == row.away.toLowerCase())
+            .where((t) => t.name.trim().toLowerCase() == row.away.toLowerCase())
             .toList();
         if (homeTeam.length != 1 || awayTeam.length != 1) continue;
 
@@ -107,9 +105,10 @@ class GameImportViewModel extends ChangeNotifier {
         final venue = row.venue.isEmpty
             ? null
             : venues
-                  .where((v) =>
-                      v.name.trim().toLowerCase() ==
-                      row.venue.toLowerCase())
+                  .where(
+                    (v) =>
+                        v.name.trim().toLowerCase() == row.venue.toLowerCase(),
+                  )
                   .toList();
         if (row.venue.isNotEmpty && venue!.length != 1) continue;
 

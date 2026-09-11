@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
-import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
+import 'package:flag_admin_web/domain/enums/competition_team_status.dart';
 
 /// ViewModel para Gerenciamento e Homologação de Equipes em Competições.
 class CompetitionTeamsViewModel extends ChangeNotifier {
@@ -47,7 +47,10 @@ class CompetitionTeamsViewModel extends ChangeNotifier {
 
     try {
       final results = await Future.wait([
-        _repository.getTeamsByCompetition(competitionId, forceRefresh: forceRefresh),
+        _repository.getTeamsByCompetition(
+          competitionId,
+          forceRefresh: forceRefresh,
+        ),
         _repository.listAllPlatformTeams(),
       ]);
       _teams = results[0] as List<CompetitionTeam>;

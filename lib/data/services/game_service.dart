@@ -1,10 +1,14 @@
+import 'package:flag_admin_web/domain/enums/game_status.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
-import 'package:flag_admin_web/src/domain/models/game_batch.dart';
+import 'package:flag_admin_web/domain/models/game_batch.dart';
 
 abstract class GameService {
   Future<List<Game>> listByCompetition(String competitionId);
+
   Future<List<Game>> listByRound(String roundId);
+
   Future<Game> getById(String id);
+
   Future<Game> create({
     required String roundId,
     required String homeTeamId,
@@ -12,6 +16,7 @@ abstract class GameService {
     String? venueId,
     required DateTime scheduledAt,
   });
+
   Future<Game> update(
     String id, {
     required String roundId,
@@ -20,7 +25,9 @@ abstract class GameService {
     String? venueId,
     required DateTime scheduledAt,
   });
+
   Future<Game> updateStatus(String id, GameStatus status);
+
   Future<GameBatchResult> createBatch(
     String roundId,
     List<Map<String, dynamic>> items,

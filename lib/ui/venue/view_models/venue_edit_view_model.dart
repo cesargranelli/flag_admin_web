@@ -1,31 +1,42 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flag_admin_web/data/repositories/venue_repository.dart';
 import 'package:flag_admin_web/domain/models/venue.dart';
 
 /// ViewModel para a edição de um Venue existente (ADR-011 / MVVM).
 class VenueEditViewModel extends ChangeNotifier {
+  bool _disposed = false;
   final VenueRepository _repository;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    nameController.dispose();
+    addressController.dispose();
+    mapsUrlController.dispose();
+    super.dispose();
+  }
+
+  void _safeNotify() {
+    if (!_disposed) notifyListeners();
+  }
 
   VenueEditViewModel({required VenueRepository repository})
       : _repository = repository;
 
+  // Controllers
+  final nameController = TextEditingController();
+  final addressController = TextEditingController();
+  final mapsUrlController = TextEditingController();
+
   // Form state
   String? _venueId;
   String? _organizationId;
-  String? _name;
-  String? _address;
-  String? _mapsUrl;
 
   // Getters
   String? get venueId => _venueId;
   String? get organizationId => _organizationId;
-  String? get name => _name;
-  String? get address => _address;
-  String? get mapsUrl => _mapsUrl;
-
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
-
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -33,50 +44,35 @@ class VenueEditViewModel extends ChangeNotifier {
   void init(Venue venue) {
     _venueId = venue.id;
     _organizationId = venue.organizationId;
-    _name = venue.name;
-    _address = venue.address;
-    _mapsUrl = venue.mapsUrl;
-    notifyListeners();
+    nameController.text = venue.name;
+    addressController.text = venue.address ?? '';
+    mapsUrlController.text = venue.mapsUrl ?? '';
+    _safeNotify();
   }
 
   // Setters
   void setOrganizationId(String? value) {
     _organizationId = value;
-    notifyListeners();
-  }
-
-  void setName(String? value) {
-    _name = value;
-    notifyListeners();
-  }
-
-  void setAddress(String? value) {
-    _address = value;
-    notifyListeners();
-  }
-
-  void setMapsUrl(String? value) {
-    _mapsUrl = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   /// Salva as alterações do venue.
   Future<bool> save() async {
     final venueId = _venueId;
     final organizationId = _organizationId;
-    final name = _name;
-    final address = _address;
-    final mapsUrl = _mapsUrl;
+    final name = nameController.text;
+    final address = addressController.text;
+    final mapsUrl = mapsUrlController.text;
 
-    if (venueId == null || organizationId == null || name == null || name.isEmpty) {
+    if (venueId == null || organizationId == null || name.isEmpty) {
       _errorMessage = 'Preencha todos os campos obrigatórios.';
-      notifyListeners();
+      _safeNotify();
       return false;
     }
 
     _isSubmitting = true;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       await _repository.updateVenue(
@@ -92,7 +88,7 @@ class VenueEditViewModel extends ChangeNotifier {
       return false;
     } finally {
       _isSubmitting = false;
-      notifyListeners();
+      _safeNotify();
     }
   }
 }

@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/round/view_models/round_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -85,91 +85,99 @@ class _RoundEditScreenState extends ConsumerState<RoundEditScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppLayout.form(
-          child: Form(
-            key: _formKey,
-            child: ListenableBuilder(
-              listenable: _viewModel,
-              builder: (context, _) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    KicksterDropdown<String>(
-                      label: 'Competição',
-                      value: _viewModel.competitionId ?? effectiveComp,
-                      items: compItems
-                          .map(
-                            (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        ref.read(selectedCompetitionProvider.notifier).state =
-                            value;
-                      },
-                      validator: (value) => (value == null || value.isEmpty)
-                          ? 'Selecione a competição'
-                          : null,
-                    ),
-                    const SizedBox(height: 12),
-                    KicksterInput(
-                      label: 'Número',
-                      controller: _number,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      maxLength: 3,
-                      hintText: 'Ex.: 1',
-                      validator: _validateNumber,
-                    ),
-                    const SizedBox(height: 12),
-                    KicksterInput(
-                      label: 'Nome',
-                      controller: _name,
-                      maxLength: 100,
-                      textCapitalization: TextCapitalization.sentences,
-                      onChanged: (value) => _viewModel.setName(value),
-                      validator: (value) =>
-                          (value == null || value.trim().isEmpty)
-                              ? 'Informe o nome'
-                              : null,
-                    ),
-                    const SizedBox(height: 12),
-                    KicksterDropdown<RoundType>(
-                      label: 'Tipo',
-                      helperText:
-                          'Fases: Regular, Playoffs, Wildcard, Semifinal, Final',
-                      value: _viewModel.type,
-                      items: RoundType.values
-                          .map(
-                            (t) => DropdownMenuItem(value: t, child: Text(t.label)),
-                          )
-                          .toList(),
-                      onChanged: (value) => _viewModel.setType(value),
-                      validator: (value) =>
-                          value == null ? 'Selecione o tipo' : null,
-                    ),
-                    if (_viewModel.errorMessage != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _viewModel.errorMessage!,
-                        style: TextStyle(
-                          color: AppColors.danger,
-                          fontWeight: FontWeight.w600,
+            child: Form(
+              key: _formKey,
+              child: ListenableBuilder(
+                listenable: _viewModel,
+                builder: (context, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      KicksterDropdown<String>(
+                        label: 'Competição',
+                        value: _viewModel.competitionId ?? effectiveComp,
+                        items: compItems
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          ref.read(selectedCompetitionProvider.notifier).state =
+                              value;
+                        },
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? 'Selecione a competição'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      KicksterInput(
+                        label: 'Número',
+                        controller: _number,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        maxLength: 3,
+                        hintText: 'Ex.: 1',
+                        validator: _validateNumber,
+                      ),
+                      const SizedBox(height: 12),
+                      KicksterInput(
+                        label: 'Nome',
+                        controller: _name,
+                        maxLength: 100,
+                        textCapitalization: TextCapitalization.sentences,
+                        onChanged: (value) => _viewModel.setName(value),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                            ? 'Informe o nome'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      KicksterDropdown<RoundType>(
+                        label: 'Tipo',
+                        helperText:
+                            'Fases: Regular, Playoffs, Wildcard, Semifinal, Final',
+                        value: _viewModel.type,
+                        items: RoundType.values
+                            .map(
+                              (t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(t.label),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) => _viewModel.setType(value),
+                        validator: (value) =>
+                            value == null ? 'Selecione o tipo' : null,
+                      ),
+                      if (_viewModel.errorMessage != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _viewModel.errorMessage!,
+                          style: TextStyle(
+                            color: AppColors.danger,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                      ],
+                      const SizedBox(height: 24),
+                      KicksterButton(
+                        label: 'Salvar',
+                        icon: Icons.check,
+                        loading: _viewModel.isSubmitting,
+                        onPressed: _viewModel.isSubmitting ? null : _save,
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    KicksterButton(
-                      label: 'Salvar',
-                      icon: Icons.check,
-                      loading: _viewModel.isSubmitting,
-                      onPressed: _viewModel.isSubmitting ? null : _save,
-                    ),
-                  ],
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }

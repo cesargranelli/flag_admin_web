@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/organization_repository.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel dedicada exclusivamente à EDIÇÃO de Organização existente (ADR-001 / MVVM 1:1).
 ///
@@ -28,8 +28,8 @@ class OrganizationEditViewModel extends ChangeNotifier {
     required OrganizationRepository repository,
     required this.organizationId,
     Organization? initialOrganization,
-  })  : _repository = repository,
-        _organization = initialOrganization;
+  }) : _repository = repository,
+       _organization = initialOrganization;
 
   /// Carrega os dados da organização a ser editada caso não tenham sido passados inicialmente.
   Future<void> load({bool forceRefresh = false}) async {
@@ -60,8 +60,10 @@ class OrganizationEditViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _updatedOrganization =
-          await _repository.updateOrganization(organizationId, body);
+      _updatedOrganization = await _repository.updateOrganization(
+        organizationId,
+        body,
+      );
       _organization = _updatedOrganization;
       _errorMessage = null;
       return true;

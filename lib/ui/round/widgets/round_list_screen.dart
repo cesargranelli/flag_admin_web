@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/domain/competition_permissions.dart';
 import 'package:flag_admin_web/ui/round/view_models/round_list_view_model.dart';
 import 'package:flutter/material.dart';
@@ -48,8 +48,7 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
     final selectedCompetitionObj = compItems
         .where((c) => c.id == effectiveComp)
         .firstOrNull;
-    final isDraft =
-        selectedCompetitionObj?.status == CompetitionStatus.draft;
+    final isDraft = selectedCompetitionObj?.status == CompetitionStatus.draft;
     final canEdit = canEditCompetition(
       ref.watch(authControllerProvider.select((a) => a.state.user)),
       selectedCompetitionObj,
@@ -94,8 +93,7 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
                   return KicksterEmptyState(
                     icon: Icons.emoji_events_outlined,
                     message: 'Nenhuma competição cadastrada',
-                    description:
-                        'Crie uma competição para adicionar rodadas.',
+                    description: 'Crie uma competição para adicionar rodadas.',
                     action: KicksterButton(
                       label: 'Criar competição',
                       icon: Icons.add,
@@ -123,8 +121,9 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
                               .toList(),
                           onChanged: (value) {
                             ref
-                                .read(selectedCompetitionProvider.notifier)
-                                .state = value;
+                                    .read(selectedCompetitionProvider.notifier)
+                                    .state =
+                                value;
                             _viewModel.setSelectedCompetition(value);
                           },
                         ),
@@ -132,9 +131,9 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
                           EditRestrictionNote(
                             message: !isDraft
                                 ? 'Competição publicada — as rodadas estão '
-                                    'travadas.'
+                                      'travadas.'
                                 : 'Apenas o criador da competição pode '
-                                    'gerenciar rodadas.',
+                                      'gerenciar rodadas.',
                           ),
                       ],
                     ),
@@ -148,19 +147,18 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
                                   loading: () => const AppLoading(
                                     message: 'Carregando rodadas...',
                                   ),
-                                  error: (error, stackTrace) =>
-                                      AppErrorState(
+                                  error: (error, stackTrace) => AppErrorState(
                                     message:
                                         'Não foi possível carregar as rodadas',
                                     onRetry: () => ref.invalidate(
-                                        roundsProvider(effectiveComp)),
+                                      roundsProvider(effectiveComp),
+                                    ),
                                   ),
                                   data: (items) {
                                     if (items.isEmpty) {
                                       return KicksterEmptyState(
                                         icon: Icons.format_list_numbered,
-                                        message:
-                                            'Nenhuma rodada cadastrada',
+                                        message: 'Nenhuma rodada cadastrada',
                                         description:
                                             'Crie a primeira rodada da competição.',
                                         action: KicksterButton(
@@ -180,19 +178,17 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
                                       searchField: _searchController,
                                       countLabel: 'rodadas',
                                       countLabelSingular: 'rodada',
-                                      emptyMessage:
-                                          'Nenhuma rodada encontrada',
-                                      gridPadding:
-                                          const EdgeInsets.all(16),
+                                      emptyMessage: 'Nenhuma rodada encontrada',
+                                      gridPadding: const EdgeInsets.all(16),
                                       filter: (all, query) => query.isEmpty
                                           ? all
                                           : all
-                                              .where(
-                                                (r) => r.name
-                                                    .toLowerCase()
-                                                    .contains(query),
-                                              )
-                                              .toList(growable: false),
+                                                .where(
+                                                  (r) => r.name
+                                                      .toLowerCase()
+                                                      .contains(query),
+                                                )
+                                                .toList(growable: false),
                                     );
                                   },
                                 )
@@ -229,7 +225,7 @@ class _RoundListScreenState extends ConsumerState<RoundListScreen> {
         size: 22,
         color: AppColors.textSecondary,
       ),
-      onTap: () => context.push('/rounds/${round.id}', extra: round),
+      onTap: () => context.go('/rounds/${round.id}', extra: round),
     );
   }
 }

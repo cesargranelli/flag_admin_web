@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/organization_repository.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel da feature de Organizações (camada ViewModels).
 ///
@@ -10,7 +10,7 @@ class OrganizationViewModel extends ChangeNotifier {
   final OrganizationRepository _repository;
 
   OrganizationViewModel({required OrganizationRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   List<Organization> _organizations = const [];
   List<Organization> get organizations => _organizations;
@@ -41,18 +41,20 @@ class OrganizationViewModel extends ChangeNotifier {
 
   /// Retorna as organizações aplicando filtros de busca e tipo.
   List<Organization> get filteredOrganizations {
-    return _organizations.where((org) {
-      if (_typeFilter != null && org.organizationType != _typeFilter) {
-        return false;
-      }
-      if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase().trim();
-        final tradeMatch = org.tradeName.toLowerCase().contains(query);
-        final legalMatch = org.legalName.toLowerCase().contains(query);
-        if (!tradeMatch && !legalMatch) return false;
-      }
-      return true;
-    }).toList(growable: false);
+    return _organizations
+        .where((org) {
+          if (_typeFilter != null && org.organizationType != _typeFilter) {
+            return false;
+          }
+          if (_searchQuery.isNotEmpty) {
+            final query = _searchQuery.toLowerCase().trim();
+            final tradeMatch = org.tradeName.toLowerCase().contains(query);
+            final legalMatch = org.legalName.toLowerCase().contains(query);
+            if (!tradeMatch && !legalMatch) return false;
+          }
+          return true;
+        })
+        .toList(growable: false);
   }
 
   /// Carrega as organizações da camada Repository (Stale-While-Revalidate).
@@ -85,8 +87,10 @@ class OrganizationViewModel extends ChangeNotifier {
   }
 
   /// Alias explícito conforme ADR-001.
-  Future<void> loadOrganizations({bool forceRefresh = false, bool silent = false}) =>
-      load(forceRefresh: forceRefresh, silent: silent);
+  Future<void> loadOrganizations({
+    bool forceRefresh = false,
+    bool silent = false,
+  }) => load(forceRefresh: forceRefresh, silent: silent);
 
   /// Exclui/desativa uma organização.
   Future<bool> delete(String id) async {

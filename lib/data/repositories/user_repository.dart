@@ -1,5 +1,5 @@
 import 'package:flag_admin_web/data/services/auth_service.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// Repositório de Usuários (ADR-001 - Cache TTL 30s).
 class UserRepository {

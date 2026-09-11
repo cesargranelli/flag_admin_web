@@ -1,7 +1,8 @@
+import 'package:flag_admin_web/data/api/api_client.dart';
+import 'package:flag_admin_web/data/api/services/round_api.dart';
 import 'package:flag_admin_web/data/services/round_service.dart';
+import 'package:flag_admin_web/domain/enums/round_type.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
-import 'package:flag_admin_web/src/api/api_client.dart';
-import 'package:flag_admin_web/src/api/services/round_api.dart';
 
 class ApiRoundService implements RoundService {
   final RoundApi _api;
@@ -21,13 +22,12 @@ class ApiRoundService implements RoundService {
     required int number,
     required String name,
     required RoundType type,
-  }) =>
-      _api.create(
-        competitionId: competitionId,
-        number: number,
-        name: name,
-        type: type,
-      );
+  }) => _api.create(
+    competitionId: competitionId,
+    number: number,
+    name: name,
+    type: type,
+  );
 
   @override
   Future<Round> update(
@@ -36,12 +36,11 @@ class ApiRoundService implements RoundService {
     required int number,
     required String name,
     required RoundType type,
-  }) =>
-      _api.update(
-        id,
-        competitionId: competitionId,
-        number: number,
-        name: name,
-        type: type,
-      );
+  }) => _api.update(
+    id,
+    competitionId: competitionId,
+    number: number,
+    name: name,
+    type: type,
+  );
 }

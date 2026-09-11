@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/roster_repository.dart';
 import 'package:flag_admin_web/data/repositories/person_repository.dart';
 import 'package:flag_admin_web/domain/models/roster_batch.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel para a importação em lote de elenco (ADR-011 / MVVM).
 class RosterImportViewModel extends ChangeNotifier {
@@ -14,8 +14,8 @@ class RosterImportViewModel extends ChangeNotifier {
     required RosterRepository rosterRepository,
     required PersonRepository personRepository,
     required this.teamId,
-  })  : _rosterRepository = rosterRepository,
-        _personRepository = personRepository;
+  }) : _rosterRepository = rosterRepository,
+       _personRepository = personRepository;
 
   List<String>? _personNames;
   List<String>? get personNames => _personNames;

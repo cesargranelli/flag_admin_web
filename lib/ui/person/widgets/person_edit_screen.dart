@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+﻿import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -110,7 +110,8 @@ class _PersonEditScreenState extends ConsumerState<PersonEditScreen> {
   String? _validatePhotoUrl(String? value) {
     if (value == null || value.trim().isEmpty) return null;
     final uri = Uri.tryParse(value.trim());
-    final valid = uri != null &&
+    final valid =
+        uri != null &&
         (uri.scheme == 'http' || uri.scheme == 'https') &&
         uri.host.isNotEmpty;
     return valid ? null : 'Informe uma URL valida (http/https)';
@@ -257,9 +258,7 @@ class _PersonEditScreenState extends ConsumerState<PersonEditScreen> {
       ref.invalidate(personDetailViewModelProvider(widget.personId!));
       ref.read(personViewModelProvider).load(forceRefresh: true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pessoa atualizada com sucesso'),
-        ),
+        const SnackBar(content: Text('Pessoa atualizada com sucesso')),
       );
       context.go('/persons/${widget.personId}');
     } else {
@@ -279,8 +278,9 @@ class _PersonEditScreenState extends ConsumerState<PersonEditScreen> {
   }
 
   Future<void> _handleBack() async {
-    final isSubmitting =
-        ref.read(personEditViewModelProvider(widget.personId!)).isSubmitting;
+    final isSubmitting = ref
+        .read(personEditViewModelProvider(widget.personId!))
+        .isSubmitting;
     if (_hasChanges && !isSubmitting && !_saved) {
       final discard = await showKicksterConfirm(
         context: context,
@@ -325,119 +325,135 @@ class _PersonEditScreenState extends ConsumerState<PersonEditScreen> {
           child: vm.isLoading
               ? const AppLoading(message: 'Carregando pessoa...')
               : vm.errorMessage != null && vm.person == null
-                  ? AppErrorState(
-                      message: 'Nao foi possivel carregar a pessoa',
-                      onRetry: () => ref
-                          .read(personEditViewModelProvider(personId))
-                          .load(forceRefresh: true),
-                    )
-                  : Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (_errorMessage != null)
-                            _errorBanner(_errorMessage!),
-                          _section('Dados pessoais', Icons.person_outline, [
-                            _field('Nome', _name,
-                                hint: 'Informe o nome completo',
-                                maxLength: 100,
-                                validator: (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                        ? 'Informe o nome'
-                                        : null),
-                            const SizedBox(height: 12),
-                            _field('CPF', _cpf,
-                                keyboardType: TextInputType.number,
-                                hint: '000.000.000-00',
-                                onChanged: (value) {
-                              final masked = DocumentUtils.maskCpf(value);
-                              if (masked != value) {
-                                _cpf.value = TextEditingValue(
-                                  text: masked,
-                                  selection: TextSelection.collapsed(
-                                      offset: masked.length),
-                                );
-                              }
-                            }, validator: _validateCpf),
-                          ]),
-                          _section('Funcao e dados complementares', Icons.badge_outlined, [
-                            DropdownButtonFormField<String>(
-                              value: _role,
-                              decoration: kicksterFieldDecoration(
-                                labelText: 'Funcao',
-                              ),
-                              items: _roleOptions.entries
-                                  .map((e) => DropdownMenuItem(
-                                        value: e.key,
-                                        child: Text(e.value),
-                                      ))
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() => _role = value);
-                                  _markDirty();
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            DropdownButtonFormField<String>(
-                              value: _gender,
-                              decoration: kicksterFieldDecoration(
-                                labelText: 'Genero',
-                              ),
-                              items: _genderOptions.entries
-                                  .map((e) => DropdownMenuItem(
-                                        value: e.key,
-                                        child: Text(e.value),
-                                      ))
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() => _gender = value);
-                                  _markDirty();
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: _pickBirthDate,
-                              child: InputDecorator(
-                                decoration: kicksterFieldDecoration(
-                                  labelText: 'Data de nascimento',
+              ? AppErrorState(
+                  message: 'Nao foi possivel carregar a pessoa',
+                  onRetry: () => ref
+                      .read(personEditViewModelProvider(personId))
+                      .load(forceRefresh: true),
+                )
+              : Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_errorMessage != null) _errorBanner(_errorMessage!),
+                      _section('Dados pessoais', Icons.person_outline, [
+                        _field(
+                          'Nome',
+                          _name,
+                          hint: 'Informe o nome completo',
+                          maxLength: 100,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Informe o nome'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        _field(
+                          'CPF',
+                          _cpf,
+                          keyboardType: TextInputType.number,
+                          hint: '000.000.000-00',
+                          onChanged: (value) {
+                            final masked = DocumentUtils.maskCpf(value);
+                            if (masked != value) {
+                              _cpf.value = TextEditingValue(
+                                text: masked,
+                                selection: TextSelection.collapsed(
+                                  offset: masked.length,
                                 ),
-                                child: Text(
-                                  _birthDate != null
-                                      ? '${_birthDate!.day.toString().padLeft(2, '0')}/${_birthDate!.month.toString().padLeft(2, '0')}/${_birthDate!.year}'
-                                      : 'Selecionar data',
-                                  style: TextStyle(
-                                    color: _birthDate != null
-                                        ? AppColors.textPrimary
-                                        : AppColors.textSecondary,
+                              );
+                            }
+                          },
+                          validator: _validateCpf,
+                        ),
+                      ]),
+                      _section(
+                        'Funcao e dados complementares',
+                        Icons.badge_outlined,
+                        [
+                          DropdownButtonFormField<String>(
+                            initialValue: _role,
+                            decoration: kicksterFieldDecoration(
+                              labelText: 'Funcao',
+                            ),
+                            items: _roleOptions.entries
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.key,
+                                    child: Text(e.value),
                                   ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _role = value);
+                                _markDirty();
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            initialValue: _gender,
+                            decoration: kicksterFieldDecoration(
+                              labelText: 'Genero',
+                            ),
+                            items: _genderOptions.entries
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.key,
+                                    child: Text(e.value),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _gender = value);
+                                _markDirty();
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          InkWell(
+                            onTap: _pickBirthDate,
+                            child: InputDecorator(
+                              decoration: kicksterFieldDecoration(
+                                labelText: 'Data de nascimento',
+                              ),
+                              child: Text(
+                                _birthDate != null
+                                    ? '${_birthDate!.day.toString().padLeft(2, '0')}/${_birthDate!.month.toString().padLeft(2, '0')}/${_birthDate!.year}'
+                                    : 'Selecionar data',
+                                style: TextStyle(
+                                  color: _birthDate != null
+                                      ? AppColors.textPrimary
+                                      : AppColors.textSecondary,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            _field('Cidade', _city,
-                                hint: 'Ex.: Sao Paulo'),
-                          ]),
-                          _section('Foto', Icons.photo_camera_outlined, [
-                            _field('URL da foto (opcional)', _photoUrl,
-                                keyboardType: TextInputType.url,
-                                hint: 'Ex.: https://...',
-                                validator: _validatePhotoUrl),
-                          ]),
-                          const SizedBox(height: 8),
-                          KicksterButton(
-                            label: 'Salvar alteracoes',
-                            icon: Icons.check,
-                            loading: vm.isSubmitting,
-                            onPressed: vm.isSubmitting ? null : _save,
                           ),
+                          const SizedBox(height: 12),
+                          _field('Cidade', _city, hint: 'Ex.: Sao Paulo'),
                         ],
                       ),
-                    ),
+                      _section('Foto', Icons.photo_camera_outlined, [
+                        _field(
+                          'URL da foto (opcional)',
+                          _photoUrl,
+                          keyboardType: TextInputType.url,
+                          hint: 'Ex.: https://...',
+                          validator: _validatePhotoUrl,
+                        ),
+                      ]),
+                      const SizedBox(height: 8),
+                      KicksterButton(
+                        label: 'Salvar alteracoes',
+                        icon: Icons.check,
+                        loading: vm.isSubmitting,
+                        onPressed: vm.isSubmitting ? null : _save,
+                      ),
+                    ],
+                  ),
+                ),
         ),
       ),
     );

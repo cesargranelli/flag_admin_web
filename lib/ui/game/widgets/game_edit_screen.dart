@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+﻿import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/game/view_models/game_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,140 +108,148 @@ class _GameEditScreenState extends ConsumerState<GameEditScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppLayout.form(
-          child: Form(
-            key: _formKey,
-            child: ListenableBuilder(
-              listenable: _viewModel,
-              builder: (context, _) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    (rounds?.when(
-                          loading: () => const LinearProgressIndicator(),
-                          error: (e, s) => const Text('Erro ao carregar rodadas'),
-                          data: (items) => KicksterDropdown<String>(
-                            label: 'Rodada',
-                            value: _viewModel.roundId,
-                            items: items
-                                .map(
-                                  (r) => DropdownMenuItem(
-                                    value: r.id,
-                                    child: Text('Rodada ${r.number} - ${r.name}'),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) => _viewModel.setRoundId(value),
-                            validator: (value) => (value == null || value.isEmpty)
-                                ? 'Selecione a rodada'
-                                : null,
-                          ),
-                        ) ??
-                        const LinearProgressIndicator()),
-                    const SizedBox(height: 12),
-                    (teams?.when(
-                          loading: () => const LinearProgressIndicator(),
-                          error: (e, s) => const Text('Erro ao carregar times'),
-                          data: (items) => KicksterDropdown<String>(
-                            label: 'Time da casa',
-                            value: _viewModel.homeTeamId,
-                            items: items
-                                .map(
-                                  (t) => DropdownMenuItem(
-                                    value: t.id,
-                                    child: Text(t.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) => _viewModel.setHomeTeamId(value),
-                            validator: (value) => (value == null || value.isEmpty)
-                                ? 'Selecione o time da casa'
-                                : null,
-                          ),
-                        ) ??
-                        const LinearProgressIndicator()),
-                    const SizedBox(height: 12),
-                    (teams?.when(
-                          loading: () => const LinearProgressIndicator(),
-                          error: (e, s) => const Text('Erro ao carregar times'),
-                          data: (items) => KicksterDropdown<String>(
-                            label: 'Time visitante',
-                            value: _viewModel.awayTeamId,
-                            items: items
-                                .map(
-                                  (t) => DropdownMenuItem(
-                                    value: t.id,
-                                    child: Text(t.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) => _viewModel.setAwayTeamId(value),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Selecione o time visitante';
-                              }
-                              if (_viewModel.homeTeamId != null &&
-                                  value == _viewModel.homeTeamId) {
-                                return 'O time visitante deve ser diferente do time da casa';
-                              }
-                              return null;
-                            },
-                          ),
-                        ) ??
-                        const LinearProgressIndicator()),
-                    const SizedBox(height: 12),
-                    venues.when(
-                      loading: () => const LinearProgressIndicator(),
-                      error: (e, s) => const Text('Erro ao carregar campos'),
-                      data: (items) => KicksterDropdown<String?>(
-                        label: 'Campo (opcional)',
-                        value: _viewModel.venueId,
-                        items: [
-                          const DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text('Sem campo'),
-                          ),
-                          ...items.map(
-                            (v) => DropdownMenuItem<String?>(
-                              value: v.id,
-                              child: Text(v.name),
+            child: Form(
+              key: _formKey,
+              child: ListenableBuilder(
+                listenable: _viewModel,
+                builder: (context, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      (rounds?.when(
+                            loading: () => const LinearProgressIndicator(),
+                            error: (e, s) =>
+                                const Text('Erro ao carregar rodadas'),
+                            data: (items) => KicksterDropdown<String>(
+                              label: 'Rodada',
+                              value: _viewModel.roundId,
+                              items: items
+                                  .map(
+                                    (r) => DropdownMenuItem(
+                                      value: r.id,
+                                      child: Text(
+                                        'Rodada ${r.number} - ${r.name}',
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) =>
+                                  _viewModel.setRoundId(value),
+                              validator: (value) =>
+                                  (value == null || value.isEmpty)
+                                  ? 'Selecione a rodada'
+                                  : null,
                             ),
-                          ),
-                        ],
-                        onChanged: (value) => _viewModel.setVenueId(value),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    KicksterInput(
-                      label: 'Horário',
-                      controller: _scheduleController,
-                      readOnly: true,
-                      onTap: _pickSchedule,
-                      hintText: 'Selecione data e hora',
-                      suffixIcon: const Icon(Icons.schedule),
-                    ),
-                    if (_viewModel.errorMessage != null) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        _viewModel.errorMessage!,
-                        style: TextStyle(
-                          color: AppColors.danger,
+                          ) ??
+                          const LinearProgressIndicator()),
+                      const SizedBox(height: 12),
+                      (teams?.when(
+                            loading: () => const LinearProgressIndicator(),
+                            error: (e, s) =>
+                                const Text('Erro ao carregar times'),
+                            data: (items) => KicksterDropdown<String>(
+                              label: 'Time da casa',
+                              value: _viewModel.homeTeamId,
+                              items: items
+                                  .map(
+                                    (t) => DropdownMenuItem(
+                                      value: t.id,
+                                      child: Text(t.name),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) =>
+                                  _viewModel.setHomeTeamId(value),
+                              validator: (value) =>
+                                  (value == null || value.isEmpty)
+                                  ? 'Selecione o time da casa'
+                                  : null,
+                            ),
+                          ) ??
+                          const LinearProgressIndicator()),
+                      const SizedBox(height: 12),
+                      (teams?.when(
+                            loading: () => const LinearProgressIndicator(),
+                            error: (e, s) =>
+                                const Text('Erro ao carregar times'),
+                            data: (items) => KicksterDropdown<String>(
+                              label: 'Time visitante',
+                              value: _viewModel.awayTeamId,
+                              items: items
+                                  .map(
+                                    (t) => DropdownMenuItem(
+                                      value: t.id,
+                                      child: Text(t.name),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) =>
+                                  _viewModel.setAwayTeamId(value),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Selecione o time visitante';
+                                }
+                                if (_viewModel.homeTeamId != null &&
+                                    value == _viewModel.homeTeamId) {
+                                  return 'O time visitante deve ser diferente do time da casa';
+                                }
+                                return null;
+                              },
+                            ),
+                          ) ??
+                          const LinearProgressIndicator()),
+                      const SizedBox(height: 12),
+                      venues.when(
+                        loading: () => const LinearProgressIndicator(),
+                        error: (e, s) => const Text('Erro ao carregar campos'),
+                        data: (items) => KicksterDropdown<String?>(
+                          label: 'Campo (opcional)',
+                          value: _viewModel.venueId,
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('Sem campo'),
+                            ),
+                            ...items.map(
+                              (v) => DropdownMenuItem<String?>(
+                                value: v.id,
+                                child: Text(v.name),
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) => _viewModel.setVenueId(value),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      KicksterInput(
+                        label: 'Horário',
+                        controller: _scheduleController,
+                        readOnly: true,
+                        onTap: _pickSchedule,
+                        hintText: 'Selecione data e hora',
+                        suffixIcon: const Icon(Icons.schedule),
+                      ),
+                      if (_viewModel.errorMessage != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          _viewModel.errorMessage!,
+                          style: TextStyle(color: AppColors.danger),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      KicksterButton(
+                        label: 'Salvar',
+                        icon: Icons.check,
+                        loading: _viewModel.isSubmitting,
+                        onPressed: _viewModel.isSubmitting ? null : _save,
+                      ),
                     ],
-                    const SizedBox(height: 24),
-                    KicksterButton(
-                      label: 'Salvar',
-                      icon: Icons.check,
-                      loading: _viewModel.isSubmitting,
-                      onPressed: _viewModel.isSubmitting ? null : _save,
-                    ),
-                  ],
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }

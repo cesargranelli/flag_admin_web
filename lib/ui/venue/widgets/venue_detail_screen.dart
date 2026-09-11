@@ -1,8 +1,7 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
-import 'package:flag_admin_web/ui/venue/view_models/venue_detail_view_model.dart'
-    as vm;
+﻿import 'package:flag_admin_web/domain/models/venue.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,53 +22,51 @@ class VenueDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
-  late vm.VenueDetailViewModel _viewModel;
-
   @override
   void initState() {
     super.initState();
-    _viewModel = vm.VenueDetailViewModel(
-      repository: ref.watch(venueRepositoryProvider),
-    );
-    if (widget.venueId != null) {
-      _viewModel.load(widget.venueId!);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final id = widget.venueId ?? widget.venue?.id;
+      if (id != null && id.isNotEmpty) {
+        ref.read(venueDetailViewModelProvider(id)).load(id);
+        if (widget.venue != null) {
+          ref.read(venueDetailViewModelProvider(id)).setVenue(widget.venue!);
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final id = widget.venueId ?? widget.venue?.id ?? '';
+    final vm = ref.watch(venueDetailViewModelProvider(id));
     return AppScreen(
-      title: widget.venue?.name ?? 'Campo',
+      title: vm.venue?.name ?? widget.venue?.name ?? 'Campo',
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.venues, route: '/venues'),
-        if (widget.venue?.name != null) BreadcrumbItem(widget.venue!.name),
+        if ((vm.venue?.name ?? widget.venue?.name) != null)
+          BreadcrumbItem(vm.venue?.name ?? widget.venue!.name),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Conteúdo
           ListenableBuilder(
-            listenable: _viewModel,
+            listenable: vm,
             builder: (context, _) {
-              if (_viewModel.isLoading) {
+              if (vm.isLoading) {
                 return const AppLoading(message: 'Carregando campo...');
               }
-
-              if (_viewModel.errorMessage != null) {
+              if (vm.errorMessage != null) {
                 return AppErrorState(
-                  message: _viewModel.errorMessage!,
-                  onRetry: () => _viewModel.load(widget.venueId!),
+                  message: vm.errorMessage!,
+                  onRetry: () => vm.load(id),
                 );
               }
-
-              final venue = _viewModel.venue;
+              final venue = vm.venue ?? widget.venue;
               if (venue == null) {
-                return const AppErrorState(
-                  message: 'Campo não encontrado',
-                );
+                return const AppErrorState(message: 'Campo não encontrado');
               }
-
               return _buildDetail(context, venue);
             },
           ),
@@ -91,74 +88,79 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
     final orgName = orgAsync?.valueOrNull?.tradeName ?? '';
 
     return AppLayout.detail(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 1,
-              shadowColor: AppColors.black.withValues(alpha: 0.08),
-              color: AppColors.surface,
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.line, width: 1),
-              ),
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.sports_soccer,
-                              color: AppColors.primary, size: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            elevation: 1,
+            shadowColor: AppColors.black.withValues(alpha: 0.08),
+            color: AppColors.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.line, width: 1),
+            ),
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                venue.name,
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 4),
-                              if (orgName.isNotEmpty)
-                                Text(
-                                  orgName,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary),
-                                ),
-                            ],
-                          ),
+                        child: const Icon(
+                          Icons.sports_soccer,
+                          color: AppColors.primary,
+                          size: 32,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    KicksterButton(
-                      label: 'Editar dados',
-                      icon: Icons.edit_outlined,
-                      onPressed: () => context.go(
-                        '/venues/${venue.id}/edit',
-                        extra: venue,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              venue.name,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            if (orgName.isNotEmpty)
+                              Text(
+                                orgName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  KicksterButton(
+                    label: 'Editar dados',
+                    icon: Icons.edit_outlined,
+                    onPressed: () =>
+                        context.go('/venues/${venue.id}/edit', extra: venue),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            AppInfoCard(children: [
+          ),
+          const SizedBox(height: 16),
+          AppInfoCard(
+            children: [
               if (orgName.isNotEmpty)
                 AppInfoRow(label: 'Organização', value: orgName),
               AppInfoRow(
@@ -167,25 +169,28 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
               ),
               if (venue.mapsUrl != null && venue.mapsUrl!.isNotEmpty)
                 AppInfoRow(label: 'URL do mapa', value: venue.mapsUrl!),
-            ]),
-            if (venue.mapsUrl != null && venue.mapsUrl!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              KicksterButton(
-                label: 'Abrir no mapa',
-                icon: Icons.map_outlined,
-                variant: KicksterButtonVariant.outline,
-                onPressed: () => _openMap(context, venue.mapsUrl!),
-              ),
             ],
-            const SizedBox(height: 16),
-            Text(
-              'Criado em ${formatBrDate(venue.createdAt)}'
-              '${venue.updatedAt != null ? ' • Atualizado em ${formatBrDate(venue.updatedAt)}' : ''}',
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.textSecondary),
+          ),
+          if (venue.mapsUrl != null && venue.mapsUrl!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            KicksterButton(
+              label: 'Abrir no mapa',
+              icon: Icons.map_outlined,
+              variant: KicksterButtonVariant.outline,
+              onPressed: () => _openMap(context, venue.mapsUrl!),
             ),
           ],
-        ),
+          const SizedBox(height: 16),
+          Text(
+            'Criado em ${formatBrDate(venue.createdAt)}'
+            '${venue.updatedAt != null ? ' • Atualizado em ${formatBrDate(venue.updatedAt)}' : ''}',
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

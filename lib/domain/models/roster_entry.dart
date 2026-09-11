@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/enums/athlete_position.dart';
+﻿import 'package:flag_admin_web/domain/enums/athlete_position.dart';
 
 /// Entrada do elenco de um time.
 ///
@@ -29,27 +29,27 @@ class RosterEntry {
   });
 
   factory RosterEntry.fromJson(Map<String, dynamic> json) => RosterEntry(
-        id: json['id'] as String,
-        rosterId: json['rosterId'] as String,
-        athleteId: json['athleteId'] as String,
-        athleteName: json['athleteName'] as String,
-        nickname: json['nickname'] as String?,
-        position: json['position'] is String
-            ? AthletePosition.fromJson(json['position'] as String)
-            : null,
-        number: json['number'] as int?,
-        photoUrl: json['photoUrl'] as String?,
-        status: json['status'] as String,
-        createdAt: json['createdAt'] is String
-            ? DateTime.tryParse(json['createdAt'] as String)
-            : null,
-      );
+    id: json['id'] as String,
+    rosterId: json['rosterId'] as String,
+    athleteId: json['athleteId'] as String,
+    athleteName: json['athleteName'] as String,
+    nickname: json['nickname'] as String?,
+    position: json['position'] is String
+        ? AthletePosition.fromJson(json['position'] as String)
+        : null,
+    number: json['number'] as int?,
+    photoUrl: json['photoUrl'] as String?,
+    status: json['status'] as String,
+    createdAt: json['createdAt'] is String
+        ? DateTime.tryParse(json['createdAt'] as String)
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'rosterId': rosterId,
-        'athleteId': athleteId,
-        'athleteName': athleteName,
-        'status': status,
-      };
+    'id': id,
+    'rosterId': rosterId,
+    'athleteId': athleteId,
+    'athleteName': athleteName,
+    'status': status,
+  };
 }

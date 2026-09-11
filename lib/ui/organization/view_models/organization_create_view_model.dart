@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/organization_repository.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel dedicada exclusivamente ao CADASTRO de nova Organização (ADR-001 / MVVM 1:1).
 ///
@@ -18,7 +18,7 @@ class OrganizationCreateViewModel extends ChangeNotifier {
   Organization? get createdOrganization => _createdOrganization;
 
   OrganizationCreateViewModel({required OrganizationRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   /// Cria uma nova organização.
   Future<bool> createOrganization(Map<String, dynamic> body) async {

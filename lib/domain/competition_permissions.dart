@@ -1,5 +1,6 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/domain/enums/user_role.dart';
 import 'package:flag_admin_web/domain/models/auth_user.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// Regras de permissão de edição sobre uma competição (issue #261).
 ///

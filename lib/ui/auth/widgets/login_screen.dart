@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+﻿import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -67,7 +67,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.sports, color: AppColors.primary, size: 20),
+                          Icon(
+                            Icons.sports,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
                           SizedBox(width: 8),
                           Text(
                             'Flag Platform',
@@ -124,17 +128,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           tooltip: vm.obscurePassword
                               ? 'Mostrar senha'
                               : 'Ocultar senha',
-                          icon: Icon(vm.obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
+                          icon: Icon(
+                            vm.obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
                           onPressed: vm.toggleObscurePassword,
                         ),
                         autofillHints: const [AutofillHints.password],
                         textInputAction: TextInputAction.done,
-                        validator: (value) =>
-                            (value == null || value.isEmpty)
-                                ? AppStrings.loginRequiredPassword
-                                : null,
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? AppStrings.loginRequiredPassword
+                            : null,
                         onFieldSubmitted: (_) => _submit(),
                       ),
                       const SizedBox(height: 8),
@@ -150,8 +155,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             onPressed: () => context.go('/forgot-password'),
                             child: Text(
                               'Esqueci a senha',
-                              style: AppTextStyles.labelMedium
-                                  .copyWith(color: AppColors.primary),
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
                         ],

@@ -1,6 +1,7 @@
-import 'package:flag_admin_web/data/services/game_service.dart';
+﻿import 'package:flag_admin_web/data/services/game_service.dart';
+import 'package:flag_admin_web/domain/enums/game_status.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
-import 'package:flag_admin_web/src/domain/models/game_batch.dart';
+import 'package:flag_admin_web/domain/models/game_batch.dart';
 
 /// Repositório de Jogos (ADR-001 - Cache TTL 30s).
 class GameRepository {
@@ -18,7 +19,8 @@ class GameRepository {
   }) async {
     final cached = _cacheByComp[competitionId];
     final lastFetch = _lastFetchByComp[competitionId];
-    final isCacheValid = cached != null &&
+    final isCacheValid =
+        cached != null &&
         lastFetch != null &&
         DateTime.now().difference(lastFetch) < _cacheTtl;
 

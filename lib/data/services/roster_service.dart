@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
 import 'package:flag_admin_web/domain/models/roster_entry.dart';
 import 'package:flag_admin_web/domain/models/roster_batch.dart';
 

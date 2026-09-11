@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/user/view_models/user_list_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,8 +78,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                   return KicksterEmptyState(
                     icon: Icons.people_outline,
                     message: 'Nenhum usuário cadastrado',
-                    description:
-                        'Crie o primeiro usuário para começar a usar.',
+                    description: 'Crie o primeiro usuário para começar a usar.',
                     action: KicksterButton(
                       label: 'Criar usuário',
                       icon: Icons.add,
@@ -97,12 +96,12 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                   filter: (all, query) => query.isEmpty
                       ? all
                       : all
-                          .where(
-                            (u) =>
-                                u.name.toLowerCase().contains(query) ||
-                                u.email.toLowerCase().contains(query),
-                          )
-                          .toList(growable: false),
+                            .where(
+                              (u) =>
+                                  u.name.toLowerCase().contains(query) ||
+                                  u.email.toLowerCase().contains(query),
+                            )
+                            .toList(growable: false),
                 );
               },
             ),

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// Item de módulo navegável na tela inicial.
 class HomeModuleItem {
@@ -21,7 +21,7 @@ class HomeViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
 
   HomeViewModel({required AuthRepository authRepository})
-      : _authRepository = authRepository;
+    : _authRepository = authRepository;
 
   UserRole? get userRole => _authRepository.currentUser?.role;
   bool get isAdmin => userRole == UserRole.admin;

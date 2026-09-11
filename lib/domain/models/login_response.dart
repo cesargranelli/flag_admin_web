@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/models/user.dart';
+﻿import 'package:flag_admin_web/domain/models/user.dart';
 
 /// Resposta da autenticação retornada por POST /api/v1/auth/login.
 class LoginResponse {
@@ -15,16 +15,16 @@ class LoginResponse {
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
-        token: json['token'] as String,
-        tokenType: (json['tokenType'] as String?) ?? 'Bearer',
-        expiresInSeconds: (json['expiresInSeconds'] as num?)?.toInt() ?? 3600,
-        user: User.fromJson(json['user'] as Map<String, dynamic>),
-      );
+    token: json['token'] as String,
+    tokenType: (json['tokenType'] as String?) ?? 'Bearer',
+    expiresInSeconds: (json['expiresInSeconds'] as num?)?.toInt() ?? 3600,
+    user: User.fromJson(json['user'] as Map<String, dynamic>),
+  );
 
   Map<String, dynamic> toJson() => {
-        'token': token,
-        'tokenType': tokenType,
-        'expiresInSeconds': expiresInSeconds,
-        'user': user.toJson(),
-      };
+    'token': token,
+    'tokenType': tokenType,
+    'expiresInSeconds': expiresInSeconds,
+    'user': user.toJson(),
+  };
 }

@@ -1,4 +1,5 @@
-import 'package:flag_admin_web/data/services/round_service.dart';
+﻿import 'package:flag_admin_web/data/services/round_service.dart';
+import 'package:flag_admin_web/domain/enums/round_type.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
 
 /// Repositório de Rodadas (ADR-001 - Cache TTL 30s).
@@ -17,7 +18,8 @@ class RoundRepository {
   }) async {
     final cached = _cacheByComp[competitionId];
     final lastFetch = _lastFetchByComp[competitionId];
-    final isCacheValid = cached != null &&
+    final isCacheValid =
+        cached != null &&
         lastFetch != null &&
         DateTime.now().difference(lastFetch) < _cacheTtl;
 

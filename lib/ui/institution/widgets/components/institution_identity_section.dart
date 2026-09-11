@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 
 /// Secao modular de Identidade Visual para Agremiação (ADR-001 / Kickster).
 ///
@@ -94,12 +94,13 @@ class InstitutionIdentitySection extends ConsumerWidget {
                 KicksterImageUploader(
                   label: 'Escudo / Logotipo da Agremiação',
                   controller: logoUrlController,
-                  uploadFunction: ({required bytes, required filename, onProgress}) =>
-                      storageService.uploadInstitutionLogo(
-                    bytes: bytes,
-                    filename: filename,
-                    onProgress: onProgress,
-                  ),
+                  uploadFunction:
+                      ({required bytes, required filename, onProgress}) =>
+                          storageService.uploadInstitutionLogo(
+                            bytes: bytes,
+                            filename: filename,
+                            onProgress: onProgress,
+                          ),
                   onUploaded: (url) => onDirty(),
                   onRemoved: () => onDirty(),
                 ),
@@ -233,10 +234,10 @@ class InstitutionIdentitySection extends ConsumerWidget {
         quaternaryColorController,
       ]),
       builder: (context, _) {
-        final primary = _parseHex(primaryColorController.text) ??
-            const Color(0xFFFD6B22);
-        final secondary = _parseHex(secondaryColorController.text) ??
-            const Color(0xFF1E293B);
+        final primary =
+            _parseHex(primaryColorController.text) ?? const Color(0xFFFD6B22);
+        final secondary =
+            _parseHex(secondaryColorController.text) ?? const Color(0xFF1E293B);
         final tertiary = _parseHex(tertiaryColorController.text);
         final quaternary = _parseHex(quaternaryColorController.text);
 
@@ -330,7 +331,9 @@ class InstitutionIdentitySection extends ConsumerWidget {
                           const SizedBox(height: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(10),
@@ -354,7 +357,10 @@ class InstitutionIdentitySection extends ConsumerWidget {
 
               // Barra inferior de amostras
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Text(
@@ -387,9 +393,7 @@ class InstitutionIdentitySection extends ConsumerWidget {
   }
 
   Widget _buildLogoFallback(Color color) {
-    return Center(
-      child: Icon(Icons.shield_outlined, size: 28, color: color),
-    );
+    return Center(child: Icon(Icons.shield_outlined, size: 28, color: color));
   }
 
   Widget _buildSwatchCircle(Color color, String tooltip) {

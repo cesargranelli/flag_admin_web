@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/user_repository.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel para a listagem de Usuários (ADR-011 / MVVM).
 class UserListViewModel extends ChangeNotifier {
   final UserRepository _repository;
 
   UserListViewModel({required UserRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   List<User> _users = const [];
   List<User> get users => _users;
@@ -29,9 +29,11 @@ class UserListViewModel extends ChangeNotifier {
     if (_searchQuery.isEmpty) return _users;
     final query = _searchQuery.toLowerCase().trim();
     return _users
-        .where((u) =>
-            u.name.toLowerCase().contains(query) ||
-            u.email.toLowerCase().contains(query))
+        .where(
+          (u) =>
+              u.name.toLowerCase().contains(query) ||
+              u.email.toLowerCase().contains(query),
+        )
         .toList(growable: false);
   }
 

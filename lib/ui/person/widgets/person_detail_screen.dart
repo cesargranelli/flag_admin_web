@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,17 +44,18 @@ class _PersonDetailScreenState extends ConsumerState<PersonDetailScreen> {
         children: [
           vm.isLoading && person == null
               ? const Expanded(
-                  child: AppLoading(message: 'Carregando pessoa...'))
+                  child: AppLoading(message: 'Carregando pessoa...'),
+                )
               : vm.errorMessage != null && person == null
-                  ? Expanded(
-                      child: AppErrorState(
-                        message: 'Nao foi possivel carregar a pessoa',
-                        onRetry: () => ref
-                            .read(personDetailViewModelProvider(personId))
-                            .load(forceRefresh: true),
-                      ),
-                    )
-                  : Expanded(child: _buildDetail(context, person!)),
+              ? Expanded(
+                  child: AppErrorState(
+                    message: 'Nao foi possivel carregar a pessoa',
+                    onRetry: () => ref
+                        .read(personDetailViewModelProvider(personId))
+                        .load(forceRefresh: true),
+                  ),
+                )
+              : Expanded(child: _buildDetail(context, person!)),
         ],
       ),
     );
@@ -95,7 +96,9 @@ class _PersonDetailScreenState extends ConsumerState<PersonDetailScreen> {
                             Text(
                               person.name,
                               style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w700),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             if (person.roleLabel.isNotEmpty) ...[
                               const SizedBox(height: 4),
@@ -116,37 +119,39 @@ class _PersonDetailScreenState extends ConsumerState<PersonDetailScreen> {
                   KicksterButton(
                     label: 'Editar dados',
                     icon: Icons.edit_outlined,
-                    onPressed: () => context.go(
-                      '/persons/${person.id}/edit',
-                      extra: person,
-                    ),
+                    onPressed: () =>
+                        context.go('/persons/${person.id}/edit', extra: person),
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-          AppInfoCard(children: [
-            AppInfoRow(label: 'Nome', value: person.name),
-            if (person.cpf != null && person.cpf!.isNotEmpty)
-              AppInfoRow(label: 'CPF', value: person.cpf!),
-            if (person.roleLabel.isNotEmpty)
-              AppInfoRow(label: 'Funcao', value: person.roleLabel),
-            if (person.gender != null && person.gender!.isNotEmpty)
-              AppInfoRow(label: 'Genero', value: person.gender!),
-            if (person.city != null && person.city!.isNotEmpty)
-              AppInfoRow(label: 'Cidade', value: person.city!),
-            if (person.status != null && person.status!.isNotEmpty)
-              AppInfoRow(label: 'Status', value: person.status!),
-            if (person.photoUrl != null && person.photoUrl!.isNotEmpty)
-              AppInfoRow(label: 'URL da foto', value: person.photoUrl!),
-          ]),
+          AppInfoCard(
+            children: [
+              AppInfoRow(label: 'Nome', value: person.name),
+              if (person.cpf != null && person.cpf!.isNotEmpty)
+                AppInfoRow(label: 'CPF', value: person.cpf!),
+              if (person.roleLabel.isNotEmpty)
+                AppInfoRow(label: 'Funcao', value: person.roleLabel),
+              if (person.gender != null && person.gender!.isNotEmpty)
+                AppInfoRow(label: 'Genero', value: person.gender!),
+              if (person.city != null && person.city!.isNotEmpty)
+                AppInfoRow(label: 'Cidade', value: person.city!),
+              if (person.status != null && person.status!.isNotEmpty)
+                AppInfoRow(label: 'Status', value: person.status!),
+              if (person.photoUrl != null && person.photoUrl!.isNotEmpty)
+                AppInfoRow(label: 'URL da foto', value: person.photoUrl!),
+            ],
+          ),
           const SizedBox(height: 16),
           Text(
             'Criado em ${formatBrDate(person.createdAt)}'
             '${person.updatedAt != null ? ' * Atualizado em ${formatBrDate(person.updatedAt)}' : ''}',
             style: const TextStyle(
-                fontSize: 12, color: AppColors.textSecondary),
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

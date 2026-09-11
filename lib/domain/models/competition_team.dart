@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
+﻿import 'package:flag_admin_web/domain/enums/competition_team_status.dart';
 
 /// Modelo de Inscrição / Alocação de Time em Competição (ADR-001).
 class CompetitionTeam {
@@ -40,7 +40,8 @@ class CompetitionTeam {
     this.updatedAt,
   });
 
-  factory CompetitionTeam.fromJson(Map<String, dynamic> json) => CompetitionTeam(
+  factory CompetitionTeam.fromJson(Map<String, dynamic> json) =>
+      CompetitionTeam(
         id: json['id'] as String,
         competitionId: json['competitionId'] as String,
         teamId: json['teamId'] as String,
@@ -92,44 +93,43 @@ class CompetitionTeam {
     int? seedNumber,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) =>
-      CompetitionTeam(
-        id: id ?? this.id,
-        competitionId: competitionId ?? this.competitionId,
-        teamId: teamId ?? this.teamId,
-        teamName: teamName ?? this.teamName,
-        teamShortName: teamShortName ?? this.teamShortName,
-        teamLogoUrl: teamLogoUrl ?? this.teamLogoUrl,
-        organizationId: organizationId ?? this.organizationId,
-        organizationName: organizationName ?? this.organizationName,
-        clubId: clubId ?? this.clubId,
-        clubName: clubName ?? this.clubName,
-        status: status ?? this.status,
-        groupName: groupName ?? this.groupName,
-        conferenceName: conferenceName ?? this.conferenceName,
-        divisionName: divisionName ?? this.divisionName,
-        seedNumber: seedNumber ?? this.seedNumber,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-      );
+  }) => CompetitionTeam(
+    id: id ?? this.id,
+    competitionId: competitionId ?? this.competitionId,
+    teamId: teamId ?? this.teamId,
+    teamName: teamName ?? this.teamName,
+    teamShortName: teamShortName ?? this.teamShortName,
+    teamLogoUrl: teamLogoUrl ?? this.teamLogoUrl,
+    organizationId: organizationId ?? this.organizationId,
+    organizationName: organizationName ?? this.organizationName,
+    clubId: clubId ?? this.clubId,
+    clubName: clubName ?? this.clubName,
+    status: status ?? this.status,
+    groupName: groupName ?? this.groupName,
+    conferenceName: conferenceName ?? this.conferenceName,
+    divisionName: divisionName ?? this.divisionName,
+    seedNumber: seedNumber ?? this.seedNumber,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'competitionId': competitionId,
-        'teamId': teamId,
-        'teamName': teamName,
-        'teamShortName': teamShortName,
-        'teamLogoUrl': teamLogoUrl,
-        'organizationId': organizationId,
-        'organizationName': organizationName,
-        if (clubId != null) 'clubId': clubId,
-        if (clubName != null) 'clubName': clubName,
-        'status': status.toJson(),
-        'groupName': groupName,
-        'conferenceName': conferenceName,
-        'divisionName': divisionName,
-        'seedNumber': seedNumber,
-        'createdAt': createdAt?.toIso8601String(),
-        'updatedAt': updatedAt?.toIso8601String(),
-      };
+    'id': id,
+    'competitionId': competitionId,
+    'teamId': teamId,
+    'teamName': teamName,
+    'teamShortName': teamShortName,
+    'teamLogoUrl': teamLogoUrl,
+    'organizationId': organizationId,
+    'organizationName': organizationName,
+    if (clubId != null) 'clubId': clubId,
+    if (clubName != null) 'clubName': clubName,
+    'status': status.toJson(),
+    'groupName': groupName,
+    'conferenceName': conferenceName,
+    'divisionName': divisionName,
+    'seedNumber': seedNumber,
+    'createdAt': createdAt?.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
+  };
 }

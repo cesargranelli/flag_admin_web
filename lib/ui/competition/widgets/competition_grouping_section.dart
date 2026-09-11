@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/domain/enums/grouping_type.dart';
 import '../view_models/competition_grouping_state.dart';
 
 /// Seção visual e interativa de Agrupamento de Times (Design System Kickster).
@@ -12,10 +12,7 @@ import '../view_models/competition_grouping_state.dart';
 class CompetitionGroupingSection extends StatelessWidget {
   final CompetitionGroupingState vm;
 
-  const CompetitionGroupingSection({
-    super.key,
-    required this.vm,
-  });
+  const CompetitionGroupingSection({super.key, required this.vm});
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +79,8 @@ class CompetitionGroupingSection extends StatelessWidget {
                         icon: Icons.account_tree_outlined,
                         minHeight: 95,
                         selected: vm.groupingType == GroupingType.conferences,
-                        onTap: () => vm.setGroupingType(GroupingType.conferences),
+                        onTap: () =>
+                            vm.setGroupingType(GroupingType.conferences),
                       ),
                     ),
                   ],
@@ -187,8 +185,11 @@ class CompetitionGroupingSection extends StatelessWidget {
                   if (canRemove) ...[
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline,
-                          size: 20, color: AppColors.danger),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: AppColors.danger,
+                      ),
                       tooltip: 'Remover ${group.name}',
                       onPressed: () => vm.removeGroup(index),
                     ),
@@ -200,10 +201,7 @@ class CompetitionGroupingSection extends StatelessWidget {
           const SizedBox(height: 4),
           const Text(
             'Mínimo de 2 grupos. Os times serão alocados nestes grupos na homologação.',
-            style: TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -277,8 +275,11 @@ class CompetitionGroupingSection extends StatelessWidget {
                         if (canRemoveConf) ...[
                           const SizedBox(width: 8),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline,
-                                size: 20, color: AppColors.danger),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              size: 20,
+                              color: AppColors.danger,
+                            ),
                             tooltip: 'Remover Conferência',
                             onPressed: () => vm.removeConference(confIndex),
                           ),
@@ -332,7 +333,9 @@ class CompetitionGroupingSection extends StatelessWidget {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: conf.divisions.asMap().entries.map((divEntry) {
+                        children: conf.divisions.asMap().entries.map((
+                          divEntry,
+                        ) {
                           final divIndex = divEntry.key;
                           final div = divEntry.value;
 
@@ -378,7 +381,9 @@ class CompetitionGroupingSection extends StatelessWidget {
                                     InkWell(
                                       borderRadius: BorderRadius.circular(12),
                                       onTap: () => vm.removeDivision(
-                                          confIndex, divIndex),
+                                        confIndex,
+                                        divIndex,
+                                      ),
                                       child: const Padding(
                                         padding: EdgeInsets.all(2),
                                         child: Icon(

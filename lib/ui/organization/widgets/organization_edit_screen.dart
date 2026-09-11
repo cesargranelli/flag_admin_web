@@ -1,10 +1,10 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+﻿import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'components/organization_identity_section.dart';
 
 /// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de Organização existente (ADR-001 / MVVM 1:1).
@@ -75,10 +75,10 @@ class _OrganizationEditScreenState
     _state = TextEditingController(text: org?.state ?? '');
     _city = TextEditingController(text: org?.city ?? '');
     _logoUrl = TextEditingController(text: org?.logoUrl ?? '');
-    _primaryColor =
-        TextEditingController(text: org?.primaryColor ?? '#FD6B22');
-    _secondaryColor =
-        TextEditingController(text: org?.secondaryColor ?? '#1E293B');
+    _primaryColor = TextEditingController(text: org?.primaryColor ?? '#FD6B22');
+    _secondaryColor = TextEditingController(
+      text: org?.secondaryColor ?? '#1E293B',
+    );
     _tertiaryColor = TextEditingController(text: org?.tertiaryColor ?? '');
     _quaternaryColor = TextEditingController(text: org?.quaternaryColor ?? '');
     _locale = TextEditingController(text: org?.locale ?? 'pt-BR');
@@ -174,38 +174,37 @@ class _OrganizationEditScreenState
   }
 
   Map<String, dynamic> _buildBody() => {
-        'legalName': _legalName.text.trim(),
-        'tradeName': _tradeName.text.trim(),
-        if (_abbreviation.text.trim().isNotEmpty)
-          'abbreviation': _abbreviation.text.trim(),
-        'organizationType': _type!.toJson(),
-        if (_document.text.trim().isNotEmpty)
-          'document': _document.text.trim().replaceAll(RegExp(r'\D'), ''),
-        if (_documentType != null) 'documentType': _documentType!.toJson(),
-        if (_presidentName.text.trim().isNotEmpty)
-          'presidentName': _presidentName.text.trim(),
-        if (_presidentCpf.text.trim().isNotEmpty)
-          'presidentCpf': _presidentCpf.text.trim().replaceAll(RegExp(r'\D'), ''),
-        if (_email.text.trim().isNotEmpty) 'email': _email.text.trim(),
-        if (_phone.text.trim().isNotEmpty) 'phone': _phone.text.trim(),
-        if (_website.text.trim().isNotEmpty) 'website': _website.text.trim(),
-        if (_instagram.text.trim().isNotEmpty)
-          'instagram': _instagram.text.trim(),
-        'country': _country,
-        if (_state.text.trim().isNotEmpty) 'state': _state.text.trim(),
-        if (_city.text.trim().isNotEmpty) 'city': _city.text.trim(),
-        if (_logoUrl.text.trim().isNotEmpty) 'logoUrl': _logoUrl.text.trim(),
-        if (_primaryColor.text.trim().isNotEmpty)
-          'primaryColor': _primaryColor.text.trim(),
-        if (_secondaryColor.text.trim().isNotEmpty)
-          'secondaryColor': _secondaryColor.text.trim(),
-        if (_tertiaryColor.text.trim().isNotEmpty)
-          'tertiaryColor': _tertiaryColor.text.trim(),
-        if (_quaternaryColor.text.trim().isNotEmpty)
-          'quaternaryColor': _quaternaryColor.text.trim(),
-        'timezone': _timezone,
-        'locale': _locale.text.trim(),
-      };
+    'legalName': _legalName.text.trim(),
+    'tradeName': _tradeName.text.trim(),
+    if (_abbreviation.text.trim().isNotEmpty)
+      'abbreviation': _abbreviation.text.trim(),
+    'organizationType': _type!.toJson(),
+    if (_document.text.trim().isNotEmpty)
+      'document': _document.text.trim().replaceAll(RegExp(r'\D'), ''),
+    if (_documentType != null) 'documentType': _documentType!.toJson(),
+    if (_presidentName.text.trim().isNotEmpty)
+      'presidentName': _presidentName.text.trim(),
+    if (_presidentCpf.text.trim().isNotEmpty)
+      'presidentCpf': _presidentCpf.text.trim().replaceAll(RegExp(r'\D'), ''),
+    if (_email.text.trim().isNotEmpty) 'email': _email.text.trim(),
+    if (_phone.text.trim().isNotEmpty) 'phone': _phone.text.trim(),
+    if (_website.text.trim().isNotEmpty) 'website': _website.text.trim(),
+    if (_instagram.text.trim().isNotEmpty) 'instagram': _instagram.text.trim(),
+    'country': _country,
+    if (_state.text.trim().isNotEmpty) 'state': _state.text.trim(),
+    if (_city.text.trim().isNotEmpty) 'city': _city.text.trim(),
+    if (_logoUrl.text.trim().isNotEmpty) 'logoUrl': _logoUrl.text.trim(),
+    if (_primaryColor.text.trim().isNotEmpty)
+      'primaryColor': _primaryColor.text.trim(),
+    if (_secondaryColor.text.trim().isNotEmpty)
+      'secondaryColor': _secondaryColor.text.trim(),
+    if (_tertiaryColor.text.trim().isNotEmpty)
+      'tertiaryColor': _tertiaryColor.text.trim(),
+    if (_quaternaryColor.text.trim().isNotEmpty)
+      'quaternaryColor': _quaternaryColor.text.trim(),
+    'timezone': _timezone,
+    'locale': _locale.text.trim(),
+  };
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -223,9 +222,7 @@ class _OrganizationEditScreenState
       ref.invalidate(organizationProvider(widget.id));
       ref.read(organizationViewModelProvider).load(forceRefresh: true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Organização atualizada com sucesso'),
-        ),
+        const SnackBar(content: Text('Organização atualizada com sucesso')),
       );
       context.go('/organizations/${widget.id}');
     } else {
@@ -245,8 +242,9 @@ class _OrganizationEditScreenState
   }
 
   Future<void> _handleBack() async {
-    final isSubmitting =
-        ref.read(organizationEditViewModelProvider(widget.id)).isSubmitting;
+    final isSubmitting = ref
+        .read(organizationEditViewModelProvider(widget.id))
+        .isSubmitting;
     if (_hasChanges && !isSubmitting && !_saved) {
       final discard = await showKicksterConfirm(
         context: context,
@@ -278,7 +276,10 @@ class _OrganizationEditScreenState
         title: 'Editar organização',
         breadcrumb: [
           const BreadcrumbItem(AppStrings.home, route: '/'),
-          const BreadcrumbItem(AppStrings.organizations, route: '/organizations'),
+          const BreadcrumbItem(
+            AppStrings.organizations,
+            route: '/organizations',
+          ),
           BreadcrumbItem(widget.organization?.tradeName ?? 'Editar'),
         ],
         body: vm.isLoading
@@ -291,17 +292,23 @@ class _OrganizationEditScreenState
                     children: [
                       if (_errorMessage != null) _errorBanner(_errorMessage!),
                       _section('Dados básicos', Icons.business_outlined, [
-                        _field('Nome fantasia', _tradeName,
-                            hint: 'Informe o nome fantasia',
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Informe o nome fantasia'
-                                : null),
+                        _field(
+                          'Nome fantasia',
+                          _tradeName,
+                          hint: 'Informe o nome fantasia',
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Informe o nome fantasia'
+                              : null,
+                        ),
                         const SizedBox(height: 12),
-                        _field('Razão social', _legalName,
-                            hint: 'Informe a razão social',
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Informe a razão social'
-                                : null),
+                        _field(
+                          'Razão social',
+                          _legalName,
+                          hint: 'Informe a razão social',
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Informe a razão social'
+                              : null,
+                        ),
                         const SizedBox(height: 12),
                         _field('Sigla (opcional)', _abbreviation),
                         const SizedBox(height: 12),
@@ -315,18 +322,18 @@ class _OrganizationEditScreenState
                           children: [
                             Expanded(
                               flex: 2,
-                              child: _field('Nome do presidente', _presidentName,
-                                  hint: 'Informe o nome do presidente',
-                                  validator: (v) =>
-                                      (v == null || v.trim().isEmpty)
-                                          ? 'Informe o nome do presidente'
-                                          : null),
+                              child: _field(
+                                'Nome do presidente',
+                                _presidentName,
+                                hint: 'Informe o nome do presidente',
+                                validator: (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                    ? 'Informe o nome do presidente'
+                                    : null,
+                              ),
                             ),
                             const SizedBox(width: 12),
-                            Expanded(
-                              flex: 1,
-                              child: _presidentCpfField(),
-                            ),
+                            Expanded(flex: 1, child: _presidentCpfField()),
                           ],
                         ),
                       ]),
@@ -468,10 +475,12 @@ class _OrganizationEditScreenState
       hint: 'Tipo de organização',
       value: _type,
       items: OrganizationType.values
-          .map((t) => DropdownMenuItem(
-                value: t,
-                child: appDropdownItem(organizationTypeIcon(t), _typeLabel(t)),
-              ))
+          .map(
+            (t) => DropdownMenuItem(
+              value: t,
+              child: appDropdownItem(organizationTypeIcon(t), _typeLabel(t)),
+            ),
+          )
           .toList(),
       onChanged: (value) {
         setState(() => _type = value);
