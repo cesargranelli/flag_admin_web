@@ -237,108 +237,122 @@ class _OrganizationCreateScreenState
         body: AppLayout.form(
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_errorMessage != null) _errorBanner(_errorMessage!),
-                _section('Dados básicos', Icons.business_outlined, [
-                  _field(
-                    'Nome fantasia',
-                    _tradeName,
-                    hint: 'Informe o nome fantasia',
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Informe o nome fantasia'
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  _field(
-                    'Razão social',
-                    _legalName,
-                    hint: 'Informe a razão social',
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Informe a razão social'
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  _field('Sigla (opcional)', _abbreviation),
-                  const SizedBox(height: 12),
-                  _typeDropdown(),
-                  const SizedBox(height: 12),
-                  _documentField(),
-                ]),
-                _section('Presidente', Icons.person_outline, [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _field(
-                          'Nome do presidente',
-                          _presidentName,
-                          hint: 'Informe o nome do presidente',
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Informe o nome do presidente'
-                              : null,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_errorMessage != null) _errorBanner(_errorMessage!),
+                  _section('Dados básicos', Icons.business_outlined, [
+                    _field(
+                      'Nome fantasia',
+                      _tradeName,
+                      hint: 'Informe o nome fantasia',
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Informe o nome fantasia'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    _field(
+                      'Razão social',
+                      _legalName,
+                      hint: 'Informe a razão social',
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Informe a razão social'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    _field('Sigla (opcional)', _abbreviation),
+                    const SizedBox(height: 12),
+                    _typeDropdown(),
+                    const SizedBox(height: 12),
+                    _documentField(),
+                  ]),
+                  _section('Presidente', Icons.person_outline, [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: _field(
+                            'Nome do presidente',
+                            _presidentName,
+                            hint: 'Informe o nome do presidente',
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Informe o nome do presidente'
+                                : null,
+                          ),
                         ),
+                        const SizedBox(width: 12),
+                        Expanded(flex: 1, child: _presidentCpfField()),
+                      ],
+                    ),
+                  ]),
+                  _section('Contato', Icons.contact_mail_outlined, [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _emailField()),
+                        const SizedBox(width: 12),
+                        Expanded(child: _phoneField()),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _websiteField()),
+                        const SizedBox(width: 12),
+                        Expanded(child: _instagramField()),
+                      ],
+                    ),
+                  ]),
+                  _section('Localização', Icons.location_on_outlined, [
+                    _countryDropdown(),
+                    const SizedBox(height: 12),
+                    if (_country == 'BR')
+                      _stateDropdown()
+                    else
+                      _field('Estado (opcional)', _state),
+                    const SizedBox(height: 12),
+                    _field('Cidade (opcional)', _city),
+                  ]),
+                  OrganizationIdentitySection(
+                    tradeNameController: _tradeName,
+                    abbreviationController: _abbreviation,
+                    logoUrlController: _logoUrl,
+                    primaryColorController: _primaryColor,
+                    secondaryColorController: _secondaryColor,
+                    tertiaryColorController: _tertiaryColor,
+                    quaternaryColorController: _quaternaryColor,
+                    localeController: _locale,
+                    localeOptions: const [
+                      ('pt-BR', 'Português (Brasil)'),
+                      ('en-US', 'English (US)'),
+                      ('es-ES', 'Español'),
+                    ],
+                    onDirty: _markDirty,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      KicksterButton(
+                        label: 'Cancelar',
+                        variant: KicksterButtonVariant.outline,
+                        onPressed: () => context.pop(),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(flex: 1, child: _presidentCpfField()),
+                      KicksterButton(
+                        label: isSubmitting ? 'Cadastrando...' : 'Criar organização',
+                        icon: Icons.check,
+                        loading: isSubmitting,
+                        onPressed: isSubmitting ? null : _save,
+                      ),
                     ],
                   ),
-                ]),
-                _section('Contato', Icons.contact_mail_outlined, [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _emailField()),
-                      const SizedBox(width: 12),
-                      Expanded(child: _phoneField()),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _websiteField()),
-                      const SizedBox(width: 12),
-                      Expanded(child: _instagramField()),
-                    ],
-                  ),
-                ]),
-                _section('Localização', Icons.location_on_outlined, [
-                  _countryDropdown(),
-                  const SizedBox(height: 12),
-                  if (_country == 'BR')
-                    _stateDropdown()
-                  else
-                    _field('Estado (opcional)', _state),
-                  const SizedBox(height: 12),
-                  _field('Cidade (opcional)', _city),
-                ]),
-                OrganizationIdentitySection(
-                  tradeNameController: _tradeName,
-                  abbreviationController: _abbreviation,
-                  logoUrlController: _logoUrl,
-                  primaryColorController: _primaryColor,
-                  secondaryColorController: _secondaryColor,
-                  tertiaryColorController: _tertiaryColor,
-                  quaternaryColorController: _quaternaryColor,
-                  localeController: _locale,
-                  localeOptions: const [
-                    ('pt-BR', 'Português (Brasil)'),
-                    ('en-US', 'English (US)'),
-                    ('es-ES', 'Español'),
-                  ],
-                  onDirty: _markDirty,
-                ),
-                const SizedBox(height: 16),
-                KicksterButton(
-                  label: isSubmitting ? 'Cadastrando...' : 'Criar organização',
-                  icon: Icons.check,
-                  loading: isSubmitting,
-                  onPressed: isSubmitting ? null : _save,
-                ),
-              ],
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
           ),
         ),
@@ -348,24 +362,15 @@ class _OrganizationCreateScreenState
 
   Widget _errorBanner(String message) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.danger.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.danger.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.danger),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: AppColors.danger),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: AppColors.danger),
-            ),
-          ),
-        ],
+      child: Text(
+        message,
+        style: const TextStyle(color: AppColors.danger),
       ),
     );
   }
@@ -377,7 +382,7 @@ class _OrganizationCreateScreenState
         KicksterSectionTitle(title: title, icon: icon),
         const SizedBox(height: 12),
         _card(null, children),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -385,10 +390,8 @@ class _OrganizationCreateScreenState
   Widget _card(String? title, List<Widget> children) {
     return Card(
       margin: EdgeInsets.zero,
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      elevation: 0,
       color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: AppColors.line, width: 1),

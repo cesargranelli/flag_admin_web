@@ -85,57 +85,59 @@ class _OrganizationDetailScreenState
     OrganizationDetailViewModel vm,
   ) {
     return AppLayout.detail(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Ações superiores
-          Row(
-            children: [
-              const Spacer(),
-              KicksterButton(
-                label: 'Editar',
-                icon: Icons.edit_outlined,
-                onPressed: () async {
-                  context.go('/organizations/${org.id}/edit', extra: org);
-                  if (context.mounted) {
-                    ref
-                        .read(organizationDetailViewModelProvider(org.id))
-                        .load(forceRefresh: true);
-                    ref
-                        .read(organizationViewModelProvider)
-                        .load(forceRefresh: true);
-                  }
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _section(
-            title: 'Identificação',
-            icon: Icons.business_outlined,
-            child: _identificacaoCard(org),
-          ),
-          _section(
-            title: 'Presidente',
-            icon: Icons.person_outline,
-            child: _presidenteCard(org),
-          ),
-          _section(
-            title: 'Contato',
-            icon: Icons.contact_mail_outlined,
-            child: _contatoCard(org),
-          ),
-          _section(
-            title: 'Localização',
-            icon: Icons.location_on_outlined,
-            child: _localizacaoCard(org),
-          ),
-          _section(
-            title: 'Agremiações Filiadas & Pedidos de Filiação',
-            icon: Icons.shield_outlined,
-            child: _agremiacoesFiliadasCard(context, org, vm),
-          ),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Ações superiores
+            Row(
+              children: [
+                const Spacer(),
+                KicksterButton(
+                  label: 'Editar',
+                  icon: Icons.edit_outlined,
+                  onPressed: () async {
+                    context.go('/organizations/${org.id}/edit', extra: org);
+                    if (context.mounted) {
+                      ref
+                          .read(organizationDetailViewModelProvider(org.id))
+                          .load(forceRefresh: true);
+                      ref
+                          .read(organizationViewModelProvider)
+                          .load(forceRefresh: true);
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _section(
+              title: 'Identificação',
+              icon: Icons.business_outlined,
+              child: _identificacaoCard(org),
+            ),
+            _section(
+              title: 'Presidente',
+              icon: Icons.person_outline,
+              child: _presidenteCard(org),
+            ),
+            _section(
+              title: 'Contato',
+              icon: Icons.contact_mail_outlined,
+              child: _contatoCard(org),
+            ),
+            _section(
+              title: 'Localização',
+              icon: Icons.location_on_outlined,
+              child: _localizacaoCard(org),
+            ),
+            _section(
+              title: 'Agremiações Filiadas & Pedidos de Filiação',
+              icon: Icons.shield_outlined,
+              child: _agremiacoesFiliadasCard(context, org, vm),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -151,8 +153,8 @@ class _OrganizationDetailScreenState
       children: [
         KicksterSectionTitle(title: title, icon: icon),
         const SizedBox(height: 12),
-        child,
-        const SizedBox(height: 20),
+child,
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -202,10 +204,8 @@ class _OrganizationDetailScreenState
     final bannerTextColor = isLightPrimary ? AppColors.black : Colors.white;
 
     return Card(
-      elevation: 2,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      elevation: 0,
       color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: AppColors.line, width: 1),
@@ -496,7 +496,7 @@ class _OrganizationDetailScreenState
         .toList();
 
     return Card(
-      elevation: 1,
+      elevation: 0,
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

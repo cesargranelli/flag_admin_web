@@ -31,13 +31,13 @@ abstract final class AppStrings {
   static const newCompetition = 'Nova competição';
   static const newGame = 'Novo jogo';
   static const importPersons = 'Importar pessoas';
-  static const newOrganization = 'Nova organizacao';
+  static const newOrganization = 'Nova organização';
   static const logout = 'Sair';
-  static const homeHint = 'Selecione uma opcao para gerenciar os cadastros.';
-  static const organizations = 'Organizacoes';
-  static const institutions = 'Agremiacoes';
-  static const competitions = 'Competicoes';
-  static const approvals = 'Aprovacoes';
+  static const homeHint = 'Selecione uma opção para gerenciar os cadastros.';
+  static const organizations = 'Organizações';
+  static const institutions = 'Agremiações';
+  static const competitions = 'Competições';
+  static const approvals = 'Aprovações';
   static const categories = 'Categorias';
   static const venues = 'Locais';
   static const teams = 'Times';
@@ -46,11 +46,11 @@ abstract final class AppStrings {
   static const persons = 'Pessoas';
   static const athletes = 'Atletas'; // Alias mantido para retrocompatibilidade
   static const rosters = 'Elencos';
-  static const users = 'Usuarios';
-  static const groupings = 'Conferencias e divisoes';
+  static const users = 'Usuários';
+  static const groupings = 'Conferências e divisões';
   static const associateClubs = 'Associar clubes';
-  static const home = 'Inicio';
-  static const notFoundTitle = 'Pagina nao encontrada';
-  static const notFoundMessage = 'O link que voce acessou nao existe.';
-  static const backToHome = 'Voltar ao inicio';
+  static const home = 'Início';
+  static const notFoundTitle = 'Página não encontrada';
+  static const notFoundMessage = 'O link que você acessou não existe.';
+  static const backToHome = 'Voltar ao início';
 }
