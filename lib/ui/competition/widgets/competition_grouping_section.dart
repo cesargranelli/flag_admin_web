@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/domain/enums/grouping_type.dart';
 import '../view_models/competition_grouping_state.dart';
 

@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';

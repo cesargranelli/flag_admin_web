@@ -1,5 +1,5 @@
-﻿import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+﻿import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/domain/competition_permissions.dart';
 import 'package:flag_admin_web/ui/game/view_models/game_list_view_model.dart';

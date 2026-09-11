@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/data/api/api_client.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// Serviço REST de organizações (camada Services).
 ///
@@ -15,15 +15,31 @@ abstract class OrganizationService {
   Future<Organization> updateOrganization(String id, Map<String, dynamic> body);
   Future<void> deleteOrganization(String id);
   Future<void> reactivateOrganization(String id);
-  Future<List<Affiliation>> getAffiliations(String organizationId, {String? season, String? status});
-  Future<Affiliation> approveAffiliation(String organizationId, String affiliationId);
-  Future<Affiliation> rejectAffiliation(String organizationId, String affiliationId, String reason);
+  Future<List<Affiliation>> getAffiliations(
+    String organizationId, {
+    String? season,
+    String? status,
+  });
+  Future<Affiliation> approveAffiliation(
+    String organizationId,
+    String affiliationId,
+  );
+  Future<Affiliation> rejectAffiliation(
+    String organizationId,
+    String affiliationId,
+    String reason,
+  );
   Future<List<AffiliationWindow>> getAffiliationWindows(String organizationId);
   Future<List<AffiliationWindow>> getOpenAffiliationWindows();
-  Future<AffiliationWindow> openAffiliationWindow(String organizationId, Map<String, dynamic> body);
-  Future<AffiliationWindow> closeAffiliationWindow(String organizationId, String season);
+  Future<AffiliationWindow> openAffiliationWindow(
+    String organizationId,
+    Map<String, dynamic> body,
+  );
+  Future<AffiliationWindow> closeAffiliationWindow(
+    String organizationId,
+    String season,
+  );
 }
-
 
 /// Implementação padrão consumindo [ApiClient].
 class ApiOrganizationService implements OrganizationService {
@@ -53,20 +69,21 @@ class ApiOrganizationService implements OrganizationService {
   }
 
   @override
-  Future<Organization> updateOrganization(String id, Map<String, dynamic> body) =>
-      _client.put('/api/v1/organizations/$id', body, Organization.fromJson);
+  Future<Organization> updateOrganization(
+    String id,
+    Map<String, dynamic> body,
+  ) => _client.put('/api/v1/organizations/$id', body, Organization.fromJson);
 
   @override
   Future<void> deleteOrganization(String id) =>
       _client.delete('/api/v1/organizations/$id');
 
   @override
-  Future<void> reactivateOrganization(String id) =>
-      _client.post(
-        '/api/v1/organizations/$id/reactivate',
-        <String, dynamic>{},
-        (json) => json,
-      );
+  Future<void> reactivateOrganization(String id) => _client.post(
+    '/api/v1/organizations/$id/reactivate',
+    <String, dynamic>{},
+    (json) => json,
+  );
 
   @override
   Future<List<Affiliation>> getAffiliations(
@@ -85,59 +102,55 @@ class ApiOrganizationService implements OrganizationService {
   }
 
   @override
-  Future<Affiliation> approveAffiliation(String organizationId, String affiliationId) =>
-      _client.post(
-        '/api/v1/organizations/$organizationId/affiliations/$affiliationId/approve',
-        <String, dynamic>{},
-        Affiliation.fromJson,
-      );
+  Future<Affiliation> approveAffiliation(
+    String organizationId,
+    String affiliationId,
+  ) => _client.post(
+    '/api/v1/organizations/$organizationId/affiliations/$affiliationId/approve',
+    <String, dynamic>{},
+    Affiliation.fromJson,
+  );
 
   @override
   Future<Affiliation> rejectAffiliation(
     String organizationId,
     String affiliationId,
     String reason,
-  ) =>
-      _client.post(
-        '/api/v1/organizations/$organizationId/affiliations/$affiliationId/reject',
-        {'reason': reason},
-        Affiliation.fromJson,
-      );
+  ) => _client.post(
+    '/api/v1/organizations/$organizationId/affiliations/$affiliationId/reject',
+    {'reason': reason},
+    Affiliation.fromJson,
+  );
 
   @override
-  Future<List<AffiliationWindow>> getAffiliationWindows(String organizationId) =>
-      _client.getList(
-        '/api/v1/organizations/$organizationId/affiliation-windows',
-        AffiliationWindow.fromJson,
-      );
+  Future<List<AffiliationWindow>> getAffiliationWindows(
+    String organizationId,
+  ) => _client.getList(
+    '/api/v1/organizations/$organizationId/affiliation-windows',
+    AffiliationWindow.fromJson,
+  );
 
   @override
-  Future<List<AffiliationWindow>> getOpenAffiliationWindows() =>
-      _client.getList(
-        '/api/v1/affiliation-windows/open',
-        AffiliationWindow.fromJson,
-      );
+  Future<List<AffiliationWindow>> getOpenAffiliationWindows() => _client
+      .getList('/api/v1/affiliation-windows/open', AffiliationWindow.fromJson);
 
   @override
   Future<AffiliationWindow> openAffiliationWindow(
     String organizationId,
     Map<String, dynamic> body,
-  ) =>
-      _client.post(
-        '/api/v1/organizations/$organizationId/affiliation-windows',
-        body,
-        AffiliationWindow.fromJson,
-      );
+  ) => _client.post(
+    '/api/v1/organizations/$organizationId/affiliation-windows',
+    body,
+    AffiliationWindow.fromJson,
+  );
 
   @override
   Future<AffiliationWindow> closeAffiliationWindow(
     String organizationId,
     String season,
-  ) =>
-      _client.post(
-        '/api/v1/organizations/$organizationId/affiliation-windows/$season/close',
-        <String, dynamic>{},
-        AffiliationWindow.fromJson,
-      );
+  ) => _client.post(
+    '/api/v1/organizations/$organizationId/affiliation-windows/$season/close',
+    <String, dynamic>{},
+    AffiliationWindow.fromJson,
+  );
 }
-

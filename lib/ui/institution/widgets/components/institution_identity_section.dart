@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 
 /// Secao modular de Identidade Visual para Agremiação (ADR-001 / Kickster).

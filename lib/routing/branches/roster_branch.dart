@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/ui/person/widgets/roster_import_screen.dart';
 import 'package:flag_admin_web/ui/person/widgets/roster_screen.dart';
 import 'package:go_router/go_router.dart';

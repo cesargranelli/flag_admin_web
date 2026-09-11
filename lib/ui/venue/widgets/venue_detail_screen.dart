@@ -1,5 +1,5 @@
 ﻿import 'package:flag_admin_web/domain/models/venue.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 
 import 'package:flutter/material.dart';

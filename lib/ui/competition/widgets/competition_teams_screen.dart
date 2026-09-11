@@ -1,7 +1,7 @@
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
 import 'package:flag_admin_web/domain/models/team.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/domain/enums/competition_team_status.dart';
 import 'package:flag_admin_web/domain/enums/grouping_type.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';

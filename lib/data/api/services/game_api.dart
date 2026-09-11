@@ -1,5 +1,5 @@
 import 'package:flag_admin_web/domain/enums/game_status.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 import '../api_client.dart';
 import '../models/live_game_response.dart';

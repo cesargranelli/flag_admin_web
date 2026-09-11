@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flutter/material.dart';
 
 /// Boilerplate de listagem em grid das telas do Admin Web (issue #459).
@@ -90,8 +90,7 @@ class AppEntityListScreen<T> extends StatefulWidget {
   final EdgeInsetsGeometry gridPadding;
 
   @override
-  State<AppEntityListScreen<T>> createState() =>
-      _AppEntityListScreenState<T>();
+  State<AppEntityListScreen<T>> createState() => _AppEntityListScreenState<T>();
 }
 
 class _AppEntityListScreenState<T> extends State<AppEntityListScreen<T>> {
@@ -141,8 +140,7 @@ class _AppEntityListScreenState<T> extends State<AppEntityListScreen<T>> {
                       cacheExtent: 100,
                       padding: widget.gridPadding,
                       itemCount: filtered.length,
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columns,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
@@ -167,18 +165,15 @@ class _AppEntityListScreenState<T> extends State<AppEntityListScreen<T>> {
       // Modo "X de Y": filtros permanentes (ex.: organizações por tipo).
       text = '$filteredCount de ${widget.items.length}';
     } else {
-      final label = widget.items.length == 1 &&
-              widget.countLabelSingular != null
+      final label =
+          widget.items.length == 1 && widget.countLabelSingular != null
           ? widget.countLabelSingular!
           : widget.countLabel!;
       text = '${widget.items.length} $label';
     }
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 13,
-        color: AppColors.textSecondary,
-      ),
+      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
     );
   }
 }

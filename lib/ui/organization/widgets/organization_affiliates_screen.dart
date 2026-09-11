@@ -2,8 +2,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/domain/models/affiliation.dart';
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_affiliates_view_model.dart';
 

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 
 /// Secao modular de Identidade Visual para organizacao (ADR-001 / Kickster).
 ///
@@ -254,7 +254,8 @@ class OrganizationIdentitySection extends StatelessWidget {
   /// Card Esportivo Kickster simulando a aplicacao real da identidade da marca
   Widget _buildSportBrandPreview(BuildContext context) {
     final primary = _parseHex(primaryColorController.text) ?? AppColors.primary;
-    final secondary = _parseHex(secondaryColorController.text) ?? const Color(0xFF1877F2);
+    final secondary =
+        _parseHex(secondaryColorController.text) ?? const Color(0xFF1877F2);
     final tertiary = _parseHex(tertiaryColorController.text);
     final quaternary = _parseHex(quaternaryColorController.text);
 
@@ -300,9 +301,13 @@ class OrganizationIdentitySection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isLightPrimary ? Icons.info_outline : Icons.check_circle_outline,
+                    isLightPrimary
+                        ? Icons.info_outline
+                        : Icons.check_circle_outline,
                     size: 14,
-                    color: isLightPrimary ? const Color(0xFF856404) : const Color(0xFF2E7D32),
+                    color: isLightPrimary
+                        ? const Color(0xFF856404)
+                        : const Color(0xFF2E7D32),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -310,7 +315,9 @@ class OrganizationIdentitySection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isLightPrimary ? const Color(0xFF856404) : const Color(0xFF2E7D32),
+                      color: isLightPrimary
+                          ? const Color(0xFF856404)
+                          : const Color(0xFF2E7D32),
                     ),
                   ),
                 ],
@@ -376,7 +383,8 @@ class OrganizationIdentitySection extends StatelessWidget {
                             ? Image.network(
                                 logoUrl,
                                 fit: BoxFit.contain,
-                                errorBuilder: (_, _, _) => _buildLogoFallback(primary),
+                                errorBuilder: (_, _, _) =>
+                                    _buildLogoFallback(primary),
                               )
                             : _buildLogoFallback(primary),
                       ),
@@ -402,7 +410,10 @@ class OrganizationIdentitySection extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(10),
@@ -426,7 +437,10 @@ class OrganizationIdentitySection extends StatelessWidget {
 
               // Barra inferior de simulacao Kickster
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     // Amostras da paleta
@@ -453,7 +467,10 @@ class OrganizationIdentitySection extends StatelessWidget {
 
                     // Mini Botao de Acao Tematico (Kickster)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: primary,
                         borderRadius: BorderRadius.circular(20),

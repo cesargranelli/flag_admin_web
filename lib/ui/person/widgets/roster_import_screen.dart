@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/person/view_models/roster_import_view_model.dart';
 import 'package:flag_admin_web/domain/models/roster_batch.dart';

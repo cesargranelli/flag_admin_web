@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flutter/material.dart';
 
 /// Card selecionável do design system (issues #287/#290–#300).
@@ -64,15 +64,17 @@ class SelectableCard extends StatelessWidget {
                         Icon(
                           icon,
                           size: 28,
-                          color:
-                              selected ? Colors.white : AppColors.textPrimary,
+                          color: selected
+                              ? Colors.white
+                              : AppColors.textPrimary,
                         ),
                         const SizedBox(height: 8),
                       ],
                       Text(
                         label,
-                        style: Theme.of(context).textTheme.titleSmall
-                            ?.copyWith(color: selected ? Colors.white : null),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: selected ? Colors.white : null,
+                        ),
                       ),
                       if (description != null) ...[
                         const SizedBox(height: 4),

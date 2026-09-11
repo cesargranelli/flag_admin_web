@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/organization_repository.dart';
 import 'package:flag_admin_web/domain/models/affiliation.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel da tela de Consulta de Agremiações Filiadas (ADR-001 / MVVM 1:1).
 class OrganizationAffiliatesViewModel extends ChangeNotifier {
@@ -40,8 +40,8 @@ class OrganizationAffiliatesViewModel extends ChangeNotifier {
     required OrganizationRepository repository,
     required this.organizationId,
     Organization? initialOrganization,
-  })  : _repository = repository,
-        _organization = initialOrganization;
+  }) : _repository = repository,
+       _organization = initialOrganization;
 
   void setSearchQuery(String query) {
     if (_searchQuery != query) {
@@ -153,7 +153,11 @@ class OrganizationAffiliatesViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repository.rejectAffiliation(organizationId, affiliationId, reason);
+      await _repository.rejectAffiliation(
+        organizationId,
+        affiliationId,
+        reason,
+      );
       await load(forceRefresh: true);
       return true;
     } catch (e) {

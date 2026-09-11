@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 /// ViewModel para a listagem de aprovações de usuários (ADR-011 / MVVM).
 class ApprovalListViewModel extends ChangeNotifier {
   final AuthRepository _repository;
 
   ApprovalListViewModel({required AuthRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   List<User> _pendingUsers = const [];
   List<User> get pendingUsers => _pendingUsers;
@@ -29,9 +29,11 @@ class ApprovalListViewModel extends ChangeNotifier {
     if (_searchQuery.isEmpty) return _pendingUsers;
     final query = _searchQuery.toLowerCase().trim();
     return _pendingUsers
-        .where((u) =>
-            u.name.toLowerCase().contains(query) ||
-            u.email.toLowerCase().contains(query))
+        .where(
+          (u) =>
+              u.name.toLowerCase().contains(query) ||
+              u.email.toLowerCase().contains(query),
+        )
         .toList(growable: false);
   }
 
@@ -66,7 +68,9 @@ class ApprovalListViewModel extends ChangeNotifier {
     try {
       await _repository.approveUser(userId);
       // Invalida cache local
-      _pendingUsers = _pendingUsers.where((u) => u.id != userId).toList(growable: false);
+      _pendingUsers = _pendingUsers
+          .where((u) => u.id != userId)
+          .toList(growable: false);
       notifyListeners();
       return true;
     } catch (e) {
@@ -78,7 +82,9 @@ class ApprovalListViewModel extends ChangeNotifier {
   Future<bool> reject(String userId) async {
     try {
       await _repository.rejectUser(userId);
-      _pendingUsers = _pendingUsers.where((u) => u.id != userId).toList(growable: false);
+      _pendingUsers = _pendingUsers
+          .where((u) => u.id != userId)
+          .toList(growable: false);
       notifyListeners();
       return true;
     } catch (e) {

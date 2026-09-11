@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_create_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_edit_screen.dart';

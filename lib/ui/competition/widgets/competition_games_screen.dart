@@ -4,7 +4,7 @@ import 'package:flag_admin_web/domain/enums/round_type.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_games_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

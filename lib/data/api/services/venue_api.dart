@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 import '../api_client.dart';
 
@@ -19,17 +19,12 @@ class VenueApi {
     required String name,
     String? address,
     String? mapsUrl,
-  }) =>
-      _client.post(
-        '/api/v1/venues',
-        {
-          'organizationId': organizationId,
-          'name': name,
-          'address': ?address,
-          'mapsUrl': ?mapsUrl,
-        },
-        Venue.fromJson,
-      );
+  }) => _client.post('/api/v1/venues', {
+    'organizationId': organizationId,
+    'name': name,
+    'address': ?address,
+    'mapsUrl': ?mapsUrl,
+  }, Venue.fromJson);
 
   Future<Venue> update(
     String id, {
@@ -37,16 +32,10 @@ class VenueApi {
     required String name,
     String? address,
     String? mapsUrl,
-  }) =>
-      _client.put(
-        '/api/v1/venues/$id',
-        {
-          'organizationId': organizationId,
-          'name': name,
-          'address': ?address,
-          'mapsUrl': ?mapsUrl,
-        },
-        Venue.fromJson,
-      );
+  }) => _client.put('/api/v1/venues/$id', {
+    'organizationId': organizationId,
+    'name': name,
+    'address': ?address,
+    'mapsUrl': ?mapsUrl,
+  }, Venue.fromJson);
 }
-

@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/domain/enums/age_group.dart';
 import 'package:flag_admin_web/domain/enums/gender.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 
 import '../api_client.dart';
 

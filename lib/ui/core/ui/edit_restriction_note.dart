@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flutter/material.dart';
 
 /// Nota informativa exibida quando as ações de edição ficam ocultas
@@ -25,10 +25,7 @@ class EditRestrictionNote extends StatelessWidget {
       padding: padding,
       child: Text(
         message,
-        style: const TextStyle(
-          fontSize: 13,
-          color: AppColors.textSecondary,
-        ),
+        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
       ),
     );
   }

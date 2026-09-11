@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/round/view_models/round_edit_view_model.dart';
 import 'package:flutter/material.dart';

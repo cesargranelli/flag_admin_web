@@ -1,5 +1,5 @@
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
-import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/ui/core/ui/admin_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

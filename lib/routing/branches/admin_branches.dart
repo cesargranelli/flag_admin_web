@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/ui/approval/widgets/approval_list_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_create_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.dart';

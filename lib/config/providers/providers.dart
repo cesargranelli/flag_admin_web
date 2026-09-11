@@ -30,7 +30,7 @@ import 'package:flag_admin_web/data/services/venue_service.dart';
 import 'package:flag_admin_web/data/session/session_manager.dart';
 import 'package:flag_admin_web/domain/models/enrollment_window.dart';
 import 'package:flag_admin_web/routing/app_router.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/config/domain_imports.dart';
 import 'package:flag_admin_web/ui/approval/view_models/approval_list_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/forgot_password_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/login_view_model.dart';
