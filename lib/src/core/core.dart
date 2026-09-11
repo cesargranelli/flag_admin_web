@@ -19,8 +19,8 @@ export 'theme/app_theme.dart';
 export '../../config/app_l10n.dart';
 
 // Utils
-export 'utils/document_utils.dart';
-export 'utils/geo_constants.dart';
+export '../../utils/document_utils.dart';
+export '../../utils/geo_constants.dart';
 export '../../utils/date_formats.dart';
 export '../../utils/mutation.dart';
 
