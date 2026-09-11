@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
+import 'app_colors.dart';
 import 'kickster_button.dart';
 
 /// Tamanho do alvo de toque mínimo (tokens.md: "Alvos de toque: mín. 48px").

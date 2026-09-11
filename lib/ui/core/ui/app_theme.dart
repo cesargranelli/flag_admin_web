@@ -38,7 +38,9 @@ class AppTheme {
       // Canvas para menu aberto de dropdown (DropdownButtonFormField lê
       // `Theme.of(context).canvasColor` como fundo do menu — issue #365).
       canvasColor: AppColors.surface,
-      textTheme: _textTheme(GoogleFonts.plusJakartaSansTextTheme(base.textTheme)),
+      textTheme: _textTheme(
+        GoogleFonts.plusJakartaSansTextTheme(base.textTheme),
+      ),
       cardTheme: const CardThemeData(
         color: AppColors.surface,
         elevation: 1,
@@ -50,7 +52,10 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surface,
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 20,
+        ),
         // Rótulo flutuante 12/16 ls−0.2 com opacidade @40% da spec (fieldLabel).
         labelStyle: AppTextStyles.fieldLabel.copyWith(
           color: AppColors.textPrimary.withValues(alpha: 0.4),
@@ -125,9 +130,7 @@ class AppTheme {
               : AppColors.grayFill,
         ),
         side: const BorderSide(color: AppColors.black),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       ),
     );
   }

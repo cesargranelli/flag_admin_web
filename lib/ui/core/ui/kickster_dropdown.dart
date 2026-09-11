@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
-import '../../../src/core/theme/app_text_styles.dart';
+import 'app_colors.dart';
+import 'app_text_styles.dart';
 import 'app_dropdown.dart';
 import 'kickster_menu_anchor.dart';
 

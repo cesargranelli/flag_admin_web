@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
-import '../../../src/core/theme/app_text_styles.dart';
+import 'app_colors.dart';
+import 'app_text_styles.dart';
 
 /// Divisor social "OU" do kit Kickster (issue #443).
 ///

@@ -1,8 +1,8 @@
 import 'package:flag_admin_web/domain/enums/game_status.dart';
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
-import '../../../src/core/theme/app_text_styles.dart';
+import 'app_colors.dart';
+import 'app_text_styles.dart';
 import 'kickster_badge.dart';
 
 /// Card de jogo com placar no estilo Live Match do kit Kickster (issue

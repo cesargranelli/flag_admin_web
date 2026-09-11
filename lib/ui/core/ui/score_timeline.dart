@@ -1,7 +1,7 @@
 import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
+import 'app_colors.dart';
 
 /// Timeline de eventos de pontuação de uma partida.
 ///

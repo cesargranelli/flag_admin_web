@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
+import 'app_colors.dart';
 
 /// Widget padrão de carregamento (spinner centralizado).
 class AppLoading extends StatelessWidget {

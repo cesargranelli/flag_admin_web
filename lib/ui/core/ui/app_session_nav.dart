@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
+import 'app_colors.dart';
 
 /// Enum dos estados (tom) de um card de sessão na navegação.
 enum AppSessionTone { current, done, inactive }

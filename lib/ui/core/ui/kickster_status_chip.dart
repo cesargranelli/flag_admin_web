@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
-import '../../../src/core/theme/app_text_styles.dart';
+import 'app_colors.dart';
+import 'app_text_styles.dart';
 
 /// Variante visual do [KicksterStatusChip].
 enum KicksterStatusChipType { success, pending, refund, failed, unpaid }

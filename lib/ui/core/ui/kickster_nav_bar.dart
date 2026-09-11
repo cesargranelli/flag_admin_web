@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../src/core/theme/app_colors.dart';
+import 'app_colors.dart';
 
 /// Barra de navegação **inferior mobile** no estilo do kit Kickster (issues
 /// #436/#441).

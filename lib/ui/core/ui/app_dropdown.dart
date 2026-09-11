@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flag_admin_web/src/domain/domain.dart';
 
-import '../../../src/core/theme/app_colors.dart';
+import 'app_colors.dart';
 
 /// Item de dropdown com ícone à esquerda (issue #365).
 ///
