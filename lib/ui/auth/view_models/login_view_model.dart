@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
 import 'package:flag_admin_web/data/services/auth_service.dart';
 import 'package:flag_admin_web/data/api/repository_exception.dart';
-import 'package:flag_admin_web/src/core/l10n/app_strings.dart';
+import 'package:flag_admin_web/config/app_l10n.dart';
 
 /// ViewModel para a tela de Login (ADR-001 / MVVM 1:1).
 class LoginViewModel extends ChangeNotifier {
@@ -24,8 +24,8 @@ class LoginViewModel extends ChangeNotifier {
   LoginViewModel({
     required AuthRepository repository,
     VoidCallback? onAuthStateChanged,
-  })  : _repository = repository,
-        _onAuthStateChanged = onAuthStateChanged;
+  }) : _repository = repository,
+       _onAuthStateChanged = onAuthStateChanged;
 
   void toggleObscurePassword() {
     _obscurePassword = !_obscurePassword;
@@ -43,10 +43,7 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   /// Realiza o login do usuário. Retorna 	rue em caso de sucesso.
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

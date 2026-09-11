@@ -4,8 +4,8 @@
 library;
 
 // Config
-export 'config/app_config.dart';
-export 'config/firebase_options.dart';
+export '../../config/app_config.dart';
+export '../../config/app_firebase_options.dart';
 
 // Layout
 export 'layout/app_layout.dart';
@@ -16,7 +16,7 @@ export 'theme/app_text_styles.dart';
 export 'theme/app_theme.dart';
 
 // L10n
-export 'l10n/app_strings.dart';
+export '../../config/app_l10n.dart';
 
 // Utils
 export 'utils/document_utils.dart';
