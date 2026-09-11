@@ -1,8 +1,7 @@
+import 'package:flag_admin_web/domain/models/venue.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
-import 'package:flag_admin_web/ui/venue/view_models/venue_detail_view_model.dart'
-    as vm;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,53 +22,47 @@ class VenueDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
-  late vm.VenueDetailViewModel _viewModel;
-
   @override
   void initState() {
     super.initState();
-    _viewModel = vm.VenueDetailViewModel(
-      repository: ref.watch(venueRepositoryProvider),
-    );
-    if (widget.venueId != null) {
-      _viewModel.load(widget.venueId!);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final id = widget.venueId ?? widget.venue?.id;
+      if (id != null && id.isNotEmpty) {
+        ref.read(venueDetailViewModelProvider(id)).load(id);
+        if (widget.venue != null) {
+          ref.read(venueDetailViewModelProvider(id)).setVenue(widget.venue!);
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final id = widget.venueId ?? widget.venue?.id ?? '';
+    final vm = ref.watch(venueDetailViewModelProvider(id));
     return AppScreen(
-      title: widget.venue?.name ?? 'Campo',
+      title: vm.venue?.name ?? widget.venue?.name ?? 'Campo',
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.venues, route: '/venues'),
-        if (widget.venue?.name != null) BreadcrumbItem(widget.venue!.name),
+        if ((vm.venue?.name ?? widget.venue?.name) != null) BreadcrumbItem(vm.venue?.name ?? widget.venue!.name),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Conteúdo
           ListenableBuilder(
-            listenable: _viewModel,
+            listenable: vm,
             builder: (context, _) {
-              if (_viewModel.isLoading) {
+              if (vm.isLoading) {
                 return const AppLoading(message: 'Carregando campo...');
               }
-
-              if (_viewModel.errorMessage != null) {
-                return AppErrorState(
-                  message: _viewModel.errorMessage!,
-                  onRetry: () => _viewModel.load(widget.venueId!),
-                );
+              if (vm.errorMessage != null) {
+                return AppErrorState(message: vm.errorMessage!, onRetry: () => vm.load(id));
               }
-
-              final venue = _viewModel.venue;
+              final venue = vm.venue ?? widget.venue;
               if (venue == null) {
-                return const AppErrorState(
-                  message: 'Campo não encontrado',
-                );
+                return const AppErrorState(message: 'Campo não encontrado');
               }
-
               return _buildDetail(context, venue);
             },
           ),

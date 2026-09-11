@@ -4,9 +4,19 @@ import 'package:flag_admin_web/data/repositories/venue_repository.dart';
 /// ViewModel para a criação de um novo Venue (ADR-011 / MVVM).
 class VenueCreateViewModel extends ChangeNotifier {
   final VenueRepository _repository;
+  bool _disposed = false;
 
-  VenueCreateViewModel({required VenueRepository repository})
-      : _repository = repository;
+  VenueCreateViewModel({required VenueRepository repository}) : _repository = repository;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  void _safeNotify() {
+    if (!_disposed) notifyListeners();
+  }
 
   // Form state
   String? _organizationId;
@@ -32,28 +42,28 @@ class VenueCreateViewModel extends ChangeNotifier {
     _name = null;
     _address = null;
     _mapsUrl = null;
-    notifyListeners();
+    _safeNotify();
   }
 
   // Setters
   void setOrganizationId(String? value) {
     _organizationId = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void setName(String? value) {
     _name = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void setAddress(String? value) {
     _address = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void setMapsUrl(String? value) {
     _mapsUrl = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   /// Salva o novo venue.
@@ -65,13 +75,13 @@ class VenueCreateViewModel extends ChangeNotifier {
 
     if (organizationId == null || name == null || name.isEmpty) {
       _errorMessage = 'Preencha todos os campos obrigatórios.';
-      notifyListeners();
+      _safeNotify();
       return false;
     }
 
     _isSubmitting = true;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       await _repository.createVenue(
@@ -86,7 +96,7 @@ class VenueCreateViewModel extends ChangeNotifier {
       return false;
     } finally {
       _isSubmitting = false;
-      notifyListeners();
+      _safeNotify();
     }
   }
 }

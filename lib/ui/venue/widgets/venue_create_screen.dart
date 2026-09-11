@@ -43,10 +43,21 @@ class _VenueCreateScreenState extends ConsumerState<VenueCreateScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
-    final success = await _viewModel.save();
-    if (success && mounted) {
-      context.pop();
+    final vm = ref.read(venueCreateViewModelProvider);
+    final success = await vm.save();
+    if (!mounted) return;
+    if (success) {
+      ref.read(venueListViewModelProvider).load(forceRefresh: true);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Campo criado com sucesso')));
+      context.go('/venues');
+    } else {
+      // Erro já foi setado no ViewModel (ex: 'Preencha todos os campos obrigatórios' ou 'Não foi possível salvar')
+      // O errorMessage já está disponível via _viewModel.errorMessage
+      if (_viewModel.errorMessage != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_viewModel.errorMessage!)),
+        );
+      }
     }
   }
 

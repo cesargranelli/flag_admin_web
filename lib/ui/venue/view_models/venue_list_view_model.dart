@@ -5,9 +5,20 @@ import 'package:flag_admin_web/domain/models/venue.dart';
 /// ViewModel para a listagem de Venues (ADR-011 / MVVM).
 class VenueListViewModel extends ChangeNotifier {
   final VenueRepository _repository;
+  bool _disposed = false;
 
   VenueListViewModel({required VenueRepository repository})
       : _repository = repository;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  void _safeNotify() {
+    if (!_disposed) notifyListeners();
+  }
 
   List<Venue> _venues = const [];
   List<Venue> get venues => _venues;
@@ -38,10 +49,10 @@ class VenueListViewModel extends ChangeNotifier {
     if (_venues.isEmpty && !silent) {
       _isLoading = true;
       _errorMessage = null;
-      notifyListeners();
+      _safeNotify();
     } else {
       _isRevalidating = true;
-      notifyListeners();
+      _safeNotify();
     }
 
     try {
@@ -55,14 +66,14 @@ class VenueListViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       _isRevalidating = false;
-      notifyListeners();
+      _safeNotify();
     }
   }
 
   void setSearchQuery(String query) {
     if (_searchQuery != query) {
       _searchQuery = query;
-      notifyListeners();
+      _safeNotify();
     }
   }
 }

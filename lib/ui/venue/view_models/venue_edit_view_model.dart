@@ -4,7 +4,13 @@ import 'package:flag_admin_web/domain/models/venue.dart';
 
 /// ViewModel para a edição de um Venue existente (ADR-011 / MVVM).
 class VenueEditViewModel extends ChangeNotifier {
+  bool _disposed = false;
   final VenueRepository _repository;
+
+  @override
+  void dispose() { _disposed = true; super.dispose(); }
+
+  void _safeNotify() { if (!_disposed) notifyListeners(); }
 
   VenueEditViewModel({required VenueRepository repository})
       : _repository = repository;
@@ -36,28 +42,28 @@ class VenueEditViewModel extends ChangeNotifier {
     _name = venue.name;
     _address = venue.address;
     _mapsUrl = venue.mapsUrl;
-    notifyListeners();
+    _safeNotify();
   }
 
   // Setters
   void setOrganizationId(String? value) {
     _organizationId = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void setName(String? value) {
     _name = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void setAddress(String? value) {
     _address = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   void setMapsUrl(String? value) {
     _mapsUrl = value;
-    notifyListeners();
+    _safeNotify();
   }
 
   /// Salva as alterações do venue.
@@ -70,13 +76,13 @@ class VenueEditViewModel extends ChangeNotifier {
 
     if (venueId == null || organizationId == null || name == null || name.isEmpty) {
       _errorMessage = 'Preencha todos os campos obrigatórios.';
-      notifyListeners();
+      _safeNotify();
       return false;
     }
 
     _isSubmitting = true;
     _errorMessage = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       await _repository.updateVenue(
@@ -92,7 +98,7 @@ class VenueEditViewModel extends ChangeNotifier {
       return false;
     } finally {
       _isSubmitting = false;
-      notifyListeners();
+      _safeNotify();
     }
   }
 }

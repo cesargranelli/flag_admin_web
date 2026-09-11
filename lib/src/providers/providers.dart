@@ -456,13 +456,13 @@ final venueRepositoryProvider = Provider<VenueRepository>(
 
 /// ViewModel para a listagem de Venues (ADR-011 / MVVM).
 final venueListViewModelProvider =
-    ChangeNotifierProvider.autoDispose<VenueListViewModel>(
+    ChangeNotifierProvider<VenueListViewModel>(
       (ref) =>
           VenueListViewModel(repository: ref.watch(venueRepositoryProvider)),
     );
 
 /// ViewModel para o detalhe de um Venue (ADR-011 / MVVM).
-final venueDetailViewModelProvider = ChangeNotifierProvider.autoDispose
+final venueDetailViewModelProvider = ChangeNotifierProvider
     .family<VenueDetailViewModel, String>(
       (ref, venueId) =>
           VenueDetailViewModel(repository: ref.watch(venueRepositoryProvider)),
@@ -470,13 +470,13 @@ final venueDetailViewModelProvider = ChangeNotifierProvider.autoDispose
 
 /// ViewModel para a criação de um novo Venue (ADR-011 / MVVM).
 final venueCreateViewModelProvider =
-    ChangeNotifierProvider.autoDispose<VenueCreateViewModel>(
+    ChangeNotifierProvider<VenueCreateViewModel>(
       (ref) =>
           VenueCreateViewModel(repository: ref.watch(venueRepositoryProvider)),
     );
 
 /// ViewModel para a edição de um Venue existente (ADR-011 / MVVM).
-final venueEditViewModelProvider = ChangeNotifierProvider.autoDispose
+final venueEditViewModelProvider = ChangeNotifierProvider
     .family<VenueEditViewModel, String>(
       (ref, venueId) =>
           VenueEditViewModel(repository: ref.watch(venueRepositoryProvider)),

@@ -1,5 +1,5 @@
+import 'package:flag_admin_web/domain/models/venue.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import 'package:flag_admin_web/ui/venue/view_models/venue_edit_view_model.dart';
 import 'package:flutter/material.dart';
@@ -53,9 +53,13 @@ class _VenueEditScreenState extends ConsumerState<VenueEditScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
-    final success = await _viewModel.save();
-    if (success && mounted) {
+    final vm = ref.read(venueEditViewModelProvider(widget.venueId));
+    final success = await vm.save();
+    if (!mounted) return;
+    if (success) {
+      ref.read(venueListViewModelProvider).load(forceRefresh: true);
+      ref.invalidate(venueDetailViewModelProvider(widget.venueId));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Campo atualizado com sucesso')));
       context.go('/venues/${widget.venueId}');
     }
   }
@@ -71,7 +75,6 @@ class _VenueEditScreenState extends ConsumerState<VenueEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final organizations = ref.watch(organizationsProvider);
 
     return AppScreen(
       title: 'Editar campo',
@@ -92,36 +95,19 @@ class _VenueEditScreenState extends ConsumerState<VenueEditScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    organizations.when(
-                      loading: () => const LinearProgressIndicator(),
-                      error: (e, s) => AppErrorState(
-                        message: 'Erro ao carregar organizações',
-                        onRetry: () => ref.invalidate(organizationsProvider),
-                      ),
-                      data: (orgs) {
-                        if (orgs.isEmpty) {
-                          return const AppEmptyState(
-                            message: 'Cadastre uma organização antes de criar campos',
-                            icon: Icons.business,
-                          );
-                        }
-                        return KicksterDropdown<String>(
-                          label: 'Organização',
-                          value: _viewModel.organizationId,
-                          items: orgs
-                              .map((o) => DropdownMenuItem(
-                                    value: o.id,
-                                    child: Text(o.tradeName),
-                                  ))
-                              .toList(),
-                          onChanged: (value) =>
-                              _viewModel.setOrganizationId(value),
-                          validator: (value) => (value == null || value.isEmpty)
-                              ? 'Selecione a organização'
-                              : null,
-                        );
-                      },
-                    ),
+                    Consumer(builder: (context, ref, _) {
+                      final vm2 = ref.watch(venueEditViewModelProvider(widget.venueId));
+                      final orgId = vm2.organizationId;
+                      final orgAsync = orgId != null && orgId.isNotEmpty ? ref.watch(organizationProvider(orgId)) : null;
+                      final orgName = orgAsync?.valueOrNull?.tradeName ?? orgId ?? '—';
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          KicksterCard(icon: Icons.business_outlined, title: orgName, subtitle: 'Organização dona do cadastro', onTap: () {}),
+                          const EditRestrictionNote(message: 'Organização dona do cadastro não pode ser alterada.', padding: EdgeInsets.only(top: 8)),
+                        ],
+                      );
+                    }),
                     const SizedBox(height: 12),
                     KicksterInput(
                       label: 'Nome',
