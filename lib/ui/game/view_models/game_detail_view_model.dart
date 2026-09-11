@@ -1,21 +1,25 @@
-import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/game_repository.dart';
+import 'package:flag_admin_web/domain/enums/game_status.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
+import 'package:flutter/foundation.dart';
 
 /// ViewModel para o detalhe de um Jogo (ADR-011 / MVVM).
 class GameDetailViewModel extends ChangeNotifier {
   final GameRepository _repository;
 
   GameDetailViewModel({required GameRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   Game? _game;
+
   Game? get game => _game;
 
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
 
   /// Carrega o jogo por ID.

@@ -1,5 +1,5 @@
 ﻿import 'package:flag_admin_web/domain/enums/user_role.dart';
-import 'package:flag_admin_web/src/domain/models/user.dart';
+import 'package:flag_admin_web/domain/models/user.dart';
 
 /// Modelo de domínio do usuário autenticado no Flag Platform (ADR-001).
 class AuthUser {

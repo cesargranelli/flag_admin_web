@@ -1,15 +1,17 @@
-import 'package:flutter/foundation.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
 import 'package:flag_admin_web/data/repositories/competition_team_repository.dart';
 import 'package:flag_admin_web/data/repositories/game_repository.dart';
 import 'package:flag_admin_web/data/repositories/round_repository.dart';
 import 'package:flag_admin_web/data/repositories/venue_repository.dart';
+import 'package:flag_admin_web/domain/enums/game_status.dart';
+import 'package:flag_admin_web/domain/enums/round_type.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
 import 'package:flag_admin_web/domain/models/team.dart';
 import 'package:flag_admin_web/domain/models/venue.dart';
-import 'package:flag_admin_web/data/api/api_client.dart';
+import 'package:flutter/foundation.dart';
 
 /// ViewModel da tela de Tabelamento e Agendamento de Jogos da Competição.
 class CompetitionGamesViewModel extends ChangeNotifier {
@@ -29,40 +31,50 @@ class CompetitionGamesViewModel extends ChangeNotifier {
     required ApiClient client,
     required this.competitionId,
     this.competition,
-  })  : _gameRepo = gameRepo,
-        _roundRepo = roundRepo,
-        _teamRepo = teamRepo,
-        _venueRepo = venueRepo,
-        _client = client;
+  }) : _gameRepo = gameRepo,
+       _roundRepo = roundRepo,
+       _teamRepo = teamRepo,
+       _venueRepo = venueRepo,
+       _client = client;
 
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
 
   String? _actionInProgressId;
+
   String? get actionInProgressId => _actionInProgressId;
 
   List<Round> _rounds = [];
+
   List<Round> get rounds => _rounds;
 
   List<Game> _games = [];
+
   List<Game> get games => _games;
 
   List<CompetitionTeam> _teams = [];
+
   List<CompetitionTeam> get teams => _teams;
 
   List<Venue> _venues = [];
+
   List<Venue> get venues => _venues;
 
   String? _selectedRoundId;
+
   String? get selectedRoundId => _selectedRoundId;
 
   GameStatus? _selectedStatus;
+
   GameStatus? get selectedStatus => _selectedStatus;
 
   String _searchQuery = '';
+
   String get searchQuery => _searchQuery;
 
   void setSelectedRoundId(String? roundId) {
@@ -98,8 +110,7 @@ class CompetitionGamesViewModel extends ChangeNotifier {
         }
       }
       return true;
-    }).toList()
-      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    }).toList()..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
   }
 
   Future<void> load({bool forceRefresh = false}) async {
@@ -109,11 +120,22 @@ class CompetitionGamesViewModel extends ChangeNotifier {
 
     try {
       final results = await Future.wait([
-        _roundRepo.getRoundsByCompetition(competitionId, forceRefresh: forceRefresh),
-        _gameRepo.getGamesByCompetition(competitionId, forceRefresh: forceRefresh),
-        _teamRepo.getTeamsByCompetition(competitionId, forceRefresh: forceRefresh),
+        _roundRepo.getRoundsByCompetition(
+          competitionId,
+          forceRefresh: forceRefresh,
+        ),
+        _gameRepo.getGamesByCompetition(
+          competitionId,
+          forceRefresh: forceRefresh,
+        ),
+        _teamRepo.getTeamsByCompetition(
+          competitionId,
+          forceRefresh: forceRefresh,
+        ),
         _venueRepo.getVenues(forceRefresh: forceRefresh),
-        _client.getList('/api/v1/teams', Team.fromJson).catchError((_) => <Team>[]),
+        _client
+            .getList('/api/v1/teams', Team.fromJson)
+            .catchError((_) => <Team>[]),
       ]);
 
       _rounds = (results[0] as List<Round>).toList()

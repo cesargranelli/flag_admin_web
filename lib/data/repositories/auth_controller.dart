@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
 import 'package:flag_admin_web/domain/models/auth_user.dart';
-import 'package:flag_admin_web/src/domain/models/user.dart';
+import 'package:flag_admin_web/domain/models/user.dart';
 
 /// Estado de autenticação do Admin Web (compatibilidade com AppRouter).
 class AuthState {
@@ -25,7 +25,8 @@ class AuthController extends ChangeNotifier {
   AuthState _state = const AuthState(restoring: true);
   AuthState get state => _state;
 
-  AuthController({required AuthRepository repository}) : _repository = repository;
+  AuthController({required AuthRepository repository})
+    : _repository = repository;
 
   /// Restaura a sessão ao inicializar a aplicação.
   Future<void> restore() async {

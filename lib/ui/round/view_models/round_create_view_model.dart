@@ -1,13 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/round_repository.dart';
-import 'package:flag_admin_web/domain/models/round.dart';
+import 'package:flag_admin_web/domain/enums/round_type.dart';
+import 'package:flutter/foundation.dart';
 
 /// ViewModel para a criação de uma nova Rodada (ADR-011 / MVVM).
 class RoundCreateViewModel extends ChangeNotifier {
   final RoundRepository _repository;
 
   RoundCreateViewModel({required RoundRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   // Form state
   String? _competitionId;
@@ -17,14 +17,19 @@ class RoundCreateViewModel extends ChangeNotifier {
 
   // Getters
   String? get competitionId => _competitionId;
+
   int? get number => _number;
+
   String? get name => _name;
+
   RoundType? get type => _type;
 
   bool _isSubmitting = false;
+
   bool get isSubmitting => _isSubmitting;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
 
   /// Inicializa o formulário para criação.

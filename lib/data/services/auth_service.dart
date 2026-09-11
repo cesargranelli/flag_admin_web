@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flag_admin_web/data/api/api_client.dart';
 import 'package:flag_admin_web/domain/models/login_response.dart';
-import 'package:flag_admin_web/src/domain/models/user.dart';
+import 'package:flag_admin_web/domain/models/user.dart';
 
 /// Exceção de serviço de autenticação com mensagem amigável em português.
 class AuthServiceException implements Exception {
@@ -36,10 +36,7 @@ abstract class AuthService {
   Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();
 
-  Future<User> registerBackend({
-    required String name,
-    required String email,
-  });
+  Future<User> registerBackend({required String name, required String email});
 
   Future<LoginResponse> loginBackend({
     required String email,
@@ -63,10 +60,8 @@ class ApiAuthService implements AuthService {
   final ApiClient _client;
   final fb.FirebaseAuth _firebaseAuth;
 
-  ApiAuthService(
-    this._client, {
-    fb.FirebaseAuth? firebaseAuth,
-  }) : _firebaseAuth = firebaseAuth ?? fb.FirebaseAuth.instance;
+  ApiAuthService(this._client, {fb.FirebaseAuth? firebaseAuth})
+    : _firebaseAuth = firebaseAuth ?? fb.FirebaseAuth.instance;
 
   @override
   Stream<fb.User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -148,15 +143,11 @@ class ApiAuthService implements AuthService {
   }
 
   @override
-  Future<User> registerBackend({
-    required String name,
-    required String email,
-  }) {
-    return _client.post(
-      '/api/v1/auth/register',
-      {'name': name, 'email': email},
-      User.fromJson,
-    );
+  Future<User> registerBackend({required String name, required String email}) {
+    return _client.post('/api/v1/auth/register', {
+      'name': name,
+      'email': email,
+    }, User.fromJson);
   }
 
   @override
@@ -164,11 +155,10 @@ class ApiAuthService implements AuthService {
     required String email,
     required String password,
   }) {
-    return _client.post(
-      '/api/v1/auth/login',
-      {'email': email, 'password': password},
-      LoginResponse.fromJson,
-    );
+    return _client.post('/api/v1/auth/login', {
+      'email': email,
+      'password': password,
+    }, LoginResponse.fromJson);
   }
 
   @override
@@ -202,11 +192,11 @@ class ApiAuthService implements AuthService {
     required String email,
     required String role,
   }) {
-    return _client.post(
-      '/api/v1/auth/users',
-      {'name': name, 'email': email, 'role': role},
-      User.fromJson,
-    );
+    return _client.post('/api/v1/auth/users', {
+      'name': name,
+      'email': email,
+      'role': role,
+    }, User.fromJson);
   }
 
   /// Mapeamento de erros do Firebase Auth para português amigável.
