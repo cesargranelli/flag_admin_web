@@ -1,54 +1,53 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
-import '../core/widgets/admin_shell.dart';
-import '../features/approvals/presentation/screens/approvals_screen.dart';
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
+import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/src/core/widgets/admin_shell.dart';
+import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/src/features/approvals/presentation/screens/approvals_screen.dart';
+import 'package:flag_admin_web/src/features/competitions/presentation/screens/groupings_screen.dart';
+import 'package:flag_admin_web/src/features/rosters/presentation/screens/rosters_screen.dart';
+import 'package:flag_admin_web/src/features/users/presentation/screens/users_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/forgot_password_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/login_screen.dart';
 import 'package:flag_admin_web/ui/auth/widgets/signup_screen.dart';
-import 'package:flag_admin_web/ui/competition/widgets/competition_list_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_create_screen.dart';
-import 'package:flag_admin_web/ui/competition/widgets/competition_edit_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_detail_screen.dart';
-import 'package:flag_admin_web/ui/competition/widgets/competition_teams_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_edit_screen.dart';
 import 'package:flag_admin_web/ui/competition/widgets/competition_games_screen.dart';
-import '../features/competitions/presentation/screens/groupings_screen.dart';
-import 'package:flag_admin_web/ui/game/widgets/game_detail_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_list_screen.dart';
+import 'package:flag_admin_web/ui/competition/widgets/competition_teams_screen.dart';
 import 'package:flag_admin_web/ui/game/widgets/game_create_screen.dart';
+import 'package:flag_admin_web/ui/game/widgets/game_detail_screen.dart';
 import 'package:flag_admin_web/ui/game/widgets/game_edit_screen.dart';
 import 'package:flag_admin_web/ui/game/widgets/game_import_screen.dart';
 import 'package:flag_admin_web/ui/game/widgets/game_list_screen.dart';
 import 'package:flag_admin_web/ui/home/widgets/home_screen.dart';
-import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
-import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
-import 'package:flag_admin_web/ui/organization/widgets/organization_edit_screen.dart';
-import 'package:flag_admin_web/ui/organization/widgets/organization_affiliates_screen.dart';
-import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
-import '../features/rosters/presentation/screens/rosters_screen.dart';
-import 'package:flag_admin_web/ui/round/widgets/round_detail_screen.dart';
-import 'package:flag_admin_web/ui/round/widgets/round_create_screen.dart';
-import 'package:flag_admin_web/ui/round/widgets/round_edit_screen.dart';
-import 'package:flag_admin_web/ui/round/widgets/round_list_screen.dart';
-import '../features/users/presentation/screens/user_form_screen.dart';
-import '../features/users/presentation/screens/users_screen.dart';
-import 'package:flag_admin_web/ui/venue/widgets/venue_detail_screen.dart';
-import 'package:flag_admin_web/ui/venue/widgets/venue_create_screen.dart';
-import 'package:flag_admin_web/ui/venue/widgets/venue_edit_screen.dart';
-import 'package:flag_admin_web/ui/venue/widgets/venue_list_screen.dart';
-import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_create_screen.dart';
+import 'package:flag_admin_web/ui/institution/widgets/institution_detail_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_edit_screen.dart';
 import 'package:flag_admin_web/ui/institution/widgets/institution_list_screen.dart';
-import 'package:flag_admin_web/ui/person/widgets/person_list_screen.dart';
-import 'package:flag_admin_web/ui/person/widgets/person_detail_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_affiliates_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_create_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_detail_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_edit_screen.dart';
+import 'package:flag_admin_web/ui/organization/widgets/organization_list_screen.dart';
 import 'package:flag_admin_web/ui/person/widgets/person_create_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_detail_screen.dart';
 import 'package:flag_admin_web/ui/person/widgets/person_edit_screen.dart';
 import 'package:flag_admin_web/ui/person/widgets/person_import_screen.dart';
-import 'package:flag_admin_web/ui/person/widgets/roster_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/person_list_screen.dart';
 import 'package:flag_admin_web/ui/person/widgets/roster_import_screen.dart';
+import 'package:flag_admin_web/ui/person/widgets/roster_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_create_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_detail_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_edit_screen.dart';
+import 'package:flag_admin_web/ui/round/widgets/round_list_screen.dart';
+import 'package:flag_admin_web/ui/user/widgets/user_form_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_create_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_detail_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_edit_screen.dart';
+import 'package:flag_admin_web/ui/venue/widgets/venue_list_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// Rotas do Admin Web com proteção de autenticação.
 ///
@@ -390,8 +389,7 @@ class AppRouter {
                         final args = extra is GameImportArgs ? extra : null;
                         return GameImportScreen(
                           roundId:
-                              args?.roundId ??
-                              (extra is String ? extra : null),
+                              args?.roundId ?? (extra is String ? extra : null),
                           competitionId: args?.competitionId,
                         );
                       },
@@ -481,7 +479,7 @@ class AppRouter {
                     GoRoute(
                       path: 'import',
                       name: 'personImport',
-                       builder: (context, state) => const PersonImportScreen(),
+                      builder: (context, state) => const PersonImportScreen(),
                     ),
                     GoRoute(
                       path: ':id',
@@ -538,8 +536,9 @@ class AppRouter {
                   path: '/teams/:id/roster',
                   name: 'teamRoster',
                   builder: (context, state) {
-                    final team =
-                        state.extra is Team ? state.extra as Team : null;
+                    final team = state.extra is Team
+                        ? state.extra as Team
+                        : null;
                     return RosterScreen(
                       teamId: state.pathParameters['id'] ?? '',
                       team: team,

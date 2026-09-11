@@ -1,0 +1,1 @@
+export 'package:flag_admin_web/src/domain/enums/check_in_status.dart';

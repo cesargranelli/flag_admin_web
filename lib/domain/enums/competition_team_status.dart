@@ -1,0 +1,1 @@
+export 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';

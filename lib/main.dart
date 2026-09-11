@@ -8,14 +8,9 @@ import 'src/core/config/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // URLs reais no browser (/organizations/new em vez de /#/organizations/new).
-  usePathUrlStrategy();
-  runApp(
-    const ProviderScope(
-      child: FlagAdminWeb(),
-    ),
-  );
+  setUrlStrategy(PathUrlStrategy());
+  // usePathUrlStrategy();
+  runApp(const ProviderScope(child: FlagAdminWeb()));
 }
