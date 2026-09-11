@@ -1,4 +1,4 @@
-import '../enums/user_role.dart';
+import 'package:flag_admin_web/domain/enums/user_role.dart';
 
 /// Usuário autenticado do Flag Platform.
 ///
@@ -30,22 +30,22 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        email: json['email'] as String,
-        role: UserRole.fromJson(json['role'] as String),
-        status: json['status'] as String?,
-        createdAt: json['createdAt'] is String
-            ? DateTime.tryParse(json['createdAt'] as String)
-            : null,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    email: json['email'] as String,
+    role: UserRole.fromJson(json['role'] as String),
+    status: json['status'] as String?,
+    createdAt: json['createdAt'] is String
+        ? DateTime.tryParse(json['createdAt'] as String)
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'email': email,
-        'role': role.toJson(),
-        if (status != null) 'status': status,
-        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'email': email,
+    'role': role.toJson(),
+    if (status != null) 'status': status,
+    if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+  };
 }

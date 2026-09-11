@@ -1,5 +1,5 @@
 ﻿import 'package:flag_admin_web/domain/models/grouping_config.dart';
-import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/domain/enums/grouping_type.dart';
 
 /// Contrato comum de controle de agrupamento de times em competições.
 abstract class CompetitionGroupingState {
@@ -15,6 +15,10 @@ abstract class CompetitionGroupingState {
   void updateConferenceName(int index, String newName);
   void removeConference(int index);
   void addDivision(int conferenceIndex, [String? initialName]);
-  void updateDivisionName(int conferenceIndex, int divisionIndex, String newName);
+  void updateDivisionName(
+    int conferenceIndex,
+    int divisionIndex,
+    String newName,
+  );
   void removeDivision(int conferenceIndex, int divisionIndex);
 }

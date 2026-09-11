@@ -3,23 +3,24 @@ import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/grouping_config.dart';
 import 'package:flag_admin_web/data/api/repository_exception.dart';
-import 'package:flag_admin_web/src/domain/enums/age_group.dart';
-import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
-import 'package:flag_admin_web/src/domain/enums/gender.dart';
-import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
-import 'package:flag_admin_web/src/domain/enums/modality.dart';
-import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
+import 'package:flag_admin_web/domain/enums/age_group.dart';
+import 'package:flag_admin_web/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/domain/enums/gender.dart';
+import 'package:flag_admin_web/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/domain/enums/modality.dart';
+import 'package:flag_admin_web/domain/enums/tournament_format.dart';
 
 import 'competition_grouping_state.dart';
 
 /// ViewModel dedicada exclusivamente ao CADASTRO de nova Competição (ADR-001 / MVVM 1:1).
 ///
 /// Responsabilidade única: gerenciar o estado do formulário de criação de nova competição (sem ID, sem busca inicial).
-class CompetitionCreateViewModel extends ChangeNotifier implements CompetitionGroupingState {
+class CompetitionCreateViewModel extends ChangeNotifier
+    implements CompetitionGroupingState {
   final CompetitionRepository _repository;
 
   CompetitionCreateViewModel({required CompetitionRepository repository})
-      : _repository = repository {
+    : _repository = repository {
     nameController.addListener(notifyListeners);
   }
 
@@ -110,7 +111,10 @@ class CompetitionCreateViewModel extends ChangeNotifier implements CompetitionGr
   @override
   void updateGroupName(int index, String newName) {
     if (index >= 0 && index < groups.length) {
-      groups[index] = CompetitionGroupConfig(id: groups[index].id, name: newName);
+      groups[index] = CompetitionGroupConfig(
+        id: groups[index].id,
+        name: newName,
+      );
       notifyListeners();
     }
   }
@@ -171,11 +175,17 @@ class CompetitionCreateViewModel extends ChangeNotifier implements CompetitionGr
   }
 
   @override
-  void updateDivisionName(int conferenceIndex, int divisionIndex, String newName) {
+  void updateDivisionName(
+    int conferenceIndex,
+    int divisionIndex,
+    String newName,
+  ) {
     if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
       final conf = conferences[conferenceIndex];
       if (divisionIndex >= 0 && divisionIndex < conf.divisions.length) {
-        final updatedDivs = List<CompetitionDivisionConfig>.from(conf.divisions);
+        final updatedDivs = List<CompetitionDivisionConfig>.from(
+          conf.divisions,
+        );
         updatedDivs[divisionIndex] = CompetitionDivisionConfig(
           id: updatedDivs[divisionIndex].id,
           name: newName,
@@ -244,7 +254,9 @@ class CompetitionCreateViewModel extends ChangeNotifier implements CompetitionGr
     final body = <String, dynamic>{
       'name': nameController.text.trim(),
       'organizationId': selectedOrganizationId,
-      'season': seasonController.text.trim().isEmpty ? '2026' : seasonController.text.trim(),
+      'season': seasonController.text.trim().isEmpty
+          ? '2026'
+          : seasonController.text.trim(),
       'tournamentFormat': tournamentFormat.toJson(),
       'groupingType': groupingType.toJson(),
       'groupingConfig': GroupingConfig(
@@ -270,11 +282,14 @@ class CompetitionCreateViewModel extends ChangeNotifier implements CompetitionGr
       return result;
     } on RepositoryException catch (e) {
       if (e.statusCode == 403) {
-        _errorMessage = 'Acesso não autorizado (403): você não possui permissão para cadastrar competições.';
+        _errorMessage =
+            'Acesso não autorizado (403): você não possui permissão para cadastrar competições.';
       } else if (e.statusCode == 401) {
         _errorMessage = 'Sessão expirada (401). Faça login novamente.';
       } else {
-        _errorMessage = e.message.isNotEmpty ? e.message : 'Erro ao cadastrar a competição ().';
+        _errorMessage = e.message.isNotEmpty
+            ? e.message
+            : 'Erro ao cadastrar a competição ().';
       }
       return null;
     } catch (e) {

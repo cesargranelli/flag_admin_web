@@ -1,7 +1,7 @@
-import 'package:flag_admin_web/data/services/competition_team_service.dart';
+﻿import 'package:flag_admin_web/data/services/competition_team_service.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
 import 'package:flag_admin_web/data/api/api_client.dart';
-import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
+import 'package:flag_admin_web/domain/enums/competition_team_status.dart';
 
 /// Implementação REST de CompetitionTeamService.
 class ApiCompetitionTeamService implements CompetitionTeamService {
@@ -25,20 +25,15 @@ class ApiCompetitionTeamService implements CompetitionTeamService {
     String? conferenceName,
     String? divisionName,
     int? seedNumber,
-  }) =>
-      _client.post(
-        '/api/v1/competitions/$competitionId/teams/$teamId',
-        {
-          'status': status.toJson(),
-          if (groupName != null && groupName.isNotEmpty) 'groupName': groupName,
-          if (conferenceName != null && conferenceName.isNotEmpty)
-            'conferenceName': conferenceName,
-          if (divisionName != null && divisionName.isNotEmpty)
-            'divisionName': divisionName,
-          'seedNumber': ?seedNumber,
-        },
-        CompetitionTeam.fromJson,
-      );
+  }) => _client.post('/api/v1/competitions/$competitionId/teams/$teamId', {
+    'status': status.toJson(),
+    if (groupName != null && groupName.isNotEmpty) 'groupName': groupName,
+    if (conferenceName != null && conferenceName.isNotEmpty)
+      'conferenceName': conferenceName,
+    if (divisionName != null && divisionName.isNotEmpty)
+      'divisionName': divisionName,
+    'seedNumber': ?seedNumber,
+  }, CompetitionTeam.fromJson);
 
   @override
   Future<CompetitionTeam> updateAllocation({
@@ -49,57 +44,49 @@ class ApiCompetitionTeamService implements CompetitionTeamService {
     String? conferenceName,
     String? divisionName,
     int? seedNumber,
-  }) =>
-      _client.put(
-        '/api/v1/competitions/$competitionId/teams/$teamId',
-        {
-          if (status != null) 'status': status.toJson(),
-          'groupName': groupName,
-          'conferenceName': conferenceName,
-          'divisionName': divisionName,
-          'seedNumber': seedNumber,
-        },
-        CompetitionTeam.fromJson,
-      );
+  }) => _client.put('/api/v1/competitions/$competitionId/teams/$teamId', {
+    if (status != null) 'status': status.toJson(),
+    'groupName': groupName,
+    'conferenceName': conferenceName,
+    'divisionName': divisionName,
+    'seedNumber': seedNumber,
+  }, CompetitionTeam.fromJson);
 
   @override
   Future<CompetitionTeam> approveTeam({
     required String competitionId,
     required String teamId,
-  }) =>
-      _client.post(
-        '/api/v1/competitions/$competitionId/teams/$teamId/approve',
-        {},
-        CompetitionTeam.fromJson,
-      );
+  }) => _client.post(
+    '/api/v1/competitions/$competitionId/teams/$teamId/approve',
+    {},
+    CompetitionTeam.fromJson,
+  );
 
   @override
   Future<CompetitionTeam> rejectTeam({
     required String competitionId,
     required String teamId,
-  }) =>
-      _client.post(
-        '/api/v1/competitions/$competitionId/teams/$teamId/reject',
-        {},
-        CompetitionTeam.fromJson,
-      );
+  }) => _client.post(
+    '/api/v1/competitions/$competitionId/teams/$teamId/reject',
+    {},
+    CompetitionTeam.fromJson,
+  );
 
   @override
   Future<void> removeFromCompetition({
     required String competitionId,
     required String teamId,
-  }) =>
-      _client.delete('/api/v1/competitions/$competitionId/teams/$teamId');
+  }) => _client.delete('/api/v1/competitions/$competitionId/teams/$teamId');
 
   @override
   Future<List<CompetitionTeam>> listByTeam(String teamId) => _client.getList(
-        '/api/v1/teams/$teamId/competitions',
-        CompetitionTeam.fromJson,
-      );
+    '/api/v1/teams/$teamId/competitions',
+    CompetitionTeam.fromJson,
+  );
 
   @override
   Future<List<Map<String, dynamic>>> listAllPlatformTeams() => _client.getList(
-        '/api/v1/teams',
-        (json) => Map<String, dynamic>.from(json),
-      );
+    '/api/v1/teams',
+    (json) => Map<String, dynamic>.from(json),
+  );
 }

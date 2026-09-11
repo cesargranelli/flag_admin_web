@@ -3,19 +3,20 @@ import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/grouping_config.dart';
 import 'package:flag_admin_web/data/api/repository_exception.dart';
-import 'package:flag_admin_web/src/domain/enums/age_group.dart';
-import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
-import 'package:flag_admin_web/src/domain/enums/gender.dart';
-import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
-import 'package:flag_admin_web/src/domain/enums/modality.dart';
-import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
+import 'package:flag_admin_web/domain/enums/age_group.dart';
+import 'package:flag_admin_web/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/domain/enums/gender.dart';
+import 'package:flag_admin_web/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/domain/enums/modality.dart';
+import 'package:flag_admin_web/domain/enums/tournament_format.dart';
 
 import 'competition_grouping_state.dart';
 
 /// ViewModel dedicada exclusivamente à EDIÇÃO de Competição existente (ADR-001 / MVVM 1:1).
 ///
 /// Responsabilidade única: carregar a entidade existente pelo ID e salvar as alterações.
-class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGroupingState {
+class CompetitionEditViewModel extends ChangeNotifier
+    implements CompetitionGroupingState {
   final CompetitionRepository _repository;
   final String competitionId;
 
@@ -23,9 +24,11 @@ class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGrou
     required CompetitionRepository repository,
     required this.competitionId,
     Competition? initialData,
-  })  : _repository = repository {
+  }) : _repository = repository {
     nameController.addListener(notifyListeners);
-    if (initialData != null && initialData.organizationId != null && initialData.organizationId!.isNotEmpty) {
+    if (initialData != null &&
+        initialData.organizationId != null &&
+        initialData.organizationId!.isNotEmpty) {
       _populate(initialData);
     }
   }
@@ -115,18 +118,22 @@ class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGrou
     nameController.text = comp.name;
     descriptionController.text = comp.description ?? '';
     seasonController.text = comp.season;
-    startDateController.text =
-        comp.startDate != null ? comp.startDate!.toIso8601String().split('T').first : '';
-    endDateController.text =
-        comp.endDate != null ? comp.endDate!.toIso8601String().split('T').first : '';
+    startDateController.text = comp.startDate != null
+        ? comp.startDate!.toIso8601String().split('T').first
+        : '';
+    endDateController.text = comp.endDate != null
+        ? comp.endDate!.toIso8601String().split('T').first
+        : '';
     selectedOrganizationId = comp.organizationId;
     organizationName = comp.organizationName;
     tournamentFormat = comp.tournamentFormat;
     selectedModality = comp.modality;
-    selectedGender =
-        comp.gender != null ? Gender.tryFromJson(comp.gender!) : null;
-    selectedAgeGroup =
-        comp.ageGroup != null ? AgeGroup.tryFromJson(comp.ageGroup!) : null;
+    selectedGender = comp.gender != null
+        ? Gender.tryFromJson(comp.gender!)
+        : null;
+    selectedAgeGroup = comp.ageGroup != null
+        ? AgeGroup.tryFromJson(comp.ageGroup!)
+        : null;
     groupingType = comp.groupingType ?? GroupingType.none;
     if (comp.groupingConfig != null) {
       if (comp.groupingConfig!.groups.isNotEmpty) {
@@ -168,7 +175,10 @@ class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGrou
   @override
   void updateGroupName(int index, String newName) {
     if (index >= 0 && index < groups.length) {
-      groups[index] = CompetitionGroupConfig(id: groups[index].id, name: newName);
+      groups[index] = CompetitionGroupConfig(
+        id: groups[index].id,
+        name: newName,
+      );
       notifyListeners();
     }
   }
@@ -229,11 +239,17 @@ class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGrou
   }
 
   @override
-  void updateDivisionName(int conferenceIndex, int divisionIndex, String newName) {
+  void updateDivisionName(
+    int conferenceIndex,
+    int divisionIndex,
+    String newName,
+  ) {
     if (conferenceIndex >= 0 && conferenceIndex < conferences.length) {
       final conf = conferences[conferenceIndex];
       if (divisionIndex >= 0 && divisionIndex < conf.divisions.length) {
-        final updatedDivs = List<CompetitionDivisionConfig>.from(conf.divisions);
+        final updatedDivs = List<CompetitionDivisionConfig>.from(
+          conf.divisions,
+        );
         updatedDivs[divisionIndex] = CompetitionDivisionConfig(
           id: updatedDivs[divisionIndex].id,
           name: newName,
@@ -302,7 +318,9 @@ class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGrou
     final body = <String, dynamic>{
       'name': nameController.text.trim(),
       'organizationId': selectedOrganizationId,
-      'season': seasonController.text.trim().isEmpty ? '2026' : seasonController.text.trim(),
+      'season': seasonController.text.trim().isEmpty
+          ? '2026'
+          : seasonController.text.trim(),
       'tournamentFormat': tournamentFormat.toJson(),
       'groupingType': groupingType.toJson(),
       'groupingConfig': GroupingConfig(
@@ -328,11 +346,14 @@ class CompetitionEditViewModel extends ChangeNotifier implements CompetitionGrou
       return result;
     } on RepositoryException catch (e) {
       if (e.statusCode == 403) {
-        _errorMessage = 'Acesso não autorizado (403): você não possui permissão para gerenciar esta competição.';
+        _errorMessage =
+            'Acesso não autorizado (403): você não possui permissão para gerenciar esta competição.';
       } else if (e.statusCode == 401) {
         _errorMessage = 'Sessão expirada (401). Faça login novamente.';
       } else {
-        _errorMessage = e.message.isNotEmpty ? e.message : 'Erro ao salvar a competição ().';
+        _errorMessage = e.message.isNotEmpty
+            ? e.message
+            : 'Erro ao salvar a competição ().';
       }
       return null;
     } catch (e) {

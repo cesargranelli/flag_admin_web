@@ -1,3 +1,5 @@
+import 'package:flag_admin_web/domain/enums/age_group.dart';
+import 'package:flag_admin_web/domain/enums/gender.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 
 import '../api_client.dart';
@@ -25,18 +27,13 @@ class CategoryApi {
     required Gender gender,
     required AgeGroup ageGroup,
     String? name,
-  }) =>
-      _client.post(
-        '/api/v1/categories',
-        {
-          'competitionId': competitionId,
-          'modalityId': modalityId,
-          'gender': gender.toJson(),
-          'ageGroup': ageGroup.toJson(),
-          'name': ?name,
-        },
-        Category.fromJson,
-      );
+  }) => _client.post('/api/v1/categories', {
+    'competitionId': competitionId,
+    'modalityId': modalityId,
+    'gender': gender.toJson(),
+    'ageGroup': ageGroup.toJson(),
+    'name': ?name,
+  }, Category.fromJson);
 
   Future<Category> update(
     String id, {
@@ -45,18 +42,13 @@ class CategoryApi {
     required Gender gender,
     required AgeGroup ageGroup,
     String? name,
-  }) =>
-      _client.put(
-        '/api/v1/categories/$id',
-        {
-          'competitionId': competitionId,
-          'modalityId': modalityId,
-          'gender': gender.toJson(),
-          'ageGroup': ageGroup.toJson(),
-          'name': ?name,
-        },
-        Category.fromJson,
-      );
+  }) => _client.put('/api/v1/categories/$id', {
+    'competitionId': competitionId,
+    'modalityId': modalityId,
+    'gender': gender.toJson(),
+    'ageGroup': ageGroup.toJson(),
+    'name': ?name,
+  }, Category.fromJson);
 
   Future<void> delete(String id) => _client.delete('/api/v1/categories/$id');
 }

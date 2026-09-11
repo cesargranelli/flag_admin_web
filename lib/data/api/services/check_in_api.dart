@@ -1,3 +1,4 @@
+import 'package:flag_admin_web/domain/enums/check_in_status.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 
 import '../api_client.dart';
@@ -8,31 +9,25 @@ class CheckInApi {
 
   CheckInApi(this._client);
 
-  Future<List<CheckIn>> getList(String gameId) => _client.getList(
-        '/api/v1/games/$gameId/checkin',
-        CheckIn.fromJson,
-      );
+  Future<List<CheckIn>> getList(String gameId) =>
+      _client.getList('/api/v1/games/$gameId/checkin', CheckIn.fromJson);
 
   Future<CheckIn> checkin({
     required String gameId,
     required String athleteId,
     required CheckInStatus status,
-  }) =>
-      _client.post(
-        '/api/v1/games/$gameId/checkin/$athleteId',
-        {'status': status.toJson()},
-        CheckIn.fromJson,
-      );
+  }) => _client.post('/api/v1/games/$gameId/checkin/$athleteId', {
+    'status': status.toJson(),
+  }, CheckIn.fromJson);
 
   Future<CheckIn> validate({
     required String gameId,
     required String athleteId,
-  }) =>
-      _client.post(
-        '/api/v1/games/$gameId/checkin/$athleteId/validate',
-        {},
-        CheckIn.fromJson,
-      );
+  }) => _client.post(
+    '/api/v1/games/$gameId/checkin/$athleteId/validate',
+    {},
+    CheckIn.fromJson,
+  );
 
   /// Define (ou limpa, com number nulo) a numeração de partida do atleta,
   /// sem alterar o número oficial cadastrado.
@@ -40,10 +35,7 @@ class CheckInApi {
     required String gameId,
     required String athleteId,
     int? number,
-  }) =>
-      _client.put(
-        '/api/v1/games/$gameId/checkin/$athleteId/match-number',
-        {'number': number},
-        CheckIn.fromJson,
-      );
+  }) => _client.put('/api/v1/games/$gameId/checkin/$athleteId/match-number', {
+    'number': number,
+  }, CheckIn.fromJson);
 }

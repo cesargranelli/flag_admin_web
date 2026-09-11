@@ -1,7 +1,7 @@
-import '../enums/competition_status.dart';
-import '../enums/grouping_type.dart';
-import '../enums/modality.dart';
-import '../enums/tournament_format.dart';
+import 'package:flag_admin_web/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/domain/enums/modality.dart';
+import 'package:flag_admin_web/domain/enums/tournament_format.dart';
 
 /// Competição do Flag Platform.
 ///
@@ -68,45 +68,45 @@ class Competition {
   });
 
   factory Competition.fromJson(Map<String, dynamic> json) => Competition(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        status: CompetitionStatus.fromJson(json['status'] as String),
-        season: (json['season'] as String?) ?? '2026',
-        tournamentFormat: TournamentFormat.tryFromJson(
-            json['tournamentFormat'] as String? ?? json['format'] as String?),
-        organizationId: json['organizationId'] as String?,
-        organizationName: json['organizationName'] as String?,
-        description: json['description'] as String?,
-        startDate: _tryParseDate(json['startDate']),
-        endDate: _tryParseDate(json['endDate']),
-        modality: json['modality'] == null
-            ? null
-            : Modality.fromJson(json['modality'] as String),
-        gender: json['gender'] as String?,
-        ageGroup: json['ageGroup'] as String?,
-        groupingType: GroupingType.tryFromJson(
-            json['groupingType'] as String?),
-        createdBy: json['createdBy'] as String?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    status: CompetitionStatus.fromJson(json['status'] as String),
+    season: (json['season'] as String?) ?? '2026',
+    tournamentFormat: TournamentFormat.tryFromJson(
+      json['tournamentFormat'] as String? ?? json['format'] as String?,
+    ),
+    organizationId: json['organizationId'] as String?,
+    organizationName: json['organizationName'] as String?,
+    description: json['description'] as String?,
+    startDate: _tryParseDate(json['startDate']),
+    endDate: _tryParseDate(json['endDate']),
+    modality: json['modality'] == null
+        ? null
+        : Modality.fromJson(json['modality'] as String),
+    gender: json['gender'] as String?,
+    ageGroup: json['ageGroup'] as String?,
+    groupingType: GroupingType.tryFromJson(json['groupingType'] as String?),
+    createdBy: json['createdBy'] as String?,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'status': status.toJson(),
-        'season': season,
-        if (tournamentFormat != null)
-          'tournamentFormat': tournamentFormat!.toJson(),
-        if (organizationId != null) 'organizationId': organizationId,
-        if (organizationName != null) 'organizationName': organizationName,
-        if (description != null) 'description': description,
-        if (startDate != null) 'startDate': startDate!.toIso8601String(),
-        if (endDate != null) 'endDate': endDate!.toIso8601String(),
-        if (modality != null) 'modality': modality!.toJson(),
-        if (gender != null) 'gender': gender,
-        if (ageGroup != null) 'ageGroup': ageGroup,
-        if (groupingType != null) 'groupingType': groupingType!.toJson(),
-        if (createdBy != null) 'createdBy': createdBy,
-      };
+    'id': id,
+    'name': name,
+    'status': status.toJson(),
+    'season': season,
+    if (tournamentFormat != null)
+      'tournamentFormat': tournamentFormat!.toJson(),
+    if (organizationId != null) 'organizationId': organizationId,
+    if (organizationName != null) 'organizationName': organizationName,
+    if (description != null) 'description': description,
+    if (startDate != null) 'startDate': startDate!.toIso8601String(),
+    if (endDate != null) 'endDate': endDate!.toIso8601String(),
+    if (modality != null) 'modality': modality!.toJson(),
+    if (gender != null) 'gender': gender,
+    if (ageGroup != null) 'ageGroup': ageGroup,
+    if (groupingType != null) 'groupingType': groupingType!.toJson(),
+    if (createdBy != null) 'createdBy': createdBy,
+  };
 }
 
 DateTime? _tryParseDate(Object? value) =>

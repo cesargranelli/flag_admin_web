@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/enums/user_role.dart';
+﻿import 'package:flag_admin_web/domain/enums/user_role.dart';
 import 'package:flag_admin_web/src/domain/models/user.dart';
 
 /// Modelo de domínio do usuário autenticado no Flag Platform (ADR-001).
@@ -26,7 +26,12 @@ class AuthUser {
   });
 
   /// Converte a partir do modelo legado [User] retornado pela API REST.
-  factory AuthUser.fromUser(User user, {String? token, String? organizationId, String? clubId}) {
+  factory AuthUser.fromUser(
+    User user, {
+    String? token,
+    String? organizationId,
+    String? clubId,
+  }) {
     return AuthUser(
       id: user.id,
       name: user.name,
@@ -60,15 +65,15 @@ class AuthUser {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'email': email,
-        'role': role.toJson(),
-        if (status != null) 'status': status,
-        if (organizationId != null) 'organizationId': organizationId,
-        if (clubId != null) 'clubId': clubId,
-        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'email': email,
+    'role': role.toJson(),
+    if (status != null) 'status': status,
+    if (organizationId != null) 'organizationId': organizationId,
+    if (clubId != null) 'clubId': clubId,
+    if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+  };
 
   /// Converte para [User] legado para retrocompatibilidade em telas existentes.
   User toLegacyUser() {

@@ -1,4 +1,4 @@
-import '../enums/game_status.dart';
+import 'package:flag_admin_web/domain/enums/game_status.dart';
 
 /// Jogo do calendário de uma competição.
 ///

@@ -1,4 +1,4 @@
-import '../enums/round_type.dart';
+import 'package:flag_admin_web/domain/enums/round_type.dart';
 
 /// Rodada de uma competição.
 ///

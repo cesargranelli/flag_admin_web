@@ -1,3 +1,6 @@
+import 'package:flag_admin_web/domain/enums/competition_status.dart';
+import 'package:flag_admin_web/domain/enums/grouping_type.dart';
+import 'package:flag_admin_web/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 
 import '../api_client.dart';
@@ -30,9 +33,11 @@ class CompetitionApi {
       _client.delete('/api/v1/competitions/$id');
 
   /// Reativa a competição (exclusivo ADMIN), voltando para DRAFT.
-  Future<void> reactivate(String id) =>
-      _client.post('/api/v1/competitions/$id/reactivate', <String, dynamic>{},
-          (json) => json);
+  Future<void> reactivate(String id) => _client.post(
+    '/api/v1/competitions/$id/reactivate',
+    <String, dynamic>{},
+    (json) => json,
+  );
 
   Future<Competition> create({
     required String organizationId,

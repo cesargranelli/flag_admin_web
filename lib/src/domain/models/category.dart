@@ -1,5 +1,5 @@
-import '../enums/age_group.dart';
-import '../enums/gender.dart';
+import 'package:flag_admin_web/domain/enums/age_group.dart';
+import 'package:flag_admin_web/domain/enums/gender.dart';
 
 /// Categoria de uma competição.
 ///
@@ -32,32 +32,32 @@ class Category {
   });
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
-        id: json['id'] as String,
-        competitionId: json['competitionId'] as String,
-        modalityId: json['modalityId'] as String,
-        modalityName: json['modalityName'] as String?,
-        modalityFormat: json['modalityFormat'] as String?,
-        gender: Gender.fromJson(json['gender'] as String),
-        ageGroup: AgeGroup.fromJson(json['ageGroup'] as String),
-        name: json['name'] as String,
-        createdAt: json['createdAt'] != null
-            ? DateTime.parse(json['createdAt'] as String)
-            : null,
-        updatedAt: json['updatedAt'] != null
-            ? DateTime.parse(json['updatedAt'] as String)
-            : null,
-      );
+    id: json['id'] as String,
+    competitionId: json['competitionId'] as String,
+    modalityId: json['modalityId'] as String,
+    modalityName: json['modalityName'] as String?,
+    modalityFormat: json['modalityFormat'] as String?,
+    gender: Gender.fromJson(json['gender'] as String),
+    ageGroup: AgeGroup.fromJson(json['ageGroup'] as String),
+    name: json['name'] as String,
+    createdAt: json['createdAt'] != null
+        ? DateTime.parse(json['createdAt'] as String)
+        : null,
+    updatedAt: json['updatedAt'] != null
+        ? DateTime.parse(json['updatedAt'] as String)
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'competitionId': competitionId,
-        'modalityId': modalityId,
-        'modalityName': modalityName,
-        'modalityFormat': modalityFormat,
-        'gender': gender.toJson(),
-        'ageGroup': ageGroup.toJson(),
-        'name': name,
-        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-        if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
-      };
+    'id': id,
+    'competitionId': competitionId,
+    'modalityId': modalityId,
+    'modalityName': modalityName,
+    'modalityFormat': modalityFormat,
+    'gender': gender.toJson(),
+    'ageGroup': ageGroup.toJson(),
+    'name': name,
+    if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+    if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+  };
 }

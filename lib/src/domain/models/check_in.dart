@@ -1,4 +1,4 @@
-import '../enums/check_in_status.dart';
+import 'package:flag_admin_web/domain/enums/check_in_status.dart';
 
 /// Check-in de um atleta em um jogo.
 ///
@@ -35,30 +35,30 @@ class CheckIn {
   });
 
   factory CheckIn.fromJson(Map<String, dynamic> json) => CheckIn(
-        gameId: json['gameId'] as String,
-        teamId: json['teamId'] as String,
-        teamName: json['teamName'] as String?,
-        athleteId: json['athleteId'] as String,
-        athleteName: json['athleteName'] as String,
-        athleteNickname: json['athleteNickname'] as String?,
-        number: json['number'] as int?,
-        athleteNumber: json['athleteNumber'] as int?,
-        matchNumber: json['matchNumber'] as int?,
-        position: json['position'] as String?,
-        status: json['status'] is String
-            ? CheckInStatus.fromJson(json['status'] as String)
-            : null,
-        validatedBy: json['validatedBy'] as String?,
-        validatedAt: json['validatedAt'] is String
-            ? DateTime.tryParse(json['validatedAt'] as String)
-            : null,
-      );
+    gameId: json['gameId'] as String,
+    teamId: json['teamId'] as String,
+    teamName: json['teamName'] as String?,
+    athleteId: json['athleteId'] as String,
+    athleteName: json['athleteName'] as String,
+    athleteNickname: json['athleteNickname'] as String?,
+    number: json['number'] as int?,
+    athleteNumber: json['athleteNumber'] as int?,
+    matchNumber: json['matchNumber'] as int?,
+    position: json['position'] as String?,
+    status: json['status'] is String
+        ? CheckInStatus.fromJson(json['status'] as String)
+        : null,
+    validatedBy: json['validatedBy'] as String?,
+    validatedAt: json['validatedAt'] is String
+        ? DateTime.tryParse(json['validatedAt'] as String)
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'gameId': gameId,
-        'teamId': teamId,
-        'athleteId': athleteId,
-        'athleteName': athleteName,
-        'status': status?.toJson(),
-      };
+    'gameId': gameId,
+    'teamId': teamId,
+    'athleteId': athleteId,
+    'athleteName': athleteName,
+    'status': status?.toJson(),
+  };
 }

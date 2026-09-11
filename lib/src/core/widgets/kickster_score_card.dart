@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/domain/domain.dart';
+import 'package:flag_admin_web/domain/enums/game_status.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
@@ -33,13 +33,13 @@ class KicksterScoreCard extends StatelessWidget {
   /// agendado = textSecondary; cancelado = disabled; abertura/conferência =
   /// tom neutro (não são "ao vivo").
   Color get _statusColor => switch (status) {
-        GameStatus.inProgress => AppColors.success,
-        GameStatus.finished => AppColors.danger,
-        GameStatus.scheduled => AppColors.textSecondary,
-        GameStatus.open => AppColors.textSecondary,
-        GameStatus.conference => AppColors.textSecondary,
-        GameStatus.cancelled => AppColors.disabled,
-      };
+    GameStatus.inProgress => AppColors.success,
+    GameStatus.finished => AppColors.danger,
+    GameStatus.scheduled => AppColors.textSecondary,
+    GameStatus.open => AppColors.textSecondary,
+    GameStatus.conference => AppColors.textSecondary,
+    GameStatus.cancelled => AppColors.disabled,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +90,9 @@ class KicksterScoreCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   '×',
-                  style: _scoreStyle(context).copyWith(
-                    fontSize: 20,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: _scoreStyle(
+                    context,
+                  ).copyWith(fontSize: 20, color: AppColors.textSecondary),
                 ),
               ),
               Text('$awayScore', style: _scoreStyle(context)),

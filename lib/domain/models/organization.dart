@@ -1,10 +1,10 @@
-import 'package:flag_admin_web/src/domain/enums/document_type.dart';
-import 'package:flag_admin_web/src/domain/enums/organization_status.dart';
-import 'package:flag_admin_web/src/domain/enums/organization_type.dart';
+﻿import 'package:flag_admin_web/domain/enums/document_type.dart';
+import 'package:flag_admin_web/domain/enums/organization_status.dart';
+import 'package:flag_admin_web/domain/enums/organization_type.dart';
 
-export 'package:flag_admin_web/src/domain/enums/document_type.dart';
-export 'package:flag_admin_web/src/domain/enums/organization_status.dart';
-export 'package:flag_admin_web/src/domain/enums/organization_type.dart';
+export 'package:flag_admin_web/domain/enums/document_type.dart';
+export 'package:flag_admin_web/domain/enums/organization_status.dart';
+export 'package:flag_admin_web/domain/enums/organization_type.dart';
 
 /// Organização esportiva do Flag Platform (Domain Model - ADR-001).
 class Organization {
@@ -69,67 +69,68 @@ class Organization {
   });
 
   factory Organization.fromJson(Map<String, dynamic> json) => Organization(
-        id: json['id'] as String,
-        legalName: json['legalName'] as String,
-        tradeName: json['tradeName'] as String,
-        abbreviation: json['abbreviation'] as String?,
-        organizationType: json['organizationType'] is String
-            ? OrganizationType.fromJson(json['organizationType'] as String)
-            : null,
-        document: json['document'] as String?,
-        documentType: json['documentType'] is String
-            ? DocumentType.fromJson(json['documentType'] as String)
-            : null,
-        presidentName: json['presidentName'] as String?,
-        presidentCpf: json['presidentCpf'] as String?,
-        email: json['email'] as String?,
-        phone: json['phone'] as String?,
-        website: json['website'] as String?,
-        instagram: json['instagram'] as String?,
-        country: json['country'] as String,
-        state: json['state'] as String?,
-        city: json['city'] as String?,
-        logoUrl: json['logoUrl'] as String?,
-        primaryColor: json['primaryColor'] as String?,
-        secondaryColor: json['secondaryColor'] as String?,
-        tertiaryColor: json['tertiaryColor'] as String?,
-        quaternaryColor: json['quaternaryColor'] as String?,
-        timezone: json['timezone'] as String,
-        locale: json['locale'] as String,
-        status: json['status'] is String
-            ? OrganizationStatus.fromJson(json['status'] as String)
-            : null,
-        createdBy: json['createdBy'] as String?,
-        createdAt: _tryParseDate(json['createdAt']),
-        updatedAt: _tryParseDate(json['updatedAt']),
-      );
+    id: json['id'] as String,
+    legalName: json['legalName'] as String,
+    tradeName: json['tradeName'] as String,
+    abbreviation: json['abbreviation'] as String?,
+    organizationType: json['organizationType'] is String
+        ? OrganizationType.fromJson(json['organizationType'] as String)
+        : null,
+    document: json['document'] as String?,
+    documentType: json['documentType'] is String
+        ? DocumentType.fromJson(json['documentType'] as String)
+        : null,
+    presidentName: json['presidentName'] as String?,
+    presidentCpf: json['presidentCpf'] as String?,
+    email: json['email'] as String?,
+    phone: json['phone'] as String?,
+    website: json['website'] as String?,
+    instagram: json['instagram'] as String?,
+    country: json['country'] as String,
+    state: json['state'] as String?,
+    city: json['city'] as String?,
+    logoUrl: json['logoUrl'] as String?,
+    primaryColor: json['primaryColor'] as String?,
+    secondaryColor: json['secondaryColor'] as String?,
+    tertiaryColor: json['tertiaryColor'] as String?,
+    quaternaryColor: json['quaternaryColor'] as String?,
+    timezone: json['timezone'] as String,
+    locale: json['locale'] as String,
+    status: json['status'] is String
+        ? OrganizationStatus.fromJson(json['status'] as String)
+        : null,
+    createdBy: json['createdBy'] as String?,
+    createdAt: _tryParseDate(json['createdAt']),
+    updatedAt: _tryParseDate(json['updatedAt']),
+  );
 
   /// Corpo de criação/atualização (POST/PUT /api/v1/organizations).
   Map<String, dynamic> toJson() => {
-        'legalName': legalName,
-        'tradeName': tradeName,
-        if (abbreviation != null) 'abbreviation': abbreviation,
-        if (organizationType != null) 'organizationType': organizationType!.toJson(),
-        if (document != null) 'document': document,
-        if (documentType != null) 'documentType': documentType!.toJson(),
-        if (presidentName != null) 'presidentName': presidentName,
-        if (presidentCpf != null) 'presidentCpf': presidentCpf,
-        if (email != null) 'email': email,
-        if (phone != null) 'phone': phone,
-        if (website != null) 'website': website,
-        if (instagram != null) 'instagram': instagram,
-        'country': country,
-        if (state != null) 'state': state,
-        if (city != null) 'city': city,
-        if (logoUrl != null) 'logoUrl': logoUrl,
-        if (primaryColor != null) 'primaryColor': primaryColor,
-        if (secondaryColor != null) 'secondaryColor': secondaryColor,
-        if (tertiaryColor != null) 'tertiaryColor': tertiaryColor,
-        if (quaternaryColor != null) 'quaternaryColor': quaternaryColor,
-        'timezone': timezone,
-        'locale': locale,
-        if (createdBy != null) 'createdBy': createdBy,
-      };
+    'legalName': legalName,
+    'tradeName': tradeName,
+    if (abbreviation != null) 'abbreviation': abbreviation,
+    if (organizationType != null)
+      'organizationType': organizationType!.toJson(),
+    if (document != null) 'document': document,
+    if (documentType != null) 'documentType': documentType!.toJson(),
+    if (presidentName != null) 'presidentName': presidentName,
+    if (presidentCpf != null) 'presidentCpf': presidentCpf,
+    if (email != null) 'email': email,
+    if (phone != null) 'phone': phone,
+    if (website != null) 'website': website,
+    if (instagram != null) 'instagram': instagram,
+    'country': country,
+    if (state != null) 'state': state,
+    if (city != null) 'city': city,
+    if (logoUrl != null) 'logoUrl': logoUrl,
+    if (primaryColor != null) 'primaryColor': primaryColor,
+    if (secondaryColor != null) 'secondaryColor': secondaryColor,
+    if (tertiaryColor != null) 'tertiaryColor': tertiaryColor,
+    if (quaternaryColor != null) 'quaternaryColor': quaternaryColor,
+    'timezone': timezone,
+    'locale': locale,
+    if (createdBy != null) 'createdBy': createdBy,
+  };
 }
 
 DateTime? _tryParseDate(Object? value) =>
