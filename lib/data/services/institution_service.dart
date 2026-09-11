@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
 import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/domain/models/institution.dart';
 import 'package:flag_admin_web/domain/models/team.dart';

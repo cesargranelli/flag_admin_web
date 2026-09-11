@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
 import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/grouping_config.dart';
-import 'package:flag_admin_web/src/api/repository_exception.dart';
+import 'package:flag_admin_web/data/api/repository_exception.dart';
 import 'package:flag_admin_web/src/domain/enums/age_group.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';

@@ -1,7 +1,7 @@
 import 'package:flag_admin_web/data/services/game_service.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
-import 'package:flag_admin_web/src/api/api_client.dart';
-import 'package:flag_admin_web/src/api/services/game_api.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
+import 'package:flag_admin_web/data/api/services/game_api.dart';
 import 'package:flag_admin_web/src/domain/models/game_batch.dart';
 
 class ApiGameService implements GameService {

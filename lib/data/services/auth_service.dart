@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
 import 'package:flag_admin_web/domain/models/login_response.dart';
 import 'package:flag_admin_web/src/domain/models/user.dart';
 

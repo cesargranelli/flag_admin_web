@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
 import 'package:flag_admin_web/data/services/auth_service.dart';
-import 'package:flag_admin_web/src/api/repository_exception.dart';
+import 'package:flag_admin_web/data/api/repository_exception.dart';
 import 'package:flag_admin_web/src/core/l10n/app_strings.dart';
 
 /// ViewModel para a tela de Login (ADR-001 / MVVM 1:1).

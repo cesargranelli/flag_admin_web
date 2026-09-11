@@ -1,7 +1,7 @@
 import 'package:flag_admin_web/data/services/round_service.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
-import 'package:flag_admin_web/src/api/api_client.dart';
-import 'package:flag_admin_web/src/api/services/round_api.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
+import 'package:flag_admin_web/data/api/services/round_api.dart';
 
 class ApiRoundService implements RoundService {
   final RoundApi _api;

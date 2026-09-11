@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/data/services/competition_team_service.dart';
 import 'package:flag_admin_web/domain/models/competition_team.dart';
-import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
 
 /// Implementação REST de CompetitionTeamService.

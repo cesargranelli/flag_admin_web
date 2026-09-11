@@ -1,15 +1,9 @@
 /// API package do Flag Admin Web.
-///
-/// Exporta todos os services de API.
 library;
 
 // API Client
 export 'api_client.dart';
 export 'repository_exception.dart';
-
-// Models
-export 'models/live_game_response.dart';
-export 'models/play_response.dart';
 
 // Services
 export 'services/auth_api.dart';

@@ -28,7 +28,7 @@ import 'package:flag_admin_web/data/services/storage_service.dart';
 import 'package:flag_admin_web/data/services/venue_service.dart';
 import 'package:flag_admin_web/domain/models/enrollment_window.dart';
 import 'package:flag_admin_web/routing/app_router.dart';
-import 'package:flag_admin_web/src/api/api.dart';
+import 'package:flag_admin_web/data/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/ui/approval/view_models/approval_list_view_model.dart';

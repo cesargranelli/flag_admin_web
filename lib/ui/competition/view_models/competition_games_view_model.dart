@@ -9,7 +9,7 @@ import 'package:flag_admin_web/domain/models/game.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
 import 'package:flag_admin_web/domain/models/team.dart';
 import 'package:flag_admin_web/domain/models/venue.dart';
-import 'package:flag_admin_web/src/api/api_client.dart';
+import 'package:flag_admin_web/data/api/api_client.dart';
 
 /// ViewModel da tela de Tabelamento e Agendamento de Jogos da Competição.
 class CompetitionGamesViewModel extends ChangeNotifier {
