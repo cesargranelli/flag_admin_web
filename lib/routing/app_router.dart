@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/core/widgets/admin_shell.dart';
+import 'package:flag_admin_web/ui/core/ui/admin_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,7 +24,10 @@ class AppRouter {
         if (authState.restoring) return '/boot';
         final authenticated = authState.authenticated;
         final location = state.matchedLocation;
-        final isPublicAuth = location == '/login' || location == '/signup' || location == '/forgot-password';
+        final isPublicAuth =
+            location == '/login' ||
+            location == '/signup' ||
+            location == '/forgot-password';
         final isBoot = location == '/boot';
         if (!authenticated) {
           if (!isPublicAuth && !isBoot) pendingDestination = location;
@@ -40,7 +43,11 @@ class AppRouter {
       errorBuilder: (context, state) => Scaffold(
         body: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [AppColors.surfaceMuted, AppColors.background]),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.surfaceMuted, AppColors.background],
+            ),
           ),
           child: SafeArea(
             child: Center(
@@ -48,15 +55,37 @@ class AppRouter {
                 padding: const EdgeInsets.all(32),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 420),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.location_off, size: 56, color: AppColors.danger),
-                    const SizedBox(height: 16),
-                    Text(AppStrings.notFoundTitle, textAlign: TextAlign.center, style: AppTextStyles.headline1.copyWith(fontSize: 28)),
-                    const SizedBox(height: 8),
-                    Text(AppStrings.notFoundMessage, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-                    const SizedBox(height: 24),
-                    KicksterButton(label: AppStrings.backToHome, variant: KicksterButtonVariant.outline, onPressed: () => context.go('/')),
-                  ]),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.location_off,
+                        size: 56,
+                        color: AppColors.danger,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppStrings.notFoundTitle,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.headline1.copyWith(fontSize: 28),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppStrings.notFoundMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      KicksterButton(
+                        label: AppStrings.backToHome,
+                        variant: KicksterButtonVariant.outline,
+                        onPressed: () => context.go('/'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -66,7 +95,8 @@ class AppRouter {
       routes: [
         ...authRoutes,
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) => AdminShell(navigationShell: navigationShell),
+          builder: (context, state, navigationShell) =>
+              AdminShell(navigationShell: navigationShell),
           branches: [
             homeBranch,
             organizationBranch,
