@@ -1,4 +1,4 @@
-import 'package:flag_admin_web/src/core/core.dart';
+﻿import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,8 +12,7 @@ class PersonCreateScreen extends ConsumerStatefulWidget {
   const PersonCreateScreen({super.key});
 
   @override
-  ConsumerState<PersonCreateScreen> createState() =>
-      _PersonCreateScreenState();
+  ConsumerState<PersonCreateScreen> createState() => _PersonCreateScreenState();
 }
 
 class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
@@ -85,7 +84,8 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
   String? _validatePhotoUrl(String? value) {
     if (value == null || value.trim().isEmpty) return null;
     final uri = Uri.tryParse(value.trim());
-    final valid = uri != null &&
+    final valid =
+        uri != null &&
         (uri.scheme == 'http' || uri.scheme == 'https') &&
         uri.host.isNotEmpty;
     return valid ? null : 'Informe uma URL valida (http/https)';
@@ -231,9 +231,7 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
       ref.invalidate(personsProvider);
       ref.read(personViewModelProvider).load(forceRefresh: true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pessoa cadastrada com sucesso'),
-        ),
+        const SnackBar(content: Text('Pessoa cadastrada com sucesso')),
       );
       context.go('/persons');
     } else {
@@ -253,8 +251,7 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
   }
 
   Future<void> _handleBack() async {
-    final isSubmitting =
-        ref.read(personCreateViewModelProvider).isSubmitting;
+    final isSubmitting = ref.read(personCreateViewModelProvider).isSubmitting;
     if (_hasChanges && !isSubmitting && !_saved) {
       final discard = await showKicksterConfirm(
         context: context,
@@ -278,8 +275,7 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting =
-        ref.watch(personCreateViewModelProvider).isSubmitting;
+    final isSubmitting = ref.watch(personCreateViewModelProvider).isSubmitting;
 
     return PopScope(
       canPop: !_hasChanges || isSubmitting || _saved,
@@ -301,38 +297,46 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
               children: [
                 if (_errorMessage != null) _errorBanner(_errorMessage!),
                 _section('Dados pessoais', Icons.person_outline, [
-                  _field('Nome', _name,
-                      hint: 'Informe o nome completo',
-                      maxLength: 100,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Informe o nome'
-                          : null),
+                  _field(
+                    'Nome',
+                    _name,
+                    hint: 'Informe o nome completo',
+                    maxLength: 100,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Informe o nome'
+                        : null,
+                  ),
                   const SizedBox(height: 12),
-                  _field('CPF', _cpf,
-                      keyboardType: TextInputType.number,
-                      hint: '000.000.000-00',
-                      onChanged: (value) {
-                    final masked = DocumentUtils.maskCpf(value);
-                    if (masked != value) {
-                      _cpf.value = TextEditingValue(
-                        text: masked,
-                        selection:
-                            TextSelection.collapsed(offset: masked.length),
-                      );
-                    }
-                  }, validator: _validateCpf),
+                  _field(
+                    'CPF',
+                    _cpf,
+                    keyboardType: TextInputType.number,
+                    hint: '000.000.000-00',
+                    onChanged: (value) {
+                      final masked = DocumentUtils.maskCpf(value);
+                      if (masked != value) {
+                        _cpf.value = TextEditingValue(
+                          text: masked,
+                          selection: TextSelection.collapsed(
+                            offset: masked.length,
+                          ),
+                        );
+                      }
+                    },
+                    validator: _validateCpf,
+                  ),
                 ]),
                 _section('Funcao e dados complementares', Icons.badge_outlined, [
                   DropdownButtonFormField<String>(
-                    value: _role,
-                    decoration: kicksterFieldDecoration(
-                      labelText: 'Funcao',
-                    ),
+                    initialValue: _role,
+                    decoration: kicksterFieldDecoration(labelText: 'Funcao'),
                     items: _roleOptions.entries
-                        .map((e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(e.value),
-                            ))
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.key,
+                            child: Text(e.value),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       if (value != null) {
@@ -343,15 +347,15 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: _gender,
-                    decoration: kicksterFieldDecoration(
-                      labelText: 'Genero',
-                    ),
+                    initialValue: _gender,
+                    decoration: kicksterFieldDecoration(labelText: 'Genero'),
                     items: _genderOptions.entries
-                        .map((e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(e.value),
-                            ))
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.key,
+                            child: Text(e.value),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       if (value != null) {
@@ -380,14 +384,16 @@ class _PersonCreateScreenState extends ConsumerState<PersonCreateScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _field('Cidade', _city,
-                      hint: 'Ex.: Sao Paulo'),
+                  _field('Cidade', _city, hint: 'Ex.: Sao Paulo'),
                 ]),
                 _section('Foto', Icons.photo_camera_outlined, [
-                  _field('URL da foto (opcional)', _photoUrl,
-                      keyboardType: TextInputType.url,
-                      hint: 'Ex.: https://...',
-                      validator: _validatePhotoUrl),
+                  _field(
+                    'URL da foto (opcional)',
+                    _photoUrl,
+                    keyboardType: TextInputType.url,
+                    hint: 'Ex.: https://...',
+                    validator: _validatePhotoUrl,
+                  ),
                 ]),
                 const SizedBox(height: 8),
                 KicksterButton(

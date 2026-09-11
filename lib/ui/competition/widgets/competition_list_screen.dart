@@ -60,9 +60,6 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                   icon: Icons.add,
                   onPressed: () async {
                     context.go('/competitions/new');
-                    if (context.mounted) {
-                      vm.load(forceRefresh: true);
-                    }
                   },
                 ),
             ],
@@ -286,9 +283,6 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
           '/competitions/${comp.id}',
           extra: comp,
         );
-        if (context.mounted) {
-          vm.load(forceRefresh: true);
-        }
       },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -346,9 +340,6 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                       '/competitions/${comp.id}/edit',
                       extra: comp,
                     );
-                    if (context.mounted) {
-                      vm.load(forceRefresh: true);
-                    }
                   },
                 ),
                 KicksterMenuItem(
@@ -375,9 +366,6 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                       '/competitions/${comp.id}/teams',
                       extra: comp,
                     );
-                    if (context.mounted) {
-                      vm.load(forceRefresh: true);
-                    }
                   },
                 ),
                 KicksterMenuItem(
@@ -404,9 +392,6 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                       '/competitions/${comp.id}/games',
                       extra: comp,
                     );
-                    if (context.mounted) {
-                      vm.load(forceRefresh: true);
-                    }
                   },
                 ),
                 if (!isDisabled)

@@ -117,9 +117,6 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                       icon: Icons.add,
                       onPressed: () async {
                         context.go('/institutions/new');
-                        if (context.mounted) {
-                          vm.load(forceRefresh: true);
-                        }
                       },
                     ),
                   ],
@@ -310,9 +307,6 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
           '/institutions/${inst.id}',
           extra: inst,
         );
-        if (context.mounted) {
-          vm.load(forceRefresh: true);
-        }
       },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -365,9 +359,6 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                       '/institutions/${inst.id}/edit',
                       extra: inst,
                     );
-                    if (context.mounted) {
-                      vm.load(forceRefresh: true);
-                    }
                   },
                 ),
                 KicksterMenuItem(

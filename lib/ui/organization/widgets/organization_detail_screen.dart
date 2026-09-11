@@ -796,7 +796,7 @@ class _OrganizationDetailScreenState
                   'Ver Quadro Geral de Afiliados (${approvedAffiliations.length})',
               icon: Icons.people_outline,
               variant: KicksterButtonVariant.outline,
-              onPressed: () => context.push(
+              onPressed: () => context.go(
                 '/organizations/${org.id}/affiliates',
                 extra: org,
               ),

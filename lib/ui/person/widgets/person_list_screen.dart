@@ -75,91 +75,96 @@ class _PersonListScreenState extends ConsumerState<PersonListScreen> {
             child: vm.isLoading
                 ? const AppLoading(message: 'Carregando pessoas...')
                 : vm.errorMessage != null && vm.persons.isEmpty
-                    ? AppErrorState(
-                        message: 'Nao foi possivel carregar as pessoas',
-                        onRetry: () =>
-                            ref.read(personViewModelProvider).load(forceRefresh: true),
-                      )
-                    : vm.filteredPersons.isEmpty
-                        ? KicksterEmptyState(
-                            icon: Icons.person_outline,
-                            message: vm.searchQuery.isEmpty
-                                ? 'Nenhuma pessoa cadastrada'
-                                : 'Nenhuma pessoa encontrada',
-                            description: vm.searchQuery.isEmpty
-                                ? 'Cadastre a primeira pessoa para comecar a usar.'
-                                : 'Tente outro termo de busca.',
-                            action: vm.searchQuery.isEmpty
-                                ? KicksterButton(
-                                    label: 'Cadastrar pessoa',
-                                    icon: Icons.add,
-                                    onPressed: () => context.go('/persons/new'),
-                                  )
-                                : null,
+                ? AppErrorState(
+                    message: 'Nao foi possivel carregar as pessoas',
+                    onRetry: () => ref
+                        .read(personViewModelProvider)
+                        .load(forceRefresh: true),
+                  )
+                : vm.filteredPersons.isEmpty
+                ? KicksterEmptyState(
+                    icon: Icons.person_outline,
+                    message: vm.searchQuery.isEmpty
+                        ? 'Nenhuma pessoa cadastrada'
+                        : 'Nenhuma pessoa encontrada',
+                    description: vm.searchQuery.isEmpty
+                        ? 'Cadastre a primeira pessoa para comecar a usar.'
+                        : 'Tente outro termo de busca.',
+                    action: vm.searchQuery.isEmpty
+                        ? KicksterButton(
+                            label: 'Cadastrar pessoa',
+                            icon: Icons.add,
+                            onPressed: () => context.go('/persons/new'),
                           )
-                        : AppLayout.content(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: KicksterSearchField(
-                                          controller: _searchController,
-                                          onChanged: (value) =>
-                                              ref.read(personViewModelProvider).setSearchQuery(value),
-                                          hint: 'Buscar pessoa por nome',
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      SizedBox(
-                                        width: 180,
-                                        child: DropdownButtonFormField<String>(
-                                          value: vm.roleFilter ?? '',
-                                          decoration: kicksterFieldDecoration(
-                                            labelText: 'Funcao',
-                                          ),
-                                          items: _roleOptions.entries
-                                              .map((e) => DropdownMenuItem(
-                                                    value: e.key,
-                                                    child: Text(e.value),
-                                                  ))
-                                              .toList(),
-                                          onChanged: (value) =>
-                                              ref.read(personViewModelProvider).setRoleFilter(
-                                                    value?.isEmpty == true ? null : value,
-                                                  ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '${vm.filteredPersons.length} ${vm.filteredPersons.length == 1 ? 'pessoa' : 'pessoas'}',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Expanded(
-                                    child: ListView.separated(
-                                      padding: const EdgeInsets.only(bottom: 16),
-                                      itemCount: vm.filteredPersons.length,
-                                      separatorBuilder: (_, _) =>
-                                          const SizedBox(height: 12),
-                                      itemBuilder: (context, index) {
-                                        final person = vm.filteredPersons[index];
-                                        return _personCard(context, person);
-                                      },
-                                    ),
-                                  ),
-                                ],
+                        : null,
+                  )
+                : AppLayout.content(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: KicksterSearchField(
+                                  controller: _searchController,
+                                  onChanged: (value) => ref
+                                      .read(personViewModelProvider)
+                                      .setSearchQuery(value),
+                                  hint: 'Buscar pessoa por nome',
+                                ),
                               ),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                width: 180,
+                                child: DropdownButtonFormField<String>(
+                                  initialValue: vm.roleFilter ?? '',
+                                  decoration: kicksterFieldDecoration(
+                                    labelText: 'Funcao',
+                                  ),
+                                  items: _roleOptions.entries
+                                      .map(
+                                        (e) => DropdownMenuItem(
+                                          value: e.key,
+                                          child: Text(e.value),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) => ref
+                                      .read(personViewModelProvider)
+                                      .setRoleFilter(
+                                        value?.isEmpty == true ? null : value,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${vm.filteredPersons.length} ${vm.filteredPersons.length == 1 ? 'pessoa' : 'pessoas'}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: ListView.separated(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              itemCount: vm.filteredPersons.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final person = vm.filteredPersons[index];
+                                return _personCard(context, person);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),
@@ -168,9 +173,7 @@ class _PersonListScreenState extends ConsumerState<PersonListScreen> {
 
   Widget _personCard(BuildContext context, Person person) {
     final roleLabel = person.roleLabel;
-    final subtitle = [
-      if (roleLabel.isNotEmpty) roleLabel,
-    ].join(' ');
+    final subtitle = [if (roleLabel.isNotEmpty) roleLabel].join(' ');
 
     return KicksterCard(
       icon: Icons.person_outline,

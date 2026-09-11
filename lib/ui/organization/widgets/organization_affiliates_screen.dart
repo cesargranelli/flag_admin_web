@@ -490,7 +490,7 @@ class _OrganizationAffiliatesScreenState
                             ],
                           ),
                           onTap: () =>
-                              context.push('/institutions/${affil.institutionId}'),
+                              context.go('/institutions/${affil.institutionId}'),
                         ),
                       ],
                     ),

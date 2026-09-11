@@ -121,9 +121,6 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
                       icon: Icons.add,
                       onPressed: () {
                         context.go('/organizations/new');
-                        if (context.mounted) {
-                          vm.load(forceRefresh: true);
-                        }
                       },
                     ),
                   ],
@@ -310,9 +307,6 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
       subtitle: organization.legalName,
       onTap: () async {
         context.go('/organizations/${organization.id}', extra: organization);
-        if (context.mounted) {
-          vm.load(forceRefresh: true);
-        }
       },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -377,9 +371,6 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
                       '/organizations/${organization.id}/edit',
                       extra: organization,
                     );
-                    if (context.mounted) {
-                      vm.load(forceRefresh: true);
-                    }
                   },
                 ),
                 if (!isDisabled)
