@@ -4,7 +4,7 @@ import 'package:flag_admin_web/domain/models/team.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_team_status.dart';
 import 'package:flag_admin_web/src/domain/enums/grouping_type.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_teams_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,9 +31,9 @@ class _CompetitionTeamsScreenState
   final _searchController = TextEditingController();
 
   CompetitionTeamsParam get _param => CompetitionTeamsParam(
-        competitionId: widget.competitionId,
-        competition: widget.competition,
-      );
+    competitionId: widget.competitionId,
+    competition: widget.competition,
+  );
 
   @override
   void initState() {
@@ -63,21 +63,18 @@ class _CompetitionTeamsScreenState
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem('Competições', route: '/competitions'),
-        BreadcrumbItem(compName, route: '/competitions/${widget.competitionId}'),
+        BreadcrumbItem(
+          compName,
+          route: '/competitions/${widget.competitionId}',
+        ),
         const BreadcrumbItem('Equipes'),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Spacer(),
-            ],
-          ),
+          Row(children: [const Spacer()]),
           const SizedBox(height: 16),
-          Expanded(
-            child: _buildBody(context, vm, canWrite),
-          ),
+          Expanded(child: _buildBody(context, vm, canWrite)),
         ],
       ),
     );
@@ -326,8 +323,11 @@ class _CompetitionTeamsScreenState
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.check_circle_outline,
-                            size: 18, color: AppColors.success),
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 18,
+                          color: AppColors.success,
+                        ),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -350,8 +350,11 @@ class _CompetitionTeamsScreenState
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.cancel_outlined,
-                            size: 18, color: AppColors.warning),
+                        Icon(
+                          Icons.cancel_outlined,
+                          size: 18,
+                          color: AppColors.warning,
+                        ),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -373,8 +376,11 @@ class _CompetitionTeamsScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.groups_outlined,
-                          size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.groups_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -405,8 +411,11 @@ class _CompetitionTeamsScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.tune_outlined,
-                          size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.tune_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -426,8 +435,11 @@ class _CompetitionTeamsScreenState
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.delete_outline,
-                          size: 18, color: AppColors.danger),
+                      Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: AppColors.danger,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -470,10 +482,7 @@ class _CompetitionTeamsScreenState
       CompetitionTeamStatus.rejected => KicksterStatusChipType.failed,
     };
 
-    return KicksterStatusChip(
-      status: chipType,
-      label: status.label,
-    );
+    return KicksterStatusChip(status: chipType, label: status.label);
   }
 
   void _showAllocationModal(
@@ -484,8 +493,9 @@ class _CompetitionTeamsScreenState
     String? selectedGroup = ct.groupName;
     String? selectedConference = ct.conferenceName;
     String? selectedDivision = ct.divisionName;
-    final seedController =
-        TextEditingController(text: ct.seedNumber?.toString() ?? '');
+    final seedController = TextEditingController(
+      text: ct.seedNumber?.toString() ?? '',
+    );
 
     final comp = widget.competition;
     final isGroups = comp?.groupingType == GroupingType.groups;
@@ -518,7 +528,9 @@ class _CompetitionTeamsScreenState
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setModalState) => AlertDialog(
           backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             'Alocar: ${ct.teamName}',
             style: AppTextStyles.labelMedium.copyWith(
@@ -540,7 +552,8 @@ class _CompetitionTeamsScreenState
                       value: selectedGroup,
                       values: [null, ...configGroups],
                       labels: ['Sem Grupo', ...configGroups],
-                      onChanged: (val) => setModalState(() => selectedGroup = val),
+                      onChanged: (val) =>
+                          setModalState(() => selectedGroup = val),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -562,29 +575,31 @@ class _CompetitionTeamsScreenState
                     ),
                     const SizedBox(height: 16),
                     if (selectedConference != null) ...[
-                      Builder(builder: (_) {
-                        final confObj = configConferences
-                            .where((c) => c.name == selectedConference)
-                            .firstOrNull;
-                        final divisions = confObj?.divisions ?? [];
-                        if (divisions.isEmpty) return const SizedBox.shrink();
-                        return Column(
-                          children: [
-                            KicksterDropdown<String?>(
-                              label: 'Divisão',
-                              value: selectedDivision,
-                              values: [null, ...divisions.map((d) => d.name)],
-                              labels: [
-                                'Sem Divisão',
-                                ...divisions.map((d) => d.name),
-                              ],
-                              onChanged: (val) =>
-                                  setModalState(() => selectedDivision = val),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                        );
-                      }),
+                      Builder(
+                        builder: (_) {
+                          final confObj = configConferences
+                              .where((c) => c.name == selectedConference)
+                              .firstOrNull;
+                          final divisions = confObj?.divisions ?? [];
+                          if (divisions.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            children: [
+                              KicksterDropdown<String?>(
+                                label: 'Divisão',
+                                value: selectedDivision,
+                                values: [null, ...divisions.map((d) => d.name)],
+                                labels: [
+                                  'Sem Divisão',
+                                  ...divisions.map((d) => d.name),
+                                ],
+                                onChanged: (val) =>
+                                    setModalState(() => selectedDivision = val),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ],
                   KicksterInput(

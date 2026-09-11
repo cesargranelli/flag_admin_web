@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/approval/view_models/approval_list_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,8 +10,7 @@ class ApprovalListScreen extends ConsumerStatefulWidget {
   const ApprovalListScreen({super.key});
 
   @override
-  ConsumerState<ApprovalListScreen> createState() =>
-      _ApprovalListScreenState();
+  ConsumerState<ApprovalListScreen> createState() => _ApprovalListScreenState();
 }
 
 class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
@@ -82,12 +81,12 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
                   filter: (all, query) => query.isEmpty
                       ? all
                       : all
-                          .where(
-                            (u) =>
-                                u.name.toLowerCase().contains(query) ||
-                                u.email.toLowerCase().contains(query),
-                          )
-                          .toList(growable: false),
+                            .where(
+                              (u) =>
+                                  u.name.toLowerCase().contains(query) ||
+                                  u.email.toLowerCase().contains(query),
+                            )
+                            .toList(growable: false),
                 );
               },
             ),

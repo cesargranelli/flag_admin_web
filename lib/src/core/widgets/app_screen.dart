@@ -1,9 +1,8 @@
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../providers/providers.dart';
 
 /// Item da trilha de navegação do [AppScreen].
 class BreadcrumbItem {
@@ -82,7 +81,8 @@ class AppScreen extends StatelessWidget {
                 KicksterBreadcrumbItem(
                   label: crumbs[i].label,
                   route: crumbs[i].route,
-                  icon: crumbs[i].icon ??
+                  icon:
+                      crumbs[i].icon ??
                       (i == 0 && crumbs[i].route == '/'
                           ? Icons.home_outlined
                           : null),
@@ -95,10 +95,7 @@ class AppScreen extends StatelessWidget {
         // Expanded para que telas com Expanded interno (grids/lists) não
         // recebam constraints ilimitadas (fix "RenderFlex children have
         // non-zero flex but incoming height constraints are unbounded").
-        if (scrollable)
-          body
-        else
-          Expanded(child: body),
+        if (scrollable) body else Expanded(child: body),
       ],
     );
   }
@@ -126,9 +123,7 @@ class _UserHeader extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(color: AppColors.line, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.line, width: 1)),
       ),
       child: Row(
         children: [
@@ -293,11 +288,7 @@ class _UserMenuAnchor extends StatelessWidget {
           onTap: onLogout,
           child: const Row(
             children: [
-              Icon(
-                Icons.logout_outlined,
-                size: 18,
-                color: AppColors.danger,
-              ),
+              Icon(Icons.logout_outlined, size: 18, color: AppColors.danger),
               SizedBox(width: 8),
               Text(
                 'Sair',

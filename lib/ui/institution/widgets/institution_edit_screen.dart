@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'components/institution_identity_section.dart';
 
 /// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de agremiação existente (ADR-001 / MVVM 1:1).
@@ -13,11 +13,7 @@ class InstitutionEditScreen extends ConsumerStatefulWidget {
   final String id;
   final Institution? institution;
 
-  const InstitutionEditScreen({
-    super.key,
-    required this.id,
-    this.institution,
-  });
+  const InstitutionEditScreen({super.key, required this.id, this.institution});
 
   @override
   ConsumerState<InstitutionEditScreen> createState() =>
@@ -67,8 +63,12 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
     super.initState();
     final inst = widget.institution;
 
-    _tradeName = TextEditingController(text: inst?.tradeName ?? inst?.name ?? '');
-    _legalName = TextEditingController(text: inst?.legalName ?? inst?.name ?? '');
+    _tradeName = TextEditingController(
+      text: inst?.tradeName ?? inst?.name ?? '',
+    );
+    _legalName = TextEditingController(
+      text: inst?.legalName ?? inst?.name ?? '',
+    );
     _abbreviation = TextEditingController(text: inst?.abbreviation ?? '');
     _document = TextEditingController(text: inst?.document ?? '');
     _presidentName = TextEditingController(text: inst?.presidentName ?? '');
@@ -81,16 +81,24 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
     _city = TextEditingController(text: inst?.city ?? '');
     _logoUrl = TextEditingController(text: inst?.logoUrl ?? '');
     _primaryColor = TextEditingController(
-      text: inst?.primaryColor ?? (inst != null && inst.colors.isNotEmpty ? inst.colors[0] : '#FD6B22'),
+      text:
+          inst?.primaryColor ??
+          (inst != null && inst.colors.isNotEmpty ? inst.colors[0] : '#FD6B22'),
     );
     _secondaryColor = TextEditingController(
-      text: inst?.secondaryColor ?? (inst != null && inst.colors.length > 1 ? inst.colors[1] : '#1E293B'),
+      text:
+          inst?.secondaryColor ??
+          (inst != null && inst.colors.length > 1 ? inst.colors[1] : '#1E293B'),
     );
     _tertiaryColor = TextEditingController(
-      text: inst?.tertiaryColor ?? (inst != null && inst.colors.length > 2 ? inst.colors[2] : ''),
+      text:
+          inst?.tertiaryColor ??
+          (inst != null && inst.colors.length > 2 ? inst.colors[2] : ''),
     );
     _quaternaryColor = TextEditingController(
-      text: inst?.quaternaryColor ?? (inst != null && inst.colors.length > 3 ? inst.colors[3] : ''),
+      text:
+          inst?.quaternaryColor ??
+          (inst != null && inst.colors.length > 3 ? inst.colors[3] : ''),
     );
 
     if (inst != null) {
@@ -106,8 +114,12 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
       final loaded = editVm.institution;
       if (mounted && loaded != null) {
         setState(() {
-          _tradeName.text = loaded.tradeName.isNotEmpty ? loaded.tradeName : loaded.name;
-          _legalName.text = loaded.legalName.isNotEmpty ? loaded.legalName : loaded.name;
+          _tradeName.text = loaded.tradeName.isNotEmpty
+              ? loaded.tradeName
+              : loaded.name;
+          _legalName.text = loaded.legalName.isNotEmpty
+              ? loaded.legalName
+              : loaded.name;
           _abbreviation.text = loaded.abbreviation ?? '';
           _document.text = loaded.document ?? '';
           _presidentName.text = loaded.presidentName ?? '';
@@ -119,10 +131,18 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
           _state.text = loaded.state ?? '';
           _city.text = loaded.city ?? '';
           _logoUrl.text = loaded.logoUrl ?? '';
-          _primaryColor.text = loaded.primaryColor ?? (loaded.colors.isNotEmpty ? loaded.colors[0] : '#FD6B22');
-          _secondaryColor.text = loaded.secondaryColor ?? (loaded.colors.length > 1 ? loaded.colors[1] : '#1E293B');
-          _tertiaryColor.text = loaded.tertiaryColor ?? (loaded.colors.length > 2 ? loaded.colors[2] : '');
-          _quaternaryColor.text = loaded.quaternaryColor ?? (loaded.colors.length > 3 ? loaded.colors[3] : '');
+          _primaryColor.text =
+              loaded.primaryColor ??
+              (loaded.colors.isNotEmpty ? loaded.colors[0] : '#FD6B22');
+          _secondaryColor.text =
+              loaded.secondaryColor ??
+              (loaded.colors.length > 1 ? loaded.colors[1] : '#1E293B');
+          _tertiaryColor.text =
+              loaded.tertiaryColor ??
+              (loaded.colors.length > 2 ? loaded.colors[2] : '');
+          _quaternaryColor.text =
+              loaded.quaternaryColor ??
+              (loaded.colors.length > 3 ? loaded.colors[3] : '');
           _type = loaded.type;
           _documentType = loaded.documentType ?? DocumentType.cnpj;
           _country = loaded.country.isNotEmpty ? loaded.country : 'BR';
@@ -183,33 +203,53 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
     final editVm = ref.read(institutionEditViewModelProvider(widget.id));
 
     final colors = <String>[];
-    if (_primaryColor.text.trim().isNotEmpty) colors.add(_primaryColor.text.trim());
-    if (_secondaryColor.text.trim().isNotEmpty) colors.add(_secondaryColor.text.trim());
-    if (_tertiaryColor.text.trim().isNotEmpty) colors.add(_tertiaryColor.text.trim());
-    if (_quaternaryColor.text.trim().isNotEmpty) colors.add(_quaternaryColor.text.trim());
+    if (_primaryColor.text.trim().isNotEmpty)
+      colors.add(_primaryColor.text.trim());
+    if (_secondaryColor.text.trim().isNotEmpty)
+      colors.add(_secondaryColor.text.trim());
+    if (_tertiaryColor.text.trim().isNotEmpty)
+      colors.add(_tertiaryColor.text.trim());
+    if (_quaternaryColor.text.trim().isNotEmpty)
+      colors.add(_quaternaryColor.text.trim());
 
     final success = await editVm.update(
       name: _tradeName.text.trim(),
       tradeName: _tradeName.text.trim(),
       legalName: _legalName.text.trim(),
       type: _type,
-      abbreviation: _abbreviation.text.trim().isNotEmpty ? _abbreviation.text.trim() : null,
+      abbreviation: _abbreviation.text.trim().isNotEmpty
+          ? _abbreviation.text.trim()
+          : null,
       document: _document.text.trim().isNotEmpty ? _document.text.trim() : null,
       documentType: _documentType,
-      presidentName: _presidentName.text.trim().isNotEmpty ? _presidentName.text.trim() : null,
-      presidentCpf: _presidentCpf.text.trim().isNotEmpty ? _presidentCpf.text.trim() : null,
+      presidentName: _presidentName.text.trim().isNotEmpty
+          ? _presidentName.text.trim()
+          : null,
+      presidentCpf: _presidentCpf.text.trim().isNotEmpty
+          ? _presidentCpf.text.trim()
+          : null,
       email: _email.text.trim().isNotEmpty ? _email.text.trim() : null,
       phone: _phone.text.trim().isNotEmpty ? _phone.text.trim() : null,
       website: _website.text.trim().isNotEmpty ? _website.text.trim() : null,
-      instagram: _instagram.text.trim().isNotEmpty ? _instagram.text.trim() : null,
+      instagram: _instagram.text.trim().isNotEmpty
+          ? _instagram.text.trim()
+          : null,
       country: _country,
       state: _state.text.trim().isNotEmpty ? _state.text.trim() : null,
       city: _city.text.trim().isNotEmpty ? _city.text.trim() : null,
       logoUrl: _logoUrl.text.trim().isNotEmpty ? _logoUrl.text.trim() : null,
-      primaryColor: _primaryColor.text.trim().isNotEmpty ? _primaryColor.text.trim() : null,
-      secondaryColor: _secondaryColor.text.trim().isNotEmpty ? _secondaryColor.text.trim() : null,
-      tertiaryColor: _tertiaryColor.text.trim().isNotEmpty ? _tertiaryColor.text.trim() : null,
-      quaternaryColor: _quaternaryColor.text.trim().isNotEmpty ? _quaternaryColor.text.trim() : null,
+      primaryColor: _primaryColor.text.trim().isNotEmpty
+          ? _primaryColor.text.trim()
+          : null,
+      secondaryColor: _secondaryColor.text.trim().isNotEmpty
+          ? _secondaryColor.text.trim()
+          : null,
+      tertiaryColor: _tertiaryColor.text.trim().isNotEmpty
+          ? _tertiaryColor.text.trim()
+          : null,
+      quaternaryColor: _quaternaryColor.text.trim().isNotEmpty
+          ? _quaternaryColor.text.trim()
+          : null,
       colors: colors,
       organizationIds: _selectedOrgs,
     );
@@ -275,7 +315,8 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
                         KicksterInput(
                           label: 'Razão Social',
                           controller: _legalName,
-                          hintText: 'Ex: Associação Esportiva Spartans de Flag Football',
+                          hintText:
+                              'Ex: Associação Esportiva Spartans de Flag Football',
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -350,29 +391,33 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
                       ]),
 
                       // 2. PRESIDENTE / REPRESENTANTE
-                      _section('Representação & Diretoria', Icons.person_outline, [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: KicksterInput(
-                                label: 'Nome do Presidente / Representante',
-                                controller: _presidentName,
-                                hintText: 'Ex: João Silva',
+                      _section(
+                        'Representação & Diretoria',
+                        Icons.person_outline,
+                        [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: KicksterInput(
+                                  label: 'Nome do Presidente / Representante',
+                                  controller: _presidentName,
+                                  hintText: 'Ex: João Silva',
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: KicksterInput(
-                                label: 'CPF do Presidente',
-                                controller: _presidentCpf,
-                                hintText: '000.000.000-00',
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: KicksterInput(
+                                  label: 'CPF do Presidente',
+                                  controller: _presidentCpf,
+                                  hintText: '000.000.000-00',
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ]),
+                            ],
+                          ),
+                        ],
+                      ),
 
                       // 3. CONTATO & REDES
                       _section('Contato', Icons.contact_mail_outlined, [
@@ -458,11 +503,15 @@ class _InstitutionEditScreenState extends ConsumerState<InstitutionEditScreen> {
                           KicksterButton(
                             label: 'Cancelar',
                             variant: KicksterButtonVariant.outline,
-                            onPressed: isSubmitting ? null : () => context.pop(),
+                            onPressed: isSubmitting
+                                ? null
+                                : () => context.pop(),
                           ),
                           const SizedBox(width: 16),
                           KicksterButton(
-                            label: isSubmitting ? 'Salvando...' : 'Salvar alterações',
+                            label: isSubmitting
+                                ? 'Salvando...'
+                                : 'Salvar alterações',
                             icon: Icons.check,
                             loading: isSubmitting,
                             onPressed: isSubmitting ? null : _save,

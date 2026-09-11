@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
+﻿import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/domain/competition_permissions.dart';
 import 'package:flag_admin_web/ui/game/view_models/game_list_view_model.dart';
 import 'package:flutter/material.dart';
@@ -87,8 +87,7 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                     ),
                   ),
                 ),
-              if (effectiveRound != null && canEdit)
-                const SizedBox(width: 8),
+              if (effectiveRound != null && canEdit) const SizedBox(width: 8),
               if (effectiveComp != null && canEdit)
                 KicksterButton(
                   label: 'Novo',
@@ -149,8 +148,9 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                               .toList(),
                           onChanged: (value) {
                             ref
-                                .read(selectedCompetitionProvider.notifier)
-                                .state = value;
+                                    .read(selectedCompetitionProvider.notifier)
+                                    .state =
+                                value;
                             ref.read(selectedRoundProvider.notifier).state =
                                 null;
                             _viewModel.setSelectedCompetition(value);
@@ -159,8 +159,7 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                         const SizedBox(height: 12),
                         (effectiveComp != null)
                             ? roundsAsync!.when(
-                                loading: () =>
-                                    const LinearProgressIndicator(),
+                                loading: () => const LinearProgressIndicator(),
                                 error: (e, s) => AppErrorState(
                                   message:
                                       'Não foi possível carregar as rodadas',
@@ -168,30 +167,30 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                                     roundsProvider(effectiveComp),
                                   ),
                                 ),
-                                data: (roundItems) =>
-                                    KicksterDropdown<String>(
-                                      key: ValueKey('round-$effectiveComp'),
-                                      label: 'Rodada',
-                                      value: effectiveRound,
-                                      items: roundItems
-                                          .map(
-                                            (r) => DropdownMenuItem(
-                                              value: r.id,
-                                              child: Text(
-                                                'Rodada ${r.number} - ${r.name}',
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                      onChanged: (value) {
-                                        ref
+                                data: (roundItems) => KicksterDropdown<String>(
+                                  key: ValueKey('round-$effectiveComp'),
+                                  label: 'Rodada',
+                                  value: effectiveRound,
+                                  items: roundItems
+                                      .map(
+                                        (r) => DropdownMenuItem(
+                                          value: r.id,
+                                          child: Text(
+                                            'Rodada ${r.number} - ${r.name}',
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    ref
                                             .read(
                                               selectedRoundProvider.notifier,
                                             )
-                                            .state = value;
-                                        _viewModel.setSelectedRound(value);
-                                      },
-                                    ),
+                                            .state =
+                                        value;
+                                    _viewModel.setSelectedRound(value);
+                                  },
+                                ),
                               )
                             : const LinearProgressIndicator(),
                         if (!canEdit)
@@ -212,8 +211,7 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                                   loading: () => const AppLoading(
                                     message: 'Carregando jogos...',
                                   ),
-                                  error: (error, stackTrace) =>
-                                      AppErrorState(
+                                  error: (error, stackTrace) => AppErrorState(
                                     message:
                                         'Não foi possível carregar os jogos',
                                     onRetry: () => ref.invalidate(
@@ -259,21 +257,20 @@ class _GameListScreenState extends ConsumerState<GameListScreen> {
                                       countLabelSingular: 'jogo',
                                       emptyMessage: 'Nenhum jogo encontrado',
                                       mainAxisExtent: 120,
-                                      gridPadding:
-                                          const EdgeInsets.all(16),
+                                      gridPadding: const EdgeInsets.all(16),
                                       filter: (all, query) => query.isEmpty
                                           ? all
                                           : all
-                                              .where(
-                                                (g) =>
-                                                    (g.homeTeamName ?? '')
-                                                        .toLowerCase()
-                                                        .contains(query) ||
-                                                    (g.awayTeamName ?? '')
-                                                        .toLowerCase()
-                                                        .contains(query),
-                                              )
-                                              .toList(growable: false),
+                                                .where(
+                                                  (g) =>
+                                                      (g.homeTeamName ?? '')
+                                                          .toLowerCase()
+                                                          .contains(query) ||
+                                                      (g.awayTeamName ?? '')
+                                                          .toLowerCase()
+                                                          .contains(query),
+                                                )
+                                                .toList(growable: false),
                                     );
                                   },
                                 )

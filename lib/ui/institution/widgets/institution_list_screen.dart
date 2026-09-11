@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import '../view_models/institution_view_model.dart';
 
 /// Screen principal de Agremiações (camada Views - ADR-001 / MVVM).
@@ -87,9 +87,11 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(institutionViewModelProvider);
-    final userRole =
-        ref.watch(authControllerProvider.select((a) => a.state.user?.role));
-    final canWrite = userRole == UserRole.admin ||
+    final userRole = ref.watch(
+      authControllerProvider.select((a) => a.state.user?.role),
+    );
+    final canWrite =
+        userRole == UserRole.admin ||
         userRole == UserRole.organizer ||
         userRole == UserRole.manager ||
         userRole == UserRole.adminLiga;
@@ -122,9 +124,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                   ],
                 ),
               if (canWrite) const SizedBox(height: 16),
-              Expanded(
-                child: _buildBody(context, vm, canWrite),
-              ),
+              Expanded(child: _buildBody(context, vm, canWrite)),
             ],
           ),
         );
@@ -195,10 +195,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
               'Todos os tipos',
               ...InstitutionType.values.map((t) => t.label),
             ],
-            icons: [
-              null,
-              ...InstitutionType.values.map(institutionTypeIcon),
-            ],
+            icons: [null, ...InstitutionType.values.map(institutionTypeIcon)],
             onChanged: vm.setTypeFilter,
           ),
         ),
@@ -223,8 +220,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
   }
 
   Widget _buildEmptyState(InstitutionViewModel vm) {
-    final hasFilters =
-        vm.searchQuery.isNotEmpty || vm.typeFilter != null;
+    final hasFilters = vm.searchQuery.isNotEmpty || vm.typeFilter != null;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -303,10 +299,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
       title: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
       subtitle: subtitle,
       onTap: () async {
-        context.go(
-          '/institutions/${inst.id}',
-          extra: inst,
-        );
+        context.go('/institutions/${inst.id}', extra: inst);
       },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -342,7 +335,11 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Text(
                         'Editar',
@@ -355,16 +352,17 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                     ],
                   ),
                   onTap: () async {
-                    context.go(
-                      '/institutions/${inst.id}/edit',
-                      extra: inst,
-                    );
+                    context.go('/institutions/${inst.id}/edit', extra: inst);
                   },
                 ),
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
+                      Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: AppColors.danger,
+                      ),
                       SizedBox(width: 10),
                       Text(
                         'Excluir',
@@ -395,8 +393,9 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
                                   ? 'Agremiação excluída com sucesso.'
                                   : 'Erro ao excluir: ${vm.errorMessage}',
                             ),
-                            backgroundColor:
-                                success ? AppColors.success : AppColors.danger,
+                            backgroundColor: success
+                                ? AppColors.success
+                                : AppColors.danger,
                           ),
                         );
                       }

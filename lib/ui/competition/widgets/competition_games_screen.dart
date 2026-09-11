@@ -4,7 +4,7 @@ import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/domain/models/game.dart';
 import 'package:flag_admin_web/domain/models/round.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/competition/view_models/competition_games_view_model.dart';
 
 /// Tela de Tabelamento & Agendamento de Jogos da Competição (Fase 3).
@@ -76,7 +76,10 @@ class _CompetitionGamesScreenState
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem('Competições', route: '/competitions'),
-        BreadcrumbItem(compName, route: '/competitions/${widget.competitionId}'),
+        BreadcrumbItem(
+          compName,
+          route: '/competitions/${widget.competitionId}',
+        ),
         const BreadcrumbItem('Tabelamento & Jogos'),
       ],
       body: Column(
@@ -102,9 +105,7 @@ class _CompetitionGamesScreenState
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: _buildBody(context, vm, canWrite),
-          ),
+          Expanded(child: _buildBody(context, vm, canWrite)),
         ],
       ),
     );
@@ -237,7 +238,9 @@ class _CompetitionGamesScreenState
           const SizedBox(height: 16),
           if (canWrite)
             KicksterButton(
-              label: vm.rounds.isEmpty ? 'Criar Primeira Rodada' : 'Agendar Primeiro Jogo',
+              label: vm.rounds.isEmpty
+                  ? 'Criar Primeira Rodada'
+                  : 'Agendar Primeiro Jogo',
               icon: Icons.add,
               onPressed: () {
                 if (vm.rounds.isEmpty) {
@@ -306,8 +309,12 @@ class _CompetitionGamesScreenState
     final awayName = game.awayTeamName ?? 'Visitante';
     final venueName = game.venueName ?? 'Local a definir';
 
-    final homeTeam = vm.teams.where((t) => t.teamId == game.homeTeamId).firstOrNull;
-    final awayTeam = vm.teams.where((t) => t.teamId == game.awayTeamId).firstOrNull;
+    final homeTeam = vm.teams
+        .where((t) => t.teamId == game.homeTeamId)
+        .firstOrNull;
+    final awayTeam = vm.teams
+        .where((t) => t.teamId == game.awayTeamId)
+        .firstOrNull;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -390,7 +397,11 @@ class _CompetitionGamesScreenState
                     KicksterMenuItem(
                       child: const Row(
                         children: [
-                          Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: AppColors.primary,
+                          ),
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -409,7 +420,11 @@ class _CompetitionGamesScreenState
                     KicksterMenuItem(
                       child: const Row(
                         children: [
-                          Icon(Icons.published_with_changes, size: 18, color: AppColors.primary),
+                          Icon(
+                            Icons.published_with_changes,
+                            size: 18,
+                            color: AppColors.primary,
+                          ),
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -443,7 +458,10 @@ class _CompetitionGamesScreenState
               ),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
@@ -517,19 +535,22 @@ class _CompetitionGamesScreenState
         ],
       ),
       child: KicksterAvatar(
-        imageUrl: (logoUrl != null && logoUrl.trim().isNotEmpty) ? logoUrl : null,
-        name: (shortName != null && shortName.trim().isNotEmpty) ? shortName : teamName,
+        imageUrl: (logoUrl != null && logoUrl.trim().isNotEmpty)
+            ? logoUrl
+            : null,
+        name: (shortName != null && shortName.trim().isNotEmpty)
+            ? shortName
+            : teamName,
         size: 44,
       ),
     );
 
     return Row(
-      mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment: isHome
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: [
-        if (!isHome) ...[
-          avatarWidget,
-          const SizedBox(width: 10),
-        ],
+        if (!isHome) ...[avatarWidget, const SizedBox(width: 10)],
         Flexible(
           child: Text(
             teamName,
@@ -542,10 +563,7 @@ class _CompetitionGamesScreenState
             ),
           ),
         ),
-        if (isHome) ...[
-          const SizedBox(width: 10),
-          avatarWidget,
-        ],
+        if (isHome) ...[const SizedBox(width: 10), avatarWidget],
       ],
     );
   }
@@ -553,11 +571,23 @@ class _CompetitionGamesScreenState
   Widget _buildStatusBadge(GameStatus status) {
     final (bg, fg) = switch (status) {
       GameStatus.scheduled => (AppColors.surfaceMuted, AppColors.textSecondary),
-      GameStatus.open => (AppColors.accent.withValues(alpha: 0.15), AppColors.accent),
-      GameStatus.inProgress => (AppColors.success.withValues(alpha: 0.15), AppColors.success),
-      GameStatus.conference => (AppColors.warning.withValues(alpha: 0.15), AppColors.chipPendingFg),
+      GameStatus.open => (
+        AppColors.accent.withValues(alpha: 0.15),
+        AppColors.accent,
+      ),
+      GameStatus.inProgress => (
+        AppColors.success.withValues(alpha: 0.15),
+        AppColors.success,
+      ),
+      GameStatus.conference => (
+        AppColors.warning.withValues(alpha: 0.15),
+        AppColors.chipPendingFg,
+      ),
       GameStatus.finished => (AppColors.surfaceMuted, AppColors.textPrimary),
-      GameStatus.cancelled => (AppColors.danger.withValues(alpha: 0.15), AppColors.danger),
+      GameStatus.cancelled => (
+        AppColors.danger.withValues(alpha: 0.15),
+        AppColors.danger,
+      ),
     };
 
     return Container(
@@ -568,11 +598,7 @@ class _CompetitionGamesScreenState
       ),
       child: Text(
         status.label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: fg,
-        ),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
       ),
     );
   }
@@ -585,7 +611,8 @@ class _CompetitionGamesScreenState
     final isEditing = round != null;
     final nextNumber = isEditing
         ? round.number
-        : (vm.rounds.fold<int>(0, (max, r) => r.number > max ? r.number : max) + 1);
+        : (vm.rounds.fold<int>(0, (max, r) => r.number > max ? r.number : max) +
+              1);
 
     final numberController = TextEditingController(text: nextNumber.toString());
     final nameController = TextEditingController(
@@ -598,7 +625,9 @@ class _CompetitionGamesScreenState
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setModalState) => AlertDialog(
           backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             isEditing ? 'Editar Rodada' : 'Nova Rodada / Fase',
             style: AppTextStyles.labelMedium.copyWith(
@@ -693,7 +722,9 @@ class _CompetitionGamesScreenState
     if (vm.teams.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Inscreva pelo menos 2 equipes esportivas na competição para agendar confrontos.'),
+          content: Text(
+            'Inscreva pelo menos 2 equipes esportivas na competição para agendar confrontos.',
+          ),
         ),
       );
       return;
@@ -710,16 +741,24 @@ class _CompetitionGamesScreenState
         : vm.teams.first.teamId;
 
     String selectedAwayTeamId = isEditing
-        ? (game.awayTeamId ?? (vm.teams.length > 1 ? vm.teams[1].teamId : vm.teams.first.teamId))
+        ? (game.awayTeamId ??
+              (vm.teams.length > 1
+                  ? vm.teams[1].teamId
+                  : vm.teams.first.teamId))
         : (vm.teams.length > 1 ? vm.teams[1].teamId : vm.teams.first.teamId);
 
     String? selectedVenueId = isEditing
         ? game.venueId
         : (vm.venues.isNotEmpty ? vm.venues.first.id : null);
 
-    DateTime selectedDate = isEditing ? game.scheduledAt : DateTime.now().add(const Duration(days: 7));
+    DateTime selectedDate = isEditing
+        ? game.scheduledAt
+        : DateTime.now().add(const Duration(days: 7));
     TimeOfDay selectedTime = isEditing
-        ? TimeOfDay(hour: game.scheduledAt.hour, minute: game.scheduledAt.minute)
+        ? TimeOfDay(
+            hour: game.scheduledAt.hour,
+            minute: game.scheduledAt.minute,
+          )
         : const TimeOfDay(hour: 14, minute: 0);
 
     showDialog(
@@ -728,14 +767,18 @@ class _CompetitionGamesScreenState
         builder: (ctx, setModalState) {
           final compName = widget.competition?.displayName ?? 'Competição';
           final orgName = widget.competition?.organizationName ?? '';
-          final selectedHomeTeam =
-              vm.teams.where((t) => t.teamId == selectedHomeTeamId).firstOrNull;
-          final selectedAwayTeam =
-              vm.teams.where((t) => t.teamId == selectedAwayTeamId).firstOrNull;
+          final selectedHomeTeam = vm.teams
+              .where((t) => t.teamId == selectedHomeTeamId)
+              .firstOrNull;
+          final selectedAwayTeam = vm.teams
+              .where((t) => t.teamId == selectedAwayTeamId)
+              .firstOrNull;
 
           return AlertDialog(
             backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: Text(
               isEditing ? 'Editar Confronto' : 'Agendar Confronto',
               style: AppTextStyles.labelMedium.copyWith(
@@ -753,7 +796,10 @@ class _CompetitionGamesScreenState
                   children: [
                     // Dados fixos (Campeonato e Organização Promotora)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(12),
@@ -803,7 +849,9 @@ class _CompetitionGamesScreenState
                               width: 1,
                               height: 30,
                               color: AppColors.line,
-                              margin: const EdgeInsets.symmetric(horizontal: 10),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                             ),
                             Expanded(
                               child: Column(
@@ -851,9 +899,12 @@ class _CompetitionGamesScreenState
                       label: 'Rodada / Fase',
                       value: selectedRoundId,
                       values: vm.rounds.map((r) => r.id).toList(),
-                      labels: vm.rounds.map((r) => '${r.name} (#${r.number})').toList(),
+                      labels: vm.rounds
+                          .map((r) => '${r.name} (#${r.number})')
+                          .toList(),
                       onChanged: (val) {
-                        if (val != null) setModalState(() => selectedRoundId = val);
+                        if (val != null)
+                          setModalState(() => selectedRoundId = val);
                       },
                     ),
                     const SizedBox(height: 16),
@@ -868,7 +919,9 @@ class _CompetitionGamesScreenState
                                 label: 'Equipe Mandante',
                                 value: selectedHomeTeamId,
                                 values: vm.teams.map((t) => t.teamId).toList(),
-                                labels: vm.teams.map((t) => t.teamName).toList(),
+                                labels: vm.teams
+                                    .map((t) => t.teamName)
+                                    .toList(),
                                 onChanged: (val) {
                                   if (val != null) {
                                     setModalState(() {
@@ -905,7 +958,8 @@ class _CompetitionGamesScreenState
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const Text(
                                             'Agremiação / Clube',
@@ -916,7 +970,8 @@ class _CompetitionGamesScreenState
                                             ),
                                           ),
                                           Text(
-                                            selectedHomeTeam?.resolvedInstitutionName ??
+                                            selectedHomeTeam
+                                                    ?.resolvedInstitutionName ??
                                                 'Não vinculada',
                                             style: const TextStyle(
                                               fontSize: 12,
@@ -943,15 +998,22 @@ class _CompetitionGamesScreenState
                                 label: 'Equipe Visitante',
                                 value: selectedAwayTeamId,
                                 values: vm.teams
-                                    .where((t) => t.teamId != selectedHomeTeamId)
+                                    .where(
+                                      (t) => t.teamId != selectedHomeTeamId,
+                                    )
                                     .map((t) => t.teamId)
                                     .toList(),
                                 labels: vm.teams
-                                    .where((t) => t.teamId != selectedHomeTeamId)
+                                    .where(
+                                      (t) => t.teamId != selectedHomeTeamId,
+                                    )
                                     .map((t) => t.teamName)
                                     .toList(),
                                 onChanged: (val) {
-                                  if (val != null) setModalState(() => selectedAwayTeamId = val);
+                                  if (val != null)
+                                    setModalState(
+                                      () => selectedAwayTeamId = val,
+                                    );
                                 },
                               ),
                               const SizedBox(height: 6),
@@ -975,7 +1037,8 @@ class _CompetitionGamesScreenState
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const Text(
                                             'Agremiação / Clube',
@@ -986,7 +1049,8 @@ class _CompetitionGamesScreenState
                                             ),
                                           ),
                                           Text(
-                                            selectedAwayTeam?.resolvedInstitutionName ??
+                                            selectedAwayTeam
+                                                    ?.resolvedInstitutionName ??
                                                 'Não vinculada',
                                             style: const TextStyle(
                                               fontSize: 12,
@@ -1011,8 +1075,12 @@ class _CompetitionGamesScreenState
                       label: 'Local / Praça Esportiva',
                       value: selectedVenueId,
                       values: [null, ...vm.venues.map((v) => v.id)],
-                      labels: ['Local a definir', ...vm.venues.map((v) => v.name)],
-                      onChanged: (val) => setModalState(() => selectedVenueId = val),
+                      labels: [
+                        'Local a definir',
+                        ...vm.venues.map((v) => v.name),
+                      ],
+                      onChanged: (val) =>
+                          setModalState(() => selectedVenueId = val),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -1032,12 +1100,13 @@ class _CompetitionGamesScreenState
                               const SizedBox(height: 8),
                               InkWell(
                                 onTap: () async {
-                                  final picked = await showKicksterCalendarDialog(
-                                    ctx,
-                                    initialDate: selectedDate,
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime(2035),
-                                  );
+                                  final picked =
+                                      await showKicksterCalendarDialog(
+                                        ctx,
+                                        initialDate: selectedDate,
+                                        firstDate: DateTime(2020),
+                                        lastDate: DateTime(2035),
+                                      );
                                   if (picked != null) {
                                     setModalState(() => selectedDate = picked);
                                   }
@@ -1152,7 +1221,9 @@ class _CompetitionGamesScreenState
                   if (selectedHomeTeamId == selectedAwayTeamId) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('A equipe mandante e a equipe visitante não podem ser a mesma equipe esportiva.'),
+                        content: Text(
+                          'A equipe mandante e a equipe visitante não podem ser a mesma equipe esportiva.',
+                        ),
                       ),
                     );
                     return;
@@ -1207,7 +1278,9 @@ class _CompetitionGamesScreenState
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setModalState) => AlertDialog(
           backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             'Alterar Status da Partida',
             style: AppTextStyles.labelMedium.copyWith(

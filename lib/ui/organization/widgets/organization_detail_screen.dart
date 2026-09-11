@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_detail_view_model.dart';
 
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 
 /// Detalhe de uma organização em página única (#455): todas as seções
 /// (identificação, presidente, contato, localização, identidade) empilhadas
@@ -796,10 +796,8 @@ class _OrganizationDetailScreenState
                   'Ver Quadro Geral de Afiliados (${approvedAffiliations.length})',
               icon: Icons.people_outline,
               variant: KicksterButtonVariant.outline,
-              onPressed: () => context.go(
-                '/organizations/${org.id}/affiliates',
-                extra: org,
-              ),
+              onPressed: () =>
+                  context.go('/organizations/${org.id}/affiliates', extra: org),
             ),
           ],
         ),

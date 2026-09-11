@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
+﻿import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/user/view_models/user_create_view_model.dart'
     as vm;
 import 'package:flutter/material.dart';
@@ -68,69 +68,71 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppLayout.form(
-          child: Form(
-            key: _formKey,
-            child: ListenableBuilder(
-              listenable: _viewModel,
-              builder: (context, _) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    KicksterInput(
-                      label: 'Nome',
-                      controller: _name,
-                      maxLength: 100,
-                      onChanged: (value) => _viewModel.setName(value),
-                      validator: (value) =>
-                          (value == null || value.trim().isEmpty)
-                              ? 'Informe o nome'
-                              : null,
-                    ),
-                    const SizedBox(height: 12),
-                    KicksterInput(
-                      label: 'E-mail',
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      onChanged: (value) => _viewModel.setEmail(value),
-                      validator: _validateEmail,
-                    ),
-                    const SizedBox(height: 12),
-                    KicksterDropdown<String>(
-                      label: 'Papel',
-                      helperText: 'Mesa: opera partidas ao vivo',
-                      value: _viewModel.role,
-                      items: UserRole.values
-                          .map((r) => DropdownMenuItem(
+            child: Form(
+              key: _formKey,
+              child: ListenableBuilder(
+                listenable: _viewModel,
+                builder: (context, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      KicksterInput(
+                        label: 'Nome',
+                        controller: _name,
+                        maxLength: 100,
+                        onChanged: (value) => _viewModel.setName(value),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                            ? 'Informe o nome'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      KicksterInput(
+                        label: 'E-mail',
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: (value) => _viewModel.setEmail(value),
+                        validator: _validateEmail,
+                      ),
+                      const SizedBox(height: 12),
+                      KicksterDropdown<String>(
+                        label: 'Papel',
+                        helperText: 'Mesa: opera partidas ao vivo',
+                        value: _viewModel.role,
+                        items: UserRole.values
+                            .map(
+                              (r) => DropdownMenuItem(
                                 value: r.label,
                                 child: Text(r.label),
-                              ))
-                          .toList(),
-                      onChanged: (value) => _viewModel.setRole(value),
-                    ),
-                    if (_viewModel.errorMessage != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _viewModel.errorMessage!,
-                        style: TextStyle(
-                          color: AppColors.danger,
-                          fontWeight: FontWeight.w600,
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) => _viewModel.setRole(value),
+                      ),
+                      if (_viewModel.errorMessage != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _viewModel.errorMessage!,
+                          style: TextStyle(
+                            color: AppColors.danger,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                      ],
+                      const SizedBox(height: 24),
+                      KicksterButton(
+                        label: 'Salvar',
+                        icon: Icons.check,
+                        loading: _viewModel.isSubmitting,
+                        onPressed: _viewModel.isSubmitting ? null : _save,
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    KicksterButton(
-                      label: 'Salvar',
-                      icon: Icons.check,
-                      loading: _viewModel.isSubmitting,
-                      onPressed: _viewModel.isSubmitting ? null : _save,
-                    ),
-                  ],
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }

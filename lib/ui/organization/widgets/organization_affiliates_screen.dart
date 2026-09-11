@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/domain/models/affiliation.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/ui/organization/view_models/organization_affiliates_view_model.dart';
 
 /// Tela dedicada para Consulta e Gestão de Agremiações Filiadas (ADR-001 / MVVM 1:1).
@@ -49,7 +49,8 @@ class _OrganizationAffiliatesScreenState
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(
-        organizationAffiliatesViewModelProvider(widget.organizationId));
+      organizationAffiliatesViewModelProvider(widget.organizationId),
+    );
     final org = vm.organization ?? widget.organization;
     final orgName = org?.tradeName ?? 'Organização';
 
@@ -223,11 +224,7 @@ class _OrganizationAffiliatesScreenState
             label: '',
             value: vm.selectedType,
             values: const [null, 'CLUB', 'UNIVERSITY'],
-            labels: const [
-              'Todos os tipos',
-              'Clubes',
-              'Universidades',
-            ],
+            labels: const ['Todos os tipos', 'Clubes', 'Universidades'],
             onChanged: vm.setSelectedType,
           ),
         ),
@@ -257,10 +254,7 @@ class _OrganizationAffiliatesScreenState
           const SizedBox(height: 4),
           const Text(
             'Tente ajustar os filtros ou a busca selecionada.',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -330,7 +324,10 @@ class _OrganizationAffiliatesScreenState
                 side: const BorderSide(color: AppColors.line),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     KicksterAvatar(
@@ -360,9 +357,13 @@ class _OrganizationAffiliatesScreenState
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 1),
+                                  horizontal: 6,
+                                  vertical: 1,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.08,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -403,17 +404,24 @@ class _OrganizationAffiliatesScreenState
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: statusColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                      color: statusColor.withValues(alpha: 0.3)),
+                                    color: statusColor.withValues(alpha: 0.3),
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(statusIcon, size: 12, color: statusColor),
+                                    Icon(
+                                      statusIcon,
+                                      size: 12,
+                                      color: statusColor,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       statusLabel,
@@ -436,7 +444,11 @@ class _OrganizationAffiliatesScreenState
                       IconButton(
                         visualDensity: VisualDensity.compact,
                         tooltip: 'Aprovar filiação',
-                        icon: const Icon(Icons.check, size: 18, color: AppColors.success),
+                        icon: const Icon(
+                          Icons.check,
+                          size: 18,
+                          color: AppColors.success,
+                        ),
                         onPressed: () async {
                           final ok = await showKicksterConfirm(
                             context: context,
@@ -453,7 +465,11 @@ class _OrganizationAffiliatesScreenState
                       IconButton(
                         visualDensity: VisualDensity.compact,
                         tooltip: 'Recusar filiação',
-                        icon: const Icon(Icons.close, size: 18, color: AppColors.danger),
+                        icon: const Icon(
+                          Icons.close,
+                          size: 18,
+                          color: AppColors.danger,
+                        ),
                         onPressed: () =>
                             _showRejectAffiliationModal(context, vm, affil),
                       ),
@@ -477,8 +493,11 @@ class _OrganizationAffiliatesScreenState
                         KicksterMenuItem(
                           child: const Row(
                             children: [
-                              Icon(Icons.visibility_outlined,
-                                  size: 16, color: AppColors.primary),
+                              Icon(
+                                Icons.visibility_outlined,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -489,8 +508,9 @@ class _OrganizationAffiliatesScreenState
                               ),
                             ],
                           ),
-                          onTap: () =>
-                              context.go('/institutions/${affil.institutionId}'),
+                          onTap: () => context.go(
+                            '/institutions/${affil.institutionId}',
+                          ),
                         ),
                       ],
                     ),
@@ -528,8 +548,10 @@ class _OrganizationAffiliatesScreenState
               children: [
                 const Text(
                   'Informe o motivo da recusa para que a agremiação possa regularizar suas pendências:',
-                  style:
-                      TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 KicksterInput(
@@ -558,7 +580,9 @@ class _OrganizationAffiliatesScreenState
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
               final ok = await vm.rejectAffiliation(
-                  affil.id, reasonCtrl.text.trim());
+                affil.id,
+                reasonCtrl.text.trim(),
+              );
               if (ok && dialogCtx.mounted) {
                 Navigator.of(dialogCtx).pop();
                 ScaffoldMessenger.of(context).showSnackBar(

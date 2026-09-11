@@ -1,7 +1,7 @@
-import 'package:flag_admin_web/data/api/api.dart';
+﻿import 'package:flag_admin_web/data/api/api.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,16 +46,18 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
     });
 
     try {
-      await ref.read(authApiProvider).createUser(
+      await ref
+          .read(authApiProvider)
+          .createUser(
             name: _name.text.trim(),
             email: _email.text.trim(),
             role: _role.toJson(),
           );
       ref.invalidate(usersProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário criado')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Usuário criado')));
         context.pop();
       }
     } on RepositoryException catch (e) {
@@ -86,60 +88,63 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppLayout.form(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                KicksterInput(
-                  label: 'Nome',
-                  controller: _name,
-                  maxLength: 100,
-                  validator: (value) =>
-                      (value == null || value.trim().isEmpty)
-                          ? 'Informe o nome'
-                          : null,
-                ),
-                const SizedBox(height: 12),
-                KicksterInput(
-                  label: 'E-mail',
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: _validateEmail,
-                ),
-                const SizedBox(height: 12),
-                KicksterDropdown<UserRole>(
-                  label: 'Papel',
-                  helperText: 'Mesa: opera partidas ao vivo',
-                  value: _role,
-                  items: UserRole.values
-                      .map((r) =>
-                          DropdownMenuItem(value: r, child: Text(r.label)))
-                      .toList(),
-                  onChanged: (value) =>
-                      setState(() => _role = value ?? UserRole.organizer),
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  KicksterInput(
+                    label: 'Nome',
+                    controller: _name,
+                    maxLength: 100,
+                    validator: (value) =>
+                        (value == null || value.trim().isEmpty)
+                        ? 'Informe o nome'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  KicksterInput(
+                    label: 'E-mail',
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: _validateEmail,
+                  ),
+                  const SizedBox(height: 12),
+                  KicksterDropdown<UserRole>(
+                    label: 'Papel',
+                    helperText: 'Mesa: opera partidas ao vivo',
+                    value: _role,
+                    items: UserRole.values
+                        .map(
+                          (r) =>
+                              DropdownMenuItem(value: r, child: Text(r.label)),
+                        )
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => _role = value ?? UserRole.organizer),
+                  ),
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(
                         color: AppColors.danger,
-                        fontWeight: FontWeight.w600),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  KicksterButton(
+                    label: 'Salvar',
+                    icon: Icons.check,
+                    loading: _submitting,
+                    onPressed: _submitting ? null : _save,
                   ),
                 ],
-                const SizedBox(height: 24),
-                KicksterButton(
-                  label: 'Salvar',
-                  icon: Icons.check,
-                  loading: _submitting,
-                  onPressed: _submitting ? null : _save,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }

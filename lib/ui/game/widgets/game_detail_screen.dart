@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/src/core/core.dart';
+﻿import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/domain/competition_permissions.dart';
 import 'package:flag_admin_web/ui/game/view_models/game_detail_view_model.dart';
 import 'package:flutter/material.dart';
@@ -62,9 +62,7 @@ class _GameDetailScreenState extends ConsumerState<GameDetailScreen> {
 
               final game = _viewModel.game;
               if (game == null) {
-                return const AppErrorState(
-                  message: 'Jogo não encontrado',
-                );
+                return const AppErrorState(message: 'Jogo não encontrado');
               }
 
               return _buildDetail(context, game);
@@ -87,85 +85,96 @@ class _GameDetailScreenState extends ConsumerState<GameDetailScreen> {
     );
 
     return AppLayout.detail(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 1,
-              shadowColor: AppColors.black.withValues(alpha: 0.08),
-              color: AppColors.surface,
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.line, width: 1),
-              ),
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${game.homeTeamName ?? 'Casa'} x ${game.awayTeamName ?? 'Fora'}',
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w700),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            elevation: 1,
+            shadowColor: AppColors.black.withValues(alpha: 0.08),
+            color: AppColors.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.line, width: 1),
+            ),
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${game.homeTeamName ?? 'Casa'} x ${game.awayTeamName ?? 'Fora'}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        _statusChip(game.status),
-                      ],
+                      ),
+                      _statusChip(game.status),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (game.homeScore != null || game.awayScore != null)
+                    Text(
+                      'Placar: ${game.homeScore ?? 0} x ${game.awayScore ?? 0}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    if (game.homeScore != null || game.awayScore != null)
-                      Text(
-                        'Placar: ${game.homeScore ?? 0} x ${game.awayScore ?? 0}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
+                  const SizedBox(height: 16),
+                  if (canEdit)
+                    KicksterButton(
+                      label: 'Editar dados',
+                      icon: Icons.edit_outlined,
+                      onPressed: () => context.go(
+                        '/games/${game.id}/edit',
+                        extra: (roundId: game.roundId, game: game),
                       ),
-                    const SizedBox(height: 16),
-                    if (canEdit)
-                      KicksterButton(
-                        label: 'Editar dados',
-                        icon: Icons.edit_outlined,
-                        onPressed: () => context.go(
-                          '/games/${game.id}/edit',
-                          extra: (roundId: game.roundId, game: game),
-                        ),
-                      )
-                    else
-                      const EditRestrictionNote(
-                        message:
-                            'Apenas o criador da competição pode editar '
-                            'este jogo.',
-                      ),
-                  ],
-                ),
+                    )
+                  else
+                    const EditRestrictionNote(
+                      message:
+                          'Apenas o criador da competição pode editar '
+                          'este jogo.',
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            AppInfoCard(children: [
+          ),
+          const SizedBox(height: 16),
+          AppInfoCard(
+            children: [
               AppInfoRow(
                 label: 'Rodada',
                 value: game.roundNumber?.toString() ?? '—',
               ),
               if (competitionName.isNotEmpty)
                 AppInfoRow(label: 'Competição', value: competitionName),
-              AppInfoRow(label: 'Horário', value: formatBrDateTime(game.scheduledAt)),
+              AppInfoRow(
+                label: 'Horário',
+                value: formatBrDateTime(game.scheduledAt),
+              ),
               if (game.venueName != null && game.venueName!.isNotEmpty)
                 AppInfoRow(label: 'Campo', value: game.venueName!),
               if (game.venueAddress != null && game.venueAddress!.isNotEmpty)
                 AppInfoRow(label: 'Endereço', value: game.venueAddress!),
-            ]),
-            const SizedBox(height: 16),
-            Text(
-              'Criado em ${formatBrDate(game.scheduledAt)}',
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.textSecondary),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Criado em ${formatBrDate(game.scheduledAt)}',
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 

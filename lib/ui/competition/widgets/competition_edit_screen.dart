@@ -8,7 +8,7 @@ import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';
 import 'package:flag_admin_web/src/domain/enums/modality.dart';
 import 'package:flag_admin_web/src/domain/enums/tournament_format.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'competition_grouping_section.dart';
 
 /// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de competição existente (ADR-001 / Kickster Design System).
@@ -16,11 +16,7 @@ class CompetitionEditScreen extends ConsumerStatefulWidget {
   final String id;
   final Competition? competition;
 
-  const CompetitionEditScreen({
-    super.key,
-    required this.id,
-    this.competition,
-  });
+  const CompetitionEditScreen({super.key, required this.id, this.competition});
 
   @override
   ConsumerState<CompetitionEditScreen> createState() =>
@@ -87,9 +83,12 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                               builder: (context) {
                                 final orgs = organizationsAsync.valueOrNull;
                                 final matchedOrg = orgs
-                                    ?.where((o) => o.id == vm.selectedOrganizationId)
+                                    ?.where(
+                                      (o) => o.id == vm.selectedOrganizationId,
+                                    )
                                     .firstOrNull;
-                                final orgName = vm.organizationName ??
+                                final orgName =
+                                    vm.organizationName ??
                                     matchedOrg?.tradeName ??
                                     matchedOrg?.legalName;
                                 return Container(
@@ -174,7 +173,8 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                                   child: KicksterInput(
                                     label: 'Temporada (ex: 2026, 2026.1)',
                                     controller: vm.seasonController,
-                                    validator: (v) => v == null || v.trim().isEmpty
+                                    validator: (v) =>
+                                        v == null || v.trim().isEmpty
                                         ? 'Informe a temporada'
                                         : null,
                                   ),
@@ -187,10 +187,12 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                                     value: vm.status,
                                     hint: 'Status da Competição',
                                     items: CompetitionStatus.values
-                                        .map((st) => DropdownMenuItem(
-                                              value: st,
-                                              child: Text(st.label),
-                                            ))
+                                        .map(
+                                          (st) => DropdownMenuItem(
+                                            value: st,
+                                            child: Text(st.label),
+                                          ),
+                                        )
                                         .toList(),
                                     onChanged: (st) {
                                       if (st != null) vm.setStatus(st);
@@ -209,256 +211,278 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                         ),
                       ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Seção 2: Formato de Disputa
-                    _buildSectionCard(
-                      title: 'Formato de Disputa',
-                      icon: Icons.account_tree_outlined,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Selecione o formato de disputa do torneio:',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                      // Seção 2: Formato de Disputa
+                      _buildSectionCard(
+                        title: 'Formato de Disputa',
+                        icon: Icons.account_tree_outlined,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Selecione o formato de disputa do torneio:',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: TournamentFormat.values.map((fmt) {
-                              return Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                    right: fmt != TournamentFormat.values.last ? 12 : 0,
-                                  ),
-                                  child: SelectableCard(
-                                    label: fmt.label,
-                                    selected: vm.tournamentFormat == fmt,
-                                    icon: Icons.emoji_events_outlined,
-                                    minHeight: 90,
-                                    onTap: () => vm.setTournamentFormat(fmt),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Seção: Estrutura de Agrupamento Dinâmico (Kickster DS)
-                    CompetitionGroupingSection(vm: vm),
-
-                    const SizedBox(height: 16),
-
-                    // Seção 3: Modalidade & Categoria
-                    _buildSectionCard(
-                      title: 'Modalidade & Categoria Esportiva',
-                      icon: Icons.sports_football_outlined,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Modalidade de Futebol Americano:',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isWide = constraints.maxWidth >= 600;
-                              final cardWidth = isWide
-                                  ? (constraints.maxWidth - 36) / 4
-                                  : (constraints.maxWidth - 12) / 2;
-                              return Wrap(
-                                spacing: 12,
-                                runSpacing: 12,
-                                children: Modality.values.map((m) {
-                                  return SizedBox(
-                                    width: cardWidth,
+                            const SizedBox(height: 12),
+                            Row(
+                              children: TournamentFormat.values.map((fmt) {
+                                return Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      right: fmt != TournamentFormat.values.last
+                                          ? 12
+                                          : 0,
+                                    ),
                                     child: SelectableCard(
-                                      label: m.label,
-                                      selected: vm.selectedModality == m,
-                                      icon: Icons.sports_football_outlined,
-                                      onTap: () => vm.setModality(m),
+                                      label: fmt.label,
+                                      selected: vm.tournamentFormat == fmt,
+                                      icon: Icons.emoji_events_outlined,
+                                      minHeight: 90,
+                                      onTap: () => vm.setTournamentFormat(fmt),
                                     ),
-                                  );
-                                }).toList(),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Gênero:',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: Gender.values.map((g) {
-                                        return SelectableChip(
-                                          label: g.label,
-                                          selected: vm.selectedGender == g,
-                                          onTap: () => vm.setGender(g),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Faixa Etária / Categoria:',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: AgeGroup.values.map((ag) {
-                                        return SelectableChip(
-                                          label: ag.label,
-                                          selected: vm.selectedAgeGroup == ag,
-                                          onTap: () => vm.setAgeGroup(ag),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Seção 4: Datas
-                    _buildSectionCard(
-                      title: 'Datas da Temporada (Opcional)',
-                      icon: Icons.date_range_outlined,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: KicksterInput(
-                              label: 'Data de Início',
-                              controller: vm.startDateController,
-                              hintText: 'AAAA-MM-DD',
-                              readOnly: true,
-                              onTap: () async {
-                                final parsed = DateTime.tryParse(vm.startDateController.text);
-                                final initial = parsed ?? DateTime.now();
-                                final picked = await showAppCalendarDialog(
-                                  context,
-                                  initialDate: initial,
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime(2035),
+                                  ),
                                 );
-                                if (picked != null) {
-                                  vm.startDateController.text =
-                                      '${picked.year}-${picked.month.toString().padLeft(2, "0")}-${picked.day.toString().padLeft(2, "0")}';
-                                }
-                              },
-                              suffixIcon: const Icon(Icons.calendar_today, size: 18),
+                              }).toList(),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: KicksterInput(
-                              label: 'Data de Término',
-                              controller: vm.endDateController,
-                              hintText: 'AAAA-MM-DD',
-                              readOnly: true,
-                              onTap: () async {
-                                final startParsed = DateTime.tryParse(vm.startDateController.text);
-                                final parsed = DateTime.tryParse(vm.endDateController.text);
-                                final first = startParsed ?? DateTime(2020);
-                                var initial = parsed ?? (startParsed ?? DateTime.now());
-                                if (initial.isBefore(first)) initial = first;
-                                final picked = await showAppCalendarDialog(
-                                  context,
-                                  initialDate: initial,
-                                  firstDate: first,
-                                  lastDate: DateTime(2035),
-                                );
-                                if (picked != null) {
-                                  vm.endDateController.text =
-                                      '${picked.year}-${picked.month.toString().padLeft(2, "0")}-${picked.day.toString().padLeft(2, "0")}';
-                                }
-                              },
-                              suffixIcon: const Icon(Icons.calendar_today, size: 18),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Ações de Rodapé
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        KicksterButton(
-                          label: 'Cancelar',
-                          variant: KicksterButtonVariant.outline,
-                          onPressed: () => context.pop(),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        KicksterButton(
-                          label: 'Salvar Alterações',
-                          icon: Icons.check,
-                          onPressed: vm.isSaving
-                              ? null
-                              : () async {
-                                  if (!_formKey.currentState!.validate()) return;
-                                  final result = await vm.update();
-                                  if (result != null && context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Competição atualizada com sucesso!'),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Seção: Estrutura de Agrupamento Dinâmico (Kickster DS)
+                      CompetitionGroupingSection(vm: vm),
+
+                      const SizedBox(height: 16),
+
+                      // Seção 3: Modalidade & Categoria
+                      _buildSectionCard(
+                        title: 'Modalidade & Categoria Esportiva',
+                        icon: Icons.sports_football_outlined,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Modalidade de Futebol Americano:',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isWide = constraints.maxWidth >= 600;
+                                final cardWidth = isWide
+                                    ? (constraints.maxWidth - 36) / 4
+                                    : (constraints.maxWidth - 12) / 2;
+                                return Wrap(
+                                  spacing: 12,
+                                  runSpacing: 12,
+                                  children: Modality.values.map((m) {
+                                    return SizedBox(
+                                      width: cardWidth,
+                                      child: SelectableCard(
+                                        label: m.label,
+                                        selected: vm.selectedModality == m,
+                                        icon: Icons.sports_football_outlined,
+                                        onTap: () => vm.setModality(m),
                                       ),
                                     );
-                                    context.pop();
+                                  }).toList(),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Gênero:',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: Gender.values.map((g) {
+                                          return SelectableChip(
+                                            label: g.label,
+                                            selected: vm.selectedGender == g,
+                                            onTap: () => vm.setGender(g),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Faixa Etária / Categoria:',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: AgeGroup.values.map((ag) {
+                                          return SelectableChip(
+                                            label: ag.label,
+                                            selected: vm.selectedAgeGroup == ag,
+                                            onTap: () => vm.setAgeGroup(ag),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Seção 4: Datas
+                      _buildSectionCard(
+                        title: 'Datas da Temporada (Opcional)',
+                        icon: Icons.date_range_outlined,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: KicksterInput(
+                                label: 'Data de Início',
+                                controller: vm.startDateController,
+                                hintText: 'AAAA-MM-DD',
+                                readOnly: true,
+                                onTap: () async {
+                                  final parsed = DateTime.tryParse(
+                                    vm.startDateController.text,
+                                  );
+                                  final initial = parsed ?? DateTime.now();
+                                  final picked = await showAppCalendarDialog(
+                                    context,
+                                    initialDate: initial,
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2035),
+                                  );
+                                  if (picked != null) {
+                                    vm.startDateController.text =
+                                        '${picked.year}-${picked.month.toString().padLeft(2, "0")}-${picked.day.toString().padLeft(2, "0")}';
                                   }
                                 },
+                                suffixIcon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: KicksterInput(
+                                label: 'Data de Término',
+                                controller: vm.endDateController,
+                                hintText: 'AAAA-MM-DD',
+                                readOnly: true,
+                                onTap: () async {
+                                  final startParsed = DateTime.tryParse(
+                                    vm.startDateController.text,
+                                  );
+                                  final parsed = DateTime.tryParse(
+                                    vm.endDateController.text,
+                                  );
+                                  final first = startParsed ?? DateTime(2020);
+                                  var initial =
+                                      parsed ?? (startParsed ?? DateTime.now());
+                                  if (initial.isBefore(first)) initial = first;
+                                  final picked = await showAppCalendarDialog(
+                                    context,
+                                    initialDate: initial,
+                                    firstDate: first,
+                                    lastDate: DateTime(2035),
+                                  );
+                                  if (picked != null) {
+                                    vm.endDateController.text =
+                                        '${picked.year}-${picked.month.toString().padLeft(2, "0")}-${picked.day.toString().padLeft(2, "0")}';
+                                  }
+                                },
+                                suffixIcon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                  ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Ações de Rodapé
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          KicksterButton(
+                            label: 'Cancelar',
+                            variant: KicksterButtonVariant.outline,
+                            onPressed: () => context.pop(),
+                          ),
+                          const SizedBox(width: 12),
+                          KicksterButton(
+                            label: 'Salvar Alterações',
+                            icon: Icons.check,
+                            onPressed: vm.isSaving
+                                ? null
+                                : () async {
+                                    if (!_formKey.currentState!.validate())
+                                      return;
+                                    final result = await vm.update();
+                                    if (result != null && context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Competição atualizada com sucesso!',
+                                          ),
+                                        ),
+                                      );
+                                      context.pop();
+                                    }
+                                  },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
     );
   }
@@ -481,10 +505,7 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: AppColors.line, width: 1),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
+          child: Padding(padding: const EdgeInsets.all(16), child: child),
         ),
       ],
     );

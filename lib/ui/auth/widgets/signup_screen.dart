@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+﻿import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -58,7 +58,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               padding: const EdgeInsets.all(32),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: vm.isSuccess ? _buildSuccess(context) : _buildForm(context, vm),
+                child: vm.isSuccess
+                    ? _buildSuccess(context)
+                    : _buildForm(context, vm),
               ),
             ),
           ),
@@ -127,10 +129,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.mail_outline,
-            autofillHints: const [
-              AutofillHints.username,
-              AutofillHints.email,
-            ],
+            autofillHints: const [AutofillHints.username, AutofillHints.email],
             textInputAction: TextInputAction.next,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -150,9 +149,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             prefixIcon: Icons.lock_outline,
             suffixIcon: IconButton(
               tooltip: vm.obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
-              icon: Icon(vm.obscurePassword
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined),
+              icon: Icon(
+                vm.obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
               onPressed: vm.toggleObscurePassword,
             ),
             textInputAction: TextInputAction.next,
@@ -173,10 +174,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             obscureText: vm.obscureConfirm,
             prefixIcon: Icons.lock_outline,
             suffixIcon: IconButton(
-              tooltip: vm.obscureConfirm ? 'Mostrar confirmação' : 'Ocultar confirmação',
-              icon: Icon(vm.obscureConfirm
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined),
+              tooltip: vm.obscureConfirm
+                  ? 'Mostrar confirmação'
+                  : 'Ocultar confirmação',
+              icon: Icon(
+                vm.obscureConfirm
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
               onPressed: vm.toggleObscureConfirm,
             ),
             textInputAction: TextInputAction.done,
@@ -203,10 +208,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 4,
             children: [
-              const Text(
-                'Já tem conta?',
-                style: AppTextStyles.footerLink,
-              ),
+              const Text('Já tem conta?', style: AppTextStyles.footerLink),
               TextButton(
                 onPressed: () => context.go('/login'),
                 child: Text(

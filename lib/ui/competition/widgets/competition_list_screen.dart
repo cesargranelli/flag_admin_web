@@ -5,7 +5,7 @@ import 'package:flag_admin_web/domain/models/competition.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/enums/competition_status.dart';
 import 'package:flag_admin_web/src/domain/enums/gender.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import '../view_models/competition_list_view_model.dart';
 
 /// Tela de Listagem de Competições e Campeonatos (ADR-001 / Kickster Design System).
@@ -38,7 +38,8 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
   Widget build(BuildContext context) {
     final vm = ref.watch(competitionListViewModelProvider);
     final user = ref.watch(authControllerProvider.select((a) => a.state.user));
-    final canWrite = user != null; // Qualquer gestor autenticado com permissão pode criar
+    final canWrite =
+        user != null; // Qualquer gestor autenticado com permissão pode criar
 
     return AppScreen(
       title: 'Competições',
@@ -65,9 +66,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: _buildBody(context, vm, canWrite),
-          ),
+          Expanded(child: _buildBody(context, vm, canWrite)),
         ],
       ),
     );
@@ -279,10 +278,7 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
       title: comp.displayName,
       subtitle: subtitle,
       onTap: () async {
-        context.go(
-          '/competitions/${comp.id}',
-          extra: comp,
-        );
+        context.go('/competitions/${comp.id}', extra: comp);
       },
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -320,7 +316,11 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -336,17 +336,17 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     ],
                   ),
                   onTap: () async {
-                    context.go(
-                      '/competitions/${comp.id}/edit',
-                      extra: comp,
-                    );
+                    context.go('/competitions/${comp.id}/edit', extra: comp);
                   },
                 ),
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.groups_outlined,
-                          size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.groups_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -362,17 +362,17 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     ],
                   ),
                   onTap: () async {
-                    context.go(
-                      '/competitions/${comp.id}/teams',
-                      extra: comp,
-                    );
+                    context.go('/competitions/${comp.id}/teams', extra: comp);
                   },
                 ),
                 KicksterMenuItem(
                   child: const Row(
                     children: [
-                      Icon(Icons.sports_football_outlined,
-                          size: 18, color: AppColors.primary),
+                      Icon(
+                        Icons.sports_football_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -388,18 +388,18 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                     ],
                   ),
                   onTap: () async {
-                    context.go(
-                      '/competitions/${comp.id}/games',
-                      extra: comp,
-                    );
+                    context.go('/competitions/${comp.id}/games', extra: comp);
                   },
                 ),
                 if (!isDisabled)
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.visibility_off_outlined,
-                            size: 18, color: AppColors.warning),
+                        Icon(
+                          Icons.visibility_off_outlined,
+                          size: 18,
+                          color: AppColors.warning,
+                        ),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -432,8 +432,11 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
                   KicksterMenuItem(
                     child: const Row(
                       children: [
-                        Icon(Icons.visibility_outlined,
-                            size: 18, color: AppColors.success),
+                        Icon(
+                          Icons.visibility_outlined,
+                          size: 18,
+                          color: AppColors.success,
+                        ),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -465,14 +468,11 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
       CompetitionStatus.ongoing => KicksterStatusChipType.pending,
       CompetitionStatus.draft => KicksterStatusChipType.unpaid,
       CompetitionStatus.finished => KicksterStatusChipType.refund,
-      CompetitionStatus.disabled || CompetitionStatus.registrationClosed =>
-        KicksterStatusChipType.failed,
+      CompetitionStatus.disabled ||
+      CompetitionStatus.registrationClosed => KicksterStatusChipType.failed,
       _ => KicksterStatusChipType.unpaid,
     };
 
-    return KicksterStatusChip(
-      status: chipType,
-      label: status.label,
-    );
+    return KicksterStatusChip(status: chipType, label: status.label);
   }
 }

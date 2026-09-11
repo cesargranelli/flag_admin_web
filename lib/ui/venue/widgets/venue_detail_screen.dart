@@ -1,6 +1,6 @@
-import 'package:flag_admin_web/domain/models/venue.dart';
+﻿import 'package:flag_admin_web/domain/models/venue.dart';
 import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,7 +45,8 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.venues, route: '/venues'),
-        if ((vm.venue?.name ?? widget.venue?.name) != null) BreadcrumbItem(vm.venue?.name ?? widget.venue!.name),
+        if ((vm.venue?.name ?? widget.venue?.name) != null)
+          BreadcrumbItem(vm.venue?.name ?? widget.venue!.name),
       ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,7 +58,10 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
                 return const AppLoading(message: 'Carregando campo...');
               }
               if (vm.errorMessage != null) {
-                return AppErrorState(message: vm.errorMessage!, onRetry: () => vm.load(id));
+                return AppErrorState(
+                  message: vm.errorMessage!,
+                  onRetry: () => vm.load(id),
+                );
               }
               final venue = vm.venue ?? widget.venue;
               if (venue == null) {
@@ -84,74 +88,79 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
     final orgName = orgAsync?.valueOrNull?.tradeName ?? '';
 
     return AppLayout.detail(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 1,
-              shadowColor: AppColors.black.withValues(alpha: 0.08),
-              color: AppColors.surface,
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.line, width: 1),
-              ),
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.sports_soccer,
-                              color: AppColors.primary, size: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            elevation: 1,
+            shadowColor: AppColors.black.withValues(alpha: 0.08),
+            color: AppColors.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.line, width: 1),
+            ),
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                venue.name,
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 4),
-                              if (orgName.isNotEmpty)
-                                Text(
-                                  orgName,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary),
-                                ),
-                            ],
-                          ),
+                        child: const Icon(
+                          Icons.sports_soccer,
+                          color: AppColors.primary,
+                          size: 32,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    KicksterButton(
-                      label: 'Editar dados',
-                      icon: Icons.edit_outlined,
-                      onPressed: () => context.go(
-                        '/venues/${venue.id}/edit',
-                        extra: venue,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              venue.name,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            if (orgName.isNotEmpty)
+                              Text(
+                                orgName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  KicksterButton(
+                    label: 'Editar dados',
+                    icon: Icons.edit_outlined,
+                    onPressed: () =>
+                        context.go('/venues/${venue.id}/edit', extra: venue),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            AppInfoCard(children: [
+          ),
+          const SizedBox(height: 16),
+          AppInfoCard(
+            children: [
               if (orgName.isNotEmpty)
                 AppInfoRow(label: 'Organização', value: orgName),
               AppInfoRow(
@@ -160,25 +169,28 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
               ),
               if (venue.mapsUrl != null && venue.mapsUrl!.isNotEmpty)
                 AppInfoRow(label: 'URL do mapa', value: venue.mapsUrl!),
-            ]),
-            if (venue.mapsUrl != null && venue.mapsUrl!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              KicksterButton(
-                label: 'Abrir no mapa',
-                icon: Icons.map_outlined,
-                variant: KicksterButtonVariant.outline,
-                onPressed: () => _openMap(context, venue.mapsUrl!),
-              ),
             ],
-            const SizedBox(height: 16),
-            Text(
-              'Criado em ${formatBrDate(venue.createdAt)}'
-              '${venue.updatedAt != null ? ' • Atualizado em ${formatBrDate(venue.updatedAt)}' : ''}',
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.textSecondary),
+          ),
+          if (venue.mapsUrl != null && venue.mapsUrl!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            KicksterButton(
+              label: 'Abrir no mapa',
+              icon: Icons.map_outlined,
+              variant: KicksterButtonVariant.outline,
+              onPressed: () => _openMap(context, venue.mapsUrl!),
             ),
           ],
-        ),
+          const SizedBox(height: 16),
+          Text(
+            'Criado em ${formatBrDate(venue.createdAt)}'
+            '${venue.updatedAt != null ? ' • Atualizado em ${formatBrDate(venue.updatedAt)}' : ''}',
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -3,7 +3,7 @@ import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 
 /// Modal de associação de clubes a uma divisão (issue #258).
 ///
@@ -18,10 +18,8 @@ Future<void> showClubAssignmentModal(
 }) {
   return showDialog<void>(
     context: context,
-    builder: (_) => ClubAssignmentModal(
-      competitionId: competitionId,
-      division: division,
-    ),
+    builder: (_) =>
+        ClubAssignmentModal(competitionId: competitionId, division: division),
   );
 }
 
@@ -59,9 +57,7 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
     final organizationId = team.organizationId;
     if (organizationId == null || organizationId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${team.name} está sem organização vinculada.'),
-        ),
+        SnackBar(content: Text('${team.name} está sem organização vinculada.')),
       );
       return;
     }
@@ -70,7 +66,9 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
       context,
       ref: ref,
       scope: _scope,
-      action: () => ref.read(teamApiProvider).update(
+      action: () => ref
+          .read(teamApiProvider)
+          .update(
             team.id,
             organizationId: organizationId,
             competitionId: widget.competitionId,
@@ -111,9 +109,9 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
               Text(
                 'Toque em um clube para associá-lo a esta divisão ou removê-la '
                 '(clube pode ficar sem divisão).',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 12),
               KicksterSearchField(
@@ -141,9 +139,12 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
                     final filtered = normalizedQuery.isEmpty
                         ? teams
                         : teams
-                            .where((t) =>
-                                t.name.toLowerCase().contains(normalizedQuery))
-                            .toList();
+                              .where(
+                                (t) => t.name.toLowerCase().contains(
+                                  normalizedQuery,
+                                ),
+                              )
+                              .toList();
 
                     if (teams.isEmpty) {
                       return const AppEmptyState(
@@ -159,10 +160,8 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
                     }
                     return ListView.builder(
                       itemCount: filtered.length,
-                      itemBuilder: (context, index) => _teamTile(
-                        filtered[index],
-                        divisionsByName,
-                      ),
+                      itemBuilder: (context, index) =>
+                          _teamTile(filtered[index], divisionsByName),
                     );
                   },
                 ),
@@ -184,10 +183,12 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
   /// Linha de um clube: nome + divisão atual; tocar alterna a associação.
   Widget _teamTile(Team team, Map<String, String> divisionsById) {
     final inTargetDivision = team.divisionId == widget.division.id;
-    final saving =
-        ref.watch(mutationProgressProvider(_scope)).contains(team.id);
-    final currentDivision =
-        team.divisionId == null ? null : divisionsById[team.divisionId];
+    final saving = ref
+        .watch(mutationProgressProvider(_scope))
+        .contains(team.id);
+    final currentDivision = team.divisionId == null
+        ? null
+        : divisionsById[team.divisionId];
 
     return ListTile(
       leading: const Icon(Icons.groups_outlined),
@@ -196,11 +197,12 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
         inTargetDivision
             ? 'Nesta divisão'
             : currentDivision != null && currentDivision.isNotEmpty
-                ? 'Divisão atual: $currentDivision'
-                : 'Sem divisão',
+            ? 'Divisão atual: $currentDivision'
+            : 'Sem divisão',
       ),
-      tileColor:
-          inTargetDivision ? AppColors.primary.withValues(alpha: 0.08) : null,
+      tileColor: inTargetDivision
+          ? AppColors.primary.withValues(alpha: 0.08)
+          : null,
       trailing: saving
           ? const SizedBox(
               width: 18,
@@ -208,8 +210,8 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : inTargetDivision
-              ? const Icon(Icons.check_circle, color: AppColors.success)
-              : const Icon(Icons.add_circle_outline),
+          ? const Icon(Icons.check_circle, color: AppColors.success)
+          : const Icon(Icons.add_circle_outline),
       onTap: saving ? null : () => _toggleDivision(team),
     );
   }

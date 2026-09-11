@@ -8,7 +8,7 @@ export '../../config/app_config.dart';
 export '../../config/app_firebase_options.dart';
 
 // Layout
-export 'layout/app_layout.dart';
+export 'theme/app_layout.dart';
 
 // Theme
 export 'theme/app_colors.dart';
@@ -21,8 +21,8 @@ export '../../config/app_l10n.dart';
 // Utils
 export 'utils/document_utils.dart';
 export 'utils/geo_constants.dart';
-export '../utils/date_formats.dart';
-export '../utils/mutation.dart';
+export '../../utils/date_formats.dart';
+export '../../utils/mutation.dart';
 
 // Session
 export 'session/session_manager.dart';

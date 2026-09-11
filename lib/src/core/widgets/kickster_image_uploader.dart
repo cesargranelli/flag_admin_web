@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/services/storage_service.dart';
-import '../../providers/providers.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import 'kickster_button.dart';
@@ -24,7 +24,8 @@ class KicksterImageUploader extends ConsumerStatefulWidget {
     required Uint8List bytes,
     required String filename,
     void Function(double progress)? onProgress,
-  })? uploadFunction;
+  })?
+  uploadFunction;
 
   const KicksterImageUploader({
     super.key,
@@ -114,7 +115,8 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
       if (bytes.lengthInBytes > widget.maxSizeBytes) {
         final maxMb = (widget.maxSizeBytes / (1024 * 1024)).round();
         setState(() {
-          _errorMessage = 'O arquivo selecionado excede o limite máximo de ${maxMb}MB.';
+          _errorMessage =
+              'O arquivo selecionado excede o limite máximo de ${maxMb}MB.';
         });
         return;
       }
@@ -222,9 +224,7 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _errorMessage != null
-                  ? AppColors.danger
-                  : AppColors.line,
+              color: _errorMessage != null ? AppColors.danger : AppColors.line,
               width: _errorMessage != null ? 1.5 : 1,
             ),
             boxShadow: [
@@ -238,8 +238,8 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
           child: _isUploading
               ? _buildUploadingState()
               : hasImage
-                  ? _buildPreviewState(currentUrl)
-                  : _buildEmptyState(),
+              ? _buildPreviewState(currentUrl)
+              : _buildEmptyState(),
         ),
 
         // Mensagem de Erro Inline
@@ -247,7 +247,11 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.error_outline, size: 14, color: AppColors.danger),
+              const Icon(
+                Icons.error_outline,
+                size: 14,
+                color: AppColors.danger,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -309,10 +313,7 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
             const Text(
               'O arquivo será salvo com segurança no Firebase Storage',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -367,7 +368,9 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
               value: _progress,
               minHeight: 6,
               backgroundColor: AppColors.surfaceMuted,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
           ),
         ],
@@ -401,7 +404,10 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
             imageUrl,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => const Center(
-              child: Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
+              child: Icon(
+                Icons.broken_image_outlined,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
         );
@@ -438,7 +444,11 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                            Icon(
+                              Icons.check_circle,
+                              size: 16,
+                              color: AppColors.success,
+                            ),
                             SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -474,7 +484,11 @@ class _KicksterImageUploaderState extends ConsumerState<KicksterImageUploader> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                      Icon(
+                        Icons.check_circle,
+                        size: 16,
+                        color: AppColors.success,
+                      ),
                       SizedBox(width: 6),
                       Expanded(
                         child: Text(

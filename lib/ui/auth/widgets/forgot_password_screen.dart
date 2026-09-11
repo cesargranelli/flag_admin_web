@@ -1,5 +1,5 @@
-import 'package:flag_admin_web/src/core/core.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+﻿import 'package:flag_admin_web/src/core/core.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +49,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               padding: const EdgeInsets.all(32),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: vm.isSent ? _buildSent(context, vm) : _buildForm(context, vm),
+                child: vm.isSent
+                    ? _buildSent(context, vm)
+                    : _buildForm(context, vm),
               ),
             ),
           ),
@@ -104,10 +106,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             autofocus: true,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.mail_outline,
-            autofillHints: const [
-              AutofillHints.username,
-              AutofillHints.email,
-            ],
+            autofillHints: const [AutofillHints.username, AutofillHints.email],
             textInputAction: TextInputAction.done,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {

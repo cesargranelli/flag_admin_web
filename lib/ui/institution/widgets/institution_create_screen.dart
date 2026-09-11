@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
-import 'package:flag_admin_web/src/providers/providers.dart';
+import 'package:flag_admin_web/config/providers/providers.dart';
 import 'components/institution_identity_section.dart';
 
 /// Tela dedicada EXCLUSIVAMENTE ao CADASTRO de nova agremiação (ADR-001 / MVVM 1:1).
@@ -129,33 +129,53 @@ class _InstitutionCreateScreenState
     final createVm = ref.read(institutionCreateViewModelProvider);
 
     final colors = <String>[];
-    if (_primaryColor.text.trim().isNotEmpty) colors.add(_primaryColor.text.trim());
-    if (_secondaryColor.text.trim().isNotEmpty) colors.add(_secondaryColor.text.trim());
-    if (_tertiaryColor.text.trim().isNotEmpty) colors.add(_tertiaryColor.text.trim());
-    if (_quaternaryColor.text.trim().isNotEmpty) colors.add(_quaternaryColor.text.trim());
+    if (_primaryColor.text.trim().isNotEmpty)
+      colors.add(_primaryColor.text.trim());
+    if (_secondaryColor.text.trim().isNotEmpty)
+      colors.add(_secondaryColor.text.trim());
+    if (_tertiaryColor.text.trim().isNotEmpty)
+      colors.add(_tertiaryColor.text.trim());
+    if (_quaternaryColor.text.trim().isNotEmpty)
+      colors.add(_quaternaryColor.text.trim());
 
     final success = await createVm.create(
       name: _tradeName.text.trim(),
       tradeName: _tradeName.text.trim(),
       legalName: _legalName.text.trim(),
       type: _type,
-      abbreviation: _abbreviation.text.trim().isNotEmpty ? _abbreviation.text.trim() : null,
+      abbreviation: _abbreviation.text.trim().isNotEmpty
+          ? _abbreviation.text.trim()
+          : null,
       document: _document.text.trim().isNotEmpty ? _document.text.trim() : null,
       documentType: _documentType,
-      presidentName: _presidentName.text.trim().isNotEmpty ? _presidentName.text.trim() : null,
-      presidentCpf: _presidentCpf.text.trim().isNotEmpty ? _presidentCpf.text.trim() : null,
+      presidentName: _presidentName.text.trim().isNotEmpty
+          ? _presidentName.text.trim()
+          : null,
+      presidentCpf: _presidentCpf.text.trim().isNotEmpty
+          ? _presidentCpf.text.trim()
+          : null,
       email: _email.text.trim().isNotEmpty ? _email.text.trim() : null,
       phone: _phone.text.trim().isNotEmpty ? _phone.text.trim() : null,
       website: _website.text.trim().isNotEmpty ? _website.text.trim() : null,
-      instagram: _instagram.text.trim().isNotEmpty ? _instagram.text.trim() : null,
+      instagram: _instagram.text.trim().isNotEmpty
+          ? _instagram.text.trim()
+          : null,
       country: _country,
       state: _state.text.trim().isNotEmpty ? _state.text.trim() : null,
       city: _city.text.trim().isNotEmpty ? _city.text.trim() : null,
       logoUrl: _logoUrl.text.trim().isNotEmpty ? _logoUrl.text.trim() : null,
-      primaryColor: _primaryColor.text.trim().isNotEmpty ? _primaryColor.text.trim() : null,
-      secondaryColor: _secondaryColor.text.trim().isNotEmpty ? _secondaryColor.text.trim() : null,
-      tertiaryColor: _tertiaryColor.text.trim().isNotEmpty ? _tertiaryColor.text.trim() : null,
-      quaternaryColor: _quaternaryColor.text.trim().isNotEmpty ? _quaternaryColor.text.trim() : null,
+      primaryColor: _primaryColor.text.trim().isNotEmpty
+          ? _primaryColor.text.trim()
+          : null,
+      secondaryColor: _secondaryColor.text.trim().isNotEmpty
+          ? _secondaryColor.text.trim()
+          : null,
+      tertiaryColor: _tertiaryColor.text.trim().isNotEmpty
+          ? _tertiaryColor.text.trim()
+          : null,
+      quaternaryColor: _quaternaryColor.text.trim().isNotEmpty
+          ? _quaternaryColor.text.trim()
+          : null,
       colors: colors,
       organizationIds: _selectedOrgs,
     );
@@ -180,8 +200,9 @@ class _InstitutionCreateScreenState
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting =
-        ref.watch(institutionCreateViewModelProvider).isSubmitting;
+    final isSubmitting = ref
+        .watch(institutionCreateViewModelProvider)
+        .isSubmitting;
 
     return PopScope(
       canPop: !_hasChanges || isSubmitting || _saved,
@@ -217,7 +238,8 @@ class _InstitutionCreateScreenState
                   KicksterInput(
                     label: 'Razão Social',
                     controller: _legalName,
-                    hintText: 'Ex: Associação Esportiva Spartans de Flag Football',
+                    hintText:
+                        'Ex: Associação Esportiva Spartans de Flag Football',
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -404,7 +426,9 @@ class _InstitutionCreateScreenState
                     ),
                     const SizedBox(width: 16),
                     KicksterButton(
-                      label: isSubmitting ? 'Cadastrando...' : 'Criar agremiação',
+                      label: isSubmitting
+                          ? 'Cadastrando...'
+                          : 'Criar agremiação',
                       icon: Icons.check,
                       loading: isSubmitting,
                       onPressed: isSubmitting ? null : _save,
