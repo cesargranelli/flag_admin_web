@@ -1,6 +1,6 @@
 import 'package:flag_admin_web/data/services/auth_service.dart';
+import 'package:flag_admin_web/data/session/session_manager.dart';
 import 'package:flag_admin_web/domain/models/auth_user.dart';
-import 'package:flag_admin_web/src/core/session/session_manager.dart';
 import 'package:flag_admin_web/domain/models/user.dart';
 
 /// Repositório de Autenticação (ADR-001 / Single Source of Truth).
@@ -9,7 +9,9 @@ class AuthRepository {
   final SessionManager _session;
 
   AuthUser? _currentUser;
+
   AuthUser? get currentUser => _currentUser;
+
   bool get isAuthenticated => _currentUser != null;
 
   AuthRepository({
@@ -116,7 +118,10 @@ class AuthRepository {
 
   // Métodos de gestão de usuários (administração)
   Future<List<User>> listUsers() => _service.listUsers();
+
   Future<List<User>> listPendingUsers() => _service.listPendingUsers();
+
   Future<User> approveUser(String id) => _service.approveUser(id);
+
   Future<User> rejectUser(String id) => _service.rejectUser(id);
 }

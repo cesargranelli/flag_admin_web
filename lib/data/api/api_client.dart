@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:flag_admin_web/data/session/session_manager.dart';
 import 'package:flag_admin_web/src/core/core.dart';
 
 import 'repository_exception.dart';
@@ -14,19 +14,18 @@ class ApiClient {
 
   final SessionManager? _sessionManager;
 
-  ApiClient({
-    Dio? dio,
-    SessionManager? sessionManager,
-  })  : dio = dio ??
-            Dio(
-              BaseOptions(
-                baseUrl: AppConfig.apiBaseUrl,
-                connectTimeout: const Duration(seconds: 10),
-                receiveTimeout: const Duration(seconds: 15),
-                headers: {'Accept': 'application/json'},
-              ),
+  ApiClient({Dio? dio, SessionManager? sessionManager})
+    : dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              baseUrl: AppConfig.apiBaseUrl,
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
+              headers: {'Accept': 'application/json'},
             ),
-        _sessionManager = sessionManager;
+          ),
+      _sessionManager = sessionManager;
 
   ApiClient get public => this;
 
@@ -57,7 +56,10 @@ class ApiClient {
     };
   }
 
-  Future<List<T>> getList<T>(String path, T Function(Map<String, dynamic>) fromJson) async {
+  Future<List<T>> getList<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
     try {
       final response = await dio.get<List<dynamic>>(
         path,
@@ -71,7 +73,10 @@ class ApiClient {
     }
   }
 
-  Future<T> getOne<T>(String path, T Function(Map<String, dynamic>) fromJson) async {
+  Future<T> getOne<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
         path,

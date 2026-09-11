@@ -1,4 +1,5 @@
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flag_admin_web/data/api/api.dart';
 import 'package:flag_admin_web/data/repositories/auth_controller.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
 import 'package:flag_admin_web/data/repositories/competition_repository.dart';
@@ -26,10 +27,9 @@ import 'package:flag_admin_web/data/services/roster_service.dart';
 import 'package:flag_admin_web/data/services/round_service.dart';
 import 'package:flag_admin_web/data/services/storage_service.dart';
 import 'package:flag_admin_web/data/services/venue_service.dart';
+import 'package:flag_admin_web/data/session/session_manager.dart';
 import 'package:flag_admin_web/domain/models/enrollment_window.dart';
 import 'package:flag_admin_web/routing/app_router.dart';
-import 'package:flag_admin_web/data/api/api.dart';
-import 'package:flag_admin_web/src/core/core.dart';
 import 'package:flag_admin_web/src/domain/domain.dart';
 import 'package:flag_admin_web/ui/approval/view_models/approval_list_view_model.dart';
 import 'package:flag_admin_web/ui/auth/view_models/forgot_password_view_model.dart';
@@ -455,15 +455,13 @@ final venueRepositoryProvider = Provider<VenueRepository>(
 );
 
 /// ViewModel para a listagem de Venues (ADR-011 / MVVM).
-final venueListViewModelProvider =
-    ChangeNotifierProvider<VenueListViewModel>(
-      (ref) =>
-          VenueListViewModel(repository: ref.watch(venueRepositoryProvider)),
-    );
+final venueListViewModelProvider = ChangeNotifierProvider<VenueListViewModel>(
+  (ref) => VenueListViewModel(repository: ref.watch(venueRepositoryProvider)),
+);
 
 /// ViewModel para o detalhe de um Venue (ADR-011 / MVVM).
-final venueDetailViewModelProvider = ChangeNotifierProvider
-    .family<VenueDetailViewModel, String>(
+final venueDetailViewModelProvider =
+    ChangeNotifierProvider.family<VenueDetailViewModel, String>(
       (ref, venueId) =>
           VenueDetailViewModel(repository: ref.watch(venueRepositoryProvider)),
     );
@@ -476,8 +474,8 @@ final venueCreateViewModelProvider =
     );
 
 /// ViewModel para a edição de um Venue existente (ADR-011 / MVVM).
-final venueEditViewModelProvider = ChangeNotifierProvider
-    .family<VenueEditViewModel, String>(
+final venueEditViewModelProvider =
+    ChangeNotifierProvider.family<VenueEditViewModel, String>(
       (ref, venueId) =>
           VenueEditViewModel(repository: ref.watch(venueRepositoryProvider)),
     );
