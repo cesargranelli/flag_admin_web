@@ -73,60 +73,74 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
               child: ListenableBuilder(
                 listenable: _viewModel,
                 builder: (context, _) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      KicksterInput(
-                        label: 'Nome',
-                        controller: _name,
-                        maxLength: 100,
-                        onChanged: (value) => _viewModel.setName(value),
-                        validator: (value) =>
-                            (value == null || value.trim().isEmpty)
-                            ? 'Informe o nome'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
-                      KicksterInput(
-                        label: 'E-mail',
-                        controller: _email,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) => _viewModel.setEmail(value),
-                        validator: _validateEmail,
-                      ),
-                      const SizedBox(height: 12),
-                      KicksterDropdown<String>(
-                        label: 'Papel',
-                        helperText: 'Mesa: opera partidas ao vivo',
-                        value: _viewModel.role,
-                        items: UserRole.values
-                            .map(
-                              (r) => DropdownMenuItem(
-                                value: r.label,
-                                child: Text(r.label),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) => _viewModel.setRole(value),
-                      ),
-                      if (_viewModel.errorMessage != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          _viewModel.errorMessage!,
-                          style: TextStyle(
-                            color: AppColors.danger,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        KicksterInput(
+                          label: 'Nome',
+                          controller: _name,
+                          maxLength: 100,
+                          onChanged: (value) => _viewModel.setName(value),
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                              ? 'Informe o nome'
+                              : null,
                         ),
+                        const SizedBox(height: 12),
+                        KicksterInput(
+                          label: 'E-mail',
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          onChanged: (value) => _viewModel.setEmail(value),
+                          validator: _validateEmail,
+                        ),
+                        const SizedBox(height: 12),
+                        KicksterDropdown<String>(
+                          label: 'Papel',
+                          helperText: 'Mesa: opera partidas ao vivo',
+                          value: _viewModel.role,
+                          items: UserRole.values
+                              .map(
+                                (r) => DropdownMenuItem(
+                                  value: r.label,
+                                  child: Text(r.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) => _viewModel.setRole(value),
+                        ),
+                        if (_viewModel.errorMessage != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            _viewModel.errorMessage!,
+                            style: TextStyle(
+                              color: AppColors.danger,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            KicksterButton(
+                              label: 'Cancelar',
+                              variant: KicksterButtonVariant.outline,
+                              onPressed: () => context.pop(),
+                            ),
+                            const SizedBox(width: 12),
+                            KicksterButton(
+                              label: 'Salvar',
+                              icon: Icons.check,
+                              loading: _viewModel.isSubmitting,
+                              onPressed: _viewModel.isSubmitting ? null : _save,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
                       ],
-                      const SizedBox(height: 24),
-                      KicksterButton(
-                        label: 'Salvar',
-                        icon: Icons.check,
-                        loading: _viewModel.isSubmitting,
-                        onPressed: _viewModel.isSubmitting ? null : _save,
-                      ),
-                    ],
+                    ),
                   );
                 },
               ),

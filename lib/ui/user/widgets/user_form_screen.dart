@@ -93,52 +93,71 @@ class _UserFormScreenState extends ConsumerState<UserFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  KicksterInput(
-                    label: 'Nome',
-                    controller: _name,
-                    maxLength: 100,
-                    validator: (value) =>
-                        (value == null || value.trim().isEmpty)
-                        ? 'Informe o nome'
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  KicksterInput(
-                    label: 'E-mail',
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: _validateEmail,
-                  ),
-                  const SizedBox(height: 12),
-                  KicksterDropdown<UserRole>(
-                    label: 'Papel',
-                    helperText: 'Mesa: opera partidas ao vivo',
-                    value: _role,
-                    items: UserRole.values
-                        .map(
-                          (r) =>
-                              DropdownMenuItem(value: r, child: Text(r.label)),
-                        )
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() => _role = value ?? UserRole.organizer),
-                  ),
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                        color: AppColors.danger,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        KicksterInput(
+                          label: 'Nome',
+                          controller: _name,
+                          maxLength: 100,
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                              ? 'Informe o nome'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        KicksterInput(
+                          label: 'E-mail',
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: _validateEmail,
+                        ),
+                        const SizedBox(height: 12),
+                        KicksterDropdown<UserRole>(
+                          label: 'Papel',
+                          helperText: 'Mesa: opera partidas ao vivo',
+                          value: _role,
+                          items: UserRole.values
+                              .map(
+                                (r) =>
+                                    DropdownMenuItem(value: r, child: Text(r.label)),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _role = value ?? UserRole.organizer),
+                        ),
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            _errorMessage!,
+                            style: TextStyle(
+                              color: AppColors.danger,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            KicksterButton(
+                              label: 'Cancelar',
+                              variant: KicksterButtonVariant.outline,
+                              onPressed: () => context.pop(),
+                            ),
+                            const SizedBox(width: 12),
+                            KicksterButton(
+                              label: 'Salvar',
+                              icon: Icons.check,
+                              loading: _submitting,
+                              onPressed: _submitting ? null : _save,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                      ],
                     ),
-                  ],
-                  const SizedBox(height: 24),
-                  KicksterButton(
-                    label: 'Salvar',
-                    icon: Icons.check,
-                    loading: _submitting,
-                    onPressed: _submitting ? null : _save,
                   ),
                 ],
               ),

@@ -101,10 +101,8 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
     final dateText = formatBrShortDateTime(user.createdAt);
 
     return Card(
-      elevation: 1,
-      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      elevation: 0,
       color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: AppColors.line, width: 1),

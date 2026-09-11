@@ -207,7 +207,7 @@ child,
       elevation: 0,
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: AppColors.line, width: 1),
       ),
       margin: EdgeInsets.zero,
