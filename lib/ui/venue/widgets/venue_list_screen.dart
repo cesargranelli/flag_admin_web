@@ -115,11 +115,11 @@ class _VenueListScreenState extends ConsumerState<VenueListScreen>
     AsyncValue<List<Organization>> organizations,
   ) {
     if (vm.isLoading && vm.venues.isEmpty) {
-      return const AppLoading(message: 'Carregando campos...');
+      return const AppLoading(message: 'Carregando locais...');
     }
     if (vm.errorMessage != null && vm.venues.isEmpty) {
       return AppErrorState(
-        message: 'Não foi possível carregar os campos',
+        message: 'Não foi possível carregar os locais',
         onRetry: () => vm.load(forceRefresh: true),
       );
     }
@@ -181,8 +181,8 @@ class _VenueListScreenState extends ConsumerState<VenueListScreen>
           const SizedBox(height: 12),
           Text(
             hasFilters
-                ? 'Nenhum campo encontrado para os filtros aplicados.'
-                : 'Nenhum campo cadastrado.',
+                ? 'Nenhum local encontrado para os filtros aplicados.'
+                : 'Nenhum local cadastrado.',
             style: const TextStyle(color: AppColors.textSecondary),
           ),
         ],

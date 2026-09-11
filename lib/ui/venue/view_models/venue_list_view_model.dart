@@ -61,7 +61,7 @@ class VenueListViewModel extends ChangeNotifier {
       _errorMessage = null;
     } catch (e) {
       if (_venues.isEmpty) {
-        _errorMessage = 'Não foi possível carregar os campos.';
+        _errorMessage = 'Não foi possível carregar os locais.';
       }
     } finally {
       _isLoading = false;

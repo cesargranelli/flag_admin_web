@@ -5,7 +5,7 @@ import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 import 'package:flag_admin_web/domain/models/venue.dart';
 
-/// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de campo existente (ADR-011 / Kickster Design System).
+/// Tela dedicada EXCLUSIVAMENTE à EDIÇÃO de local existente (ADR-011 / Kickster Design System).
 class VenueEditScreen extends ConsumerStatefulWidget {
   const VenueEditScreen({super.key, required this.venueId, this.venue});
 
@@ -35,7 +35,7 @@ class _VenueEditScreenState extends ConsumerState<VenueEditScreen> {
     final vm = ref.watch(venueEditViewModelProvider(widget.venueId));
 
     return AppScreen(
-      title: 'Editar campo',
+      title: 'Editar local',
       breadcrumb: const [
         BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.venues, route: '/venues'),
@@ -98,9 +98,9 @@ class _VenueEditScreenState extends ConsumerState<VenueEditScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Seção: Dados do Campo
+                // Seção: Dados do Local
                 _buildSectionCard(
-                  title: 'Dados do Campo',
+                  title: 'Dados do Local',
                   icon: Icons.sports_soccer_outlined,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -152,7 +152,7 @@ class _VenueEditScreenState extends ConsumerState<VenueEditScreen> {
                               if (result && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Campo atualizado com sucesso'),
+                                    content: Text('Local atualizado com sucesso'),
                                   ),
                                 );
                                 ref.read(venueListViewModelProvider).load(forceRefresh: true);

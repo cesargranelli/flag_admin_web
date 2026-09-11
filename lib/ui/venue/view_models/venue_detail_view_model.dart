@@ -39,11 +39,11 @@ class VenueDetailViewModel extends ChangeNotifier {
       final venues = await _repository.getVenues(forceRefresh: true);
       _venue = venues.firstWhere(
         (v) => v.id == venueId,
-        orElse: () => throw Exception('Campo não encontrado'),
+        orElse: () => throw Exception('Local não encontrado'),
       );
       _errorMessage = null;
     } catch (e) {
-      _errorMessage = 'Não foi possível carregar o campo.';
+      _errorMessage = 'Não foi possível carregar o local.';
     } finally {
       _isLoading = false;
       _safeNotify();

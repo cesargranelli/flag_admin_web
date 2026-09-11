@@ -41,7 +41,7 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
     final id = widget.venueId ?? widget.venue?.id ?? '';
     final vm = ref.watch(venueDetailViewModelProvider(id));
     return AppScreen(
-      title: vm.venue?.name ?? widget.venue?.name ?? 'Campo',
+      title: vm.venue?.name ?? widget.venue?.name ?? 'Local',
       breadcrumb: [
         const BreadcrumbItem(AppStrings.home, route: '/'),
         const BreadcrumbItem(AppStrings.venues, route: '/venues'),
@@ -55,7 +55,7 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
             listenable: vm,
             builder: (context, _) {
               if (vm.isLoading) {
-                return const AppLoading(message: 'Carregando campo...');
+                return const AppLoading(message: 'Carregando local...');
               }
               if (vm.errorMessage != null) {
                 return AppErrorState(
@@ -65,7 +65,7 @@ class _VenueDetailScreenState extends ConsumerState<VenueDetailScreen> {
               }
               final venue = vm.venue ?? widget.venue;
               if (venue == null) {
-                return const AppErrorState(message: 'Campo não encontrado');
+                return const AppErrorState(message: 'Local não encontrado');
               }
               return _buildDetail(context, venue);
             },

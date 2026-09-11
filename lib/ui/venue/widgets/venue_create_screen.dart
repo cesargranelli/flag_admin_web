@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
 
-/// Tela dedicada EXCLUSIVAMENTE ao CADASTRO de novo campo (ADR-011 / Kickster Design System).
+/// Tela dedicada EXCLUSIVAMENTE ao CADASTRO de novo local (ADR-011 / Kickster Design System).
 class VenueCreateScreen extends ConsumerStatefulWidget {
   const VenueCreateScreen({super.key});
 
@@ -21,7 +21,7 @@ class _VenueCreateScreenState extends ConsumerState<VenueCreateScreen> {
     final organizationsAsync = ref.watch(organizationsProvider);
 
     return AppScreen(
-      title: 'Novo campo',
+      title: 'Novo local',
       breadcrumb: const [
         BreadcrumbItem(AppStrings.home, route: '/'),
         BreadcrumbItem(AppStrings.venues, route: '/venues'),
@@ -63,7 +63,7 @@ class _VenueCreateScreenState extends ConsumerState<VenueCreateScreen> {
                     data: (orgs) {
                       if (orgs.isEmpty) {
                         return const AppEmptyState(
-                          message: 'Cadastre uma organização antes de criar campos',
+                          message: 'Cadastre uma organização antes de criar locais',
                           icon: Icons.business,
                         );
                       }
@@ -90,9 +90,9 @@ class _VenueCreateScreenState extends ConsumerState<VenueCreateScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Seção: Dados do Campo
+                // Seção: Dados do Local
                 _buildSectionCard(
-                  title: 'Dados do Campo',
+                  title: 'Dados do Local',
                   icon: Icons.sports_soccer_outlined,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -144,7 +144,7 @@ class _VenueCreateScreenState extends ConsumerState<VenueCreateScreen> {
                               if (result && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Campo criado com sucesso'),
+                                    content: Text('Local criado com sucesso'),
                                   ),
                                 );
                                 ref.read(venueListViewModelProvider).load(forceRefresh: true);

@@ -39,7 +39,7 @@ abstract final class AppStrings {
   static const competitions = 'Competicoes';
   static const approvals = 'Aprovacoes';
   static const categories = 'Categorias';
-  static const venues = 'Campos';
+  static const venues = 'Locais';
   static const teams = 'Times';
   static const rounds = 'Rodadas';
   static const games = 'Jogos';

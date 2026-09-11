@@ -64,7 +64,7 @@ class VenueCreateViewModel extends ChangeNotifier {
     final mapsUrl = mapsUrlController.text;
 
     if (organizationId == null || name.isEmpty) {
-      _errorMessage = 'Preencha todos os campos obrigatórios.';
+      _errorMessage = 'Preencha todos os locais obrigatórios.';
       _safeNotify();
       return false;
     }
@@ -82,7 +82,7 @@ class VenueCreateViewModel extends ChangeNotifier {
       );
       return true;
     } catch (e) {
-      _errorMessage = 'Não foi possível salvar o campo.';
+      _errorMessage = 'Não foi possível salvar o local.';
       return false;
     } finally {
       _isSubmitting = false;
