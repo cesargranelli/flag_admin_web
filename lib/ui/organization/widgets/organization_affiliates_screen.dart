@@ -330,11 +330,11 @@ class _OrganizationAffiliatesScreenState
                 ),
                 child: Row(
                   children: [
-                    KicksterAvatar(
-                      name: affil.institutionName,
-                      imageUrl: affil.institutionLogoUrl,
-                      size: 44,
-                    ),
+KicksterAvatar(
+                       name: affil.institutionName,
+                       imageUrl: affil.institutionLogoUrl,
+                       size: 56,
+                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
