@@ -419,6 +419,12 @@ class _CompetitionCreateScreenState
                                     ),
                                   ),
                                 );
+                                ref.invalidate(competitionListViewModelProvider);
+                                ref
+                                    .read(
+                                      competitionListViewModelProvider,
+                                    )
+                                    .load(forceRefresh: true);
                                 context.pop();
                               }
                             },

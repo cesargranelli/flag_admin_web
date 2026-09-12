@@ -459,8 +459,9 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                             onPressed: vm.isSaving
                                 ? null
                                 : () async {
-                                    if (!_formKey.currentState!.validate())
+                                    if (!_formKey.currentState!.validate()) {
                                       return;
+                                    }
                                     final result = await vm.update();
                                     if (result != null && context.mounted) {
                                       ScaffoldMessenger.of(
@@ -472,6 +473,12 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
                                           ),
                                         ),
                                       );
+                                      ref.invalidate(competitionListViewModelProvider);
+                                      ref
+                                          .read(
+                                            competitionListViewModelProvider,
+                                          )
+                                          .load(forceRefresh: true);
                                       context.pop();
                                     }
                                   },
