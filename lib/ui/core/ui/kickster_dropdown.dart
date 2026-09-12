@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'app_colors.dart';
 import 'app_text_styles.dart';
@@ -104,10 +105,15 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
     // Synchronize FormField value when the parent updates the value prop.
     // This fixes the case where the ViewModel updates the value after
     // initialization (e.g., after _populate() sets status = comp.status).
+    // Use addPostFrameCallback to avoid calling setState() during build.
     final newValue = (widget as KicksterDropdown<T>).value;
     final oldValue = oldWidget.value;
     if (newValue != oldValue) {
-      didChange(newValue);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          didChange(newValue);
+        }
+      });
     }
   }
 
