@@ -53,24 +53,24 @@ class _ClubAssignmentModalState extends ConsumerState<ClubAssignmentModal> {
   /// Associa ou remove o clube da divisão-alvo, enviando o corpo completo
   /// exigido pelo backend (inclui `organizationId`).
   Future<void> _toggleDivision(Team team) async {
-    final removing = team.divisionId == widget.division.id;
-    final organizationId = team.organizationId;
-    if (organizationId == null || organizationId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${team.name} está sem organização vinculada.')),
-      );
-      return;
-    }
+final removing = team.divisionId == widget.division.id;
+     final clubId = team.clubId;
+     if (clubId == null || clubId.isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text('${team.name} está sem clube vinculado.')),
+       );
+       return;
+     }
 
-    await runMutation(
-      context,
-      ref: ref,
-      scope: _scope,
-      action: () => ref
-          .read(teamApiProvider)
-          .update(
-            team.id,
-            organizationId: organizationId,
+     await runMutation(
+       context,
+       ref: ref,
+       scope: _scope,
+       action: () => ref
+           .read(teamApiProvider)
+           .update(
+             team.id,
+             clubId: clubId,
             competitionId: widget.competitionId,
             divisionId: removing ? null : widget.division.id,
             name: team.name,

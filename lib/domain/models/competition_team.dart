@@ -1,6 +1,10 @@
 ﻿import 'package:flag_admin_web/domain/enums/competition_team_status.dart';
 
 /// Modelo de Inscrição / Alocação de Time em Competição (ADR-001).
+///
+/// Uma equipe pertence a um clube/agremiação e pode ser inscrita
+/// em competições. O backend retorna apenas o nome do clube (clubName),
+/// sem o campo organizationId que causava confusão com o nome da organização.
 class CompetitionTeam {
   final String id;
   final String competitionId;
@@ -8,8 +12,6 @@ class CompetitionTeam {
   final String teamName;
   final String? teamShortName;
   final String? teamLogoUrl;
-  final String? organizationId;
-  final String? organizationName;
   final String? clubId;
   final String? clubName;
   final CompetitionTeamStatus status;
@@ -27,8 +29,6 @@ class CompetitionTeam {
     required this.teamName,
     this.teamShortName,
     this.teamLogoUrl,
-    this.organizationId,
-    this.organizationName,
     this.clubId,
     this.clubName,
     this.status = CompetitionTeamStatus.pending,
@@ -48,8 +48,6 @@ class CompetitionTeam {
         teamName: (json['teamName'] as String?) ?? 'Sem nome',
         teamShortName: json['teamShortName'] as String?,
         teamLogoUrl: json['teamLogoUrl'] as String?,
-        organizationId: json['organizationId'] as String?,
-        organizationName: json['organizationName'] as String?,
         clubId: json['clubId'] as String?,
         clubName: json['clubName'] as String?,
         status: json['status'] != null
@@ -82,8 +80,6 @@ class CompetitionTeam {
     String? teamName,
     String? teamShortName,
     String? teamLogoUrl,
-    String? organizationId,
-    String? organizationName,
     String? clubId,
     String? clubName,
     CompetitionTeamStatus? status,
@@ -100,8 +96,6 @@ class CompetitionTeam {
     teamName: teamName ?? this.teamName,
     teamShortName: teamShortName ?? this.teamShortName,
     teamLogoUrl: teamLogoUrl ?? this.teamLogoUrl,
-    organizationId: organizationId ?? this.organizationId,
-    organizationName: organizationName ?? this.organizationName,
     clubId: clubId ?? this.clubId,
     clubName: clubName ?? this.clubName,
     status: status ?? this.status,
@@ -120,8 +114,6 @@ class CompetitionTeam {
     'teamName': teamName,
     'teamShortName': teamShortName,
     'teamLogoUrl': teamLogoUrl,
-    'organizationId': organizationId,
-    'organizationName': organizationName,
     if (clubId != null) 'clubId': clubId,
     if (clubName != null) 'clubName': clubName,
     'status': status.toJson(),

@@ -98,7 +98,7 @@ class CompetitionTeamsViewModel extends ChangeNotifier {
       }
       if (_searchQuery.isNotEmpty) {
         final name = team.teamName.toLowerCase();
-        final org = (team.organizationName ?? '').toLowerCase();
+        final org = (team.clubName ?? '').toLowerCase();
         final group = (team.groupName ?? '').toLowerCase();
         final conf = (team.conferenceName ?? '').toLowerCase();
         return name.contains(_searchQuery) ||

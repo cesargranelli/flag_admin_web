@@ -143,7 +143,7 @@ class _CompetitionTeamsScreenState
         Expanded(
           child: KicksterSearchField(
             controller: _searchController,
-            hint: 'Buscar por equipe, agremiação ou grupo...',
+            hint: 'Buscar por equipe, clube ou grupo...',
             onChanged: vm.setSearchQuery,
           ),
         ),
@@ -270,8 +270,8 @@ class _CompetitionTeamsScreenState
     final isBusy = vm.actionInProgressTeamId == ct.teamId;
 
     final subtitleParts = <String>[
-      if (ct.organizationName != null && ct.organizationName!.isNotEmpty)
-        ct.organizationName!,
+      if (ct.clubName != null && ct.clubName!.isNotEmpty)
+        ct.clubName!,
       if (ct.groupName != null && ct.groupName!.isNotEmpty)
         'Grupo: ${ct.groupName}',
       if (ct.conferenceName != null && ct.conferenceName!.isNotEmpty)
@@ -408,7 +408,7 @@ class _CompetitionTeamsScreenState
                         name: ct.teamName,
                         shortName: ct.teamShortName,
                         logoUrl: ct.teamLogoUrl,
-                        organizationId: ct.organizationId ?? '',
+                        clubId: ct.clubId ?? '',
                       ),
                     );
                   },

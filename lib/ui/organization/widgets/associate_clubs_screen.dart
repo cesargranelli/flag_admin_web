@@ -56,9 +56,9 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       context,
       ref: ref,
       scope: _associateScope,
-      action: () => ref
-          .read(teamApiProvider)
-          .associateClub(competitionId: competitionId, organizationId: club.id),
+action: () => ref
+           .read(teamApiProvider)
+           .associateClub(competitionId: competitionId, clubId: club.id),
       successMessage: '${club.tradeName} associado à competição.',
       errorMessage: 'Não foi possível associar o clube.',
       progressId: club.id,
@@ -79,9 +79,9 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       onSuccess: () {
         ref.invalidate(teamsProvider(competitionId));
         // O clube deixou de ser selecionável; remove da seleção se constar.
-        if (team.organizationId != null && mounted) {
-          setState(() => _selectedOrgIds.remove(team.organizationId));
-        }
+if (team.clubId != null && mounted) {
+           setState(() => _selectedOrgIds.remove(team.clubId));
+         }
       },
     );
   }
@@ -105,12 +105,12 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       final club = orgsById[orgId];
       if (club == null) continue;
       try {
-        await ref
-            .read(teamApiProvider)
-            .associateClub(
-              competitionId: competitionId,
-              organizationId: club.id,
-            );
+await ref
+             .read(teamApiProvider)
+             .associateClub(
+               competitionId: competitionId,
+               clubId: club.id,
+             );
         success++;
       } catch (_) {
         failure++;
@@ -233,10 +233,10 @@ class _AssociateClubsScreenState extends ConsumerState<AssociateClubsScreen> {
       ),
       data: (teams) {
         // Organizações já inscritas nesta competição (id do clube → Team).
-        final orgIdToTeam = <String, Team>{
-          for (final team in teams)
-            if (team.organizationId != null) team.organizationId!: team,
-        };
+final orgIdToTeam = <String, Team>{
+           for (final team in teams)
+             if (team.clubId != null) team.clubId!: team,
+         };
 
         return orgsAsync.when(
           loading: () =>

@@ -17,12 +17,12 @@ class TeamApi {
   Future<Team> getById(String id) =>
       _client.getOne('/api/v1/teams/$id', Team.fromJson);
 
-  /// Cria um time.
+  /// Criar um time.
   ///
   /// O backend espera `POST /api/v1/teams` com corpo completo
-  /// (`organizationId` e `competitionId` obrigatórios).
+  /// (`clubId` e `competitionId` obrigatórios).
   Future<Team> create({
-    required String organizationId,
+    required String clubId,
     required String competitionId,
     String? divisionId,
     required String name,
@@ -31,7 +31,7 @@ class TeamApi {
     DocumentType? documentType,
     String? logoUrl,
   }) => _client.post('/api/v1/teams', {
-    'organizationId': organizationId,
+    'clubId': clubId,
     'competitionId': competitionId,
     'divisionId': ?divisionId,
     'name': name,
@@ -41,20 +41,20 @@ class TeamApi {
     'logoUrl': ?logoUrl,
   }, Team.fromJson);
 
-  /// Associa um clube (organização) a uma competição, criando o time
+  /// Associa um clube (agremiação) a uma competição, criando o time
   /// automaticamente com o nome do clube (rota própria de associação, #377).
   Future<Team> associateClub({
     required String competitionId,
-    required String organizationId,
+    required String clubId,
   }) => _client.post('/api/v1/competitions/$competitionId/clubs', {
-    'organizationId': organizationId,
+    'clubId': clubId,
   }, Team.fromJson);
 
   /// Atualiza um time enviando o MESMO corpo completo da criação
-  /// (o backend exige `organizationId` com `@NotNull`).
+  /// (o backend exige `clubId` com `@NotNull`).
   Future<Team> update(
     String id, {
-    required String organizationId,
+    required String clubId,
     required String competitionId,
     String? divisionId,
     required String name,
@@ -63,7 +63,7 @@ class TeamApi {
     DocumentType? documentType,
     String? logoUrl,
   }) => _client.put('/api/v1/teams/$id', {
-    'organizationId': organizationId,
+    'clubId': clubId,
     'competitionId': competitionId,
     'divisionId': ?divisionId,
     'name': name,
@@ -76,18 +76,18 @@ class TeamApi {
   /// Remove a inscrição do clube na competição (desassociar).
   Future<void> delete(String id) => _client.delete('/api/v1/teams/$id');
 
-  /// Lista os times esportivos pertencentes a uma agremiação/organização.
-  Future<List<Team>> listByOrganization(String organizationId) => _client
-      .getList('/api/v1/organizations/$organizationId/teams', Team.fromJson);
+  /// Lista os times esportivos pertencentes a uma agremiação/clube.
+  Future<List<Team>> listByOrganization(String clubId) => _client
+      .getList('/api/v1/institutions/$clubId/teams', Team.fromJson);
 
-  /// Cria um time dentro de uma agremiação/organização.
+  /// Cria um time dentro de uma agremiação/clube.
   Future<Team> createForOrganization({
-    required String organizationId,
+    required String clubId,
     required String name,
     String? shortName,
     String? sportName,
     String? logoUrl,
-  }) => _client.post('/api/v1/organizations/$organizationId/teams', {
+  }) => _client.post('/api/v1/institutions/$clubId/teams', {
     'name': name,
     if (shortName != null && shortName.isNotEmpty) 'shortName': shortName,
     if (sportName != null && sportName.isNotEmpty) 'sportName': sportName,

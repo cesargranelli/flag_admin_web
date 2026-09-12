@@ -2,13 +2,10 @@
 
 /// Equipe Esportiva do Flag Platform (Domain Model - ADR-001).
 ///
-/// Uma equipe pertence a uma organização (clube/universidade) e pode ser inscrita
+/// Uma equipe pertence a um clube/agremiação via clubId e pode ser inscrita
 /// em competições através do modelo de inscrição `CompetitionTeam`.
 class Team {
   final String id;
-
-  /// Id da agremiação/clube a qual a equipe pertence.
-  final String? organizationId;
 
   /// Id da agremiação / instituição dona do time.
   final String? clubId;
@@ -34,7 +31,6 @@ class Team {
 
   const Team({
     required this.id,
-    this.organizationId,
     this.clubId,
     this.clubName,
     this.competitionId,
@@ -53,7 +49,6 @@ class Team {
 
   factory Team.fromJson(Map<String, dynamic> json) => Team(
     id: json['id'] as String,
-    organizationId: json['organizationId'] as String?,
     clubId: json['clubId'] as String?,
     clubName: json['clubName'] as String?,
     competitionId: json['competitionId'] as String?,
@@ -78,7 +73,6 @@ class Team {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    if (organizationId != null) 'organizationId': organizationId,
     if (clubId != null) 'clubId': clubId,
     if (clubName != null) 'clubName': clubName,
     if (competitionId != null) 'competitionId': competitionId,
