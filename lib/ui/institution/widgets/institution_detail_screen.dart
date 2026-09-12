@@ -1022,9 +1022,13 @@ class _InstitutionDetailScreenState
 
     return KicksterCard(
       icon: Icons.shield_outlined,
+      leading: KicksterAvatar(
+        name: team.name,
+        imageUrl: team.logoUrl,
+        size: 72,
+      ),
       title: team.name,
       subtitle: subtitle,
-      imageUrl: team.logoUrl,
       onTap: () => context.go('/teams/${team.id}/roster', extra: team),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

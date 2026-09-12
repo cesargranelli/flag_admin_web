@@ -543,7 +543,7 @@ class _CompetitionGamesScreenState
         name: (shortName != null && shortName.trim().isNotEmpty)
             ? shortName
             : teamName,
-        size: 44,
+        size: 72,
       ),
     );
 

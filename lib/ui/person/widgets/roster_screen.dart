@@ -282,11 +282,11 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Row(
           children: [
-            KicksterAvatar(
-              name: person.name,
-              imageUrl: person.photoUrl,
-              size: 48,
-            ),
+KicksterAvatar(
+               name: person.name,
+               imageUrl: person.photoUrl,
+               size: 72,
+             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

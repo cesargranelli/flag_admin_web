@@ -295,7 +295,11 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
 
     return KicksterCard(
       icon: institutionTypeIcon(inst.type),
-      imageUrl: inst.logoUrl,
+      leading: KicksterAvatar(
+        name: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
+        imageUrl: inst.logoUrl,
+        size: 72,
+      ),
       title: inst.tradeName.isNotEmpty ? inst.tradeName : inst.name,
       subtitle: subtitle,
       onTap: () async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'kickster_avatar.dart';
 
 /// Card de módulo no estilo do kit Kickster (issues #433/#436/#439).
 ///
@@ -12,9 +13,9 @@ import 'app_colors.dart';
 /// - **Tile** (padrão, sem [subtitle] e sem [trailing]): ícone grande em
 ///   `primary` sobre um círculo `primary` @10% centralizado acima do título —
 ///   usado na home (#433).
-/// - **Linha** (com [subtitle] e/ou [trailing]): ícone à esquerda + coluna
-///   título/subtítulo + widget de apoio à direita — usado nas listagens de
-///   módulos do admin (org, competição, campo, time, atleta).
+/// - **Linha** (com [subtitle] e/ou [trailing]): [leading] à esquerda +
+///   coluna título/subtítulo + widget de apoio à direita —
+///   usado nas listagens de módulos do admin (org, competição, campo, time, atleta).
 class KicksterCard extends StatelessWidget {
   const KicksterCard({
     super.key,
@@ -23,7 +24,7 @@ class KicksterCard extends StatelessWidget {
     required this.onTap,
     this.subtitle,
     this.trailing,
-    this.imageUrl,
+    this.leading,
   });
 
   final IconData icon;
@@ -35,8 +36,9 @@ class KicksterCard extends StatelessWidget {
   /// Widget de apoio opcional à direita (ex.: menu de ações, badges).
   final Widget? trailing;
 
-  /// URL da imagem ou escudo/logo exibido no card. Se nulo ou vazio, utiliza o [icon].
-  final String? imageUrl;
+  /// Widget à esquerda do título (ex.: KicksterAvatar com logo).
+  /// Se nulo, exibe o [icon] como fallback.
+  final Widget? leading;
 
   final VoidCallback onTap;
 
@@ -72,7 +74,7 @@ class KicksterCard extends StatelessWidget {
     );
   }
 
-  /// Layout em linha (listagens): ícone à esquerda, título/subtítulo à
+  /// Layout em linha (listagens): [leading] à esquerda, título/subtítulo à
   /// direita e o [trailing] na ponta.
   Widget _buildRowLayout() {
     // Subtítulo opcional: widget nulo é omitido pelo elemento null-aware (?).
@@ -91,44 +93,16 @@ class KicksterCard extends StatelessWidget {
             ),
           );
 
-    final hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
-    final Widget leadingWidget;
-
-    if (hasImage) {
-      leadingWidget = Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.line, width: 1),
-        ),
-        padding: const EdgeInsets.all(2),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.network(
-            imageUrl!,
-            fit: BoxFit.contain,
-            cacheWidth: 96,
-            cacheHeight: 96,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: AppColors.primary.withValues(alpha: 0.10),
-              child: Icon(icon, color: AppColors.primary, size: 24),
-            ),
+    final leadingWidget = leading ??
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(12),
           ),
-        ),
-      );
-    } else {
-      leadingWidget = Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: AppColors.primary, size: 24),
-      );
-    }
+          child: Icon(icon, color: AppColors.primary, size: 24),
+        );
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -165,48 +139,21 @@ class KicksterCard extends StatelessWidget {
   /// Título com [maxLines] + ellipsis em vez de `FittedBox` (#71): evita
   /// encolher o texto em grades de 2 colunas no mobile.
   Widget _buildTileLayout() {
-    final hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
-    final Widget iconWidget;
-
-    if (hasImage) {
-      iconWidget = Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.line, width: 1),
-        ),
-        padding: const EdgeInsets.all(2),
-        child: ClipOval(
-          child: Image.network(
-            imageUrl!,
-            fit: BoxFit.contain,
-            cacheWidth: 112,
-            cacheHeight: 112,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: AppColors.primary.withValues(alpha: 0.10),
-              child: Icon(icon, size: 28, color: AppColors.primary),
-            ),
+    final leadingWidget = leading ??
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.10),
+            shape: BoxShape.circle,
           ),
-        ),
-      );
-    } else {
-      iconWidget = Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.10),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 28, color: AppColors.primary),
-      );
-    }
+          child: Icon(icon, size: 28, color: AppColors.primary),
+        );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        iconWidget,
+        leadingWidget,
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),

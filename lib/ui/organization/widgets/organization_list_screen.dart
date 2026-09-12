@@ -301,7 +301,11 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
     final isBusy = vm.actionInProgressId == organization.id;
 
     return KicksterCard(
-      imageUrl: organization.logoUrl,
+      leading: KicksterAvatar(
+        name: organization.tradeName,
+        imageUrl: organization.logoUrl,
+        size: 72,
+      ),
       icon: organizationTypeIcon(organization.organizationType),
       title: organization.tradeName,
       subtitle: organization.legalName,
