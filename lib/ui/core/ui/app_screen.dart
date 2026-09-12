@@ -202,7 +202,7 @@ class _UserMenuAnchor extends StatelessWidget {
       trigger: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          KicksterAvatar(name: displayName, size: 40),
+          KicksterAvatar(name: displayName, size: 56),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

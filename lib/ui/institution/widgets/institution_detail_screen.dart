@@ -1025,7 +1025,7 @@ class _InstitutionDetailScreenState
       leading: KicksterAvatar(
         name: team.name,
         imageUrl: team.logoUrl,
-        size: 72,
+        size: 56,
       ),
       title: team.name,
       subtitle: subtitle,

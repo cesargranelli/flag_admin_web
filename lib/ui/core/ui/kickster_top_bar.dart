@@ -183,7 +183,7 @@ class KicksterTopBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (userLabel != null) ...[
-          KicksterAvatar(name: userLabel, size: 32),
+KicksterAvatar(name: userLabel, size: 56),
           const SizedBox(width: 8),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 160),
@@ -338,7 +338,7 @@ class KicksterTopBar extends StatelessWidget {
 
   Widget _buildDrawerUser(BuildContext context) {
     return ListTile(
-      leading: KicksterAvatar(name: userLabel, size: 32),
+      leading: KicksterAvatar(name: userLabel, size: 56),
       title: Text(
         userLabel ?? '',
         style: const TextStyle(
