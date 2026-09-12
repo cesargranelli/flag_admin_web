@@ -98,6 +98,19 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
 
   KicksterDropdown<T> get _widget => widget as KicksterDropdown<T>;
 
+  @override
+  void didUpdateWidget(KicksterDropdown<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Synchronize FormField value when the parent updates the value prop.
+    // This fixes the case where the ViewModel updates the value after
+    // initialization (e.g., after _populate() sets status = comp.status).
+    final newValue = (widget as KicksterDropdown<T>).value;
+    final oldValue = oldWidget.value;
+    if (newValue != oldValue) {
+      didChange(newValue);
+    }
+  }
+
   /// Normaliza as opções para [_KicksterMenuEntry], seja pela forma
   /// declarativa (values/labels/icons) ou por [items] (child já montado).
   List<_KicksterMenuEntry<T>> get _entries {
