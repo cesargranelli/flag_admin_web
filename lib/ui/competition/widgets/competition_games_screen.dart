@@ -1165,10 +1165,11 @@ class _CompetitionGamesScreenState
                               const SizedBox(height: 8),
                               InkWell(
                                 onTap: () async {
-                                  final picked = await showTimePicker(
-                                    context: ctx,
-                                    initialTime: selectedTime,
-                                  );
+                                  final picked =
+                                      await showKicksterTimePickerDialog(
+                                        context: ctx,
+                                        initialTime: selectedTime,
+                                      );
                                   if (picked != null) {
                                     setModalState(() => selectedTime = picked);
                                   }

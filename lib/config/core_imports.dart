@@ -37,6 +37,7 @@ export '../ui/core/ui/kickster_button.dart';
 
 // ../../ui/core/ui
 export '../ui/core/ui/kickster_calendar.dart';
+export '../ui/core/ui/kickster_time_picker.dart';
 export '../ui/core/ui/kickster_card.dart';
 export '../ui/core/ui/kickster_checkbox.dart';
 export '../ui/core/ui/kickster_chip.dart';

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flag_admin_web/data/session/session_manager.dart';
 import 'package:flag_admin_web/config/core_imports.dart';
 
 import 'repository_exception.dart';
@@ -65,9 +64,23 @@ class ApiClient {
         path,
         options: Options(headers: await _headers()),
       );
-      return (response.data ?? const [])
-          .map((e) => fromJson(e as Map<String, dynamic>))
-          .toList();
+      if (response.data == null) return const [];
+      if (response.data is List<dynamic>) {
+        return (response.data as List<dynamic>)
+            .map((e) => fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      // If the response is a Map (e.g., wrapped/paginated response),
+      // try to extract the list from common keys
+      final map = response.data as Map<String, dynamic>;
+      for (final key in ['content', 'data', 'items', 'teams']) {
+        if (map[key] is List<dynamic>) {
+          return (map[key] as List<dynamic>)
+              .map((e) => fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return const [];
     } on DioException catch (e) {
       throw RepositoryException.fromDio(e);
     }

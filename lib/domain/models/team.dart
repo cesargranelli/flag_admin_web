@@ -48,7 +48,7 @@ class Team {
   });
 
   factory Team.fromJson(Map<String, dynamic> json) => Team(
-    id: json['id'] as String,
+    id: json['id'] as String? ?? '',
     clubId: json['clubId'] as String?,
     clubName: json['clubName'] as String?,
     competitionId: json['competitionId'] as String?,
