@@ -84,6 +84,8 @@ class _GameCreateScreenState extends ConsumerState<GameCreateScreen> {
 
     final success = await _viewModel.save();
     if (success && mounted) {
+      ref.invalidate(gameListViewModelProvider);
+      ref.read(gameListViewModelProvider).load(forceRefresh: true);
       context.pop();
     }
   }

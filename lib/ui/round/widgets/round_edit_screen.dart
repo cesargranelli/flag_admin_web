@@ -53,6 +53,9 @@ class _RoundEditScreenState extends ConsumerState<RoundEditScreen> {
 
     final success = await _viewModel.save();
     if (success && mounted) {
+      ref.invalidate(roundListViewModelProvider);
+      ref.invalidate(roundDetailViewModelProvider(widget.roundId));
+      ref.read(roundListViewModelProvider).load(forceRefresh: true);
       context.go('/rounds/${widget.roundId}');
     }
   }

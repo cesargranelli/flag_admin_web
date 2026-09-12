@@ -49,6 +49,8 @@ class _RoundCreateScreenState extends ConsumerState<RoundCreateScreen> {
 
     final success = await _viewModel.save();
     if (success && mounted) {
+      ref.invalidate(roundListViewModelProvider);
+      ref.read(roundListViewModelProvider).load(forceRefresh: true);
       context.pop();
     }
   }

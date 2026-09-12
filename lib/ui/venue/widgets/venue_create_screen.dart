@@ -141,15 +141,16 @@ class _VenueCreateScreenState extends ConsumerState<VenueCreateScreen> {
                           : () async {
                               if (!_formKey.currentState!.validate()) return;
                               final result = await vm.save();
-                              if (result && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Local criado com sucesso'),
-                                  ),
-                                );
-                                ref.read(venueListViewModelProvider).load(forceRefresh: true);
-                                context.pop();
-                              }
+if (result && context.mounted) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   const SnackBar(
+                                     content: Text('Local criado com sucesso'),
+                                   ),
+                                 );
+                                 ref.invalidate(venueListViewModelProvider);
+                                 ref.read(venueListViewModelProvider).load(forceRefresh: true);
+                                 context.pop();
+                               }
                             },
                     ),
                   ],

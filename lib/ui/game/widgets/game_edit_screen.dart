@@ -82,6 +82,8 @@ class _GameEditScreenState extends ConsumerState<GameEditScreen> {
 
     final success = await _viewModel.save();
     if (success && mounted) {
+      ref.invalidate(gameListViewModelProvider);
+      ref.read(gameListViewModelProvider).load(forceRefresh: true);
       context.go('/games/${widget.gameId}');
     }
   }
