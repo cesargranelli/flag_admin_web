@@ -83,10 +83,14 @@ class _PersonDetailScreenState extends ConsumerState<PersonDetailScreen> {
                 children: [
                   Row(
                     children: [
-KicksterAvatar(
-                         name: person.name,
-                         imageUrl: person.photoUrl,
-                         size: 72,
+SizedBox(
+                         width: 56,
+                         height: 56,
+                         child: KicksterAvatar(
+                           name: person.name,
+                           imageUrl: person.photoUrl,
+                           size: 56,
+                         ),
                        ),
                       const SizedBox(width: 16),
                       Expanded(

@@ -153,7 +153,7 @@ class _OrganizationDetailScreenState
       children: [
         KicksterSectionTitle(title: title, icon: icon),
         const SizedBox(height: 12),
-child,
+        child,
         const SizedBox(height: 16),
       ],
     );
@@ -709,11 +709,15 @@ child,
                   final affil = pendingAffiliations[index];
                   return Row(
                     children: [
-                      KicksterAvatar(
-                        name: affil.institutionName,
-                        imageUrl: affil.institutionLogoUrl,
-                        size: 38,
-                      ),
+SizedBox(
+                       width: 56,
+                       height: 56,
+                       child: KicksterAvatar(
+                         name: affil.institutionName,
+                         imageUrl: affil.institutionLogoUrl,
+                         size: 56,
+                       ),
+                     ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(

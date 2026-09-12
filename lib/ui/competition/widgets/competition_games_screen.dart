@@ -526,6 +526,8 @@ class _CompetitionGamesScreenState
     required bool isHome,
   }) {
     final avatarWidget = Container(
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
@@ -543,7 +545,7 @@ class _CompetitionGamesScreenState
         name: (shortName != null && shortName.trim().isNotEmpty)
             ? shortName
             : teamName,
-        size: 72,
+        size: 56,
       ),
     );
 
