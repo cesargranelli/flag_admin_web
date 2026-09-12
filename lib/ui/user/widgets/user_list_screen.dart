@@ -127,8 +127,8 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
   Widget _roleChip(UserRole role, String label) {
     final color = switch (role) {
       UserRole.admin => AppColors.danger,
-      UserRole.adminLiga => AppColors.danger,
-      UserRole.mesa => AppColors.success,
+      UserRole.adminInstitution => AppColors.danger,
+      UserRole.commissioner => AppColors.success,
       UserRole.organizer => AppColors.primary,
       UserRole.manager => AppColors.primary,
       UserRole.referee => AppColors.warning,

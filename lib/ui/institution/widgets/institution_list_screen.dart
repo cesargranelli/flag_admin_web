@@ -94,7 +94,7 @@ class _InstitutionListScreenState extends ConsumerState<InstitutionListScreen>
         userRole == UserRole.admin ||
         userRole == UserRole.organizer ||
         userRole == UserRole.manager ||
-        userRole == UserRole.adminLiga;
+        userRole == UserRole.adminInstitution;
 
     return ListenableBuilder(
       listenable: vm,

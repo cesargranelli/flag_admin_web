@@ -95,7 +95,7 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
         userRole == UserRole.admin ||
         userRole == UserRole.organizer ||
         userRole == UserRole.manager ||
-        userRole == UserRole.adminLiga;
+        userRole == UserRole.adminInstitution;
     final isAdmin = userRole == UserRole.admin;
 
     return ListenableBuilder(
