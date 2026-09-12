@@ -46,12 +46,14 @@ abstract class AuthService {
   Future<User> getMe();
   Future<List<User>> listUsers();
   Future<List<User>> listPendingUsers();
-  Future<User> approveUser(String id);
+  Future<User> approveUser(String id, {String status = 'APPROVED'});
   Future<User> rejectUser(String id);
+  Future<User> changeUserRole(String userId, String newRole);
   Future<User> createUser({
     required String name,
     required String email,
     required String role,
+    String status = 'PROVISIONAL',
   });
 }
 
@@ -177,8 +179,8 @@ class ApiAuthService implements AuthService {
   }
 
   @override
-  Future<User> approveUser(String id) {
-    return _client.post('/api/v1/auth/users/$id/approve', {}, User.fromJson);
+  Future<User> approveUser(String id, {String status = 'APPROVED'}) {
+    return _client.post('/api/v1/auth/users/$id/approve', {'status': status}, User.fromJson);
   }
 
   @override
@@ -191,12 +193,19 @@ class ApiAuthService implements AuthService {
     required String name,
     required String email,
     required String role,
+    String status = 'PROVISIONAL',
   }) {
     return _client.post('/api/v1/auth/users', {
       'name': name,
       'email': email,
       'role': role,
+      'status': status,
     }, User.fromJson);
+  }
+
+  @override
+  Future<User> changeUserRole(String userId, String newRole) {
+    return _client.post('/api/v1/auth/users/$userId/role', {'role': newRole}, User.fromJson);
   }
 
   /// Mapeamento de erros do Firebase Auth para português amigável.

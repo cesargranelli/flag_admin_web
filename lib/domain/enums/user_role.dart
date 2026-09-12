@@ -1,18 +1,18 @@
 enum UserRole {
   admin,
   organizer,
-  mesa,
+  commissioner,
   manager,
-  adminLiga,
+  adminInstitution,
   referee,
   clubManager,
   fan;
 
   static UserRole fromJson(String value) => switch (value) {
         'ADMIN' => UserRole.admin,
-        'ADMIN_LIGA' => UserRole.adminLiga,
+        'ADMIN_INSTITUTION' => UserRole.adminInstitution,
         'ORGANIZER' => UserRole.organizer,
-        'MESA' => UserRole.mesa,
+        'COMMISSIONER' => UserRole.commissioner,
         'MANAGER' => UserRole.manager,
         'REFEREE' => UserRole.referee,
         'CLUB_MANAGER' => UserRole.clubManager,
@@ -22,9 +22,9 @@ enum UserRole {
 
   String toJson() => switch (this) {
         UserRole.admin => 'ADMIN',
-        UserRole.adminLiga => 'ADMIN_LIGA',
+        UserRole.adminInstitution => 'ADMIN_INSTITUTION',
         UserRole.organizer => 'ORGANIZER',
-        UserRole.mesa => 'MESA',
+        UserRole.commissioner => 'COMMISSIONER',
         UserRole.manager => 'MANAGER',
         UserRole.referee => 'REFEREE',
         UserRole.clubManager => 'CLUB_MANAGER',
@@ -34,9 +34,9 @@ enum UserRole {
   /// Rótulo amigável em pt-BR.
   String get label => switch (this) {
         UserRole.admin => 'Administrador',
-        UserRole.adminLiga => 'Admin Liga',
+        UserRole.adminInstitution => 'Admin Instituição',
         UserRole.organizer => 'Organizador',
-        UserRole.mesa => 'Mesa',
+        UserRole.commissioner => 'Comissário',
         UserRole.manager => 'Manager',
         UserRole.referee => 'Árbitro',
         UserRole.clubManager => 'Gestor de Clube',

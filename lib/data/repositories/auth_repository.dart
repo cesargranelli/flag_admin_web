@@ -121,7 +121,11 @@ class AuthRepository {
 
   Future<List<User>> listPendingUsers() => _service.listPendingUsers();
 
-  Future<User> approveUser(String id) => _service.approveUser(id);
+  Future<User> approveUser(String id, {String status = 'APPROVED'}) =>
+      _service.approveUser(id, status: status);
 
   Future<User> rejectUser(String id) => _service.rejectUser(id);
+
+  Future<User> changeUserRole(String userId, String newRole) =>
+      _service.changeUserRole(userId, newRole);
 }
