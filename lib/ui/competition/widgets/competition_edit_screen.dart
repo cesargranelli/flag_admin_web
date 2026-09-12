@@ -30,7 +30,9 @@ class _CompetitionEditScreenState extends ConsumerState<CompetitionEditScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(competitionEditViewModelProvider(widget.id)).load();
+      ref
+          .read(competitionEditViewModelProvider(widget.id))
+          .load(forceRefresh: true, initialData: widget.competition);
     });
   }
 

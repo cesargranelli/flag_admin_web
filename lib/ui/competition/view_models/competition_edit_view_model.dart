@@ -97,14 +97,14 @@ class CompetitionEditViewModel extends ChangeNotifier
   String? get errorMessage => _errorMessage;
 
   /// Inicializa e busca os dados da competição pelo ID.
-  Future<void> load({bool forceRefresh = false}) async {
+  Future<void> load({bool forceRefresh = false, Competition? initialData}) async {
     if (selectedOrganizationId != null && !forceRefresh) return;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final comp = await _repository.getCompetition(competitionId);
+      final comp = initialData ?? await _repository.getCompetition(competitionId);
       _populate(comp);
     } catch (e) {
       _errorMessage = 'Não foi possível carregar a competição.';
