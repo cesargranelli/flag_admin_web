@@ -50,6 +50,7 @@ class CompetitionApi {
     String? gender,
     String? ageGroup,
     GroupingType? groupingType,
+    Map<String, dynamic>? groupingConfig,
   }) => _client.post(
     '/api/v1/competitions',
     _body(
@@ -63,6 +64,7 @@ class CompetitionApi {
       gender: gender,
       ageGroup: ageGroup,
       groupingType: groupingType,
+      groupingConfig: groupingConfig,
     ),
     Competition.fromJson,
   );
@@ -79,6 +81,7 @@ class CompetitionApi {
     String? gender,
     String? ageGroup,
     GroupingType? groupingType,
+    Map<String, dynamic>? groupingConfig,
   }) => _client.put(
     '/api/v1/competitions/$id',
     _body(
@@ -92,6 +95,7 @@ class CompetitionApi {
       gender: gender,
       ageGroup: ageGroup,
       groupingType: groupingType,
+      groupingConfig: groupingConfig,
     ),
     Competition.fromJson,
   );
@@ -107,17 +111,19 @@ class CompetitionApi {
     String? gender,
     String? ageGroup,
     GroupingType? groupingType,
+    Map<String, dynamic>? groupingConfig,
   }) => {
     'organizationId': organizationId,
     'name': name,
     if (description != null && description.isNotEmpty)
       'description': description,
-    'startDate': ?startDate,
-    'endDate': ?endDate,
-    'status': ?(status?.toJson()),
-    'modality': ?(modality?.toJson()),
-    'gender': ?gender,
-    'ageGroup': ?ageGroup,
-    'groupingType': ?(groupingType?.toJson()),
+    if (startDate != null && startDate.isNotEmpty) 'startDate': startDate,
+    if (endDate != null && endDate.isNotEmpty) 'endDate': endDate,
+    if (status != null) 'status': status.toJson(),
+    if (modality != null) 'modality': modality.toJson(),
+    if (gender != null) 'gender': gender,
+    if (ageGroup != null) 'ageGroup': ageGroup,
+    if (groupingType != null) 'groupingType': groupingType.toJson(),
+    if (groupingConfig != null) 'groupingConfig': groupingConfig,
   };
 }
