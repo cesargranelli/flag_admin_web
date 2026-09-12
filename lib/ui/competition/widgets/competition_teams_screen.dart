@@ -270,8 +270,6 @@ class _CompetitionTeamsScreenState
     final isBusy = vm.actionInProgressTeamId == ct.teamId;
 
     final subtitleParts = <String>[
-      if (ct.organizationName != null && ct.organizationName!.isNotEmpty)
-        ct.organizationName!,
       if (ct.groupName != null && ct.groupName!.isNotEmpty)
         'Grupo: ${ct.groupName}',
       if (ct.conferenceName != null && ct.conferenceName!.isNotEmpty)
@@ -283,6 +281,11 @@ class _CompetitionTeamsScreenState
 
     return KicksterCard(
       icon: Icons.shield_outlined,
+      leading: KicksterAvatar(
+        name: ct.teamName,
+        imageUrl: vm.teamLogos[ct.teamId],
+        size: 56,
+      ),
       title: ct.teamName,
       subtitle: subtitleParts.join(' • '),
       onTap: () => _showAllocationModal(context, vm, ct),

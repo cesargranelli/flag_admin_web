@@ -31,6 +31,11 @@ class CompetitionTeamsViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> _platformTeams = [];
   List<Map<String, dynamic>> get platformTeams => _platformTeams;
 
+  /// Mapeia teamId → logoUrl a partir da lista de times do sistema.
+  Map<String, String?> _teamLogos = {};
+
+  Map<String, String?> get teamLogos => _teamLogos;
+
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
@@ -55,6 +60,10 @@ class CompetitionTeamsViewModel extends ChangeNotifier {
       ]);
       _teams = results[0] as List<CompetitionTeam>;
       _platformTeams = results[1] as List<Map<String, dynamic>>;
+      _teamLogos = {
+        for (final t in _platformTeams)
+          if (t['logoUrl'] != null && t['logoUrl'] is String && (t['logoUrl'] as String).isNotEmpty) t['id'] as String: t['logoUrl'] as String
+      };
     } catch (e) {
       _errorMessage = 'Erro ao carregar equipes da competição: $e';
     } finally {
