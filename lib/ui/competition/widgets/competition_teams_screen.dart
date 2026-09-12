@@ -270,6 +270,8 @@ class _CompetitionTeamsScreenState
     final isBusy = vm.actionInProgressTeamId == ct.teamId;
 
     final subtitleParts = <String>[
+      if (ct.organizationName != null && ct.organizationName!.isNotEmpty)
+        ct.organizationName!,
       if (ct.groupName != null && ct.groupName!.isNotEmpty)
         'Grupo: ${ct.groupName}',
       if (ct.conferenceName != null && ct.conferenceName!.isNotEmpty)
