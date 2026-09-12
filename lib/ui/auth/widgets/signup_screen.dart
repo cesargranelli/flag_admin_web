@@ -1,5 +1,6 @@
 ﻿import 'package:flag_admin_web/config/core_imports.dart';
 import 'package:flag_admin_web/config/providers/providers.dart';
+import 'package:flag_admin_web/ui/auth/view_models/signup_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,12 +56,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+                constraints: const BoxConstraints(maxWidth: 440),
                 child: vm.isSuccess
                     ? _buildSuccess(context)
-                    : _buildForm(context, vm),
+                    : _buildCard(context, vm),
               ),
             ),
           ),
@@ -69,189 +70,248 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
-  Widget _buildForm(BuildContext context, dynamic vm) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (vm.errorMessage != null) ...[
-            _errorBanner(vm.errorMessage!),
-            const SizedBox(height: 16),
-          ],
-          const SizedBox(height: 16),
-          // Marca compacta no topo
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildCard(BuildContext context, dynamic vm) {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(Icons.sports, color: AppColors.primary, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Flag Platform',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          const Text(
-            'Crie sua conta',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.headline1,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Acesso para organizadores de competição',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.subtitle,
-          ),
-          const SizedBox(height: 32),
-          KicksterInput(
-            label: 'Nome completo',
-            controller: _nameController,
-            autofocus: true,
-            prefixIcon: Icons.person_outline,
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Informe seu nome completo';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          KicksterInput(
-            label: AppStrings.loginEmail,
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            prefixIcon: Icons.mail_outline,
-            autofillHints: const [AutofillHints.username, AutofillHints.email],
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return AppStrings.loginRequiredEmail;
-              }
-              if (!value.contains('@')) {
-                return AppStrings.loginInvalidEmail;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          KicksterInput(
-            label: AppStrings.loginPassword,
-            controller: _passwordController,
-            obscureText: vm.obscurePassword,
-            prefixIcon: Icons.lock_outline,
-            suffixIcon: IconButton(
-              tooltip: vm.obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
-              icon: Icon(
-                vm.obscurePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              onPressed: vm.toggleObscurePassword,
-            ),
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return AppStrings.loginRequiredPassword;
-              }
-              if (value.length < 6) {
-                return 'A senha deve ter no mínimo 6 caracteres';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          KicksterInput(
-            label: 'Confirmar senha',
-            controller: _confirmController,
-            obscureText: vm.obscureConfirm,
-            prefixIcon: Icons.lock_outline,
-            suffixIcon: IconButton(
-              tooltip: vm.obscureConfirm
-                  ? 'Mostrar confirmação'
-                  : 'Ocultar confirmação',
-              icon: Icon(
-                vm.obscureConfirm
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              onPressed: vm.toggleObscureConfirm,
-            ),
-            textInputAction: TextInputAction.done,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Confirme sua senha';
-              }
-              if (value != _passwordController.text) {
-                return 'As senhas não conferem';
-              }
-              return null;
-            },
-            onFieldSubmitted: (_) => _submit(),
-          ),
-          const SizedBox(height: 24),
-          KicksterButton(
-            label: 'Cadastrar',
-            onPressed: vm.isLoading ? null : _submit,
-            loading: vm.isLoading,
-          ),
-          const SizedBox(height: 24),
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 4,
-            children: [
-              const Text('Já tem conta?', style: AppTextStyles.footerLink),
-              TextButton(
-                onPressed: () => context.go('/login'),
-                child: Text(
-                  'Acessar conta',
-                  style: AppTextStyles.footerLink.copyWith(
-                    color: AppColors.primary,
+              // Logo e título no topo do card
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.verified, color: AppColors.primary, size: 40),
+                  SizedBox(width: 12),
+                  Text(
+                    'Flag Platform',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
+                    ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Crie sua conta',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.headline1,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Acesse a plataforma e gerencie suas competições',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.subtitle,
+              ),
+              const SizedBox(height: 32),
+              if (vm.errorMessage != null) ...[
+                _errorBanner(vm.errorMessage!),
+                const SizedBox(height: 16),
+              ],
+              KicksterInput(
+                label: 'Nome completo',
+                controller: _nameController,
+                autofocus: true,
+                prefixIcon: Icons.person_outline,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Informe seu nome completo';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KicksterInput(
+                label: AppStrings.loginEmail,
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icons.mail_outline,
+                autofillHints: const [AutofillHints.username, AutofillHints.email],
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return AppStrings.loginRequiredEmail;
+                  }
+                  if (!value.contains('@')) {
+                    return AppStrings.loginInvalidEmail;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KicksterInput(
+                label: AppStrings.loginPassword,
+                controller: _passwordController,
+                obscureText: vm.obscurePassword,
+                prefixIcon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  tooltip: vm.obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+                  icon: Icon(
+                    vm.obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: vm.toggleObscurePassword,
                 ),
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppStrings.loginRequiredPassword;
+                  }
+                  if (value.length < 6) {
+                    return 'A senha deve ter no mínimo 6 caracteres';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KicksterInput(
+                label: 'Confirmar senha',
+                controller: _confirmController,
+                obscureText: vm.obscureConfirm,
+                prefixIcon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  tooltip: vm.obscureConfirm
+                      ? 'Mostrar confirmação'
+                      : 'Ocultar confirmação',
+                  icon: Icon(
+                    vm.obscureConfirm
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: vm.toggleObscureConfirm,
+                ),
+                textInputAction: TextInputAction.done,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Confirme sua senha';
+                  }
+                  if (value != _passwordController.text) {
+                    return 'As senhas não conferem';
+                  }
+                  return null;
+                },
+                onFieldSubmitted: (_) => _submit(),
+              ),
+              const SizedBox(height: 16),
+              KicksterDropdown<String>(
+                label: 'Perfil',
+                helperText: 'Selecione o perfil de acesso na plataforma',
+                items: SignupViewModel.availableRoles.map((r) {
+                  return DropdownMenuItem<String>(
+                    value: r.toJson(),
+                    child: Text(r.label),
+                  );
+                }).toList(),
+                value: vm.role,
+                onChanged: (value) => vm.setRole(value),
+                hint: 'Selecione o perfil',
+              ),
+              const SizedBox(height: 24),
+              KicksterButton(
+                label: 'Cadastrar',
+                onPressed: vm.isLoading ? null : _submit,
+                loading: vm.isLoading,
+              ),
+              const SizedBox(height: 24),
+              // Links de navegação
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 4,
+                children: [
+                  const Text('Já tem conta?', style: AppTextStyles.footerLink),
+                  TextButton(
+                    onPressed: () => context.go('/login'),
+                    child: Text(
+                      'Acessar conta',
+                      style: AppTextStyles.footerLink.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildSuccess(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Icon(
-          Icons.check_circle_outline,
-          color: AppColors.success,
-          size: 64,
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      shadowColor: AppColors.black.withValues(alpha: 0.08),
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppColors.line, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.verified, color: AppColors.primary, size: 40),
+                SizedBox(width: 12),
+                Text(
+                  'Flag Platform',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Icon(
+              Icons.check_circle_outline,
+              color: AppColors.success,
+              size: 64,
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Conta solicitada!',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.headline1,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Seu cadastro foi enviado com sucesso. Como medida de segurança, o acesso de organizador precisa ser aprovado por um administrador da plataforma antes de você começar a usar o sistema.',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.paragraph.copyWith(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 32),
+            KicksterButton(
+              label: 'Voltar para o login',
+              onPressed: () => context.go('/login'),
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
-        const Text(
-          'Conta solicitada!',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.headline1,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Seu cadastro foi enviado com sucesso. Como medida de segurança, o acesso de organizador precisa ser aprovado por um administrador da plataforma antes de você começar a usar o sistema.',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.paragraph.copyWith(color: AppColors.textMuted),
-        ),
-        const SizedBox(height: 32),
-        KicksterButton(
-          label: 'Voltar para o login',
-          onPressed: () => context.go('/login'),
-        ),
-      ],
+      ),
     );
   }
 

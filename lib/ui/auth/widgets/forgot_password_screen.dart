@@ -46,12 +46,26 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: vm.isSent
-                    ? _buildSent(context, vm)
-                    : _buildForm(context, vm),
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  elevation: 0,
+                  shadowColor: AppColors.black.withValues(alpha: 0.08),
+                  color: AppColors.surface,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: AppColors.line, width: 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
+                    child: vm.isSent
+                        ? _buildSent(context, vm)
+                        : _buildForm(context, vm),
+                  ),
+                ),
               ),
             ),
           ),
@@ -66,28 +80,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (vm.errorMessage != null) ...[
-            _errorBanner(vm.errorMessage!),
-            const SizedBox(height: 16),
-          ],
-          const SizedBox(height: 16),
+          // Logo e título no topo do card
           const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.sports, color: AppColors.primary, size: 20),
-              SizedBox(width: 8),
+              Icon(Icons.verified, color: AppColors.primary, size: 40),
+              SizedBox(width: 12),
               Text(
                 'Flag Platform',
                 style: TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.3,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           const Text(
             'Esqueci a senha',
             textAlign: TextAlign.center,
@@ -100,6 +110,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             style: AppTextStyles.subtitle,
           ),
           const SizedBox(height: 32),
+          if (vm.errorMessage != null) ...[
+            _errorBanner(vm.errorMessage!),
+            const SizedBox(height: 16),
+          ],
           KicksterInput(
             label: AppStrings.loginEmail,
             controller: _emailController,
@@ -144,6 +158,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Logo e título no topo do card
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.verified, color: AppColors.primary, size: 40),
+            SizedBox(width: 12),
+            Text(
+              'Flag Platform',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
         const Icon(
           Icons.mark_email_read_outlined,
           color: AppColors.primary,

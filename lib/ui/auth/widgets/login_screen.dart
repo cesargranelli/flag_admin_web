@@ -49,152 +49,161 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: SafeArea(
           child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (vm.errorMessage != null) ...[
-                        _errorBanner(vm.errorMessage!),
-                        const SizedBox(height: 16),
-                      ],
-                      const SizedBox(height: 24),
-                      // Marca compacta no topo
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  elevation: 0,
+                  shadowColor: AppColors.black.withValues(alpha: 0.08),
+                  color: AppColors.surface,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: AppColors.line, width: 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Icon(
-                            Icons.sports,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Flag Platform',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
-                      const Text(
-                        'Acesse sua conta',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.headline1,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppStrings.loginSubtitle,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.subtitle,
-                      ),
-                      const SizedBox(height: 32),
-                      KicksterInput(
-                        label: AppStrings.loginEmail,
-                        controller: _emailController,
-                        autofocus: true,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icons.mail_outline,
-                        autofillHints: const [
-                          AutofillHints.username,
-                          AutofillHints.email,
-                        ],
-                        textInputAction: TextInputAction.next,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return AppStrings.loginRequiredEmail;
-                          }
-                          if (!value.contains('@')) {
-                            return AppStrings.loginInvalidEmail;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      KicksterInput(
-                        label: AppStrings.loginPassword,
-                        controller: _passwordController,
-                        obscureText: vm.obscurePassword,
-                        prefixIcon: Icons.lock_outline,
-                        suffixIcon: IconButton(
-                          tooltip: vm.obscurePassword
-                              ? 'Mostrar senha'
-                              : 'Ocultar senha',
-                          icon: Icon(
-                            vm.obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: vm.toggleObscurePassword,
-                        ),
-                        autofillHints: const [AutofillHints.password],
-                        textInputAction: TextInputAction.done,
-                        validator: (value) => (value == null || value.isEmpty)
-                            ? AppStrings.loginRequiredPassword
-                            : null,
-                        onFieldSubmitted: (_) => _submit(),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          KicksterCheckbox(
-                            value: vm.keepConnected,
-                            onChanged: (value) => vm.setKeepConnected(value),
-                            label: 'Manter conectado',
-                          ),
-                          TextButton(
-                            onPressed: () => context.go('/forgot-password'),
-                            child: Text(
-                              'Esqueci a senha',
-                              style: AppTextStyles.labelMedium.copyWith(
-                                color: AppColors.primary,
+                          // Logo e título no topo do card
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.verified, color: AppColors.primary, size: 40),
+                              SizedBox(width: 12),
+                              Text(
+                                'Flag Platform',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      KicksterButton(
-                        label: AppStrings.loginSubmit,
-                        onPressed: vm.isLoading ? null : _submit,
-                        loading: vm.isLoading,
-                      ),
-                      const SizedBox(height: 24),
-                      const KicksterSocialDivider(),
-                      const SizedBox(height: 16),
-                      const KicksterGoogleButton(),
-                      const SizedBox(height: 32),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 4,
-                        children: [
+                          const SizedBox(height: 24),
                           const Text(
-                            'Não tem conta?',
-                            style: AppTextStyles.footerLink,
+                            'Acesse sua conta',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.headline1,
                           ),
-                          TextButton(
-                            onPressed: () => context.go('/signup'),
-                            child: Text(
-                              'Criar conta',
-                              style: AppTextStyles.footerLink.copyWith(
-                                color: AppColors.primary,
+                          const SizedBox(height: 8),
+                          Text(
+                            AppStrings.loginSubtitle,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.subtitle,
+                          ),
+                          const SizedBox(height: 32),
+                          if (vm.errorMessage != null) ...[
+                            _errorBanner(vm.errorMessage!),
+                            const SizedBox(height: 16),
+                          ],
+                          KicksterInput(
+                            label: AppStrings.loginEmail,
+                            controller: _emailController,
+                            autofocus: true,
+                            keyboardType: TextInputType.emailAddress,
+                            prefixIcon: Icons.mail_outline,
+                            autofillHints: const [
+                              AutofillHints.username,
+                              AutofillHints.email,
+                            ],
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return AppStrings.loginRequiredEmail;
+                              }
+                              if (!value.contains('@')) {
+                                return AppStrings.loginInvalidEmail;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          KicksterInput(
+                            label: AppStrings.loginPassword,
+                            controller: _passwordController,
+                            obscureText: vm.obscurePassword,
+                            prefixIcon: Icons.lock_outline,
+                            suffixIcon: IconButton(
+                              tooltip: vm.obscurePassword
+                                  ? 'Mostrar senha'
+                                  : 'Ocultar senha',
+                              icon: Icon(
+                                vm.obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
                               ),
+                              onPressed: vm.toggleObscurePassword,
                             ),
+                            autofillHints: const [AutofillHints.password],
+                            textInputAction: TextInputAction.done,
+                            validator: (value) => (value == null || value.isEmpty)
+                                ? AppStrings.loginRequiredPassword
+                                : null,
+                            onFieldSubmitted: (_) => _submit(),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              KicksterCheckbox(
+                                value: vm.keepConnected,
+                                onChanged: (value) => vm.setKeepConnected(value),
+                                label: 'Manter conectado',
+                              ),
+                              TextButton(
+                                onPressed: () => context.go('/forgot-password'),
+                                child: Text(
+                                  'Esqueci a senha',
+                                  style: AppTextStyles.labelMedium.copyWith(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          KicksterButton(
+                            label: AppStrings.loginSubmit,
+                            onPressed: vm.isLoading ? null : _submit,
+                            loading: vm.isLoading,
+                          ),
+                          const SizedBox(height: 24),
+                          const KicksterSocialDivider(),
+                          const SizedBox(height: 16),
+                          const KicksterGoogleButton(),
+                          const SizedBox(height: 32),
+                          // Link para cadastro
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 4,
+                            children: [
+                              const Text(
+                                'Não tem conta?',
+                                style: AppTextStyles.footerLink,
+                              ),
+                              TextButton(
+                                onPressed: () => context.go('/signup'),
+                                child: Text(
+                                  'Criar conta',
+                                  style: AppTextStyles.footerLink.copyWith(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

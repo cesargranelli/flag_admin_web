@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flag_admin_web/config/app_l10n.dart';
 import 'package:flag_admin_web/data/repositories/auth_repository.dart';
 import 'package:flag_admin_web/data/services/auth_service.dart';
 import 'package:flag_admin_web/data/api/repository_exception.dart';
-import 'package:flag_admin_web/config/app_l10n.dart';
+import 'package:flag_admin_web/domain/enums/user_role.dart';
 
 /// ViewModel para a tela de Cadastro de Organizador (ADR-001 / MVVM 1:1).
 class SignupViewModel extends ChangeNotifier {
@@ -23,6 +24,12 @@ class SignupViewModel extends ChangeNotifier {
   bool _obscureConfirm = true;
   bool get obscureConfirm => _obscureConfirm;
 
+  String? _role;
+  String? get role => _role;
+
+  static List<UserRole> get availableRoles =>
+      UserRole.values.where((r) => r != UserRole.admin && r != UserRole.fan).toList();
+
   SignupViewModel({required AuthRepository repository})
     : _repository = repository;
 
@@ -41,7 +48,12 @@ class SignupViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Realiza o cadastro do organizador. Retorna 	rue se concluído com sucesso.
+  void setRole(String? value) {
+    _role = value;
+    notifyListeners();
+  }
+
+  /// Realiza o cadastro do organizador. Retorna true se concluído com sucesso.
   Future<bool> signUp({
     required String name,
     required String email,
@@ -52,12 +64,37 @@ class SignupViewModel extends ChangeNotifier {
     _isSuccess = false;
     notifyListeners();
 
+    // Validação do papel
+    if (_role == null) {
+      _errorMessage = 'Selecione o perfil de acesso na plataforma';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+    final role = UserRole.fromJson(_role!);
+    if (!availableRoles.contains(role)) {
+      _errorMessage = 'Perfil de acesso inválido';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
     try {
+      // 1. Firebase Auth
       await _repository.signUp(
         name: name.trim().isEmpty ? 'Organizador' : name.trim(),
         email: email.trim(),
         password: password,
       );
+
+      // 2. Backend — cria perfil do usuário
+      await _repository.createUser(
+        name: name.trim().isEmpty ? 'Organizador' : name.trim(),
+        email: email.trim(),
+        role: role.toJson(),
+        status: 'PROVISIONAL',
+      );
+
       _isLoading = false;
       _isSuccess = true;
       notifyListeners();

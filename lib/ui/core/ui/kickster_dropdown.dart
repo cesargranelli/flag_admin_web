@@ -101,9 +101,16 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
   @override
   void didUpdateWidget(covariant KicksterDropdown<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final current = (widget as KicksterDropdown<T>).value;
+    final current = _widget.value;
     if (current != oldWidget.value) {
       didChange(current);
+    } else if (current != null && oldWidget.items != null && _widget.items != null) {
+      // Se o valor atual é não-nulo e os itens mudaram, verifica se o valor
+      // ainda existe na nova lista de itens; se não, reseta para null.
+      final newValues = _widget.items!.map((e) => e.value).toList();
+      if (!newValues.contains(current)) {
+        didChange(null);
+      }
     }
   }
 

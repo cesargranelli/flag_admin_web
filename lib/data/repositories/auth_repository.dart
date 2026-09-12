@@ -116,6 +116,18 @@ class AuthRepository {
     _currentUser = null;
   }
 
+  Future<User> createUser({
+    required String name,
+    required String email,
+    required String role,
+    String status = 'PROVISIONAL',
+  }) => _service.createUser(
+        name: name,
+        email: email,
+        role: role,
+        status: status,
+      );
+
   // Métodos de gestão de usuários (administração)
   Future<List<User>> listUsers() => _service.listUsers();
 
