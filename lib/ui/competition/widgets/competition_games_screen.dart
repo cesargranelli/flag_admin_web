@@ -307,16 +307,16 @@ class _CompetitionGamesScreenState
 
     final dateStr = _formatDateTime(game.scheduledAt);
 
-    final homeName = game.homeTeamName ?? 'Mandante';
-    final awayName = game.awayTeamName ?? 'Visitante';
-    final venueName = game.venueName ?? 'Local a definir';
-
     final homeTeam = vm.teams
         .where((t) => t.teamId == game.homeTeamId)
         .firstOrNull;
     final awayTeam = vm.teams
         .where((t) => t.teamId == game.awayTeamId)
         .firstOrNull;
+
+    final homeName = homeTeam?.teamName ?? game.homeTeamName ?? 'Mandante';
+    final awayName = awayTeam?.teamName ?? game.awayTeamName ?? 'Visitante';
+    final venueName = game.venueName ?? 'Local a definir';
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -453,7 +453,7 @@ class _CompetitionGamesScreenState
               Expanded(
                 child: _buildTeamCardSide(
                   teamName: homeName,
-                  logoUrl: homeTeam?.teamLogoUrl,
+                  logoUrl: vm.teamLogos[game.homeTeamId],
                   shortName: homeTeam?.teamShortName,
                   isHome: true,
                 ),
@@ -486,7 +486,7 @@ class _CompetitionGamesScreenState
               Expanded(
                 child: _buildTeamCardSide(
                   teamName: awayName,
-                  logoUrl: awayTeam?.teamLogoUrl,
+                  logoUrl: vm.teamLogos[game.awayTeamId],
                   shortName: awayTeam?.teamShortName,
                   isHome: false,
                 ),

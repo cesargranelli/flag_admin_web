@@ -61,6 +61,11 @@ class CompetitionGamesViewModel extends ChangeNotifier {
 
   List<CompetitionTeam> get teams => _teams;
 
+  /// Mapeia teamId → logoUrl a partir da lista completa de Times.
+  Map<String, String?> _teamLogos = {};
+
+  Map<String, String?> get teamLogos => _teamLogos;
+
   List<Venue> _venues = [];
 
   List<Venue> get venues => _venues;
@@ -146,6 +151,7 @@ class CompetitionGamesViewModel extends ChangeNotifier {
       final allTeams = results[4] as List<Team>;
 
       final teamClubMap = <String, String>{};
+      _teamLogos = {for (final t in allTeams) if (t.logoUrl != null && t.logoUrl!.isNotEmpty) t.id: t.logoUrl!};
       for (final t in allTeams) {
         if (t.clubName != null && t.clubName!.trim().isNotEmpty) {
           teamClubMap[t.id] = t.clubName!.trim();
