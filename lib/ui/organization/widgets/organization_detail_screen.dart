@@ -206,6 +206,7 @@ child,
     return Card(
       elevation: 0,
       color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: AppColors.line, width: 1),
@@ -217,7 +218,9 @@ child,
           // Banner Superior com Gradiente das Cores da Organizacao
           Container(
             height: 100,
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
               gradient: LinearGradient(
                 colors: [
                   primary,

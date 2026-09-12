@@ -39,6 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final vm = ref.watch(loginViewModelProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -51,9 +52,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: AppLayout.form(
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   if (vm.errorMessage != null) ...[
                     _errorBanner(vm.errorMessage!),
                     const SizedBox(height: 16),
@@ -189,7 +191,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
