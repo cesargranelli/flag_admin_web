@@ -178,12 +178,12 @@ class ApiAuthService implements AuthService {
 
   @override
   Future<User> approveUser(String id) {
-    return _client.post('/api/v1/auth/users//approve', {}, User.fromJson);
+    return _client.post('/api/v1/auth/users/$id/approve', {}, User.fromJson);
   }
 
   @override
   Future<User> rejectUser(String id) {
-    return _client.post('/api/v1/auth/users//reject', {}, User.fromJson);
+    return _client.post('/api/v1/auth/users/$id/reject', {}, User.fromJson);
   }
 
   @override

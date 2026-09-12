@@ -304,7 +304,7 @@ class _OrganizationListScreenState extends ConsumerState<OrganizationListScreen>
       leading: KicksterAvatar(
         name: organization.tradeName,
         imageUrl: organization.logoUrl,
-        size: 72,
+        size: 56,
       ),
       icon: organizationTypeIcon(organization.organizationType),
       title: organization.tradeName,
