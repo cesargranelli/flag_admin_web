@@ -260,57 +260,59 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Trocar Perfil: ${user.name}'),
-        content: StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Selecione o novo perfil:',
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 12),
-                KicksterDropdown<String>(
-                  label: 'Novo perfil',
-                  value: selectedRole,
-                  values: UserRole.availableRoles.map((r) => r.toJson()).toList(),
-                  labels: UserRole.availableRoles.map((r) => r.label).toList(),
-                  hint: 'Selecione o perfil',
-                  onChanged: (value) {
-                    selectedRole = value;
-                    setModalState(() {});
-                  },
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: KicksterButton(
-                        label: 'Cancelar',
-                        variant: KicksterButtonVariant.outline,
-                        onPressed: () => Navigator.pop(context),
+        content: Form(
+          child: StatefulBuilder(
+            builder: (ctx, setModalState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Selecione o novo perfil:',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
+                  KicksterDropdown<String>(
+                    label: 'Novo perfil',
+                    value: selectedRole,
+                    values: UserRole.availableRoles.map((r) => r.toJson()).toList(),
+                    labels: UserRole.availableRoles.map((r) => r.label).toList(),
+                    hint: 'Selecione o perfil',
+                    onChanged: (value) {
+                      selectedRole = value;
+                      setModalState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: KicksterButton(
+                          label: 'Cancelar',
+                          variant: KicksterButtonVariant.outline,
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: KicksterButton(
-                        label: 'Confirmar',
-                        icon: Icons.check,
-                        onPressed: selectedRole == null
-                            ? null
-                            : () {
-                                Navigator.pop(context);
-                                _vm.changeRole(user.id, selectedRole!);
-                                _vm.load(forceRefresh: true);
-                              },
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: KicksterButton(
+                          label: 'Confirmar',
+                          icon: Icons.check,
+                          onPressed: selectedRole == null
+                              ? null
+                              : () {
+                                  Navigator.pop(context);
+                                  _vm.changeRole(user.id, selectedRole!);
+                                  _vm.load(forceRefresh: true);
+                                },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
