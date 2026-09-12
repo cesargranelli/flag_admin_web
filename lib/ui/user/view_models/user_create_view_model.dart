@@ -61,6 +61,13 @@ class UserCreateViewModel extends ChangeNotifier {
       return false;
     }
 
+    // Valida que o role é um UserRole válido
+    if (role == null || role.isEmpty || !UserRole.values.map((r) => r.toJson()).contains(role)) {
+      _errorMessage = 'Selecione um perfil de usuário válido.';
+      notifyListeners();
+      return false;
+    }
+
     _isSubmitting = true;
     _errorMessage = null;
     notifyListeners();
@@ -69,7 +76,7 @@ class UserCreateViewModel extends ChangeNotifier {
       await _repository.createUser(
         name: name,
         email: email,
-        role: role ?? 'organizer',
+        role: role,
       );
       return true;
     } catch (e) {

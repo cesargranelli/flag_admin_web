@@ -98,6 +98,15 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
 
   KicksterDropdown<T> get _widget => widget as KicksterDropdown<T>;
 
+  @override
+  void didUpdateWidget(covariant KicksterDropdown<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final current = (widget as KicksterDropdown<T>).value;
+    if (current != oldWidget.value) {
+      didChange(current);
+    }
+  }
+
   /// Normaliza as opções para [_KicksterMenuEntry], seja pela forma
   /// declarativa (values/labels/icons) ou por [items] (child já montado).
   List<_KicksterMenuEntry<T>> get _entries {

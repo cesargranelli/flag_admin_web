@@ -100,7 +100,7 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
                         const SizedBox(height: 12),
                         KicksterDropdown<String>(
                           label: 'Papel',
-                          helperText: 'Mesa: opera partidas ao vivo',
+                          helperText: 'Defina o perfil de acesso do usuário na plataforma',
                           value: _viewModel.role,
                           items: UserRole.values
                               .map(
