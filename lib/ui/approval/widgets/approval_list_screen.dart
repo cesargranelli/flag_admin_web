@@ -15,14 +15,14 @@ class ApprovalListScreen extends ConsumerStatefulWidget {
 
 class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
   final _searchController = TextEditingController();
-  late ApprovalListViewModel _viewModel;
+  late ApprovalListViewModel _vm;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = ref.read(approvalListViewModelProvider);
+    _vm = ref.read(approvalListViewModelProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.load(forceRefresh: true);
+      _vm.load(forceRefresh: true);
     });
   }
 
@@ -34,6 +34,8 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ref.watch keeps the provider alive (required for autoDispose)
+    ref.watch(approvalListViewModelProvider);
     return AppScreen(
       title: AppStrings.approvals,
       scrollable: false,
@@ -47,26 +49,26 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
           // Conteúdo (Expanded para dar altura finita ao grid)
           Expanded(
             child: ListenableBuilder(
-              listenable: _viewModel,
+              listenable: _vm,
               builder: (context, _) {
-                if (_viewModel.isLoading) {
+                if (_vm.isLoading) {
                   return const AppLoading(message: 'Carregando pendências...');
                 }
 
-                if (_viewModel.errorMessage != null) {
+                if (_vm.errorMessage != null) {
                   return AppErrorState(
-                    message: _viewModel.errorMessage!,
-                    onRetry: () => _viewModel.load(forceRefresh: true),
+                    message: _vm.errorMessage!,
+                    onRetry: () => _vm.load(forceRefresh: true),
                   );
                 }
 
-                final items = _viewModel.filteredUsers;
+                final items = _vm.filteredUsers;
                 if (items.isEmpty) {
                   return const KicksterEmptyState(
                     message: 'Nenhuma conta aguardando aprovação',
                     description:
                         'Contas criadas por novos usuários aparecem aqui '
-                        'para revisão.',
+                            'para revisão.',
                     icon: Icons.verified_outlined,
                   );
                 }
@@ -194,11 +196,27 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
   }
 
   Future<void> _approve(BuildContext context, User user) async {
-    final success = await _viewModel.approve(user.id);
-    if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível aprovar.')),
-      );
+    final confirmed = await showKicksterConfirm(
+      context: context,
+      title: 'Aprovar conta',
+      content: 'Aprovar ${user.email}?\nO usuário terá acesso à plataforma.',
+      confirmLabel: 'Aprovar',
+      danger: false,
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final success = await _vm.approve(user.id);
+    if (context.mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Conta aprovada com sucesso!')),
+        );
+        _vm.load(forceRefresh: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Não foi possível aprovar.')),
+        );
+      }
     }
   }
 
@@ -212,11 +230,18 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
     );
     if (confirmed != true || !context.mounted) return;
 
-    final success = await _viewModel.reject(user.id);
-    if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível rejeitar.')),
-      );
+    final success = await _vm.reject(user.id);
+    if (context.mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Conta rejeitada com sucesso!')),
+        );
+        _vm.load(forceRefresh: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Não foi possível rejeitar.')),
+        );
+      }
     }
   }
 }
