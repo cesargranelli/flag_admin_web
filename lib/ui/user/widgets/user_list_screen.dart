@@ -35,6 +35,8 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ref.watch keeps the provider alive (required for autoDispose)
+    ref.watch(userListViewModelProvider);
     return AppScreen(
       title: AppStrings.users,
       scrollable: false,

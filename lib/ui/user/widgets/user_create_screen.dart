@@ -57,6 +57,8 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ref.watch keeps the provider alive (required for autoDispose)
+    ref.watch(userCreateViewModelProvider);
     return AppScreen(
       title: 'Novo usuário',
       breadcrumb: const [
@@ -84,8 +86,8 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
                           onChanged: (value) => _viewModel.setName(value),
                           validator: (value) =>
                               (value == null || value.trim().isEmpty)
-                              ? 'Informe o nome'
-                              : null,
+                                  ? 'Informe o nome'
+                                  : null,
                         ),
                         const SizedBox(height: 12),
                         KicksterInput(
@@ -102,8 +104,8 @@ class _UserCreateScreenState extends ConsumerState<UserCreateScreen> {
                           value: _viewModel.role,
                           items: UserRole.values
                               .map(
-                                (r) => DropdownMenuItem(
-                                  value: r.label,
+                                (r) => DropdownMenuItem<String>(
+                                  value: r.toJson(),
                                   child: Text(r.label),
                                 ),
                               )

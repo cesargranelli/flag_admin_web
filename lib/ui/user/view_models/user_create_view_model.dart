@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flag_admin_web/data/repositories/user_repository.dart';
+import 'package:flag_admin_web/domain/enums/user_role.dart';
 
 /// ViewModel para a criação de um novo Usuário (ADR-011 / MVVM).
 class UserCreateViewModel extends ChangeNotifier {
@@ -28,7 +29,7 @@ class UserCreateViewModel extends ChangeNotifier {
   void init() {
     _name = null;
     _email = null;
-    _role = 'organizer';
+    _role = UserRole.organizer.toJson();
     notifyListeners();
   }
 
