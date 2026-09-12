@@ -172,19 +172,37 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
               children: [
                 Expanded(
                   child: KicksterButton(
-                    label: 'Rejeitar',
-                    icon: Icons.close,
-                    variant: KicksterButtonVariant.danger,
-                    onPressed: () => _reject(context, user),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: KicksterButton(
                     label: 'Aprovar',
                     icon: Icons.check,
                     variant: KicksterButtonVariant.success,
                     onPressed: () => _approve(context, user),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: KicksterButton(
+                    label: 'Provisório',
+                    icon: Icons.hourglass_top,
+                    variant: KicksterButtonVariant.outline,
+                    onPressed: () => _approveProvisionary(context, user),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: KicksterButton(
+                    label: 'Trocar',
+                    icon: Icons.swap_horiz,
+                    variant: KicksterButtonVariant.text,
+                    onPressed: () => _openRoleModal(context, user),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: KicksterButton(
+                    label: 'Recusar',
+                    icon: Icons.close,
+                    variant: KicksterButtonVariant.danger,
+                    onPressed: () => _reject(context, user),
                   ),
                 ),
               ],
@@ -218,6 +236,95 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
         );
       }
     }
+  }
+
+  Future<void> _approveProvisionary(BuildContext context, User user) async {
+    final confirmed = await showKicksterConfirm(
+      context: context,
+      title: 'Aprovar provisório',
+      content: 'Aprovar ${user.email} de forma provisória?\nO usuário terá acesso limitado.',
+      confirmLabel: 'Aprovar Provisório',
+      danger: false,
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final success = await _vm.approveProvisionary(user.id);
+    if (context.mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Conta aprovada provisoriamente!')),
+        );
+        _vm.load(forceRefresh: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Não foi possível aprovar provisoriamente.')),
+        );
+      }
+    }
+  }
+
+  void _openRoleModal(BuildContext context, User user) {
+    String? selectedRole = user.role.toJson();
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Trocar Perfil: ${user.name}'),
+        content: StatefulBuilder(
+          builder: (ctx, setModalState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Selecione o novo perfil:',
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                KicksterDropdown<String>(
+                  label: 'Novo perfil',
+                  value: selectedRole,
+                  values: UserRole.availableRoles.map((r) => r.toJson()).toList(),
+                  labels: UserRole.availableRoles.map((r) => r.label).toList(),
+                  hint: 'Selecione o perfil',
+                  onChanged: (value) {
+                    selectedRole = value;
+                    setModalState(() {});
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: KicksterButton(
+                        label: 'Cancelar',
+                        variant: KicksterButtonVariant.outline,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: KicksterButton(
+                        label: 'Confirmar',
+                        icon: Icons.check,
+                        onPressed: selectedRole == null
+                            ? null
+                            : () {
+                                Navigator.pop(context);
+                                _vm.changeRole(user.id, selectedRole!);
+                                _vm.load(forceRefresh: true);
+                              },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _reject(BuildContext context, User user) async {

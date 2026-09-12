@@ -63,13 +63,41 @@ class ApprovalListViewModel extends ChangeNotifier {
     }
   }
 
-  /// Aprova um usuário.
-  Future<bool> approve(String userId) async {
+  /// Aprova um usuário com status opcional (padrão 'APPROVED').
+  Future<bool> approve(String userId, {String status = 'APPROVED'}) async {
     try {
-      await _repository.approveUser(userId);
+      await _repository.approveUser(userId, status: status);
       // Invalida cache local
       _pendingUsers = _pendingUsers
           .where((u) => u.id != userId)
+          .toList(growable: false);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Aprova um usuário de forma provisória.
+  Future<bool> approveProvisionary(String userId) async {
+    try {
+      await _repository.approveUser(userId, status: 'PROVISIONAL');
+      _pendingUsers = _pendingUsers
+          .where((u) => u.id != userId)
+          .toList(growable: false);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Troca o papel/perfil de um usuário.
+  Future<bool> changeRole(String userId, String newRole) async {
+    try {
+      final updatedUser = await _repository.changeUserRole(userId, newRole);
+      _pendingUsers = _pendingUsers
+          .map((u) => u.id == userId ? updatedUser : u)
           .toList(growable: false);
       notifyListeners();
       return true;

@@ -42,4 +42,8 @@ enum UserRole {
         UserRole.clubManager => 'Gestor de Clube',
         UserRole.fan => 'Torcedor',
       };
+
+  /// Roles disponíveis para seleção (todos exceto admin e fan).
+  static List<UserRole> get availableRoles =>
+      UserRole.values.where((r) => r != UserRole.admin && r != UserRole.fan).toList();
 }
