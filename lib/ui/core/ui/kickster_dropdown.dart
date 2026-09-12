@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'app_colors.dart';
 import 'app_text_styles.dart';
@@ -105,15 +104,9 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
     // Synchronize FormField value when the parent updates the value prop.
     // This fixes the case where the ViewModel updates the value after
     // initialization (e.g., after _populate() sets status = comp.status).
-    // Use addPostFrameCallback to avoid calling setState() during build.
-    final newValue = (widget as KicksterDropdown<T>).value;
-    final oldValue = oldWidget.value;
-    if (newValue != oldValue) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          didChange(newValue);
-        }
-      });
+    // Read from widget.value directly to avoid cascading FormField rebuilds.
+    if ((widget as KicksterDropdown<T>).value != oldWidget.value) {
+      setState(() {});
     }
   }
 
@@ -145,9 +138,9 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
     });
   }
 
-  /// Opção correspondente ao valor atual ([FormFieldState.value]).
+  /// Opção correspondente ao valor atual (widget.value).
   _KicksterMenuEntry<T>? get _selectedEntry {
-    final current = value;
+    final current = (widget as KicksterDropdown<T>).value;
     for (final entry in _entries) {
       if (entry.value == current) return entry;
     }
@@ -256,12 +249,12 @@ class _KicksterDropdownState<T> extends FormFieldState<T> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Semantics(
-                      selected: entries[i].value == value,
-                      child: _KicksterCheckCircle(
-                        checked: entries[i].value == value,
-                      ),
-                    ),
+Semantics(
+                       selected: entries[i].value == (widget as KicksterDropdown<T>).value,
+                       child: _KicksterCheckCircle(
+                         checked: entries[i].value == (widget as KicksterDropdown<T>).value,
+                       ),
+                     ),
                   ],
                 ),
                 onTap: () => _selectValue(entries[i].value),
