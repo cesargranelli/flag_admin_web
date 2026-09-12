@@ -709,17 +709,14 @@ class _CompetitionDetailScreenState
     );
   }
 
-  Widget _buildStatusChip(CompetitionStatus status) {
-    final chipType = switch (status) {
-      CompetitionStatus.registrationOpen => KicksterStatusChipType.success,
-      CompetitionStatus.ongoing => KicksterStatusChipType.pending,
-      CompetitionStatus.draft => KicksterStatusChipType.unpaid,
-      CompetitionStatus.finished => KicksterStatusChipType.refund,
-      CompetitionStatus.disabled ||
-      CompetitionStatus.registrationClosed => KicksterStatusChipType.failed,
-      _ => KicksterStatusChipType.unpaid,
-    };
+Widget _buildStatusChip(CompetitionStatus status) {
+     final chipType = switch (status) {
+       CompetitionStatus.draft => KicksterStatusChipType.unpaid,
+       CompetitionStatus.published => KicksterStatusChipType.success,
+       CompetitionStatus.finished => KicksterStatusChipType.refund,
+       CompetitionStatus.disabled => KicksterStatusChipType.failed,
+     };
 
-    return KicksterStatusChip(status: chipType, label: status.label);
-  }
+     return KicksterStatusChip(status: chipType, label: status.label);
+   }
 }

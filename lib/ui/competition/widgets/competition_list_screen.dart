@@ -131,20 +131,20 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
           child: KicksterDropdown<CompetitionStatus?>(
             label: '',
             value: vm.statusFilter,
-            values: [
-              null,
-              CompetitionStatus.registrationOpen,
-              CompetitionStatus.ongoing,
-              CompetitionStatus.draft,
-              CompetitionStatus.finished,
-            ],
-            labels: [
-              'Todos os status',
-              CompetitionStatus.registrationOpen.label,
-              CompetitionStatus.ongoing.label,
-              CompetitionStatus.draft.label,
-              CompetitionStatus.finished.label,
-            ],
+values: [
+                null,
+                CompetitionStatus.draft,
+                CompetitionStatus.published,
+                CompetitionStatus.finished,
+                CompetitionStatus.disabled,
+              ],
+              labels: [
+                'Todos os status',
+                CompetitionStatus.draft.label,
+                CompetitionStatus.published.label,
+                CompetitionStatus.finished.label,
+                CompetitionStatus.disabled.label,
+              ],
             onChanged: vm.setStatusFilter,
           ),
         ),
@@ -462,17 +462,14 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
     );
   }
 
-  Widget _buildStatusBadge(CompetitionStatus status) {
-    final chipType = switch (status) {
-      CompetitionStatus.registrationOpen => KicksterStatusChipType.success,
-      CompetitionStatus.ongoing => KicksterStatusChipType.pending,
-      CompetitionStatus.draft => KicksterStatusChipType.unpaid,
-      CompetitionStatus.finished => KicksterStatusChipType.refund,
-      CompetitionStatus.disabled ||
-      CompetitionStatus.registrationClosed => KicksterStatusChipType.failed,
-      _ => KicksterStatusChipType.unpaid,
-    };
+Widget _buildStatusBadge(CompetitionStatus status) {
+     final chipType = switch (status) {
+       CompetitionStatus.draft => KicksterStatusChipType.unpaid,
+       CompetitionStatus.published => KicksterStatusChipType.success,
+       CompetitionStatus.finished => KicksterStatusChipType.refund,
+       CompetitionStatus.disabled => KicksterStatusChipType.failed,
+     };
 
-    return KicksterStatusChip(status: chipType, label: status.label);
-  }
+     return KicksterStatusChip(status: chipType, label: status.label);
+   }
 }
