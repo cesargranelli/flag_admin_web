@@ -158,12 +158,24 @@ class _CompetitionDetailScreenState
                         spacing: 24,
                         runSpacing: 16,
                         children: [
-                          _buildInfoItem(
-                            icon: Icons.date_range_outlined,
-                            label: 'Temporada',
-                            value: comp.season,
-                          ),
-                          _buildInfoItem(
+_buildInfoItem(
+                             icon: Icons.date_range_outlined,
+                             label: 'Temporada',
+                             value: comp.season,
+                           ),
+                           if (comp.startDate != null)
+                             _buildInfoItem(
+                               icon: Icons.calendar_today_outlined,
+                               label: 'Início',
+                               value: '${comp.startDate!.year}-${comp.startDate!.month.toString().padLeft(2, "0")}-${comp.startDate!.day.toString().padLeft(2, "0")}',
+                             ),
+                           if (comp.endDate != null)
+                             _buildInfoItem(
+                               icon: Icons.calendar_month_outlined,
+                               label: 'Término',
+                               value: '${comp.endDate!.year}-${comp.endDate!.month.toString().padLeft(2, "0")}-${comp.endDate!.day.toString().padLeft(2, "0")}',
+                             ),
+                           _buildInfoItem(
                             icon: Icons.account_tree_outlined,
                             label: 'Formato',
                             value: comp.tournamentFormat.label,

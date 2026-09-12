@@ -680,27 +680,30 @@ class _CompetitionGamesScreenState
             ),
             KicksterButton(
               label: isEditing ? 'Salvar Alterações' : 'Criar Rodada',
-              onPressed: () async {
-                final number = int.tryParse(numberController.text.trim()) ?? 1;
-                final name = nameController.text.trim();
-                if (name.isEmpty) return;
+onPressed: () async {
+                 final number = int.tryParse(numberController.text.trim()) ?? 1;
+                 final name = nameController.text.trim();
+                 if (name.isEmpty) return;
 
-                Navigator.of(dialogCtx).pop();
-                if (isEditing) {
-                  await vm.updateRound(
-                    id: round.id,
-                    number: number,
-                    name: name,
-                    type: selectedType,
-                  );
-                } else {
-                  await vm.createRound(
-                    number: number,
-                    name: name,
-                    type: selectedType,
-                  );
-                }
-              },
+                 NavigatorState navigator = Navigator.of(dialogCtx);
+                 if (isEditing) {
+                   await vm.updateRound(
+                     id: round.id,
+                     number: number,
+                     name: name,
+                     type: selectedType,
+                   );
+                 } else {
+                   await vm.createRound(
+                     number: number,
+                     name: name,
+                     type: selectedType,
+                   );
+                 }
+                 if (mounted) {
+                   navigator.pop();
+                 }
+               },
             ),
           ],
         ),
