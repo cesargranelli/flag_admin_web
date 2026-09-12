@@ -74,12 +74,12 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
                 }
                 return AppEntityListScreen<User>(
                   items: items,
-                  cardBuilder: (user) => _approvalCard(context, ref, user),
+                  cardBuilder: (user) => _approvalCard(context, user),
                   searchField: _searchController,
                   countLabel: 'contas pendentes',
                   countLabelSingular: 'conta pendente',
                   emptyMessage: 'Nenhuma conta encontrada',
-                  mainAxisExtent: 200,
+                  mainAxisExtent: 96,
                   filter: (all, query) => query.isEmpty
                       ? all
                       : all
@@ -98,118 +98,107 @@ class _ApprovalListScreenState extends ConsumerState<ApprovalListScreen> {
     );
   }
 
-  Widget _approvalCard(BuildContext context, WidgetRef ref, User user) {
+  Widget _approvalCard(BuildContext context, User user) {
     final roleLabel = user.role.label;
     final dateText = formatBrShortDateTime(user.createdAt);
 
-    return Card(
-      elevation: 0,
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.line, width: 1),
+    final subtitleParts = <String>[
+      if (user.email.isNotEmpty) user.email,
+      if (roleLabel.isNotEmpty) roleLabel,
+      'Solicitado em $dateText',
+    ].join(' · ');
+
+    return KicksterCard(
+      icon: Icons.person_outline,
+      leading: KicksterAvatar(
+        name: user.name,
+        size: 40,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.person_outline,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (user.name.isNotEmpty)
-                        Text(
-                          user.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      Text(
-                        user.email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${roleLabel.isNotEmpty ? '$roleLabel · ' : ''}Solicitado em $dateText',
-              style: const TextStyle(
-                fontSize: 13,
+      title: user.name.isNotEmpty ? user.name : user.email,
+      subtitle: subtitleParts,
+      onTap: () {},
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildStatusChip(user),
+          const SizedBox(width: 8),
+          KicksterMenuAnchor(
+            triggerLabel: 'Ações de ${user.name}',
+            alignment: Alignment.topRight,
+            width: 230,
+            trigger: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.more_vert,
+                size: 20,
                 color: AppColors.textSecondary,
               ),
             ),
-            const Spacer(),
-            Row(
-              children: [
-                Expanded(
-                  child: KicksterButton(
-                    label: 'Aprovar',
-                    icon: Icons.check,
-                    variant: KicksterButtonVariant.success,
-                    onPressed: () => _approve(context, user),
-                  ),
+            items: [
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Homologar', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: KicksterButton(
-                    label: 'Provisório',
-                    icon: Icons.hourglass_top,
-                    variant: KicksterButtonVariant.outline,
-                    onPressed: () => _approveProvisionary(context, user),
-                  ),
+                onTap: () => _approve(context, user),
+              ),
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.hourglass_top, size: 18, color: AppColors.warning),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Provisório', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: KicksterButton(
-                    label: 'Trocar',
-                    icon: Icons.swap_horiz,
-                    variant: KicksterButtonVariant.text,
-                    onPressed: () => _openRoleModal(context, user),
-                  ),
+                onTap: () => _approveProvisionary(context, user),
+              ),
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.swap_horiz, size: 18, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Trocar Perfil', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: KicksterButton(
-                    label: 'Recusar',
-                    icon: Icons.close,
-                    variant: KicksterButtonVariant.danger,
-                    onPressed: () => _reject(context, user),
-                  ),
+                onTap: () => _openRoleModal(context, user),
+              ),
+              KicksterMenuItem(
+                child: const Row(
+                  children: [
+                    Icon(Icons.cancel_outlined, size: 18, color: AppColors.danger),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Recusar', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
+                onTap: () => _reject(context, user),
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildStatusChip(User user) {
+    return KicksterStatusChip(
+      status: KicksterStatusChipType.pending,
+      label: 'Pendente',
     );
   }
 
