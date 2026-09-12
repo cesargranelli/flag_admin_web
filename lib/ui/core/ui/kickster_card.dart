@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
-import 'kickster_avatar.dart';
 
 /// Card de módulo no estilo do kit Kickster (issues #433/#436/#439).
 ///
@@ -99,7 +98,7 @@ class KicksterCard extends StatelessWidget {
           height: 48,
           decoration: BoxDecoration(
             color: AppColors.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(12),
+            shape: BoxShape.circle,
           ),
           child: Icon(icon, color: AppColors.primary, size: 24),
         );
